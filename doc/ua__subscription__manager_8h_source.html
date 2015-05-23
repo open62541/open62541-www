@@ -44,119 +44,36 @@
 <a name="l00006"></a>00006 <span class="preprocessor">#include &quot;<a class="code" href="ua__types_8h.html">ua_types.h</a>&quot;</span>
 <a name="l00007"></a>00007 <span class="preprocessor">#include &quot;queue.h&quot;</span>
 <a name="l00008"></a>00008 <span class="preprocessor">#include &quot;<a class="code" href="ua__nodestore_8h.html">ua_nodestore.h</a>&quot;</span>
-<a name="l00009"></a>00009 
-<a name="l00010"></a>00010 <span class="preprocessor">#define LIST_INITENTRY(item,entry) \</span>
-<a name="l00011"></a>00011 <span class="preprocessor">  (item)-&gt;entry.le_next = NULL; \</span>
-<a name="l00012"></a>00012 <span class="preprocessor">  (item)-&gt;entry.le_prev = NULL;</span>
-<a name="l00013"></a>00013 <span class="preprocessor"></span>
-<a name="l00014"></a>00014 <span class="preprocessor">#define INITPOINTER(src) (src) = NULL;</span>
-<a name="l00015"></a>00015 <span class="preprocessor"></span>
-<a name="l00016"></a>00016 <span class="preprocessor">#define ISNOTZERO(value) ((value == 0) ? 0 : 1)</span>
-<a name="l00017"></a>00017 <span class="preprocessor"></span>
-<a name="l00018"></a>00018 <span class="keyword">typedef</span> <span class="keyword">struct </span>{
-<a name="l00019"></a>00019     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> currentValue;
-<a name="l00020"></a>00020     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> minValue;
-<a name="l00021"></a>00021     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> maxValue;
-<a name="l00022"></a>00022 } UA_Int32_BoundedValue;
-<a name="l00023"></a>00023 
-<a name="l00024"></a>00024 <span class="keyword">typedef</span> <span class="keyword">struct </span>{
-<a name="l00025"></a>00025     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> currentValue;
-<a name="l00026"></a>00026     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> minValue;
-<a name="l00027"></a>00027     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> maxValue;
-<a name="l00028"></a>00028 } UA_UInt32_BoundedValue;
-<a name="l00029"></a>00029 
-<a name="l00030"></a>00030 <span class="keyword">typedef</span> <span class="keyword">enum</span> MONITOREDITEM_TYPE_ENUM {
-<a name="l00031"></a>00031     MONITOREDITEM_CHANGENOTIFY_T = 1,
-<a name="l00032"></a>00032     MONITOREDITEM_STATUSNOTIFY_T = 2,
-<a name="l00033"></a>00033     MONITOREDITEM_EVENTNOTIFY_T = 4 } MONITOREDITEM_TYPE;
-<a name="l00034"></a>00034 
-<a name="l00035"></a>00035 <span class="keyword">typedef</span> <span class="keyword">struct </span>MonitoredItem_queuedValue_s {
-<a name="l00036"></a>00036     <a class="code" href="structUA__Variant.html" title="Variants store (arrays of) any data type. Either they provide a pointer to the data in memory...">UA_Variant</a> value;
-<a name="l00037"></a>00037     LIST_ENTRY(MonitoredItem_queuedValue_s) listEntry;
-<a name="l00038"></a>00038 } MonitoredItem_queuedValue;
-<a name="l00039"></a>00039 
-<a name="l00040"></a>00040 typedef LIST_HEAD(UA_ListOfQueuedDataValues_s, MonitoredItem_queuedValue_s) UA_ListOfQueuedDataValues;
-<a name="l00041"></a>00041 typedef struct UA_MonitoredItem_s {
-<a name="l00042"></a>00042     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                       ItemId;
-<a name="l00043"></a>00043     MONITOREDITEM_TYPE          MonitoredItemType;
-<a name="l00044"></a>00044     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                       TimestampsToReturn;
-<a name="l00045"></a>00045     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                       MonitoringMode;
-<a name="l00046"></a>00046     <span class="keyword">const</span> <a class="code" href="ua__nodes_8h.html#structUA__Node">UA_Node</a>                   *monitoredNode; <span class="comment">// Pointer to a node of any type</span>
-<a name="l00047"></a>00047     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                       AttributeID;
-<a name="l00048"></a>00048     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                       ClientHandle;
-<a name="l00049"></a>00049     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                       SamplingInterval;
-<a name="l00050"></a>00050     UA_UInt32_BoundedValue          QueueSize;
-<a name="l00051"></a>00051     <a class="code" href="group__types.html#ga9a1800cf448ad57727ab920aa254a1a4" title="A two-state logical value (true or false).">UA_Boolean</a>                      DiscardOldest;
-<a name="l00052"></a>00052     <a class="code" href="group__types.html#gab4378e68c207b1de4e58d0ae26dc333c" title="An instance in time. A DateTime value is encoded as a 64-bit signed integer which represents the numb...">UA_DateTime</a>                     LastSampled;
-<a name="l00053"></a>00053     <a class="code" href="group__types.html#structUA__String" title="A sequence of Unicode characters.">UA_ByteString</a>                   LastSampledValue;
-<a name="l00054"></a>00054     <span class="comment">// FIXME: indexRange is ignored; array values default to element 0</span>
-<a name="l00055"></a>00055     <span class="comment">// FIXME: dataEncoding is hardcoded to UA binary</span>
-<a name="l00056"></a>00056     LIST_ENTRY(UA_MonitoredItem_s)  listEntry;
-<a name="l00057"></a>00057     UA_ListOfQueuedDataValues       *queue;
-<a name="l00058"></a>00058 } UA_MonitoredItem;
-<a name="l00059"></a>00059 
-<a name="l00060"></a>00060 typedef struct UA_unpublishedNotification_s {
-<a name="l00061"></a>00061     UA_NotificationMessage           *notification;
-<a name="l00062"></a>00062     LIST_ENTRY(UA_unpublishedNotification_s) listEntry;
-<a name="l00063"></a>00063 } UA_unpublishedNotification;
-<a name="l00064"></a>00064 
-<a name="l00065"></a>00065 typedef LIST_HEAD(UA_ListOfUAMonitoredItems_s, UA_MonitoredItem_s) UA_ListOfUAMonitoredItems;
-<a name="l00066"></a>00066 typedef LIST_HEAD(UA_ListOfUnpublishedNotifications_s, UA_unpublishedNotification_s) UA_ListOfUnpublishedNotifications;
-<a name="l00067"></a>00067 typedef struct UA_Subscription_s {
-<a name="l00068"></a>00068     UA_UInt32_BoundedValue              LifeTime;
-<a name="l00069"></a>00069     UA_Int32_BoundedValue               KeepAliveCount;
-<a name="l00070"></a>00070     <a class="code" href="group__types.html#gab4378e68c207b1de4e58d0ae26dc333c" title="An instance in time. A DateTime value is encoded as a 64-bit signed integer which represents the numb...">UA_DateTime</a>                         PublishingInterval;
-<a name="l00071"></a>00071     <a class="code" href="group__types.html#gab4378e68c207b1de4e58d0ae26dc333c" title="An instance in time. A DateTime value is encoded as a 64-bit signed integer which represents the numb...">UA_DateTime</a>                         LastPublished;
-<a name="l00072"></a>00072     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>                            SubscriptionID;
-<a name="l00073"></a>00073     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>                            NotificationsPerPublish;
-<a name="l00074"></a>00074     <a class="code" href="group__types.html#ga9a1800cf448ad57727ab920aa254a1a4" title="A two-state logical value (true or false).">UA_Boolean</a>                          PublishingMode;
-<a name="l00075"></a>00075     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                           Priority;
-<a name="l00076"></a>00076     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>                           SequenceNumber;
-<a name="l00077"></a>00077     LIST_ENTRY(UA_Subscription_s)       listEntry;
-<a name="l00078"></a>00078     UA_ListOfUnpublishedNotifications   *unpublishedNotifications;
-<a name="l00079"></a>00079     UA_ListOfUAMonitoredItems           *MonitoredItems;
-<a name="l00080"></a>00080 } UA_Subscription;
-<a name="l00081"></a>00081 
-<a name="l00082"></a>00082 typedef LIST_HEAD(UA_ListOfUASubscriptions_s, UA_Subscription_s) UA_ListOfUASubscriptions;
-<a name="l00083"></a>00083 typedef struct UA_SubscriptionManager_s {
-<a name="l00084"></a>00084     UA_Int32_BoundedValue    GlobalPublishingInterval;
-<a name="l00085"></a>00085     UA_UInt32_BoundedValue   GlobalLifeTimeCount;
-<a name="l00086"></a>00086     UA_UInt32_BoundedValue   GlobalKeepAliveCount;
-<a name="l00087"></a>00087     UA_Int32_BoundedValue    GlobalNotificationsPerPublish;
-<a name="l00088"></a>00088     UA_UInt32_BoundedValue   GlobalSamplingInterval;
-<a name="l00089"></a>00089     UA_UInt32_BoundedValue   GlobalQueueSize;
-<a name="l00090"></a>00090     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>                 LastSessionID;
-<a name="l00091"></a>00091     UA_ListOfUASubscriptions *ServerSubscriptions;
-<a name="l00092"></a>00092 } UA_SubscriptionManager;
-<a name="l00093"></a>00093 
-<a name="l00094"></a>00094 <span class="keywordtype">void</span>            SubscriptionManager_init(<a class="code" href="structUA__Session.html">UA_Session</a> *session);
-<a name="l00095"></a>00095 <span class="keywordtype">void</span>            SubscriptionManager_deleteMembers(<a class="code" href="structUA__Session.html">UA_Session</a> *session);
-<a name="l00096"></a>00096 <span class="keywordtype">void</span>            SubscriptionManager_addSubscription(UA_SubscriptionManager *manager, UA_Subscription *subscription);
-<a name="l00097"></a>00097 UA_Subscription *SubscriptionManager_getSubscriptionByID(UA_SubscriptionManager *manager, <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID);
-<a name="l00098"></a>00098 <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>        SubscriptionManager_deleteSubscription(UA_SubscriptionManager *manager, <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID);
-<a name="l00099"></a>00099 <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>        SubscriptionManager_deleteMonitoredItem(UA_SubscriptionManager *manager, <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID, <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> MonitoredItemID);
-<a name="l00100"></a>00100 
-<a name="l00101"></a>00101 UA_Subscription     *UA_Subscription_new(<a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID);
-<a name="l00102"></a>00102 <span class="keywordtype">void</span>                Subscription_updateNotifications(UA_Subscription *subscription);
-<a name="l00103"></a>00103 <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>           Subscription_queuedNotifications(UA_Subscription *subscription);
-<a name="l00104"></a>00104 <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>       *Subscription_getAvailableSequenceNumbers(UA_Subscription *sub);
-<a name="l00105"></a>00105 <span class="keywordtype">void</span>            Subscription_copyTopNotificationMessage(UA_NotificationMessage *<a class="code" href="ua__nodes_8h.html#af9c9a31dac911f494e549232de33f59f">dst</a>, UA_Subscription *sub);
-<a name="l00106"></a>00106 <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>       Subscription_deleteUnpublishedNotification(<a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> seqNo, UA_Subscription *sub);
-<a name="l00107"></a>00107 <span class="keywordtype">void</span>                    Subscription_generateKeepAlive(UA_Subscription *subscription);
-<a name="l00108"></a>00108 
-<a name="l00109"></a>00109 UA_MonitoredItem *UA_MonitoredItem_new(<span class="keywordtype">void</span>);
-<a name="l00110"></a>00110 <span class="keywordtype">void</span>             MonitoredItem_delete(UA_MonitoredItem *monitoredItem);
-<a name="l00111"></a>00111 <span class="keywordtype">void</span>             MonitoredItem_QueuePushDataValue(UA_MonitoredItem *monitoredItem);
-<a name="l00112"></a>00112 <span class="keywordtype">void</span>             MonitoredItem_ClearQueue(UA_MonitoredItem *monitoredItem);
-<a name="l00113"></a>00113 <a class="code" href="group__types.html#ga9a1800cf448ad57727ab920aa254a1a4" title="A two-state logical value (true or false).">UA_Boolean</a>       MonitoredItem_CopyMonitoredValueToVariant(<a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> AttributeID, <span class="keyword">const</span> <a class="code" href="ua__nodes_8h.html#structUA__Node">UA_Node</a> *src, <a class="code" href="structUA__Variant.html" title="Variants store (arrays of) any data type. Either they provide a pointer to the data in memory...">UA_Variant</a> *<a class="code" href="ua__nodes_8h.html#af9c9a31dac911f494e549232de33f59f">dst</a>);
-<a name="l00114"></a>00114 <span class="keywordtype">int</span>              MonitoredItem_QueueToDataChangeNotifications(UA_MonitoredItemNotification *<a class="code" href="ua__nodes_8h.html#af9c9a31dac911f494e549232de33f59f">dst</a>, UA_MonitoredItem *monitoredItem);
-<a name="l00115"></a>00115 <span class="preprocessor">#endif  // ifndef... define UA_SUBSCRIPTION_MANAGER_H_</span>
-<a name="l00116"></a>00116 <span class="preprocessor"></span><span class="preprocessor">#endif  // ifdef EnableSubscriptions ...</span>
+<a name="l00009"></a>00009 <span class="preprocessor">#include &quot;<a class="code" href="ua__subscription_8h.html">ua_subscription.h</a>&quot;</span>
+<a name="l00010"></a>00010 
+<a name="l00011"></a>00011 <span class="keyword">typedef</span> LIST_HEAD(UA_ListOfUASubscriptions_s, UA_Subscription_s) UA_ListOfUASubscriptions;
+<a name="l00012"></a>00012 typedef struct UA_SubscriptionManager_s {
+<a name="l00013"></a>00013     UA_Int32_BoundedValue    GlobalPublishingInterval;
+<a name="l00014"></a>00014     UA_UInt32_BoundedValue   GlobalLifeTimeCount;
+<a name="l00015"></a>00015     UA_UInt32_BoundedValue   GlobalKeepAliveCount;
+<a name="l00016"></a>00016     UA_Int32_BoundedValue    GlobalNotificationsPerPublish;
+<a name="l00017"></a>00017     UA_UInt32_BoundedValue   GlobalSamplingInterval;
+<a name="l00018"></a>00018     UA_UInt32_BoundedValue   GlobalQueueSize;
+<a name="l00019"></a>00019     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>                 LastSessionID;
+<a name="l00020"></a>00020     UA_ListOfUASubscriptions *ServerSubscriptions;
+<a name="l00021"></a>00021 } UA_SubscriptionManager;
+<a name="l00022"></a>00022 
+<a name="l00023"></a>00023 <span class="keywordtype">void</span> SubscriptionManager_init(<a class="code" href="structUA__Session.html">UA_Session</a> *session);
+<a name="l00024"></a>00024 <span class="keywordtype">void</span> SubscriptionManager_deleteMembers(<a class="code" href="structUA__Session.html">UA_Session</a> *session);
+<a name="l00025"></a>00025 <span class="keywordtype">void</span> SubscriptionManager_addSubscription(UA_SubscriptionManager *manager, UA_Subscription *subscription);
+<a name="l00026"></a>00026 UA_Subscription *SubscriptionManager_getSubscriptionByID(UA_SubscriptionManager *manager,
+<a name="l00027"></a>00027                                                          <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID);
+<a name="l00028"></a>00028 <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionManager_deleteSubscription(UA_SubscriptionManager *manager, <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID);
+<a name="l00029"></a>00029 <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionManager_deleteMonitoredItem(UA_SubscriptionManager *manager, <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> SubscriptionID,
+<a name="l00030"></a>00030                                                  <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> MonitoredItemID);
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#endif  // ifndef... define UA_SUBSCRIPTION_MANAGER_H_</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#endif  // ifdef EnableSubscriptions ...</span>
 </pre></div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat May 23 2015 07:58:28 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat May 23 2015 09:01:51 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>
