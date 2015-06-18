@@ -96,64 +96,12 @@
 <a name="l00062"></a>00062 <span class="preprocessor"></span>} <span class="comment">// extern &quot;C&quot;</span>
 <a name="l00063"></a>00063 <span class="preprocessor">#endif</span>
 <a name="l00064"></a>00064 <span class="preprocessor"></span>
-<a name="l00065"></a>00065 
-<a name="l00066"></a>00066 <span class="preprocessor">#ifdef ENABLE_SUBSCRIPTIONS</span>
-<a name="l00067"></a>00067 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">struct </span>UA_Client_NotificationsAckNumber_s {
-<a name="l00068"></a>00068     UA_SubscriptionAcknowledgement subAck;
-<a name="l00069"></a>00069     LIST_ENTRY(UA_Client_NotificationsAckNumber_s) listEntry;
-<a name="l00070"></a>00070 } UA_Client_NotificationsAckNumber;
-<a name="l00071"></a>00071 
-<a name="l00072"></a>00072 typedef struct UA_Client_MonitoredItem_s {
-<a name="l00073"></a>00073     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>          MonitoredItemId;
-<a name="l00074"></a>00074     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>          MonitoringMode;
-<a name="l00075"></a>00075     <a class="code" href="structUA__NodeId.html" title="An identifier for a node in the address space of an OPC UA Server.">UA_NodeId</a>          monitoredNodeId; 
-<a name="l00076"></a>00076     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>          AttributeID;
-<a name="l00077"></a>00077     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>          ClientHandle;
-<a name="l00078"></a>00078     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>          SamplingInterval;
-<a name="l00079"></a>00079     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>          QueueSize;
-<a name="l00080"></a>00080     <a class="code" href="group__types.html#ga9a1800cf448ad57727ab920aa254a1a4" title="A two-state logical value (true or false).">UA_Boolean</a>         DiscardOldest;
-<a name="l00081"></a>00081     void               (*handler)(<a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> handle, <a class="code" href="group__types.html#structUA__DataValue" title="A data value with an associated status code and timestamps.">UA_DataValue</a> *value);
-<a name="l00082"></a>00082     LIST_ENTRY(UA_Client_MonitoredItem_s)  listEntry;
-<a name="l00083"></a>00083 } UA_Client_MonitoredItem;
-<a name="l00084"></a>00084 
-<a name="l00085"></a>00085 typedef struct UA_Client_Subscription_s {
-<a name="l00086"></a>00086     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>    LifeTime;
-<a name="l00087"></a>00087     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>     KeepAliveCount;
-<a name="l00088"></a>00088     <a class="code" href="group__types.html#gab4378e68c207b1de4e58d0ae26dc333c" title="An instance in time. A DateTime value is encoded as a 64-bit signed integer which represents the numb...">UA_DateTime</a>  PublishingInterval;
-<a name="l00089"></a>00089     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>    SubscriptionID;
-<a name="l00090"></a>00090     <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>     NotificationsPerPublish;
-<a name="l00091"></a>00091     <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>    Priority;
-<a name="l00092"></a>00092     LIST_ENTRY(UA_Client_Subscription_s) listEntry; 
-<a name="l00093"></a>00093     LIST_HEAD(UA_ListOfUAMonitoredItems, UA_Client_MonitoredItem_s) MonitoredItems;
-<a name="l00094"></a>00094 } UA_Client_Subscription;
-<a name="l00095"></a>00095 
-<a name="l00096"></a>00096 UA_CreateSubscriptionResponse   <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_createSubscription(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_CreateSubscriptionRequest *request);
-<a name="l00097"></a>00097 UA_ModifySubscriptionResponse   <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_modifySubscription(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_ModifySubscriptionRequest *request);
-<a name="l00098"></a>00098 UA_DeleteSubscriptionsResponse  <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_deleteSubscriptions(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_DeleteSubscriptionsRequest *request);
-<a name="l00099"></a>00099 UA_CreateMonitoredItemsResponse <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_createMonitoredItems(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_CreateMonitoredItemsRequest *request);
-<a name="l00100"></a>00100 UA_DeleteMonitoredItemsResponse <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_deleteMonitoredItems(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_DeleteMonitoredItemsRequest *request);
-<a name="l00101"></a>00101 UA_PublishResponse              <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_publish(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_PublishRequest *request);
-<a name="l00102"></a>00102 
-<a name="l00103"></a>00103 <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a>      <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_newSubscription(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, <a class="code" href="group__types.html#ga01ce3c3b2fb34ef81c97c313f516004e" title="An integer value between -2 147 483 648 and 2 147 483 647.">UA_Int32</a> publishInterval);
-<a name="l00104"></a>00104 <a class="code" href="ua__statuscodes_8h.html#a82f92964aaa5dd1c5a1c5d7e9099883c">UA_StatusCode</a> <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_removeSubscription(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> subscriptionId);
-<a name="l00105"></a>00105 <span class="comment">//void UA_EXPORT UA_Client_modifySubscription(UA_Client *client);</span>
-<a name="l00106"></a>00106 
-<a name="l00107"></a>00107 <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a>     <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_monitorItemChanges(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> subscriptionId, 
-<a name="l00108"></a>00108                                                      <a class="code" href="structUA__NodeId.html" title="An identifier for a node in the address space of an OPC UA Server.">UA_NodeId</a> nodeId, <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> attributeID, 
-<a name="l00109"></a>00109                                                      <span class="keywordtype">void</span> *handlingFunction);
-<a name="l00110"></a>00110 <a class="code" href="ua__statuscodes_8h.html#a82f92964aaa5dd1c5a1c5d7e9099883c">UA_StatusCode</a> <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_unMonitorItemChanges(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> subscriptionId, 
-<a name="l00111"></a>00111                                                        <a class="code" href="group__types.html#ga5f0721b034e4c44a7f81589b15ba1baf" title="An integer value between 0 and 429 4967 295.">UA_UInt32</a> monitoredItemId );
-<a name="l00112"></a>00112 
-<a name="l00113"></a>00113 <span class="keywordtype">void</span> <a class="code" href="ua__config_8h.html#aba46d236acc7541d0ee0a96f8c7f7907">UA_EXPORT</a> UA_Client_doPublish(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client);
-<a name="l00114"></a>00114 <a class="code" href="group__types.html#ga9a1800cf448ad57727ab920aa254a1a4" title="A two-state logical value (true or false).">UA_Boolean</a> UA_Client_processPublishRx(<a class="code" href="ua__client_8h.html#a2bd5a2265eb4146ce3d95897f7c51aae">UA_Client</a> *client, UA_PublishResponse response);
-<a name="l00115"></a>00115 
-<a name="l00116"></a>00116 <span class="preprocessor">#endif</span>
-<a name="l00117"></a>00117 <span class="preprocessor"></span><span class="preprocessor">#endif </span><span class="comment">/* UA_CLIENT_H_ */</span>
+<a name="l00065"></a>00065 <span class="preprocessor">#endif </span><span class="comment">/* UA_CLIENT_H_ */</span>
 </pre></div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jun 16 2015 15:06:24 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jun 18 2015 12:57:46 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>
