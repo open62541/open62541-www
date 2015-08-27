@@ -297,6 +297,43 @@
 &lt;/UANodeSet&gt;
 </pre></div>
 </div>
+<p>Or, more consiscly, this:</p>
+<div class="highlight-python"><div class="highlight"><pre>+------------------+
+|  &lt;&lt;ObjectType&gt;&gt;  |
+|   FieldDevice    |
++------------------+
+          |              +------------------+
+          |              |   &lt;&lt;Variable&gt;&gt;   |
+          |-------------&gt;| ManufacturerName |
+          | hasComponent +------------------+
+          |              +------------------+
+          |              |   &lt;&lt;Variable&gt;&gt;   |
+          |-------------&gt;|    ModelName     |
+          | hasComponent +------------------+
+          |              +----------------+
+          |              | &lt;&lt;ObjectType&gt;&gt; |
+          &#39;-------------&gt;|      Pump      |
+             hasSubtype  +----------------+
+                                  |
+                                  |
+                                  |                +------------------+
+                                  |                |   &lt;&lt;Variable&gt;&gt;   |
+                                  |---------------&gt;|     MotorRPM     |
+                                  |  hasComponent  +------------------+
+                                  |                +------------------+
+                                  |                |   &lt;&lt;Variable&gt;&gt;   |
+                                  |---------------&gt;|       isOn       |
+                                  |  hasComponent  +------------------+
+                                  |                +------------------+    +------------------+
+                                  |                |    &lt;&lt;Method&gt;&gt;    |    |   &lt;&lt;Variable&gt;&gt;   |
+                                  |---------------&gt;|    startPump     |---&gt;| outputArguments  |
+                                  |  hasProperty   +------------------+    +------------------+
+                                  |                +------------------+    +------------------+
+                                  |                |    &lt;&lt;Method&gt;&gt;    |    |   &lt;&lt;Variable&gt;&gt;   |
+                                  &#39;---------------&gt;|     stopPump     |---&gt;| outputArguments  |
+                                     hasProperty   +------------------+    +------------------+
+</pre></div>
+</div>
 <p>UA Modeler prepends the namespace qualifier &#8220;uax:&#8221; to some fields - this is not supported by the namespace compiler, who has strict aliasing rules concerning field names. If a datatype defines a field called &#8220;Argument&#8221;, the compiler expects to find &#8220;&lt;Argument&gt;&#8221; tags, not &#8220;&lt;uax:Argument&gt;&#8221;. Remove/Substitute such fields to remove namespace qualifiers.</p>
 <p>The namespace compiler can be invoked manually and has numerous options. In its simplest form, an invokation will look like this:</p>
 <div class="highlight-python"><div class="highlight"><pre>python ./generate_open62541CCode.py ../schema/namespace0/Opc.Ua.NodeSet2.xml &lt;path&gt;/&lt;to&gt;/&lt;more&gt;/&lt;files&gt;.xml &lt;path&gt;/&lt;to&gt;/&lt;evenmore&gt;/&lt;files&gt;.xml myNamespace
@@ -378,6 +415,15 @@ Linking C shared library libopen62541.so
 [100%] Built target open62541
 </pre></div>
 </div>
+<p>If you open the header <code class="docutils literal"><span class="pre">src_generated/ua_namespaceinit_generated.h</span></code> and take a short look at the generated defines, you will notice the following definitions have been created:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#define UA_NS1ID_PROVIDESINPUTTO</span>
+<span class="c">#define UA_NS1ID_FIELDDEVICE</span>
+<span class="c">#define UA_NS1ID_PUMP</span>
+<span class="c">#define UA_NS1ID_STARTPUMP</span>
+<span class="c">#define UA_NS1ID_STOPPUMP</span>
+</pre></div>
+</div>
+<p>These definitions are generated for all types, but not variables, objects or views (as their names may be ambiguous and may not a be unique identifier). You can use these definitions in your code as you already used the <code class="docutils literal"><span class="pre">UA_NS0ID_</span></code> equivalents.</p>
 <p>Now switch back to your own source directory and update your libopen62541 library (in case you have not linked it into the build folder). Compile our example server as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre>ichrispa@Cassandra:open62541/build-tutorials&gt; gcc -g -std=c99 -Wl,-rpath,`pwd` -I ./include -L . -DENABLE_METHODCALLS -o server ./server.c -lopen62541
 </pre></div>
@@ -398,11 +444,110 @@ Linking C shared library libopen62541.so
 </div>
 <div class="section" id="creating-object-instances">
 <h2>Creating object instances<a class="headerlink" href="#creating-object-instances" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal"><span class="pre">`</span> <span class="pre">UA_(Server|Client)_createInstanceOf()`</span></code></p>
+<p>Defining an object type is only usefull if it ends up making our lives easier in some way (though it is always the proper thing to do). One of the key benefits of defining object types is being able to create object instances fairly easily. As an example, we will modify the server to create 2 pump instances:</p>
+<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+
+# include &quot;ua_types.h&quot;
+# include &quot;ua_server.h&quot;
+# include &quot;ua_namespaceinit_generated.h&quot;
+# include &quot;logger_stdout.h&quot;
+# include &quot;networklayer_tcp.h&quot;
+
+UA_Boolean running;
+UA_Int32 global_accessCounter = 0;
+
+void stopHandler(int signal) {
+  running = 0;
+}
+
+UA_StatusCode pumpInstantiationCallback(UA_NodeId objectId, UA_NodeId definitionId, void *handle);
+UA_StatusCode pumpInstantiationCallback(UA_NodeId objectId, UA_NodeId definitionId, void *handle) {
+  printf(&quot;Created new node ns=%d;i=%d according to template ns=%d;i=%d (handle was %d)\n&quot;, objectId.namespaceIndex, objectId.identifier.numeric,
+          definitionId.namespaceIndex, definitionId.identifier.numeric, *((UA_Int32 *) handle));
+  return UA_STATUSCODE_GOOD;
+}
+
+int main(void) {
+  signal(SIGINT,  stopHandler);
+  signal(SIGTERM, stopHandler);
+
+  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
+  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
+  running = UA_TRUE;
+
+  UA_Int32 myHandle = 42;
+  UA_Server_addInstanceOf(server, UA_NODEID_NUMERIC(1, 0),
+                          UA_QUALIFIEDNAME(1, &quot;Pump1&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;Pump1&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;A pump!&quot;),
+                          UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
+                          0, 0, UA_EXPANDEDNODEID_NUMERIC(1, UA_NS1ID_PUMP), pumpInstantiationCallback, (void *) &amp;myHandle, NULL);
+
+  UA_Server_addInstanceOf(server, UA_NODEID_NUMERIC(1, 0),
+                          UA_QUALIFIEDNAME(1, &quot;Pump2&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;Pump2&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;Another pump!&quot;),
+                          UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
+                          0, 0, UA_EXPANDEDNODEID_NUMERIC(1, UA_NS1ID_PUMP), pumpInstantiationCallback, (void *) &amp;myHandle, NULL);
+
+  UA_Server_run(server, 1, &amp;running);
+  UA_Server_delete(server);
+
+  printf(&quot;Bye\n&quot;);
+  return 0;
+}
+</pre></div>
+</div>
+<p>Make sure you have updated the headers and libs in your project, then recompile and run the server. Make especially sure you have added <code class="docutils literal"><span class="pre">ua_namespaceinit_generated.h</span></code> to your include folder and that you have removed any references to header in <code class="docutils literal"><span class="pre">server</span></code>. The only include you are going to need is <code class="docutils literal"><span class="pre">ua_types.h</span></code>.</p>
+<p>As you can see instantiating an object is not much different from creating an object node. The main difference is that you <em>must</em> use an objectType node as typeDefinition and you (may) pass a callback function (<code class="docutils literal"><span class="pre">pumpInstantiationCallback</span></code>) and a handle (<code class="docutils literal"><span class="pre">myHandle</span></code>). You should already be familiar with callbacks and handles from our previous tutorial and you can easily derive how the callback is used by running the server binary, which produces the following output:</p>
+<div class="highlight-python"><div class="highlight"><pre>Created new node ns=1;i=1505 according to template ns=1;i=6001
+Created new node ns=1;i=1506 according to template ns=1;i=6002
+Created new node ns=1;i=1507 according to template ns=1;i=6003
+Created new node ns=1;i=1508 according to template ns=1;i=6004
+Created new node ns=1;i=1510 according to template ns=1;i=6001
+Created new node ns=1;i=1511 according to template ns=1;i=6002
+Created new node ns=1;i=1512 according to template ns=1;i=6003
+Created new node ns=1;i=1513 according to template ns=1;i=6004
+</pre></div>
+</div>
+<p>If you start the server and inspect the nodes with UA Expert, you will find two pumps in the objects folder, which look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>+------------+
+| &lt;&lt;Object&gt;&gt; |
+|   Pump1    |
++------------+
+       |
+       |  +------------------+
+       |-&gt;|   &lt;&lt;Variable&gt;&gt;   |
+       |  | ManufacturerName |
+       |  +------------------+
+       |  +------------------+
+       |  |   &lt;&lt;Variable&gt;&gt;   |
+       |-&gt;|    ModelName     |
+       |  +------------------+
+       |  +------------------+
+       |  |   &lt;&lt;Variable&gt;&gt;   |
+       |-&gt;|     MotorRPM     |
+       |  +------------------+
+       |  +------------------+
+       |  |   &lt;&lt;Variable&gt;&gt;   |
+       |-&gt;|       isOn       |
+       |  +------------------+
+       |  +------------------+    +------------------+
+       |  |    &lt;&lt;Method&gt;&gt;    |    |   &lt;&lt;Variable&gt;&gt;   |
+       |-&gt;|    startPump     |---&gt;| outputArguments  |
+       |  +------------------+    +------------------+
+       |  +------------------+    +------------------+
+       |  |    &lt;&lt;Method&gt;&gt;    |    |   &lt;&lt;Variable&gt;&gt;   |
+       &#39;-&gt;|     stopPump     |---&gt;| outputArguments  |
+          +------------------+    +------------------+
+</pre></div>
+</div>
+<p>As you can see the pump has inherited it&#8217;s parents attributes (ManufacturerName and ModelName). You may also notice that the callback was not called for the methods, even though they are obviously where they are supposed to be. Methods, in contrast to objects and variables, are never cloned but instead only linked. The reason is that you will quite propably attach a method callback to a central method, not each object. Objects are instantiated if they are <em>below</em> the object you are creating, so any object (like an object called associatedServer of ServerType) that is part of pump will be instantiated as well. Objects <em>above</em> you object are never instantiated, so the same ServerType object in Fielddevices would have been ommitted (the reason is that the recursive instantiation function protects itself from infinite recursions, which are hard to track when first ascending, then redescending into a tree).</p>
+<p>For each object and variable created by the call, the callback was invoked. The callback gives you the nodeId of the new node along with the Id of the Type template used to create it. You can thereby effectively use setAttributeValue() functions (or others) to adapt the properties of these new nodes, as they can be identified by there templates.</p>
+<p>If you want to overwrite an attribute of the parent definition, you will have to delete the node instantiated by the parent&#8217;s template (this as a <strong>FIXME</strong> for developers).</p>
 </div>
 <div class="section" id="iterating-over-child-nodes">
 <h2>Iterating over Child nodes<a class="headerlink" href="#iterating-over-child-nodes" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal"><span class="pre">`</span> <span class="pre">UA_(Server|Client)_forEachChildNodeCall();`</span></code></p>
+<p>A common usecase is wanting to perform something akin to <code class="docutils literal"><span class="pre">for</span> <span class="pre">each</span> <span class="pre">node</span> <span class="pre">referenced</span> <span class="pre">by</span> <span class="pre">X,</span> <span class="pre">call</span> <span class="pre">...</span></code>; you may for example be searching for a specific browseName or instance which was created with a dynamic nodeId. There is no way of telling what you are searching for beforehand (inverse hasComponents, typedefinitions, etc.), but all usescases of &#8220;searching for&#8221; basically means iterating over each reference of a node.</p>
+<p>Since searching in nodes is a common operation, the high-level branch provides a function to help you perform this operation: `` UA_(Server|Client)_forEachChildNodeCall();``.</p>
+<p><strong>WIP:</strong> use findNodeByBrowseName as an example.</p>
 </div>
 <div class="section" id="examining-node-copies">
 <h2>Examining node copies<a class="headerlink" href="#examining-node-copies" title="Permalink to this headline">¶</a></h2>
