@@ -27,7 +27,7 @@ Before we can get started you will require the stack. You may either clone the c
    ichrispa@Cassandra:>
 
 Then create a build directory and read the next section.::
-   
+
    ichrispa@Cassandra:> cd open62541
    ichrispa@Cassandra:open62541> mkdir build
    ichrispa@Cassandra:open62541/build> cd build
@@ -122,6 +122,7 @@ Let's build a very rudimentary server. Create a separate folder for your applica
    |   `-- ua_types.h
    |-- libopen62541.so
    `-- myServer.c
+   ichrispa@Cassandra:myServerApp> touch myServer.c
 
 Open myServer.c and write/paste your minimal server application::
 
@@ -149,7 +150,8 @@ This is all that is needed to start your OPC UA Server. Compile the the server w
 
 Some notes: You are using a dynamically linked library (libopen62541.so), which needs to be locates in your dynamic linkers search path. Unless you copy libopen62541.so into a common folder like /lib or /usr/lib, the linker will fail to find the library and complain (i.e. not run the application). ``-Wl,-rpath,`pwd``` adds your present working directory to the relative searchpaths of the linker when executing the binary (you can also use ``-Wl,-rpath,.`` if the binary and the library are always in the same directory).
 
-::
+Now execute the server::
+
    ichrispa@Cassandra:myServerApp> ./myServer
 
 You have now compiled and started your first OPC UA Server. Though quite unspectacular and only terminatable with ``CTRL+C`` (SIGTERM) at the moment, you can already launch it and browse around with UA Expert. The Server will be listening on localhost:16664 - go ahead and give it a try.
@@ -194,13 +196,36 @@ This one might appear quite mysterious at first... this option will enable a pyt
 Switch back to your MyServerApp directory and recompile your binary, this time embedding all open62541 functionality in one executable::
 
    ichrispa@Cassandra:open62541/build> cd ../../myServerApp
-   ichrispa@Cassandra:open62541/build> cp ../../open62541/build/open62541.* .
-   ichrispa@Cassandra:myServerApp> gcc -std=c99 -I ./ -c ./open62541.c
+   ichrispa@Cassandra:open62541/build> cp ../open62541/build/open62541.* .
    ichrispa@Cassandra:myServerApp> gcc -std=c99 -I ./ -c ./open62541.c
    ichrispa@Cassandra:myServerApp> gcc -std=c99 -I ./include -o myServer myServer.c open62541.o
    ichrispa@Cassandra:myServerApp> ./myServer
    
 You can now start the server and browse around as before. As you might have noticed, no shared library is required anymore. That makes the application more portable or runnable on systems without dynamic linking support and allows you to use functions that are not exported by the library (which propably means we haven't documented them as thouroughly...); on the other hand the application is also much bigger, so if you intend to also use a client with open62541, you might be inclined to overthink amalgamation.
+
+The next step is to simplify the header dependencies. Instead of picking header files one-by-one, we can use the copied amalgamated header including all the public headers dependencies.
+
+Open myServer.c and simplify it to::
+
+   #include <stdio.h>
+
+   # include "open62541.h"
+
+   UA_Boolean running;
+   int main(void) {
+     UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
+     UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
+     running = UA_TRUE;
+     UA_Server_run(server, 1, &running);
+     UA_Server_delete(server);
+
+     return 0;
+   }
+   
+It can now also be compiled without the include directory, i.e., ::
+
+   ichrispa@Cassandra:myServerApp> gcc -std=c99 myServer.c open62541.c -o myServer
+   ichrispa@Cassandra:myServerApp> ./myServer
 
 Please note that at times the amalgamation script has... well, bugs. It might include files in the wrong order or include features even though the feature is turned off. Please report problems with amalgamation so we can improve it.
 
