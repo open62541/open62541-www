@@ -251,6 +251,7 @@ ichrispa@Cassandra:myServerApp&gt; tree
 |   `-- ua_types.h
 |-- libopen62541.so
 `-- myServer.c
+ichrispa@Cassandra:myServerApp&gt; touch myServer.c
 </pre></div>
 </div>
 <p>Open myServer.c and write/paste your minimal server application:</p>
@@ -317,14 +318,36 @@ ichrispa@Cassandra:open62541/build&gt;
 </div>
 <p>Switch back to your MyServerApp directory and recompile your binary, this time embedding all open62541 functionality in one executable:</p>
 <div class="highlight-python"><div class="highlight"><pre>ichrispa@Cassandra:open62541/build&gt; cd ../../myServerApp
-ichrispa@Cassandra:open62541/build&gt; cp ../../open62541/build/open62541.* .
-ichrispa@Cassandra:myServerApp&gt; gcc -std=c99 -I ./ -c ./open62541.c
+ichrispa@Cassandra:open62541/build&gt; cp ../open62541/build/open62541.* .
 ichrispa@Cassandra:myServerApp&gt; gcc -std=c99 -I ./ -c ./open62541.c
 ichrispa@Cassandra:myServerApp&gt; gcc -std=c99 -I ./include -o myServer myServer.c open62541.o
 ichrispa@Cassandra:myServerApp&gt; ./myServer
 </pre></div>
 </div>
 <p>You can now start the server and browse around as before. As you might have noticed, no shared library is required anymore. That makes the application more portable or runnable on systems without dynamic linking support and allows you to use functions that are not exported by the library (which propably means we haven&#8217;t documented them as thouroughly...); on the other hand the application is also much bigger, so if you intend to also use a client with open62541, you might be inclined to overthink amalgamation.</p>
+<p>The next step is to simplify the header dependencies. Instead of picking header files one-by-one, we can use the copied amalgamated header including all the public headers dependencies.</p>
+<p>Open myServer.c and simplify it to:</p>
+<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+
+# include &quot;open62541.h&quot;
+
+UA_Boolean running;
+int main(void) {
+  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
+  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
+  running = UA_TRUE;
+  UA_Server_run(server, 1, &amp;running);
+  UA_Server_delete(server);
+
+  return 0;
+}
+</pre></div>
+</div>
+<p>It can now also be compiled without the include directory, i.e.,</p>
+<div class="highlight-python"><div class="highlight"><pre>ichrispa@Cassandra:myServerApp&gt; gcc -std=c99 myServer.c open62541.c -o myServer
+ichrispa@Cassandra:myServerApp&gt; ./myServer
+</pre></div>
+</div>
 <p>Please note that at times the amalgamation script has... well, bugs. It might include files in the wrong order or include features even though the feature is turned off. Please report problems with amalgamation so we can improve it.</p>
 <p><strong>BUILD_EXAMPLECLIENT</strong> and <strong>BUILD_EXAMPLESERVER</strong></p>
 <p>If you build your stack with the above two options, you will enable the example server/client applications to be built. You can review their sources under <code class="docutils literal"><span class="pre">examples/server.c</span></code> and <code class="docutils literal"><span class="pre">example/client.c</span></code>. These provide a neat reference for just about any features of open62541, as most of them are included in these examples by us (the developers) for testing and demonstration purposes.</p>
