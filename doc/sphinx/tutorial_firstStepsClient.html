@@ -347,6 +347,13 @@ listed types</td>
 #include &quot;networklayer_tcp.h&quot;
 
 int main(void) {
+  UA_Client *client = UA_Client_new(UA_ClientConfig_standard, Logger_Stdout_new());
+  UA_StatusCode retval = UA_Client_connect(client, ClientNetworkLayerTCP_connect, &quot;opc.tcp://localhost:16664&quot;);
+  if(retval != UA_STATUSCODE_GOOD) {
+    UA_Client_delete(client);
+    return retval;
+  }
+
   //variable to store data
   UA_DateTime raw_date = 0;
 
@@ -439,6 +446,7 @@ int main(void) {
 <div class="section" id="further-tasks">
 <h2>Further tasks<a class="headerlink" href="#further-tasks" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
+<li>Try to connect to some other OPC UA server by changing &#8220;opc.tcp://localhost:16664&#8221; to an appropriate address (remember that the queried node is contained in any OPC UA server).</li>
 <li>Display the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an &#8220;Int32&#8221; from the example server (which is built in <a class="reference internal" href="tutorial_firstStepsServer.html"><em>First steps with open62541-server</em></a>). Note that the identifier of this node is a string type: use &#8220;UA_NODEID_STRING_ALLOC&#8221;. The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
 <li>Try to set the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an &#8220;Int32&#8221; from the example server (which is built in <a class="reference internal" href="tutorial_firstStepsServer.html"><em>First steps with open62541-server</em></a>) using &#8220;UA_Client_write&#8221; function. The example server needs some more modifications, i.e., changing request types. The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
 </ul>
