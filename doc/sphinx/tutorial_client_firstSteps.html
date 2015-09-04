@@ -103,6 +103,9 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-1-first-steps-with-open62541-server">Tutorial 1: First steps with open62541-server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-2-first-steps-with-open62541-client">Tutorial 2: First steps with open62541-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-3-adding-nodes-to-a-server-and-connecting-nodes-to-user-defined-values">Tutorial 3: Adding nodes to a server and connecting nodes to user-defined values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-4-adding-server-side-methods">Tutorial 4: Adding server-side methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-5-nodeset-handling">Tutorial 5: Nodeset handling</a></li>
 </ul>
 </li>
 </ul>
@@ -133,7 +136,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/tutorial_firstStepsClient.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_client_firstSteps.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -144,7 +147,7 @@
             
   <div class="section" id="first-steps-with-open62541-client">
 <h1>First steps with open62541-client<a class="headerlink" href="#first-steps-with-open62541-client" title="Permalink to this headline">¶</a></h1>
-<p>In the previous <a class="reference internal" href="tutorial_firstStepsServer.html"><em>First steps with open62541-server</em></a> tutorial, you should have gotten your build environment verified and created a first OPC UA server using the open62541 stack. The created server however doesn&#8217;t do much yet and there is no client to interact with the server. We are going to remedy that in this tutorial by creating some nodes and variables.</p>
+<p>In the previous <code class="xref doc docutils literal"><span class="pre">tutorial_firstStepsServer</span></code> tutorial, you should have gotten your build environment verified and created a first OPC UA server using the open62541 stack. The created server however doesn&#8217;t do much yet and there is no client to interact with the server. We are going to remedy that in this tutorial by creating some nodes and variables.</p>
 <hr class="docutils" />
 <p>You should already have a basic server from the previous tutorial. open62541 provides both a server- and clientside API, so creating a client is equally as easy as creating a server. We are going to use dynamic linking (libopen62541.so) from now on, because our client and server will share a lot of code. Reusing the shared library will considerably reduce the overhead. To avoid confusion, remove the amalgated open62541.c/h files from your example directory.</p>
 <p>As a recap, your directory structure should now look like this:</p>
@@ -200,54 +203,6 @@ int main(void) {
 <div class="highlight-python"><div class="highlight"><pre>:myApp&gt; gcc -Wl,-rpath=./ -L./ -I ./include -o myClient myClient.c  -lopen62541
 </pre></div>
 </div>
-<p>We will also make a slight change to our server: We want it to exit cleanly when pressing <code class="docutils literal"><span class="pre">CTRL+C</span></code>. We will add signal handler for SIGINT and SIGTERM to accomplish that to the server:</p>
-<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
-
-# include &quot;ua_types.h&quot;
-# include &quot;ua_server.h&quot;
-# include &quot;logger_stdout.h&quot;
-# include &quot;networklayer_tcp.h&quot;
-
-UA_Boolean running;
-UA_Logger logger;
-
-void stopHandler(int signal) {
-  running = 0;
-}
-
-int main(void) {
-  signal(SIGINT,  stopHandler);
-  signal(SIGTERM, stopHandler);
-
-  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
-  logger = Logger_Stdout_new();
-  UA_Server_setLogger(server, logger);
-  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
-  running = UA_TRUE;
-  UA_Server_run(server, 1, &amp;running);
-  UA_Server_delete(server);
-
-  printf(&quot;Terminated\n&quot;);
-  return 0;
-}
-</pre></div>
-</div>
-<p>And then of course, recompile it:</p>
-<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; gcc -Wl,-rpath=./ -L./ -I ./include -o myServer myServer.c  -lopen62541
-</pre></div>
-</div>
-<p>You can now start and background the server, run the client, and then terminate the server like so:</p>
-<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; ./myServer &amp;
-[xx/yy/zz aa:bb:cc.dd.ee] info/communication        Listening on opc.tcp://localhost:16664
-[1] 2114
-:myApp&gt; ./myClient &amp;&amp; killall myServer
-Terminated
-[1]+  Done                    ./myServer
-:myApp&gt;
-</pre></div>
-</div>
-<p>Notice how the server received the SIGTERM signal from kill and exited cleany? We also used the return value of our client by inserting the <code class="docutils literal"><span class="pre">&amp;&amp;</span></code>, so kill is only called after a clean client exit (<code class="docutils literal"><span class="pre">return</span> <span class="pre">0</span></code>).</p>
 <div class="section" id="asserting-success-failure">
 <h2>Asserting success/failure<a class="headerlink" href="#asserting-success-failure" title="Permalink to this headline">¶</a></h2>
 <p>Almost all functions of the open62541 API will return a <code class="docutils literal"><span class="pre">UA_StatusCode</span></code>, which in the C world would be represented by a <code class="docutils literal"><span class="pre">unsigned</span> <span class="pre">int</span></code>. OPC UA defines large number of good and bad return codes represented by this number. The constant UA_STATUSCODE_GOOD is defined as 0 in <code class="docutils literal"><span class="pre">include/ua_statuscodes.h</span></code> along with many other return codes. It pays off to check the return code of your function calls, as we already did implicitly in the client.</p>
@@ -436,6 +391,7 @@ int main(void) {
 }
 </pre></div>
 </div>
+<p>Note that this file can be found as &#8220;examples/client_firstSteps.c&#8221; in the repository.</p>
 <p>Now you should see raw time and a formatted date:</p>
 <div class="highlight-python"><div class="highlight"><pre>:myApp&gt; ./myClient
 :myApp&gt; raw date is: 130856981449041870
@@ -447,8 +403,8 @@ int main(void) {
 <h2>Further tasks<a class="headerlink" href="#further-tasks" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Try to connect to some other OPC UA server by changing &#8220;opc.tcp://localhost:16664&#8221; to an appropriate address (remember that the queried node is contained in any OPC UA server).</li>
-<li>Display the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an &#8220;Int32&#8221; from the example server (which is built in <a class="reference internal" href="tutorial_firstStepsServer.html"><em>First steps with open62541-server</em></a>). Note that the identifier of this node is a string type: use &#8220;UA_NODEID_STRING_ALLOC&#8221;. The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
-<li>Try to set the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an &#8220;Int32&#8221; from the example server (which is built in <a class="reference internal" href="tutorial_firstStepsServer.html"><em>First steps with open62541-server</em></a>) using &#8220;UA_Client_write&#8221; function. The example server needs some more modifications, i.e., changing request types. The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
+<li>Display the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an &#8220;Int32&#8221; from the example server (which is built in <code class="xref doc docutils literal"><span class="pre">tutorial_firstStepsServer</span></code>). Note that the identifier of this node is a string type: use &#8220;UA_NODEID_STRING_ALLOC&#8221;. The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
+<li>Try to set the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an &#8220;Int32&#8221; from the example server (which is built in <code class="xref doc docutils literal"><span class="pre">tutorial_firstStepsServer</span></code>) using &#8220;UA_Client_write&#8221; function. The example server needs some more modifications, i.e., changing request types. The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
 </ul>
 </div>
 </div>

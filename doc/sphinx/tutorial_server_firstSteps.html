@@ -103,6 +103,9 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-1-first-steps-with-open62541-server">Tutorial 1: First steps with open62541-server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-2-first-steps-with-open62541-client">Tutorial 2: First steps with open62541-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-3-adding-nodes-to-a-server-and-connecting-nodes-to-user-defined-values">Tutorial 3: Adding nodes to a server and connecting nodes to user-defined values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-4-adding-server-side-methods">Tutorial 4: Adding server-side methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials.html#tutorial-5-nodeset-handling">Tutorial 5: Nodeset handling</a></li>
 </ul>
 </li>
 </ul>
@@ -133,7 +136,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/tutorial_firstStepsServer.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_server_firstSteps.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -289,6 +292,55 @@ int main(void) {
 </pre></div>
 </div>
 <p>You have now compiled and started your first OPC UA Server. Though quite unspectacular and only terminatable with <code class="docutils literal"><span class="pre">CTRL+C</span></code> (SIGTERM) at the moment, you can already launch it and browse around with UA Expert. The Server will be listening on localhost:16664 - go ahead and give it a try.</p>
+<p>We will also make a slight change to our server: We want it to exit cleanly when pressing <code class="docutils literal"><span class="pre">CTRL+C</span></code>. We will add signal handler for SIGINT and SIGTERM to accomplish that to the server:</p>
+<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+
+# include &quot;ua_types.h&quot;
+# include &quot;ua_server.h&quot;
+# include &quot;logger_stdout.h&quot;
+# include &quot;networklayer_tcp.h&quot;
+
+UA_Boolean running;
+UA_Logger logger;
+
+static void stopHandler(int signal) {
+  running = UA_FALSE;
+}
+
+int main(void) {
+  signal(SIGINT,  stopHandler);
+  signal(SIGTERM, stopHandler);
+
+  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
+  logger = Logger_Stdout_new();
+  UA_Server_setLogger(server, logger);
+  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
+  running = UA_TRUE;
+  UA_Server_run(server, 1, &amp;running);
+  UA_Server_delete(server);
+
+  printf(&quot;Terminated\n&quot;);
+  return 0;
+}
+</pre></div>
+</div>
+<p>Note that this file can be found as &#8220;examples/server_firstSteps.c&#8221; in the repository.</p>
+<p>And then of course, recompile it:</p>
+<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; gcc -Wl,-rpath=./ -L./ -I ./include -o myServer myServer.c  -lopen62541
+</pre></div>
+</div>
+<p>You can now start and background the server, run the client, and then terminate the server like so:</p>
+<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; ./myServer &amp;
+[xx/yy/zz aa:bb:cc.dd.ee] info/communication        Listening on opc.tcp://localhost:16664
+[1] 2114
+:myApp&gt; ./myClient &amp;&amp; killall myServer
+Terminated
+[1]+  Done                    ./myServer
+:myApp&gt;
+</pre></div>
+</div>
+<p>Notice how the server received the SIGTERM signal from kill and exited cleany? We also used the return value of our client by inserting the <code class="docutils literal"><span class="pre">&amp;&amp;</span></code>, so kill is only called after a clean client exit (<code class="docutils literal"><span class="pre">return</span> <span class="pre">0</span></code>).</p>
 </div>
 <div class="section" id="introduction-to-configuration-options-amalgamation">
 <h2>Introduction to Configuration options (Amalgamation)<a class="headerlink" href="#introduction-to-configuration-options-amalgamation" title="Permalink to this headline">¶</a></h2>
