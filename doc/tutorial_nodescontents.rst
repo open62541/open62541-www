@@ -1,116 +1,66 @@
 Manipulating node attributes
 ============================
 
-In our last tutorial, :doc:`tutorial_nodes`, we created some nodes using both the server and the client side API. In this tutorial, we will explore how to manipulate the contents of nodes and create meaningful neamespace contents. This part of the tutorials focuses in particular on node fields (displayname, description,...) and variables.
+In our last tutorial, we created some nodes using both the server and the client side API. In this tutorial, we will explore how to manipulate the contents of nodes and create meaningful neamespace contents. This part of the tutorials focuses in particular on node fields (displayname, description,...) and variables.
 
 Getting and setting node attributes
 -----------------------------------
 
 Setting or getting attributes in nodes is handled by the following set of functions:
 
-```UA_(Server|Client)_(get|set)Attribute_(attributeName)( ..., (attributeType *) value);```
+```UA_(Server|Client)_(get|set)AttributeValue( ..., UA_AttributeId attributeId, void* value);```
+  
+You may notice that the get/set functions do not require the construction of variants. This is both a blessing and a curse. The blessing part is that you only need to construct the dataType you want to alter. The curse is that the value's type (given as void) can be anything, but it needs to precisely match the field type the server expects; this is particularly true for the serverside functions, as there is no possible way for the server api to check the type. The client functions make use of the read/write services, which always pass the datatype along.
 
-Some explanation may be in order. OPC UA has different types of nodes that consist of a series of attribute field. All nodes share a common set of attributes, called base attributes. Each node type then has a set of his own type specific attributes. The above function allows the user to read or write those attributes of nodes in a simple fashion, without having to resort to the low-level read and write services. Note that not all attributes may be readable or writable, especially not those that identify a note or its type. Also, since variable specific attributes are contained within the variableNodes UA_Variant field, they may not be set directly, but have to be set along with a valid UA_Variant value;
+The following table shows which datatype is expected for which attribute field:
 
-The next table gives you an overview over the attributes and related nodes. As you can see, the first 7 attributes are shared by all node types.
-
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| Attribute ID           | UA_ObjectNode | UA_VariableNode | UA_ObjectTypeNode | UA_VariableTypeNode | UA_DataTypeNode | UA_ReferenceTypeNode | UA_MethodNode | UA_ViewNode |
-+========================+===============+=================+===================+=====================+=================+======================+===============+=============+
-| nodeId                 |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| nodeClass              |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| browseName             |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| displayName            |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| description            |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| writeMask              |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| userWriteMask          |       X       |        X        |         X         |          X          |        X        |          X           |        X      |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| isAbstract             |               |                 |         X         |          X          |        X        |          X           |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| symmetric              |               |                 |                   |                     |                 |          X           |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| inverseName            |               |                 |                   |                     |                 |          X           |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| containsNoLoops        |               |                 |                   |                     |                 |                      |               |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| eventNotifier          |       X       |                 |                   |                     |                 |                      |               |       X     |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| value                  |               |        X        |                   |          X          |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| dataType               |               |                 |                   |          X          |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| valueRank              |               |        X        |                   |                     |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| arrayDimensions        |               |                 |                   |                     |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| accessLevel            |               |        X        |                   |                     |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| userAccessLevel        |               |        X        |                   |                     |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| minimumSamplingInterval|               |        X        |                   |                     |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| historizing            |               |        X        |                   |                     |                 |                      |               |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| executable             |               |                 |                   |                     |                 |                      |       X       |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-| userExecutable         |               |                 |                   |                     |                 |                      |       X       |             |
-+------------------------+---------------+-----------------+-------------------+---------------------+-----------------+----------------------+---------------+-------------+
-
-The following table shows which datatype is expected for which attribute field and if set or get are supported. This list applies to both the client and the server:
-
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| Attribute ID           | Attribute Number / Alias               | get | set | Expected type for void* |
-+------------------------+========================================+=====+=====+=========================+
-| nodeId                 | UA_ATTRIBUTEID_NODEID                  |  ✔  |  ✘  | UA_NodeId               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| nodeClass              | UA_ATTRIBUTEID_NODECLASS               |  ✔  |  ✘  | UA_NodeClass | UA_UInt32|
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| browseName             | UA_ATTRIBUTEID_BROWSENAME              |  ✔  |  ✔  | UA_QualifiedName        |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| displayName            | UA_ATTRIBUTEID_DISPLAYNAME             |  ✔  |  ✔  | UA_LocalizedText        |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| description            | UA_ATTRIBUTEID_DESCRIPTION             |  ✔  |  ✔  | UA_LocalizedText        |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| writeMask              | UA_ATTRIBUTEID_WRITEMASK               |  ✔  |  ✔  | UA_UInt32               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| userWriteMask          | UA_ATTRIBUTEID_USERWRITEMASK           |  ✔  |  ✔  | UA_UInt32               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| isAbstract             | UA_ATTRIBUTEID_ISABSTRACT              |  ✔  |  ✔  | UA_Boolean              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| symmetric              | UA_ATTRIBUTEID_SYMMETRIC               |  ✔  |  ✔  | UA_Boolean              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| inverseName            | UA_ATTRIBUTEID_INVERSENAME             |  ✔  |  ✔  | UA_LocalizedText        |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| containsNoLoops        | UA_ATTRIBUTEID_CONTAINSNOLOOPS         |  ✔  |  ✔  | UA_Boolean              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| eventNotifier          | UA_ATTRIBUTEID_EVENTNOTIFIER           |  ✔  |  ✔  | UA_Byte                 |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| value                  | UA_ATTRIBUTEID_VALUE                   |  ✔  |  ✔  | UA_Variant              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| dataType               | UA_ATTRIBUTEID_DATATYPE                |  ✔  |  ✘  | UA_NodeId               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| valueRank              | UA_ATTRIBUTEID_VALUERANK               |  ✔  |  ✘  | UA_Int32                |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| arrayDimensions        | UA_ATTRIBUTEID_ARRAYDIMENSIONS         |  ✔  |  ✘  | UA_UInt32               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| accessLevel            | UA_ATTRIBUTEID_ACCESSLEVEL             |  ✔  |  ✔  | UA_UInt32               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| userAccessLevel        | UA_ATTRIBUTEID_USERACCESSLEVEL         |  ✔  |  ✔  | UA_UInt32               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| minimumSamplingInterval| UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL |  ✔  |  ✔  | UA_Double               |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| historizing            | UA_ATTRIBUTEID_HISTORIZING             |  ✔  |  ✔  | UA_Boolean              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| executable             | UA_ATTRIBUTEID_EXECUTABLE              |  ✔  |  ✔  | UA_Boolean              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
-| userExecutable         | UA_ATTRIBUTEID_USEREXECUTABLE          |  ✔  |  ✔  | UA_Boolean              |
-+------------------------+----------------------------------------+-----+-----+-------------------------+
++----------------------------------------+-----+-----+-------------------------+
+| Attribute Name                         | get | set | Expected type for void* |
++========================================+=====+=====+=========================+
+| UA_ATTRIBUTEID_NODEID                  |  ✔  |  ✘  | UA_NodeId               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_NODECLASS               |  ✔  |  ✘  | UA_NodeClass | UA_UInt32|
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_BROWSENAME              |  ✔  |  ✔  | UA_QualifiedName        |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_DISPLAYNAME             |  ✔  |  ✔  | UA_LocalizedText        |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_DESCRIPTION             |  ✔  |  ✔  | UA_LocalizedText        |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_WRITEMASK               |  ✔  |  ✔  | UA_UInt32               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_USERWRITEMASK           |  ✔  |  ✔  | UA_UInt32               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_ISABSTRACT              |  ✔  |  ✔  | UA_Boolean              |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_SYMMETRIC               |  ✔  |  ✔  | UA_Boolean              |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_INVERSENAME             |  ✔  |  ✔  | UA_LocalizedText        |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_CONTAINSNOLOOPS         |  ✔  |  ✔  | UA_Boolean              |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_EVENTNOTIFIER           |  ✔  |  ✔  | UA_Byte                 |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_VALUE                   |  ✔  |  ✔  | UA_Variant              |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_DATATYPE                |  ✔  |  ✘  | UA_NodeId               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_VALUERANK               |  ✔  |  ✘  | UA_Int32                |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_ARRAYDIMENSIONS         |  ✔  |  ✘  | UA_UInt32               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_ACCESSLEVEL             |  ✔  |  ✔  | UA_UInt32               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_USERACCESSLEVEL         |  ✔  |  ✔  | UA_UInt32               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL |  ✔  |  ✔  | UA_Double               |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_HISTORIZING             |  ✔  |  ✔  | UA_Boolean              |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_EXECUTABLE              |  ✔  |  ✔  | UA_Boolean              |
++----------------------------------------+-----+-----+-------------------------+
+| UA_ATTRIBUTEID_USEREXECUTABLE          |  ✔  |  ✔  | UA_Boolean              |
++----------------------------------------+-----+-----+-------------------------+
 
 The Basenode attributes NodeId and NodeClass uniquely identify that node and cannot be changed (changing them is equal to creating a new node). The DataType, ValueRank and ArrayDimensions are not part of the node attributes in open62541, but instead contained in the UA_Variant data value of that a variable or variableType node (change the value to change these as well).
 
@@ -139,7 +89,7 @@ Let us use one of some of these functions to slightly alter the Objects node to 
       running = UA_TRUE;
       
       UA_LocalizedText objectsLocale = UA_LOCALIZEDTEXT("de_DE","Objekkkte");
-      UA_Server_setAttribute_diplayName(server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), &objectsLocale);
+      UA_Server_setAttributeValue(server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_ATTRIBUTEID_DISPLAYNAME, (void *) &objectsLocale);
 
       UA_Server_run(server, 1, &running);
       UA_Server_delete(server);
@@ -147,6 +97,8 @@ Let us use one of some of these functions to slightly alter the Objects node to 
       printf("Bye\n");
       return 0;
     }
+
+Again as a warning: We are using a very lowlevel form of polymorphism here to pass any type value to setAttribute. The type must match, or the server will produce a runtime error (propably a segmentation fault).
 
 German speakers (and maybe others too) will immediately notice that the localized text is misspelled. There are too many "k"'s there. We will have to fix that, and for practice we will do that using the client.::
 
@@ -167,7 +119,7 @@ German speakers (and maybe others too) will immediately notice that the localize
       }
       
       UA_LocalizedText localeName = UA_LOCALIZEDTEXT("de_DE", "Objekte");
-      retval = UA_Client_setAttribute_displayName(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), &localeName);
+      retval = UA_Client_setAttributeValue(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_ATTRIBUTEID_DISPLAYNAME, (void *) &localeName);
       
       UA_Client_disconnect(client);
       UA_Client_delete(client);
@@ -224,7 +176,7 @@ We will first create a new variable on the server side during startup to introdu
       UA_Variant *updateMyValueVariant = UA_Variant_new();
       myValue = 22;
       UA_Variant_setScalarCopy(updateMyValueVariant, &myValue, &UA_TYPES[UA_TYPES_INT32]);
-      UA_Server_setAttribute_value(server, UA_NODEID_NUMERIC(1,12345), updateMyValueVariant);
+      UA_Server_setAttributeValue(server, UA_NODEID_NUMERIC(1,12345), UA_ATTRIBUTEID_VALUE, (void *) updateMyValueVariant);
       
       UA_Server_run(server, 1, &running);
       UA_Server_delete(server);
@@ -233,7 +185,7 @@ We will first create a new variable on the server side during startup to introdu
       return 0;
     }
 
-Let's take a closer look at what was done here. You already know the *UA_(Server|Client)_add<Type>Node* from the previous tutorial. What is new is the variant datatype. A variant is a container for an arbitrary OPC UA builtin type, which is stored in the field ```(void *) variant->data```. Note that this field is void, which is the same kind of low-level polymorphism. So we need to also store the dataType along with the variant to distinguish between contents. A variant can always contain nothing at all, which is a NULL pointer. Variants can also contain arrays of builtin types. In that case the arrayDimensions and arrayDimensionsSize fields of the variant would be set.
+Let's take a closer look at what was done here. You already know the *UA_(Server|Client)_add<Type>Node* from the previous tutorial. What is new is the variant datatype. A variant is a container for an arbitrary OPC UA builtin type, which is stored in the field ```(void *) variant->data```. Note that this field is void, which is the same kind of low-level polymorphism we already met in ```setAttributeValue```. So we need to also store the dataType along with the variant to distinguish between contents. A variant can always contain nothing at all, which is a NULL pointer. Variants can also contain arrays of builtin types. In that case the arrayDimensions and arrayDimensionsSize fields of the variant would be set.
 
 Note that some UA Client (like UAExpert) will interpret the empty variant to be a UA_Boolean.
 
@@ -311,4 +263,4 @@ Callbacks and handles are a very important concept of open62541 and we will enco
 Conclusion
 ----------
 
-In this tutorial you have learned how to harness variable contents to do your bidding. You can now create dynamic read/write callbacks that can update your data contents on the fly, even if the server is running its main loop. However, our nodes are out of sync with object oriented concepts - we are not using any of the Type/Inheritance/Objectmodel strengths that OPC UA provides yet. We will mend that in our next tutorial, :doc:`tutorial_noderelations`.
+In this tutorial you have learned how to harness variable contents to do your bidding. You can now create dynamic read/write callbacks that can update your data contents on the fly, even if the server is running its main loop. 
