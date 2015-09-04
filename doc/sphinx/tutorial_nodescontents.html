@@ -144,134 +144,416 @@
             
   <div class="section" id="manipulating-node-attributes">
 <h1>Manipulating node attributes<a class="headerlink" href="#manipulating-node-attributes" title="Permalink to this headline">¶</a></h1>
-<p>In our last tutorial, we created some nodes using both the server and the client side API. In this tutorial, we will explore how to manipulate the contents of nodes and create meaningful neamespace contents. This part of the tutorials focuses in particular on node fields (displayname, description,...) and variables.</p>
+<p>In our last tutorial, <a class="reference internal" href="tutorial_nodes.html"><em>Creating and interacting with Nodes</em></a>, we created some nodes using both the server and the client side API. In this tutorial, we will explore how to manipulate the contents of nodes and create meaningful neamespace contents. This part of the tutorials focuses in particular on node fields (displayname, description,...) and variables.</p>
 <div class="section" id="getting-and-setting-node-attributes">
 <h2>Getting and setting node attributes<a class="headerlink" href="#getting-and-setting-node-attributes" title="Permalink to this headline">¶</a></h2>
 <p>Setting or getting attributes in nodes is handled by the following set of functions:</p>
-<p><code class="docutils literal"><span class="pre">`UA_(Server|Client)_(get|set)AttributeValue(</span> <span class="pre">...,</span> <span class="pre">UA_AttributeId</span> <span class="pre">attributeId,</span> <span class="pre">void*</span> <span class="pre">value);`</span></code></p>
-<p>You may notice that the get/set functions do not require the construction of variants. This is both a blessing and a curse. The blessing part is that you only need to construct the dataType you want to alter. The curse is that the value&#8217;s type (given as void) can be anything, but it needs to precisely match the field type the server expects; this is particularly true for the serverside functions, as there is no possible way for the server api to check the type. The client functions make use of the read/write services, which always pass the datatype along.</p>
-<p>The following table shows which datatype is expected for which attribute field:</p>
+<p><code class="docutils literal"><span class="pre">`UA_(Server|Client)_(get|set)Attribute_(attributeName)(</span> <span class="pre">...,</span> <span class="pre">(attributeType</span> <span class="pre">*)</span> <span class="pre">value);`</span></code></p>
+<p>Some explanation may be in order. OPC UA has different types of nodes that consist of a series of attribute field. All nodes share a common set of attributes, called base attributes. Each node type then has a set of his own type specific attributes. The above function allows the user to read or write those attributes of nodes in a simple fashion, without having to resort to the low-level read and write services. Note that not all attributes may be readable or writable, especially not those that identify a note or its type. Also, since variable specific attributes are contained within the variableNodes UA_Variant field, they may not be set directly, but have to be set along with a valid UA_Variant value;</p>
+<p>The next table gives you an overview over the attributes and related nodes. As you can see, the first 7 attributes are shared by all node types.</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="53%" />
-<col width="7%" />
-<col width="7%" />
-<col width="33%" />
+<col width="15%" />
+<col width="9%" />
+<col width="10%" />
+<col width="12%" />
+<col width="13%" />
+<col width="10%" />
+<col width="13%" />
+<col width="9%" />
+<col width="8%" />
 </colgroup>
 <thead valign="bottom">
-<tr class="row-odd"><th class="head">Attribute Name</th>
-<th class="head">get</th>
-<th class="head">set</th>
-<th class="head">Expected type for void*</th>
+<tr class="row-odd"><th class="head">Attribute ID</th>
+<th class="head">UA_ObjectNode</th>
+<th class="head">UA_VariableNode</th>
+<th class="head">UA_ObjectTypeNode</th>
+<th class="head">UA_VariableTypeNode</th>
+<th class="head">UA_DataTypeNode</th>
+<th class="head">UA_ReferenceTypeNode</th>
+<th class="head">UA_MethodNode</th>
+<th class="head">UA_ViewNode</th>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>UA_ATTRIBUTEID_NODEID</td>
-<td>✔</td>
-<td>✘</td>
-<td>UA_NodeId</td>
+<tr class="row-even"><td>nodeId</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_NODECLASS</td>
+<tr class="row-odd"><td>nodeClass</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td>browseName</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td>displayName</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td>description</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td>writeMask</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td>userWriteMask</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td>isAbstract</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td>symmetric</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>inverseName</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td>containsNoLoops</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td>eventNotifier</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td>value</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>dataType</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td>valueRank</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>arrayDimensions</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td>accessLevel</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>userAccessLevel</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td>minimumSamplingInterval</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>historizing</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-even"><td>executable</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>userExecutable</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>X</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>The following table shows which datatype is expected for which attribute field and if set or get are supported. This list applies to both the client and the server:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="40%" />
+<col width="5%" />
+<col width="5%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Attribute ID</td>
+<td rowspan="2"><blockquote class="first">
+<div>Attribute Number / Alias</div></blockquote>
+<blockquote class="last">
+<div>UA_ATTRIBUTEID_NODEID</div></blockquote>
+</td>
+<td rowspan="2"><blockquote class="first">
+<div>get</div></blockquote>
+<blockquote class="last">
+<div>✔</div></blockquote>
+</td>
+<td rowspan="2"><blockquote class="first">
+<div>set</div></blockquote>
+<blockquote class="last">
+<div>✘</div></blockquote>
+</td>
+<td rowspan="2"><blockquote class="first">
+<div>Expected type for void*</div></blockquote>
+<blockquote class="last">
+<div>UA_NodeId</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td>nodeId</td>
+</tr>
+<tr class="row-odd"><td>nodeClass</td>
+<td>UA_ATTRIBUTEID_NODECLASS</td>
 <td>✔</td>
 <td>✘</td>
 <td>UA_NodeClass | UA_UInt32</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_BROWSENAME</td>
+<tr class="row-even"><td>browseName</td>
+<td>UA_ATTRIBUTEID_BROWSENAME</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_QualifiedName</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_DISPLAYNAME</td>
+<tr class="row-odd"><td>displayName</td>
+<td>UA_ATTRIBUTEID_DISPLAYNAME</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_LocalizedText</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_DESCRIPTION</td>
+<tr class="row-even"><td>description</td>
+<td>UA_ATTRIBUTEID_DESCRIPTION</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_LocalizedText</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_WRITEMASK</td>
+<tr class="row-odd"><td>writeMask</td>
+<td>UA_ATTRIBUTEID_WRITEMASK</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_UInt32</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_USERWRITEMASK</td>
+<tr class="row-even"><td>userWriteMask</td>
+<td>UA_ATTRIBUTEID_USERWRITEMASK</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_UInt32</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_ISABSTRACT</td>
+<tr class="row-odd"><td>isAbstract</td>
+<td>UA_ATTRIBUTEID_ISABSTRACT</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Boolean</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_SYMMETRIC</td>
+<tr class="row-even"><td>symmetric</td>
+<td>UA_ATTRIBUTEID_SYMMETRIC</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Boolean</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_INVERSENAME</td>
+<tr class="row-odd"><td>inverseName</td>
+<td>UA_ATTRIBUTEID_INVERSENAME</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_LocalizedText</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_CONTAINSNOLOOPS</td>
+<tr class="row-even"><td>containsNoLoops</td>
+<td>UA_ATTRIBUTEID_CONTAINSNOLOOPS</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Boolean</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_EVENTNOTIFIER</td>
+<tr class="row-odd"><td>eventNotifier</td>
+<td>UA_ATTRIBUTEID_EVENTNOTIFIER</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Byte</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_VALUE</td>
+<tr class="row-even"><td>value</td>
+<td>UA_ATTRIBUTEID_VALUE</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Variant</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_DATATYPE</td>
+<tr class="row-odd"><td>dataType</td>
+<td>UA_ATTRIBUTEID_DATATYPE</td>
 <td>✔</td>
 <td>✘</td>
 <td>UA_NodeId</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_VALUERANK</td>
+<tr class="row-even"><td>valueRank</td>
+<td>UA_ATTRIBUTEID_VALUERANK</td>
 <td>✔</td>
 <td>✘</td>
 <td>UA_Int32</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_ARRAYDIMENSIONS</td>
+<tr class="row-odd"><td>arrayDimensions</td>
+<td>UA_ATTRIBUTEID_ARRAYDIMENSIONS</td>
 <td>✔</td>
 <td>✘</td>
 <td>UA_UInt32</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_ACCESSLEVEL</td>
+<tr class="row-even"><td>accessLevel</td>
+<td>UA_ATTRIBUTEID_ACCESSLEVEL</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_UInt32</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_USERACCESSLEVEL</td>
+<tr class="row-odd"><td>userAccessLevel</td>
+<td>UA_ATTRIBUTEID_USERACCESSLEVEL</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_UInt32</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</td>
+<tr class="row-even"><td>minimumSamplingInterval</td>
+<td>UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Double</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_HISTORIZING</td>
+<tr class="row-odd"><td>historizing</td>
+<td>UA_ATTRIBUTEID_HISTORIZING</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Boolean</td>
 </tr>
-<tr class="row-even"><td>UA_ATTRIBUTEID_EXECUTABLE</td>
+<tr class="row-even"><td>executable</td>
+<td>UA_ATTRIBUTEID_EXECUTABLE</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Boolean</td>
 </tr>
-<tr class="row-odd"><td>UA_ATTRIBUTEID_USEREXECUTABLE</td>
+<tr class="row-odd"><td>userExecutable</td>
+<td>UA_ATTRIBUTEID_USEREXECUTABLE</td>
 <td>✔</td>
 <td>✔</td>
 <td>UA_Boolean</td>
@@ -303,7 +585,7 @@ int main(void) {
   running = UA_TRUE;
 
   UA_LocalizedText objectsLocale = UA_LOCALIZEDTEXT(&quot;de_DE&quot;,&quot;Objekkkte&quot;);
-  UA_Server_setAttributeValue(server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_ATTRIBUTEID_DISPLAYNAME, (void *) &amp;objectsLocale);
+  UA_Server_setAttribute_diplayName(server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), &amp;objectsLocale);
 
   UA_Server_run(server, 1, &amp;running);
   UA_Server_delete(server);
@@ -313,7 +595,6 @@ int main(void) {
 }
 </pre></div>
 </div>
-<p>Again as a warning: We are using a very lowlevel form of polymorphism here to pass any type value to setAttribute. The type must match, or the server will produce a runtime error (propably a segmentation fault).</p>
 <p>German speakers (and maybe others too) will immediately notice that the localized text is misspelled. There are too many &#8220;k&#8220;&#8216;s there. We will have to fix that, and for practice we will do that using the client.:</p>
 <div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
 
@@ -332,7 +613,7 @@ int main(void) {
   }
 
   UA_LocalizedText localeName = UA_LOCALIZEDTEXT(&quot;de_DE&quot;, &quot;Objekte&quot;);
-  retval = UA_Client_setAttributeValue(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_ATTRIBUTEID_DISPLAYNAME, (void *) &amp;localeName);
+  retval = UA_Client_setAttribute_displayName(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), &amp;localeName);
 
   UA_Client_disconnect(client);
   UA_Client_delete(client);
@@ -388,7 +669,7 @@ int main(void) {
   UA_Variant *updateMyValueVariant = UA_Variant_new();
   myValue = 22;
   UA_Variant_setScalarCopy(updateMyValueVariant, &amp;myValue, &amp;UA_TYPES[UA_TYPES_INT32]);
-  UA_Server_setAttributeValue(server, UA_NODEID_NUMERIC(1,12345), UA_ATTRIBUTEID_VALUE, (void *) updateMyValueVariant);
+  UA_Server_setAttribute_value(server, UA_NODEID_NUMERIC(1,12345), updateMyValueVariant);
 
   UA_Server_run(server, 1, &amp;running);
   UA_Server_delete(server);
@@ -398,7 +679,7 @@ int main(void) {
 }
 </pre></div>
 </div>
-<p>Let&#8217;s take a closer look at what was done here. You already know the <em>UA_(Server|Client)_add&lt;Type&gt;Node</em> from the previous tutorial. What is new is the variant datatype. A variant is a container for an arbitrary OPC UA builtin type, which is stored in the field <code class="docutils literal"><span class="pre">`(void</span> <span class="pre">*)</span> <span class="pre">variant-&gt;data`</span></code>. Note that this field is void, which is the same kind of low-level polymorphism we already met in <code class="docutils literal"><span class="pre">`setAttributeValue`</span></code>. So we need to also store the dataType along with the variant to distinguish between contents. A variant can always contain nothing at all, which is a NULL pointer. Variants can also contain arrays of builtin types. In that case the arrayDimensions and arrayDimensionsSize fields of the variant would be set.</p>
+<p>Let&#8217;s take a closer look at what was done here. You already know the <em>UA_(Server|Client)_add&lt;Type&gt;Node</em> from the previous tutorial. What is new is the variant datatype. A variant is a container for an arbitrary OPC UA builtin type, which is stored in the field <code class="docutils literal"><span class="pre">`(void</span> <span class="pre">*)</span> <span class="pre">variant-&gt;data`</span></code>. Note that this field is void, which is the same kind of low-level polymorphism. So we need to also store the dataType along with the variant to distinguish between contents. A variant can always contain nothing at all, which is a NULL pointer. Variants can also contain arrays of builtin types. In that case the arrayDimensions and arrayDimensionsSize fields of the variant would be set.</p>
 <p>Note that some UA Client (like UAExpert) will interpret the empty variant to be a UA_Boolean.</p>
 <p>Since it is quite complicated to setup a variant by hand, there are four basic functions you need to be aware of:</p>
 <blockquote>
@@ -467,7 +748,7 @@ int main(void) {
 </div>
 <div class="section" id="conclusion">
 <h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
-<p>In this tutorial you have learned how to harness variable contents to do your bidding. You can now create dynamic read/write callbacks that can update your data contents on the fly, even if the server is running its main loop.</p>
+<p>In this tutorial you have learned how to harness variable contents to do your bidding. You can now create dynamic read/write callbacks that can update your data contents on the fly, even if the server is running its main loop. However, our nodes are out of sync with object oriented concepts - we are not using any of the Type/Inheritance/Objectmodel strengths that OPC UA provides yet. We will mend that in our next tutorial, <a class="reference internal" href="tutorial_noderelations.html"><em>Examining and interacting with node relations</em></a>.</p>
 </div>
 </div>
 
