@@ -89,8 +89,17 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="">Building the Library</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#building-the-single-file-release">Building the Single-File Release</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#building-with-cmake-on-ubuntu-or-debian">Building with CMake on Ubuntu or Debian</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#building-with-cmake-on-windows-visual-studio">Building with CMake on Windows (Visual Studio)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#build-options">Build Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-with-cmake-on-windows">Building with CMake on Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-on-os-x">Building on OS X</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-options">Build Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generic-cmake-options">Generic CMake options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-group">BUILD_* group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enable-group">ENABLE_* group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#extension-group">EXTENSION_* group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ua-group">UA_* group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c-precompiler-configuration-options">C precompiler configuration options</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -171,18 +180,19 @@ make
 </pre></div>
 </div>
 </div>
-<div class="section" id="building-with-cmake-on-windows-visual-studio">
-<h2>Building with CMake on Windows (Visual Studio)<a class="headerlink" href="#building-with-cmake-on-windows-visual-studio" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="building-with-cmake-on-windows">
+<h2>Building with CMake on Windows<a class="headerlink" href="#building-with-cmake-on-windows" title="Permalink to this headline">¶</a></h2>
+<p>Here we explain the build process for Visual Studio. To build with MinGW, just
+replace the compiler selection in the call to CMake.</p>
 <ul class="simple">
-<li>Get and install Python 2.7.x (Python 3.x should work, too) and CMake: <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a>, <a class="reference external" href="http://www.cmake.org/cmake/resources/software.html">http://www.cmake.org/cmake/resources/software.html</a></li>
-<li>Get and install Visual Studio 2015 Preview: <a class="reference external" href="https://www.visualstudio.com/downloads/visual-studio-2015-ctp-vs">https://www.visualstudio.com/downloads/visual-studio-2015-ctp-vs</a></li>
-<li>Download the open62541 sources (using git or as a zipfile from github)</li>
-<li>Open a command shell (cmd) with Administrator rights and run</li>
+<li>Download and install<ul>
+<li>Python 2.7.x (Python 3.x should work, too): <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a></li>
+<li>Python lxml: <a class="reference external" href="https://pypi.python.org/pypi/lxml">https://pypi.python.org/pypi/lxml</a></li>
+<li>CMake: <a class="reference external" href="http://www.cmake.org/cmake/resources/software.html">http://www.cmake.org/cmake/resources/software.html</a></li>
+<li>Microsoft Visual Studio 2015 Community Edition: <a class="reference external" href="https://www.visualstudio.com/products/visual-studio-community-vs">https://www.visualstudio.com/products/visual-studio-community-vs</a></li>
 </ul>
-<div class="highlight-bat"><div class="highlight"><pre><span class="p">&lt;</span><span class="n">path</span>-to-python&gt;\Scripts\pip.exe install lxml
-</pre></div>
-</div>
-<ul class="simple">
+</li>
+<li>Download the open62541 sources (using git or as a zipfile from github)</li>
 <li>Open a command shell (cmd) and run</li>
 </ul>
 <div class="highlight-bat"><div class="highlight"><pre><span class="k">cd</span> <span class="p">&lt;</span><span class="n">path</span>-to&gt;\open<span class="m">62541</span>
@@ -196,8 +206,124 @@ mkdir build
 <li>Then open &#8220;buildopen62541.sln&#8221; in Visual Studio 2015 and build as usual</li>
 </ul>
 </div>
+<div class="section" id="building-on-os-x">
+<h2>Building on OS X<a class="headerlink" href="#building-on-os-x" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Download and install<ul>
+<li>Xcode: <a class="reference external" href="https://itunes.apple.com/us/app/xcode/id497799835?ls=1&amp;mt=12">https://itunes.apple.com/us/app/xcode/id497799835?ls=1&amp;mt=12</a></li>
+<li>Homebrew: <a class="reference external" href="http://brew.sh/">http://brew.sh/</a></li>
+<li>Pip (a package manager for python, may be preinstalled): <code class="docutils literal"><span class="pre">sudo</span> <span class="pre">easy_install</span> <span class="pre">pip</span></code></li>
+</ul>
+</li>
+<li>Run the following in a shell</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre>brew install cmake
+brew install libxml2
+pip install lxml
+brew install check <span class="c"># for unit tests</span>
+brew install userspace-rcu <span class="c"># for multi-threading support</span>
+brew install graphviz doxygen <span class="c"># for documentation generation</span>
+pip install sphinx <span class="c"># for documentation generation</span>
+</pre></div>
+</div>
+<p>Follow Ubuntu instructions without the <code class="docutils literal"><span class="pre">apt-get</span></code> commands as these are taken care of by the above packages.</p>
+</div>
 <div class="section" id="build-options">
 <h2>Build Options<a class="headerlink" href="#build-options" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="generic-cmake-options">
+<h3>Generic CMake options<a class="headerlink" href="#generic-cmake-options" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>CMAKE_BUILD_TYPE</strong></dt>
+<dd><ul class="first last simple">
+<li>RelWithDebInfo: -O2 optimization with debug symbols</li>
+<li>Release: -O2 optimization without debug symbols</li>
+<li>Debug: -O0 optimization with debug symbols</li>
+<li>MinSizeRel: -Os optimization without debug symbols</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="build-group">
+<h3>BUILD_* group<a class="headerlink" href="#build-group" title="Permalink to this headline">¶</a></h3>
+<p>By default only the shared object libopen62541.so or the library open62541.dll
+and open62541.dll.a resp. open62541.lib are build. Additional artifacts can be
+specified by the following options:</p>
+<dl class="docutils">
+<dt><strong>BUILD_DOCUMENTATION</strong></dt>
+<dd>Generate documentation with doxygen</dd>
+<dt><strong>BUILD_EXAMPLECLIENT</strong></dt>
+<dd>Compile example clients from client.c. There are a static and a dynamic binary client and client_static, respectively</dd>
+<dt><strong>BUILD_EXAMPLESERVER</strong></dt>
+<dd>Compile example server from server.c There are a static and a dynamic binary server and server_static, respectively</dd>
+<dt><strong>BUILD_UNIT_TESTS</strong></dt>
+<dd>Compile unit tests with Check framework. The tests can be executed with make test</dd>
+<dt><strong>BUILD_EXAMPLES</strong></dt>
+<dd>Compile specific examples from <a class="reference external" href="https://github.com/acplt/open62541/blob/master/examples/">https://github.com/acplt/open62541/blob/master/examples/</a></dd>
+</dl>
+</div>
+<div class="section" id="enable-group">
+<h3>ENABLE_* group<a class="headerlink" href="#enable-group" title="Permalink to this headline">¶</a></h3>
+<p>This group contains build options related to the supported OPC UA features.</p>
+<dl class="docutils">
+<dt><strong>ENABLE_ADDNODES</strong></dt>
+<dd>AddNodes services in sever and client</dd>
+<dt><strong>ENABLE_AMALGAMATION</strong></dt>
+<dd>Compile a single-file release files open62541.c and open62541.h</dd>
+<dt><strong>ENABLE_COVERAGE</strong></dt>
+<dd>Measure the coverage of unit tests</dd>
+<dt><strong>ENABLE_EXTERNAL_NAMESPACES</strong></dt>
+<dd>Enable external namespaces in server</dd>
+<dt><strong>ENABLE_GNERATE_NAMESPACE0</strong></dt>
+<dd>Enable automatic generation of NS0</dd>
+<dt><strong>GENERATE_NAMESPACE0_FILE</strong></dt>
+<dd>File for NS0 generation from namespace0 folder. Default value is Opc.Ua.NodeSet2.xml</dd>
+<dt><strong>ENABLE_METHODCALL</strong></dt>
+<dd>Enable method calls in server and client</dd>
+<dt><strong>ENABLE_MULTITHREADING</strong></dt>
+<dd>Enable multi-threading support (experimental)</dd>
+<dt><strong>ENABLE_SUBSCRIPTONS</strong></dt>
+<dd>Enable subscriptions</dd>
+<dt><strong>GENERATE_SELFSIGNED</strong></dt>
+<dd>Generate a self-signed certificate for the server (openSSL required)</dd>
+</dl>
+</div>
+<div class="section" id="extension-group">
+<h3>EXTENSION_* group<a class="headerlink" href="#extension-group" title="Permalink to this headline">¶</a></h3>
+<p>Extensions mark experimental extensions that are not compliant with IEC 62541 or
+other OPC UA clients</p>
+<dl class="docutils">
+<dt><strong>EXTENSION_STATELESS</strong></dt>
+<dd>Stateless service calls</dd>
+<dt><strong>EXTENSION_UDP</strong></dt>
+<dd>UDP network layer</dd>
+</dl>
+</div>
+<div class="section" id="ua-group">
+<h3>UA_* group<a class="headerlink" href="#ua-group" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>UA_LOGLEVEL</strong></dt>
+<dd>The level of logging events that are reported
+- 600: Fatal and all below
+- 500: Error and all below
+- 400: Error and all below
+- 300: Info and all below
+- 200: Debug and all below
+- 100: Trace and all below</dd>
+</dl>
+</div>
+<div class="section" id="c-precompiler-configuration-options">
+<h3>C precompiler configuration options<a class="headerlink" href="#c-precompiler-configuration-options" title="Permalink to this headline">¶</a></h3>
+<p>Options that are not inherited from the CMake configuration are defined in
+ua_config.h. Usually there is no need to adjust them.</p>
+<dl class="docutils">
+<dt><strong>UA_NON_LITTLEENDIAN_ARCHITECTURE</strong></dt>
+<dd>Big-endian or mixed endian platform</dd>
+<dt><strong>UA_MIXED_ENDIAN</strong></dt>
+<dd>Mixed-endian platform (e.g., ARM7TDMI)</dd>
+<dt><strong>UA_ALIGNED_MEMORY_ACCESS</strong></dt>
+<dd>Platform with aligned memory access only (some ARM processors, e.g. Cortex M3/M4 ARM7TDMI etc.)</dd>
+</dl>
+</div>
 </div>
 </div>
 
