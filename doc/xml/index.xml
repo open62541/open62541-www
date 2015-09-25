@@ -41,10 +41,11 @@
     <member refid="structUA__Connection_1a26ecbdc0cfc9be35f49c4028f9ce4287" kind="variable"><name>sockfd</name></member>
     <member refid="structUA__Connection_1acc52d6b6984f09739dea63b7a479134a" kind="variable"><name>handle</name></member>
     <member refid="structUA__Connection_1aece2e6f87cb0453c155d330c11057d24" kind="variable"><name>incompleteMessage</name></member>
-    <member refid="structUA__Connection_1aa2e0195b40a29de05bde6745318bd1ad" kind="variable"><name>getBuffer</name></member>
-    <member refid="structUA__Connection_1a96cf7cafbfeb714a4fb967ee75f68017" kind="variable"><name>releaseBuffer</name></member>
-    <member refid="structUA__Connection_1ab75c0175b81ba6184af215ef37c97e49" kind="variable"><name>write</name></member>
+    <member refid="structUA__Connection_1a52f3914e2b4ccdc46e3b6a18b3f018ff" kind="variable"><name>getSendBuffer</name></member>
+    <member refid="structUA__Connection_1a3712775bd92c395b5c807392acae5f74" kind="variable"><name>releaseSendBuffer</name></member>
+    <member refid="structUA__Connection_1a1083f0bf79d07f30db706b356a87d766" kind="variable"><name>send</name></member>
     <member refid="structUA__Connection_1a703ad6c424dba3f8d4b3b90542a678ad" kind="variable"><name>recv</name></member>
+    <member refid="structUA__Connection_1ab2344723bdd22cffb6ca7c3bce336d06" kind="variable"><name>releaseRecvBuffer</name></member>
     <member refid="structUA__Connection_1a058de89799bcfb3a93b56a5c88955f10" kind="variable"><name>close</name></member>
   </compound>
   <compound refid="structUA__ConnectionConfig" kind="struct"><name>UA_ConnectionConfig</name>
@@ -162,9 +163,10 @@
     <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444a" kind="enum"><name>@0</name></member>
     <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aa1c49500c3e1ea129f4884c78b275b4fe" kind="enumvalue"><name>UA_JOBTYPE_NOTHING</name></member>
     <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aa16247f2e9cc8426376eceff7139e8243" kind="enumvalue"><name>UA_JOBTYPE_DETACHCONNECTION</name></member>
-    <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aaceb89090e4355ed6ce98fb1b549db228" kind="enumvalue"><name>UA_JOBTYPE_BINARYMESSAGE</name></member>
+    <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aa027506d38fc325073e302f53ef70aa8a" kind="enumvalue"><name>UA_JOBTYPE_BINARYMESSAGE_NETWORKLAYER</name></member>
+    <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aa33ed891afa70c2b8c9330a58e2d37b6b" kind="enumvalue"><name>UA_JOBTYPE_BINARYMESSAGE_ALLOCATED</name></member>
     <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aac0e6d6975fb6370e1559a6febf035703" kind="enumvalue"><name>UA_JOBTYPE_METHODCALL</name></member>
-    <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aa2453d98a85904666e505a49781b9a623" kind="enumvalue"><name>UA_JOBTYPE_DELAYEDMETHODCALL</name></member>
+    <member refid="structUA__Job_1a4da9fb7308adda91c283f030e39a444aa1a5572fdc56aa5762774a1c34b6f53c1" kind="enumvalue"><name>UA_JOBTYPE_METHODCALL_DELAYED</name></member>
     <member refid="structUA__Job_1ad91e36e85df982aebfa98f3e3086420c" kind="variable"><name>type</name></member>
     <member refid="structUA__Job_1ad495178539bd02dc1c5eb2f7e0a3a0ba" kind="variable"><name>job</name></member>
   </compound>
@@ -260,7 +262,7 @@
     <member refid="structUA__Server_1a3a01c63afce4d7cf45161cb238893e4b" kind="variable"><name>endpointDescriptionsSize</name></member>
     <member refid="structUA__Server_1a9d985c41b8e684e165d2b65946c95651" kind="variable"><name>endpointDescriptions</name></member>
     <member refid="structUA__Server_1ac105b0e352e88e5699062962dc38075f" kind="variable"><name>networkLayersSize</name></member>
-    <member refid="structUA__Server_1a2131aec1850de43d36106cb9a1ea2427" kind="variable"><name>networkLayers</name></member>
+    <member refid="structUA__Server_1a869a99a95bcc789e019d6c5229cb5e00" kind="variable"><name>networkLayers</name></member>
     <member refid="structUA__Server_1a4045dfb45fa3fabe2e82b95940417139" kind="variable"><name>serverCertificate</name></member>
     <member refid="structUA__Server_1a0c2b3459cecb0697d224c2af3a0c6d13" kind="variable"><name>secureChannelManager</name></member>
     <member refid="structUA__Server_1acf5f53eb34eec848abdea5b09a97a9ea" kind="variable"><name>sessionManager</name></member>
@@ -281,11 +283,11 @@
     <member refid="structUA__ServerConfig_1a62fd55244ab07bf10fcea296dc45a0fb" kind="variable"><name>Application_applicationName</name></member>
   </compound>
   <compound refid="structUA__ServerNetworkLayer" kind="struct"><name>UA_ServerNetworkLayer</name>
-    <member refid="structUA__ServerNetworkLayer_1aa7d84ac7585cb30c0330603e54444833" kind="variable"><name>handle</name></member>
     <member refid="structUA__ServerNetworkLayer_1a8b43ba58167b1497d4dbf862984919d3" kind="variable"><name>discoveryUrl</name></member>
-    <member refid="structUA__ServerNetworkLayer_1a6823d39c82b3e1eb939f5738ac4fe8a0" kind="variable"><name>start</name></member>
-    <member refid="structUA__ServerNetworkLayer_1ac7e841252adc2bdfe7c821e8fddb6c1b" kind="variable"><name>getJobs</name></member>
-    <member refid="structUA__ServerNetworkLayer_1a9cddae1292789c1863003b380577bca6" kind="variable"><name>stop</name></member>
+    <member refid="structUA__ServerNetworkLayer_1a8fe71fdce6026dd1b9624c8293816ad2" kind="variable"><name>logger</name></member>
+    <member refid="structUA__ServerNetworkLayer_1ac5c29af9f630513d9815e30666e12747" kind="variable"><name>start</name></member>
+    <member refid="structUA__ServerNetworkLayer_1a97e8321b086b6d65917983438ddbf668" kind="variable"><name>getJobs</name></member>
+    <member refid="structUA__ServerNetworkLayer_1a15a533dba70ca3cf33fc986ae87017dd" kind="variable"><name>stop</name></member>
     <member refid="structUA__ServerNetworkLayer_1ae5c34bf6ec60f594e4696796e653ba65" kind="variable"><name>deleteMembers</name></member>
   </compound>
   <compound refid="structUA__Session" kind="struct"><name>UA_Session</name>
@@ -407,7 +409,7 @@
   </compound>
   <compound refid="ua__client_8h" kind="file"><name>ua_client.h</name>
     <member refid="ua__client_8h_1a2bd5a2265eb4146ce3d95897f7c51aae" kind="typedef"><name>UA_Client</name></member>
-    <member refid="ua__client_8h_1a7ea3c5efa9b305a3790ce27a47fb1907" kind="typedef"><name>UA_ConnectClientConnection</name></member>
+    <member refid="ua__client_8h_1aea9e76de341abb29c8cec76e917fe1d4" kind="typedef"><name>UA_ConnectClientConnection</name></member>
     <member refid="ua__client_8h_1a8059bc06467bb2f99d41ce878d0b3721" kind="variable"><name>UA_ClientConfig_standard</name></member>
     <member refid="ua__client_8h_1a5dfe16811daeb899ffce0693abcb2de7" kind="function"><name>UA_Client_new</name></member>
     <member refid="ua__client_8h_1a961f42e16a4a93e325b0ca81203a2a66" kind="function"><name>UA_Client_reset</name></member>
@@ -432,16 +434,18 @@
     <member refid="ua__client_8h_1a6504200de79dad1b340725f34586badb" kind="function"><name>UA_Client_createObjectTypeNode</name></member>
   </compound>
   <compound refid="ua__connection_8h" kind="file"><name>ua_connection.h</name>
-    <member refid="group__communication_1ga581d16bf4bb2cef817c374c81680fc8d" kind="enum"><name>UA_ConnectionState</name></member>
-    <member refid="group__communication_1gga581d16bf4bb2cef817c374c81680fc8da1cad58934b273287b2ffd4596d212354" kind="enumvalue"><name>UA_CONNECTION_OPENING</name></member>
-    <member refid="group__communication_1gga581d16bf4bb2cef817c374c81680fc8dadadfe199007b0ea4a3920e175c34481a" kind="enumvalue"><name>UA_CONNECTION_ESTABLISHED</name></member>
-    <member refid="group__communication_1gga581d16bf4bb2cef817c374c81680fc8da03bd4d717099f93e6a8966dafb647a23" kind="enumvalue"><name>UA_CONNECTION_CLOSED</name></member>
-    <member refid="group__communication_1ga7df36a27f1912afab506a0e8d162ffef" kind="variable"><name>UA_ConnectionConfig_standard</name></member>
-    <member refid="group__communication_1ga02b034fd08529823b9ef69eade75eecd" kind="function"><name>UA_Connection_init</name></member>
-    <member refid="group__communication_1ga5d0c2f1558adf1b8c774aa38e82dc32d" kind="function"><name>UA_Connection_deleteMembers</name></member>
-    <member refid="group__communication_1gafca93a6369176013b778d5eed067e163" kind="function"><name>UA_Connection_detachSecureChannel</name></member>
-    <member refid="group__communication_1ga6833094b30b737a45214b643687a5b13" kind="function"><name>UA_Connection_attachSecureChannel</name></member>
-    <member refid="group__communication_1gacfeb280b2aa45fb2cd8b287a90c8758d" kind="function"><name>UA_Connection_completeMessages</name></member>
+    <member refid="ua__connection_8h_1a581d16bf4bb2cef817c374c81680fc8d" kind="enum"><name>UA_ConnectionState</name></member>
+    <member refid="ua__connection_8h_1a581d16bf4bb2cef817c374c81680fc8da1cad58934b273287b2ffd4596d212354" kind="enumvalue"><name>UA_CONNECTION_OPENING</name></member>
+    <member refid="ua__connection_8h_1a581d16bf4bb2cef817c374c81680fc8dadadfe199007b0ea4a3920e175c34481a" kind="enumvalue"><name>UA_CONNECTION_ESTABLISHED</name></member>
+    <member refid="ua__connection_8h_1a581d16bf4bb2cef817c374c81680fc8da03bd4d717099f93e6a8966dafb647a23" kind="enumvalue"><name>UA_CONNECTION_CLOSED</name></member>
+    <member refid="ua__connection_8h_1a7df36a27f1912afab506a0e8d162ffef" kind="variable"><name>UA_ConnectionConfig_standard</name></member>
+    <member refid="ua__connection_8h_1a02b034fd08529823b9ef69eade75eecd" kind="function"><name>UA_Connection_init</name></member>
+    <member refid="ua__connection_8h_1a5d0c2f1558adf1b8c774aa38e82dc32d" kind="function"><name>UA_Connection_deleteMembers</name></member>
+    <member refid="ua__connection_8h_1afca93a6369176013b778d5eed067e163" kind="function"><name>UA_Connection_detachSecureChannel</name></member>
+    <member refid="ua__connection_8h_1a6833094b30b737a45214b643687a5b13" kind="function"><name>UA_Connection_attachSecureChannel</name></member>
+    <member refid="ua__connection_8h_1a9fcc85108028704b89a87ed879d9cd96" kind="function"><name>UA_Connection_completeMessages</name></member>
+  </compound>
+  <compound refid="ua__job_8h" kind="file"><name>ua_job.h</name>
   </compound>
   <compound refid="ua__log_8h" kind="file"><name>ua_log.h</name>
     <member refid="group__logging_1gaa6d9dffabd47e4bf0714d488c7a27890" kind="define"><name>UA_LOG_TRACE</name></member>
@@ -556,7 +560,7 @@
     <member refid="group__server_1ga878a976e3c2de6fcbcc8e63360df7436" kind="function"><name>UA_Server_getAttribute_DataSource</name></member>
     <member refid="group__server_1ga97795e4da4dedc15ebbf1779a1c5f0ff" kind="function"><name>UA_Server_addRepeatedJob</name></member>
     <member refid="group__server_1gaddf321adb869b351d0edf5603d818f29" kind="function"><name>UA_Server_removeRepeatedJob</name></member>
-    <member refid="group__server_1gac089776185fd1558b3a0b24cfb5da5fd" kind="function"><name>UA_Server_addNetworkLayer</name></member>
+    <member refid="group__server_1gabb4db69ff1fa03286f50376b4bc86d1f" kind="function"><name>UA_Server_addNetworkLayer</name></member>
     <member refid="ua__server_8h_1a6c89c2e85b1c4ca477adeca4a798eb4d" kind="function"><name>UA_Server_appendInstanceOfSupertype</name></member>
     <member refid="ua__server_8h_1a44a33cadc468d74b30a18ff6c978bfdc" kind="function"><name>UA_Server_addInstanceOf_instatiateChildNode</name></member>
     <member refid="ua__server_8h_1a758f64f9f712de4910aef797e90db085" kind="function"><name>UA_Server_addInstanceOf</name></member>
@@ -1205,18 +1209,6 @@
     <member refid="ua__util_8h_1ad1a962c9914954e5236f9d01084e28bc" kind="define"><name>UA_alloca</name></member>
     <member refid="ua__util_8h_1a9cb286f1301989fbc9b1574c809bdd4a" kind="define"><name>UA_THREAD_LOCAL</name></member>
   </compound>
-  <compound refid="group__communication" kind="group"><name>communication</name>
-    <member refid="group__communication_1ga581d16bf4bb2cef817c374c81680fc8d" kind="enum"><name>UA_ConnectionState</name></member>
-    <member refid="group__communication_1gga581d16bf4bb2cef817c374c81680fc8da1cad58934b273287b2ffd4596d212354" kind="enumvalue"><name>UA_CONNECTION_OPENING</name></member>
-    <member refid="group__communication_1gga581d16bf4bb2cef817c374c81680fc8dadadfe199007b0ea4a3920e175c34481a" kind="enumvalue"><name>UA_CONNECTION_ESTABLISHED</name></member>
-    <member refid="group__communication_1gga581d16bf4bb2cef817c374c81680fc8da03bd4d717099f93e6a8966dafb647a23" kind="enumvalue"><name>UA_CONNECTION_CLOSED</name></member>
-    <member refid="group__communication_1ga7df36a27f1912afab506a0e8d162ffef" kind="variable"><name>UA_ConnectionConfig_standard</name></member>
-    <member refid="group__communication_1ga02b034fd08529823b9ef69eade75eecd" kind="function"><name>UA_Connection_init</name></member>
-    <member refid="group__communication_1ga5d0c2f1558adf1b8c774aa38e82dc32d" kind="function"><name>UA_Connection_deleteMembers</name></member>
-    <member refid="group__communication_1gafca93a6369176013b778d5eed067e163" kind="function"><name>UA_Connection_detachSecureChannel</name></member>
-    <member refid="group__communication_1ga6833094b30b737a45214b643687a5b13" kind="function"><name>UA_Connection_attachSecureChannel</name></member>
-    <member refid="group__communication_1gacfeb280b2aa45fb2cd8b287a90c8758d" kind="function"><name>UA_Connection_completeMessages</name></member>
-  </compound>
   <compound refid="group__logging" kind="group"><name>logging</name>
     <member refid="group__logging_1ga8ef40be05c138d1635386794b46ebf76" kind="enum"><name>UA_LogLevel</name></member>
     <member refid="group__logging_1gga8ef40be05c138d1635386794b46ebf76a0460537443396e9fce08df95bbf90a63" kind="enumvalue"><name>UA_LOGLEVEL_TRACE</name></member>
@@ -1273,7 +1265,7 @@
     <member refid="group__server_1ga878a976e3c2de6fcbcc8e63360df7436" kind="function"><name>UA_Server_getAttribute_DataSource</name></member>
     <member refid="group__server_1ga97795e4da4dedc15ebbf1779a1c5f0ff" kind="function"><name>UA_Server_addRepeatedJob</name></member>
     <member refid="group__server_1gaddf321adb869b351d0edf5603d818f29" kind="function"><name>UA_Server_removeRepeatedJob</name></member>
-    <member refid="group__server_1gac089776185fd1558b3a0b24cfb5da5fd" kind="function"><name>UA_Server_addNetworkLayer</name></member>
+    <member refid="group__server_1gabb4db69ff1fa03286f50376b4bc86d1f" kind="function"><name>UA_Server_addNetworkLayer</name></member>
     <member refid="group__server_1ga3902b72e704a2e2b289feb8f73e482a4" kind="define"><name>UA_SERVER_DELETENODEALIAS_DECL</name></member>
     <member refid="group__server_1ga1cf628b6c34012588566f8a0503a463e" kind="define"><name>_HAVE_UA_NODEITERATORCALLBACK_D</name></member>
     <member refid="group__server_1ga6e9d1f6676f7fa542d21efeb206c3f28" kind="define"><name>UA_Server_setAttribute_nodeId</name></member>
