@@ -52,9 +52,6 @@
           
 
           
-            
-            <img src="_static/open62541_html.png" class="logo" />
-          
           </a>
 
           
@@ -83,9 +80,7 @@
             
             
                 <ul>
-<li class="toctree-l1"><a class="reference internal" href="in_a_nutshell.html">OPC UA in a nutshell</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building the Library</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="datatypes.html">Data Types</a></li>
 </ul>
 
@@ -133,8 +128,114 @@
             
   <div class="section" id="creating-and-interacting-with-nodes">
 <h1>Creating and interacting with Nodes<a class="headerlink" href="#creating-and-interacting-with-nodes" title="Permalink to this headline">¶</a></h1>
+<p>In the previous &#8220;First Steps&#8221; tutorial, you should have gotten your build environment verified and created a first OPC UA server using the open62541 stack. The created server however doesn&#8217;t do much yet and there is no client to interact with the server. We are going to remedy that in this tutorial by creating some nodes and variables.</p>
 <p>The open62541 stack let&#8217;s you access the guts of open62541 if you really feel the need for it. For simpler or not all that specific requirements, there is an extensive set of high-level abstractions available that let you easily and quickly use complex features in your programs. An example for a high-level abstraction is &#8216;&#8217;UA_Client_newSubscription()&#8217;&#8216;, which spares you the internals of the subscription service (but also assumes sensible default values). High-Level abstractions make use of mid-level abstractions, which in turn use the low-level stack function like &#8216;&#8217;synchronousRequest()&#8217;&#8216;.</p>
 <p>This series of tutorials will stick to those high-level abstractions. Feel free to explore the API&#8217;s source to see what they. Nodes are of course the foundation of OPC UA and we will start of at this point with creating, deleting and changing them.</p>
+<div class="section" id="writing-a-basic-client">
+<h2>Writing a basic client<a class="headerlink" href="#writing-a-basic-client" title="Permalink to this headline">¶</a></h2>
+<p>You should already have a basic server from the previous tutorial. open62541 provides both a server- and clientside API, so creating a client is equally as easy as creating a server. We are going to use dynamic linking (libopen62541.so) from now on, because our client and server will share a lot of code. Reusing the shared library will considerably reduce the overhead. To avoid confusion, remove the amalgated open62541.c/h files from your example directory.</p>
+<p>As a recap, your directory structure should now look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>ichrispa@adriana:myServerApp&gt; rm *.o open62541.*
+ichrispa@adriana:myServerApp&gt; ln -s ../open62541/build/*so ./
+ichrispa@adriana:myServerApp&gt; tree
+.
+├── include
+│   ├── logger_stdout.h
+│   ├── networklayer_tcp.h
+│   ├── networklayer_udp.h
+│   ├── open62541.h
+│   ├── ua_client.h
+│   ├── ua_config.h
+│   ├── ua_config.h.in
+│   ├── ua_connection.h
+│   ├── ua_log.h
+│   ├── ua_nodeids.h
+│   ├── ua_server.h
+│   ├── ua_statuscodes.h
+│   ├── ua_transport_generated.h
+│   ├── ua_types_generated.h
+│   └── ua_types.h
+├── libopen62541.so -&gt; ../../open62541/build/libopen62541.so
+├── myServer
+└── myServer.c
+</pre></div>
+</div>
+<p>Note that I have linked the library into the folder to spare me the trouble of copying it every time I change/rebuild the stack.</p>
+<p>To create a really basic client, navigate back into the MyServerApp folder from the previous tutorial and create a client:</p>
+<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+
+#include &quot;ua_types.h&quot;
+#include &quot;ua_server.h&quot;
+#include &quot;logger_stdout.h&quot;
+#include &quot;networklayer_tcp.h&quot;
+
+int main(void) {
+  UA_Client *client = UA_Client_new(UA_ClientConfig_standard, Logger_Stdout_new());
+  UA_StatusCode retval = UA_Client_connect(client, ClientNetworkLayerTCP_connect, &quot;opc.tcp://localhost:16664&quot;);
+  if(retval != UA_STATUSCODE_GOOD) {
+    UA_Client_delete(client);
+    return retval;
+  }
+
+  UA_Client_disconnect(client);
+  UA_Client_delete(client);
+  return 0;
+}
+</pre></div>
+</div>
+<p>Let&#8217;s recompile both server and client - if you feel up to it, you can create a Makefile for this procedure. I will show a final command line compile example and ommit the compilation directives in future examples.:</p>
+<div class="highlight-python"><div class="highlight"><pre>ichrispa@adriana:myServerApp&gt; gcc -Wl,-rpath=./ -L./ -I ./include -o myClient myClient.c  -lopen62541
+</pre></div>
+</div>
+<p>We will also make a slight change to our server: We want it to exit cleanly when pressing <code class="docutils literal"><span class="pre">CTRL+C</span></code>. We will add signal handler for SIGINT and SIGTERM to accomplish that to the server:</p>
+<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+#include &lt;signal.h&gt;
+
+# include &quot;ua_types.h&quot;
+# include &quot;ua_server.h&quot;
+# include &quot;logger_stdout.h&quot;
+# include &quot;networklayer_tcp.h&quot;
+
+UA_Boolean running;
+
+void stopHandler(int signal) {
+  running = 0;
+}
+
+int main(void) {
+  signal(SIGINT,  stopHandler);
+  signal(SIGTERM, stopHandler);
+
+  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
+  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
+  running = UA_TRUE;
+  UA_Server_run(server, 1, &amp;running);
+  UA_Server_delete(server);
+
+  printf(&quot;Bye\n&quot;);
+  return 0;
+}
+</pre></div>
+</div>
+<p>And then of course, recompile it:</p>
+<div class="highlight-python"><div class="highlight"><pre>ichrispa@adriana:myServerApp&gt; gcc -Wl,-rpath=./ -L./ -I ./include -o myServer myServer.c  -lopen62541
+</pre></div>
+</div>
+<p>You can now start and background the server, run the client, and then terminate the server like so:</p>
+<div class="highlight-python"><div class="highlight"><pre>ichrispa@adriana:myServerApp&gt; ./myServer &amp;
+[1] 2114
+ichrispa@adriana:myServerApp&gt; ./myClient &amp;&amp; killall myServer
+Bye
+[1]+  Done                    ./myServer
+ichrispa@adriana:myServerApp&gt;
+</pre></div>
+</div>
+<p>Notice how the server received the SIGTERM signal from kill and exited cleany? We also used the return value of our client by inserting the <code class="docutils literal"><span class="pre">&amp;&amp;</span></code>, so kill is only called after a clean client exit (<code class="docutils literal"><span class="pre">return</span> <span class="pre">0</span></code>).</p>
+</div>
+<div class="section" id="asserting-success-failure">
+<h2>Asserting success/failure<a class="headerlink" href="#asserting-success-failure" title="Permalink to this headline">¶</a></h2>
+<p>Almost all functions of the open62541 API will return a <code class="docutils literal"><span class="pre">UA_StatusCode</span></code>, which in the C world would be represented by a <code class="docutils literal"><span class="pre">unsigned</span> <span class="pre">int</span></code>. OPC UA defines large number of good and bad return codes represented by this number. The constant UA_STATUSCODE_GOOD is defined as 0 in <code class="docutils literal"><span class="pre">include/ua_statuscodes.h</span></code> along with many other return codes. It pays off to check the return code of your function calls, as we already did implicitly in the client.</p>
+</div>
 <div class="section" id="api-concepts">
 <h2>API Concepts<a class="headerlink" href="#api-concepts" title="Permalink to this headline">¶</a></h2>
 <p>The following section will put you in contact with open62541 userspace API - that is functions available to you as a user. Functions in that API fall into three categories:</p>
