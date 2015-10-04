@@ -30,7 +30,10 @@
   
 
   
-    <link rel="top" title="open62541 1 documentation" href="index.html"/> 
+    <link rel="top" title="open62541 1 documentation" href="index.html"/>
+        <link rel="up" title="Tutorials" href="tutorials.html"/>
+        <link rel="next" title="Data Types" href="datatypes.html"/>
+        <link rel="prev" title="Adding server-side methods" href="tutorial_server_method.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -51,6 +54,9 @@
             <a href="index.html" class="icon icon-home"> open62541
           
 
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
           
           </a>
 
@@ -79,8 +85,24 @@
           
             
             
-                <ul>
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="in_a_nutshell.html">OPC UA in a nutshell</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building the Library</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_firstSteps.html">First steps with open62541-server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firstSteps.html">First steps with open62541-client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variables.html">Adding nodes to a server and connecting nodes to user-defined values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding server-side methods</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Examining and interacting with node relations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#compile-xml-namespaces">Compile XML Namespaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-object-instances">Creating object instances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iterating-over-child-nodes">Iterating over Child nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examining-node-copies">Examining node copies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="datatypes.html">Data Types</a></li>
 </ul>
 
@@ -112,6 +134,8 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+      
     <li>Examining and interacting with node relations</li>
       <li class="wy-breadcrumbs-aside">
         
@@ -128,162 +152,162 @@
             
   <div class="section" id="examining-and-interacting-with-node-relations">
 <h1>Examining and interacting with node relations<a class="headerlink" href="#examining-and-interacting-with-node-relations" title="Permalink to this headline">¶</a></h1>
-<p>In the past tutorials you learned to compile the stack in various configurations, create/delete nodes and manage variables. The core of OPC UA are it&#8217;s data modelling capabilities, and you will invariably find yourself confronted to investigate these relations during runtime. This tutorial will show you how to interact with object and types hierarchies and how to create your own.</p>
+<p>In the past tutorials you have learned to compile the stack in various configurations, create/delete nodes and manage variables. The core of OPC UA is its data modelling capabilities, and you will invariably find yourself confronted to investigate these relations during runtime. This tutorial will show you how to interact with object and type hierarchies and how to create your own.</p>
 <div class="section" id="compile-xml-namespaces">
 <h2>Compile XML Namespaces<a class="headerlink" href="#compile-xml-namespaces" title="Permalink to this headline">¶</a></h2>
 <p>So far we have made due with the hardcoded mini-namespace in the server stack. When writing an application, it is more then likely that you will want to create your own data models using some comfortable GUI based tools like UA Modeller. Most tools can export data to the OPC UA XML specification. open62541 contains a python based namespace compiler that can embed datamodels contained in XML files into the server stack.</p>
 <p>Note beforehand that the pyUANamespace compiler you can find in the <em>tools</em> subfolder is <em>not</em> a XML transformation tool but a compiler. That means that it will create an internal representation (dAST) when parsing the XML files and attempt to understand this representation in order to generate C Code. In consequence, the compiler will refuse to print any inconsistencies or invalid nodes.</p>
 <p>As an example, we will create a simple object model using UA Modeller and embed this into the servers nodeset, which is exported to the following XML file:</p>
-<div class="highlight-python"><div class="highlight"><pre>&lt;UANodeSet xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:uax=&quot;http://opcfoundation.org/UA/2008/02/Types.xsd&quot; xmlns=&quot;http://opcfoundation.org/UA/2011/03/UANodeSet.xsd&quot; xmlns:s1=&quot;http://yourorganisation.org/example_nodeset/&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;
-    &lt;NamespaceUris&gt;
-        &lt;Uri&gt;http://yourorganisation.org/example_nodeset/&lt;/Uri&gt;
-    &lt;/NamespaceUris&gt;
-    &lt;Aliases&gt;
-        &lt;Alias Alias=&quot;Boolean&quot;&gt;i=1&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;UInt32&quot;&gt;i=7&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;String&quot;&gt;i=12&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;HasModellingRule&quot;&gt;i=37&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;HasTypeDefinition&quot;&gt;i=40&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;HasSubtype&quot;&gt;i=45&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;HasProperty&quot;&gt;i=46&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;HasComponent&quot;&gt;i=47&lt;/Alias&gt;
-        &lt;Alias Alias=&quot;Argument&quot;&gt;i=296&lt;/Alias&gt;
-    &lt;/Aliases&gt;
-    &lt;Extensions&gt;
-        &lt;Extension&gt;
-            &lt;ModelInfo Tool=&quot;UaModeler&quot; Hash=&quot;Zs8w1AQI71W8P/GOk3k/xQ==&quot; Version=&quot;1.3.4&quot;/&gt;
-        &lt;/Extension&gt;
-    &lt;/Extensions&gt;
-    &lt;UAReferenceType NodeId=&quot;ns=1;i=4001&quot; BrowseName=&quot;1:providesInputTo&quot;&gt;
-        &lt;DisplayName&gt;providesInputTo&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasSubtype&quot; IsForward=&quot;false&quot;&gt;i=33&lt;/Reference&gt;
-        &lt;/References&gt;
-        &lt;InverseName Locale=&quot;en_US&quot;&gt;inputProcidedBy&lt;/InverseName&gt;
-    &lt;/UAReferenceType&gt;
-    &lt;UAObjectType IsAbstract=&quot;true&quot; NodeId=&quot;ns=1;i=1001&quot; BrowseName=&quot;1:FieldDevice&quot;&gt;
-        &lt;DisplayName&gt;FieldDevice&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasSubtype&quot; IsForward=&quot;false&quot;&gt;i=58&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot;&gt;ns=1;i=6001&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot;&gt;ns=1;i=6002&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAObjectType&gt;
-    &lt;UAVariable DataType=&quot;String&quot; ParentNodeId=&quot;ns=1;i=1001&quot; NodeId=&quot;ns=1;i=6001&quot; BrowseName=&quot;1:ManufacturerName&quot; UserAccessLevel=&quot;3&quot; AccessLevel=&quot;3&quot;&gt;
-        &lt;DisplayName&gt;ManufacturerName&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasTypeDefinition&quot;&gt;i=63&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1001&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAVariable&gt;
-    &lt;UAVariable DataType=&quot;String&quot; ParentNodeId=&quot;ns=1;i=1001&quot; NodeId=&quot;ns=1;i=6002&quot; BrowseName=&quot;1:ModelName&quot; UserAccessLevel=&quot;3&quot; AccessLevel=&quot;3&quot;&gt;
-        &lt;DisplayName&gt;ModelName&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasTypeDefinition&quot;&gt;i=63&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1001&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAVariable&gt;
-    &lt;UAObjectType NodeId=&quot;ns=1;i=1002&quot; BrowseName=&quot;1:Pump&quot;&gt;
-        &lt;DisplayName&gt;Pump&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot;&gt;ns=1;i=6003&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot;&gt;ns=1;i=6004&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasSubtype&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1001&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot;&gt;ns=1;i=7001&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot;&gt;ns=1;i=7002&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAObjectType&gt;
-    &lt;UAVariable DataType=&quot;Boolean&quot; ParentNodeId=&quot;ns=1;i=1002&quot; NodeId=&quot;ns=1;i=6003&quot; BrowseName=&quot;1:isOn&quot; UserAccessLevel=&quot;3&quot; AccessLevel=&quot;3&quot;&gt;
-        &lt;DisplayName&gt;isOn&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasTypeDefinition&quot;&gt;i=63&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1002&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAVariable&gt;
-    &lt;UAVariable DataType=&quot;UInt32&quot; ParentNodeId=&quot;ns=1;i=1002&quot; NodeId=&quot;ns=1;i=6004&quot; BrowseName=&quot;1:MotorRPM&quot; UserAccessLevel=&quot;3&quot; AccessLevel=&quot;3&quot;&gt;
-        &lt;DisplayName&gt;MotorRPM&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasTypeDefinition&quot;&gt;i=63&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1002&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAVariable&gt;
-    &lt;UAMethod ParentNodeId=&quot;ns=1;i=1002&quot; NodeId=&quot;ns=1;i=7001&quot; BrowseName=&quot;1:startPump&quot;&gt;
-        &lt;DisplayName&gt;startPump&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasProperty&quot;&gt;ns=1;i=6005&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1002&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAMethod&gt;
-    &lt;UAVariable DataType=&quot;Argument&quot; ParentNodeId=&quot;ns=1;i=7001&quot; ValueRank=&quot;1&quot; NodeId=&quot;ns=1;i=6005&quot; ArrayDimensions=&quot;1&quot; BrowseName=&quot;OutputArguments&quot;&gt;
-        &lt;DisplayName&gt;OutputArguments&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasProperty&quot; IsForward=&quot;false&quot;&gt;ns=1;i=7001&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasTypeDefinition&quot;&gt;i=68&lt;/Reference&gt;
-        &lt;/References&gt;
-        &lt;Value&gt;
-            &lt;ListOfExtensionObject&gt;
-                &lt;ExtensionObject&gt;
-                    &lt;TypeId&gt;
-                        &lt;Identifier&gt;i=297&lt;/Identifier&gt;
-                    &lt;/TypeId&gt;
-                    &lt;Body&gt;
-                        &lt;Argument&gt;
-                            &lt;Name&gt;started&lt;/Name&gt;
-                            &lt;DataType&gt;
-                                &lt;Identifier&gt;i=1&lt;/Identifier&gt;
-                            &lt;/DataType&gt;
-                            &lt;ValueRank&gt;-1&lt;/ValueRank&gt;
-                            &lt;ArrayDimensions&gt;&lt;/ArrayDimensions&gt;
-                            &lt;Description/&gt;
-                        &lt;/Argument&gt;
-                    &lt;/Body&gt;
-                &lt;/ExtensionObject&gt;
-            &lt;/ListOfExtensionObject&gt;
-        &lt;/Value&gt;
-    &lt;/UAVariable&gt;
-    &lt;UAMethod ParentNodeId=&quot;ns=1;i=1002&quot; NodeId=&quot;ns=1;i=7002&quot; BrowseName=&quot;1:stopPump&quot;&gt;
-        &lt;DisplayName&gt;stopPump&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasProperty&quot;&gt;ns=1;i=6006&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasComponent&quot; IsForward=&quot;false&quot;&gt;ns=1;i=1002&lt;/Reference&gt;
-        &lt;/References&gt;
-    &lt;/UAMethod&gt;
-    &lt;UAVariable DataType=&quot;Argument&quot; ParentNodeId=&quot;ns=1;i=7002&quot; ValueRank=&quot;1&quot; NodeId=&quot;ns=1;i=6006&quot; ArrayDimensions=&quot;1&quot; BrowseName=&quot;OutputArguments&quot;&gt;
-        &lt;DisplayName&gt;OutputArguments&lt;/DisplayName&gt;
-        &lt;References&gt;
-            &lt;Reference ReferenceType=&quot;HasModellingRule&quot;&gt;i=78&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasProperty&quot; IsForward=&quot;false&quot;&gt;ns=1;i=7002&lt;/Reference&gt;
-            &lt;Reference ReferenceType=&quot;HasTypeDefinition&quot;&gt;i=68&lt;/Reference&gt;
-        &lt;/References&gt;
-        &lt;Value&gt;
-            &lt;ListOfExtensionObject&gt;
-                &lt;ExtensionObject&gt;
-                    &lt;TypeId&gt;
-                        &lt;Identifier&gt;i=297&lt;/Identifier&gt;
-                    &lt;/TypeId&gt;
-                    &lt;Body&gt;
-                        &lt;Argument&gt;
-                            &lt;Name&gt;stopped&lt;/Name&gt;
-                            &lt;DataType&gt;
-                                &lt;Identifier&gt;i=1&lt;/Identifier&gt;
-                            &lt;/DataType&gt;
-                            &lt;ValueRank&gt;-1&lt;/ValueRank&gt;
-                            &lt;ArrayDimensions&gt;&lt;/ArrayDimensions&gt;
-                            &lt;Description/&gt;
-                        &lt;/Argument&gt;
-                    &lt;/Body&gt;
-                &lt;/ExtensionObject&gt;
-            &lt;/ListOfExtensionObject&gt;
-        &lt;/Value&gt;
-    &lt;/UAVariable&gt;
-&lt;/UANodeSet&gt;
+<div class="highlight-xml"><div class="highlight"><pre><span class="nt">&lt;UANodeSet</span> <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="na">xmlns:uax=</span><span class="s">&quot;http://opcfoundation.org/UA/2008/02/Types.xsd&quot;</span> <span class="na">xmlns=</span><span class="s">&quot;http://opcfoundation.org/UA/2011/03/UANodeSet.xsd&quot;</span> <span class="na">xmlns:s1=</span><span class="s">&quot;http://yourorganisation.org/example_nodeset/&quot;</span> <span class="na">xmlns:xsd=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;NamespaceUris&gt;</span>
+        <span class="nt">&lt;Uri&gt;</span>http://yourorganisation.org/example_nodeset/<span class="nt">&lt;/Uri&gt;</span>
+    <span class="nt">&lt;/NamespaceUris&gt;</span>
+    <span class="nt">&lt;Aliases&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>i=1<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;UInt32&quot;</span><span class="nt">&gt;</span>i=7<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>i=12<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=37<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=40<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasSubtype&quot;</span><span class="nt">&gt;</span>i=45<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasProperty&quot;</span><span class="nt">&gt;</span>i=46<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>i=47<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;Argument&quot;</span><span class="nt">&gt;</span>i=296<span class="nt">&lt;/Alias&gt;</span>
+    <span class="nt">&lt;/Aliases&gt;</span>
+    <span class="nt">&lt;Extensions&gt;</span>
+        <span class="nt">&lt;Extension&gt;</span>
+            <span class="nt">&lt;ModelInfo</span> <span class="na">Tool=</span><span class="s">&quot;UaModeler&quot;</span> <span class="na">Hash=</span><span class="s">&quot;Zs8w1AQI71W8P/GOk3k/xQ==&quot;</span> <span class="na">Version=</span><span class="s">&quot;1.3.4&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Extension&gt;</span>
+    <span class="nt">&lt;/Extensions&gt;</span>
+    <span class="nt">&lt;UAReferenceType</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=4001&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:providesInputTo&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>providesInputTo<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasSubtype&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>i=33<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+        <span class="nt">&lt;InverseName</span> <span class="na">Locale=</span><span class="s">&quot;en_US&quot;</span><span class="nt">&gt;</span>inputProcidedBy<span class="nt">&lt;/InverseName&gt;</span>
+    <span class="nt">&lt;/UAReferenceType&gt;</span>
+    <span class="nt">&lt;UAObjectType</span> <span class="na">IsAbstract=</span><span class="s">&quot;true&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=1001&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:FieldDevice&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>FieldDevice<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasSubtype&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>i=58<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAObjectType&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;String&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1001&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6001&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:ManufacturerName&quot;</span> <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>ManufacturerName<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1001<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;String&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1001&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6002&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:ModelName&quot;</span> <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>ModelName<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1001<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAObjectType</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:Pump&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>Pump<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6003<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6004<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasSubtype&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=7001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=7002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAObjectType&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;Boolean&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6003&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:isOn&quot;</span> <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>isOn<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;UInt32&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6004&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:MotorRPM&quot;</span> <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>MotorRPM<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAMethod</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=7001&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:startPump&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>startPump<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span><span class="nt">&gt;</span>ns=1;i=6005<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAMethod&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;Argument&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=7001&quot;</span> <span class="na">ValueRank=</span><span class="s">&quot;1&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6005&quot;</span> <span class="na">ArrayDimensions=</span><span class="s">&quot;1&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;OutputArguments&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>OutputArguments<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=7001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=68<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+        <span class="nt">&lt;Value&gt;</span>
+            <span class="nt">&lt;ListOfExtensionObject&gt;</span>
+                <span class="nt">&lt;ExtensionObject&gt;</span>
+                    <span class="nt">&lt;TypeId&gt;</span>
+                        <span class="nt">&lt;Identifier&gt;</span>i=297<span class="nt">&lt;/Identifier&gt;</span>
+                    <span class="nt">&lt;/TypeId&gt;</span>
+                    <span class="nt">&lt;Body&gt;</span>
+                        <span class="nt">&lt;Argument&gt;</span>
+                            <span class="nt">&lt;Name&gt;</span>started<span class="nt">&lt;/Name&gt;</span>
+                            <span class="nt">&lt;DataType&gt;</span>
+                                <span class="nt">&lt;Identifier&gt;</span>i=1<span class="nt">&lt;/Identifier&gt;</span>
+                            <span class="nt">&lt;/DataType&gt;</span>
+                            <span class="nt">&lt;ValueRank&gt;</span>-1<span class="nt">&lt;/ValueRank&gt;</span>
+                            <span class="nt">&lt;ArrayDimensions&gt;&lt;/ArrayDimensions&gt;</span>
+                            <span class="nt">&lt;Description/&gt;</span>
+                        <span class="nt">&lt;/Argument&gt;</span>
+                    <span class="nt">&lt;/Body&gt;</span>
+                <span class="nt">&lt;/ExtensionObject&gt;</span>
+            <span class="nt">&lt;/ListOfExtensionObject&gt;</span>
+        <span class="nt">&lt;/Value&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAMethod</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=7002&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:stopPump&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>stopPump<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span><span class="nt">&gt;</span>ns=1;i=6006<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAMethod&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;Argument&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=7002&quot;</span> <span class="na">ValueRank=</span><span class="s">&quot;1&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6006&quot;</span> <span class="na">ArrayDimensions=</span><span class="s">&quot;1&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;OutputArguments&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>OutputArguments<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=7002<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=68<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+        <span class="nt">&lt;Value&gt;</span>
+            <span class="nt">&lt;ListOfExtensionObject&gt;</span>
+                <span class="nt">&lt;ExtensionObject&gt;</span>
+                    <span class="nt">&lt;TypeId&gt;</span>
+                        <span class="nt">&lt;Identifier&gt;</span>i=297<span class="nt">&lt;/Identifier&gt;</span>
+                    <span class="nt">&lt;/TypeId&gt;</span>
+                    <span class="nt">&lt;Body&gt;</span>
+                        <span class="nt">&lt;Argument&gt;</span>
+                            <span class="nt">&lt;Name&gt;</span>stopped<span class="nt">&lt;/Name&gt;</span>
+                            <span class="nt">&lt;DataType&gt;</span>
+                                <span class="nt">&lt;Identifier&gt;</span>i=1<span class="nt">&lt;/Identifier&gt;</span>
+                            <span class="nt">&lt;/DataType&gt;</span>
+                            <span class="nt">&lt;ValueRank&gt;</span>-1<span class="nt">&lt;/ValueRank&gt;</span>
+                            <span class="nt">&lt;ArrayDimensions&gt;&lt;/ArrayDimensions&gt;</span>
+                            <span class="nt">&lt;Description/&gt;</span>
+                        <span class="nt">&lt;/Argument&gt;</span>
+                    <span class="nt">&lt;/Body&gt;</span>
+                <span class="nt">&lt;/ExtensionObject&gt;</span>
+            <span class="nt">&lt;/ListOfExtensionObject&gt;</span>
+        <span class="nt">&lt;/Value&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+<span class="nt">&lt;/UANodeSet&gt;</span>
 </pre></div>
 </div>
 <p>Or, more consiscly, this:</p>
@@ -405,11 +429,11 @@ Linking C shared library libopen62541.so
 </pre></div>
 </div>
 <p>If you open the header <code class="docutils literal"><span class="pre">src_generated/ua_namespaceinit_generated.h</span></code> and take a short look at the generated defines, you will notice the following definitions have been created:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c">#define UA_NS1ID_PROVIDESINPUTTO</span>
-<span class="c">#define UA_NS1ID_FIELDDEVICE</span>
-<span class="c">#define UA_NS1ID_PUMP</span>
-<span class="c">#define UA_NS1ID_STARTPUMP</span>
-<span class="c">#define UA_NS1ID_STOPPUMP</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#define UA_NS1ID_PROVIDESINPUTTO</span>
+<span class="cp">#define UA_NS1ID_FIELDDEVICE</span>
+<span class="cp">#define UA_NS1ID_PUMP</span>
+<span class="cp">#define UA_NS1ID_STARTPUMP</span>
+<span class="cp">#define UA_NS1ID_STOPPUMP</span>
 </pre></div>
 </div>
 <p>These definitions are generated for all types, but not variables, objects or views (as their names may be ambiguous and may not a be unique identifier). You can use these definitions in your code as you already used the <code class="docutils literal"><span class="pre">UA_NS0ID_</span></code> equivalents.</p>
@@ -434,54 +458,54 @@ Linking C shared library libopen62541.so
 <div class="section" id="creating-object-instances">
 <h2>Creating object instances<a class="headerlink" href="#creating-object-instances" title="Permalink to this headline">¶</a></h2>
 <p>Defining an object type is only usefull if it ends up making our lives easier in some way (though it is always the proper thing to do). One of the key benefits of defining object types is being able to create object instances fairly easily. As an example, we will modify the server to create 2 pump instances:</p>
-<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;stdio.h&gt;</span>
+<span class="cp">#include &lt;signal.h&gt;</span>
 
-# include &quot;ua_types.h&quot;
-# include &quot;ua_server.h&quot;
-# include &quot;ua_namespaceinit_generated.h&quot;
-# include &quot;logger_stdout.h&quot;
-# include &quot;networklayer_tcp.h&quot;
+<span class="cp">#include &quot;ua_types.h&quot;</span>
+<span class="cp">#include &quot;ua_server.h&quot;</span>
+<span class="cp">#include &quot;ua_namespaceinit_generated.h&quot;</span>
+<span class="cp">#include &quot;logger_stdout.h&quot;</span>
+<span class="cp">#include &quot;networklayer_tcp.h&quot;</span>
 
-UA_Boolean running;
-UA_Int32 global_accessCounter = 0;
+<span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
+<span class="n">UA_Int32</span> <span class="n">global_accessCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-void stopHandler(int signal) {
-  running = 0;
-}
+<span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">signal</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-UA_StatusCode pumpInstantiationCallback(UA_NodeId objectId, UA_NodeId definitionId, void *handle);
-UA_StatusCode pumpInstantiationCallback(UA_NodeId objectId, UA_NodeId definitionId, void *handle) {
-  printf(&quot;Created new node ns=%d;i=%d according to template ns=%d;i=%d (handle was %d)\n&quot;, objectId.namespaceIndex, objectId.identifier.numeric,
-          definitionId.namespaceIndex, definitionId.identifier.numeric, *((UA_Int32 *) handle));
-  return UA_STATUSCODE_GOOD;
-}
+<span class="n">UA_StatusCode</span> <span class="nf">pumpInstantiationCallback</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">definitionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="n">UA_StatusCode</span> <span class="nf">pumpInstantiationCallback</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">definitionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Created new node ns=%d;i=%d according to template ns=%d;i=%d (handle was %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">objectId</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="p">,</span> <span class="n">objectId</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">,</span>
+          <span class="n">definitionId</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="p">,</span> <span class="n">definitionId</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">,</span> <span class="o">*</span><span class="p">((</span><span class="n">UA_Int32</span> <span class="o">*</span><span class="p">)</span> <span class="n">handle</span><span class="p">));</span>
+  <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main(void) {
-  signal(SIGINT,  stopHandler);
-  signal(SIGTERM, stopHandler);
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
-  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
-  running = UA_TRUE;
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
+  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
 
-  UA_Int32 myHandle = 42;
-  UA_Server_addInstanceOf(server, UA_NODEID_NUMERIC(1, 0),
-                          UA_QUALIFIEDNAME(1, &quot;Pump1&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;Pump1&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;A pump!&quot;),
-                          UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
-                          0, 0, UA_EXPANDEDNODEID_NUMERIC(1, UA_NS1ID_PUMP), pumpInstantiationCallback, (void *) &amp;myHandle, NULL);
+  <span class="n">UA_Int32</span> <span class="n">myHandle</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+  <span class="n">UA_Server_addInstanceOf</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                          <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;Pump1&quot;</span><span class="p">),</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;Pump1&quot;</span><span class="p">),</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;A pump!&quot;</span><span class="p">),</span>
+                          <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">),</span>
+                          <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">UA_NS1ID_PUMP</span><span class="p">),</span> <span class="n">pumpInstantiationCallback</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">myHandle</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 
-  UA_Server_addInstanceOf(server, UA_NODEID_NUMERIC(1, 0),
-                          UA_QUALIFIEDNAME(1, &quot;Pump2&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;Pump2&quot;), UA_LOCALIZEDTEXT(&quot;en_US&quot;,&quot;Another pump!&quot;),
-                          UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
-                          0, 0, UA_EXPANDEDNODEID_NUMERIC(1, UA_NS1ID_PUMP), pumpInstantiationCallback, (void *) &amp;myHandle, NULL);
+  <span class="n">UA_Server_addInstanceOf</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                          <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;Pump2&quot;</span><span class="p">),</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;Pump2&quot;</span><span class="p">),</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;Another pump!&quot;</span><span class="p">),</span>
+                          <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">),</span>
+                          <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">UA_NS1ID_PUMP</span><span class="p">),</span> <span class="n">pumpInstantiationCallback</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">myHandle</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 
-  UA_Server_run(server, 1, &amp;running);
-  UA_Server_delete(server);
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-  printf(&quot;Bye\n&quot;);
-  return 0;
-}
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Bye</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Make sure you have updated the headers and libs in your project, then recompile and run the server. Make especially sure you have added <code class="docutils literal"><span class="pre">ua_namespaceinit_generated.h</span></code> to your include folder and that you have removed any references to header in <code class="docutils literal"><span class="pre">server</span></code>. The only include you are going to need is <code class="docutils literal"><span class="pre">ua_types.h</span></code>.</p>
@@ -535,72 +559,72 @@ Created new node ns=1;i=1513 according to template ns=1;i=6004 (handle was 42)
 <div class="section" id="iterating-over-child-nodes">
 <h2>Iterating over Child nodes<a class="headerlink" href="#iterating-over-child-nodes" title="Permalink to this headline">¶</a></h2>
 <p>A common usecase is wanting to perform something akin to <code class="docutils literal"><span class="pre">for</span> <span class="pre">each</span> <span class="pre">node</span> <span class="pre">referenced</span> <span class="pre">by</span> <span class="pre">X,</span> <span class="pre">call</span> <span class="pre">...</span></code>; you may for example be searching for a specific browseName or instance which was created with a dynamic nodeId. There is no way of telling what you are searching for beforehand (inverse hasComponents, typedefinitions, etc.), but all usescases of &#8220;searching for&#8221; basically means iterating over each reference of a node.</p>
-<p>Since searching in nodes is a common operation, the high-level branch provides a function to help you perform this operation:  <code class="docutils literal"><span class="pre">UA_(Server|Client)_forEachChildNodeCall();</span></code>. These functions will iterate over all references of a given node, invoking a callback (with a handle) for every found reference. Since in our last tutorial we created a server that instantiates two pumps, we are now going to build a client that will search for pumps in all object instances on the server.:</p>
-<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+<p>Since searching in nodes is a common operation, the high-level branch provides a function to help you perform this operation:  <code class="docutils literal"><span class="pre">UA_(Server|Client)_forEachChildNodeCall();</span></code>. These functions will iterate over all references of a given node, invoking a callback (with a handle) for every found reference. Since in our last tutorial we created a server that instantiates two pumps, we are now going to build a client that will search for pumps in all object instances on the server.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;stdio.h&gt;</span>
 
-#include &quot;ua_types.h&quot;
-#include &quot;ua_server.h&quot;
-#include &quot;ua_client.h&quot;
-#include &quot;ua_namespaceinit_generated.h&quot;
-#include &quot;logger_stdout.h&quot;
-#include &quot;networklayer_tcp.h&quot;
+<span class="cp">#include &quot;ua_types.h&quot;</span>
+<span class="cp">#include &quot;ua_server.h&quot;</span>
+<span class="cp">#include &quot;ua_client.h&quot;</span>
+<span class="cp">#include &quot;ua_namespaceinit_generated.h&quot;</span>
+<span class="cp">#include &quot;logger_stdout.h&quot;</span>
+<span class="cp">#include &quot;networklayer_tcp.h&quot;</span>
 
-UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle);
-UA_StatusCode nodeIter(UA_NodeId childId, UA_Boolean isInverse, UA_NodeId referenceTypeId, void *handle) {
-  struct {
-    UA_Client *client;
-    UA_Boolean isAPump;
-    UA_NodeId PumpId;
-  } *nodeIterParam = handle;
+<span class="n">UA_StatusCode</span> <span class="nf">nodeIter</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="n">childId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="n">UA_StatusCode</span> <span class="nf">nodeIter</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="n">childId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">isAPump</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">PumpId</span><span class="p">;</span>
+  <span class="p">}</span> <span class="o">*</span><span class="n">nodeIterParam</span> <span class="o">=</span> <span class="n">handle</span><span class="p">;</span>
 
-  if (isInverse == UA_TRUE)
-    return UA_STATUSCODE_GOOD;
-  if (childId.namespaceIndex != 1)
-    return UA_STATUSCODE_GOOD;
-  if (nodeIterParam == NULL)
-    return UA_STATUSCODE_GOODNODATA;
+  <span class="k">if</span> <span class="p">(</span><span class="n">isInverse</span> <span class="o">==</span> <span class="n">UA_TRUE</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">childId</span><span class="p">.</span><span class="n">namespaceIndex</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">nodeIterParam</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOODNODATA</span><span class="p">;</span>
 
-  UA_QualifiedName *childBrowseName = NULL;
-  UA_Client_getAttributeValue(nodeIterParam-&gt;client, childId, UA_ATTRIBUTEID_BROWSENAME, (void**) &amp;childBrowseName);
+  <span class="n">UA_QualifiedName</span> <span class="o">*</span><span class="n">childBrowseName</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">UA_Client_getAttributeValue</span><span class="p">(</span><span class="n">nodeIterParam</span><span class="o">-&gt;</span><span class="n">client</span><span class="p">,</span> <span class="n">childId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_BROWSENAME</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">childBrowseName</span><span class="p">);</span>
 
-  UA_String pumpName = UA_STRING(&quot;Pump&quot;);
-  if (childBrowseName != NULL) {
-    if (childBrowseName-&gt;namespaceIndex == 1) {
-      if (!strncmp(childBrowseName-&gt;name.data, pumpName.data, pumpName.length))
-        printf(&quot;Found %s with NodeId ns=1,i=%d\n&quot;, childBrowseName-&gt;name.data, childId.identifier.numeric);
-        inodeIterParam-&gt;isAPump = UA_TRUE;
-        UA_NodeId_copy(&amp;childId, &amp;nodeIterParam-&gt;PumpId);
-    }
-  }
+  <span class="n">UA_String</span> <span class="n">pumpName</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;Pump&quot;</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">childBrowseName</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">childBrowseName</span><span class="o">-&gt;</span><span class="n">namespaceIndex</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strncmp</span><span class="p">(</span><span class="n">childBrowseName</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">pumpName</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">pumpName</span><span class="p">.</span><span class="n">length</span><span class="p">))</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Found %s with NodeId ns=1,i=%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">childBrowseName</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">childId</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">);</span>
+        <span class="n">inodeIterParam</span><span class="o">-&gt;</span><span class="n">isAPump</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
+        <span class="n">UA_NodeId_copy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">childId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeIterParam</span><span class="o">-&gt;</span><span class="n">PumpId</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
 
-  UA_QualifiedName_delete(childBrowseName);
-  return UA_STATUSCODE_GOOD;
-}
+  <span class="n">UA_QualifiedName_delete</span><span class="p">(</span><span class="n">childBrowseName</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main(void) {
-  UA_Client *client = UA_Client_new(UA_ClientConfig_standard, Logger_Stdout_new());
-  UA_StatusCode retval = UA_Client_connect(client, ClientNetworkLayerTCP_connect, &quot;opc.tcp://localhost:16664&quot;);
-  if(retval != UA_STATUSCODE_GOOD) {
-    UA_Client_delete(client);
-    return retval;
-  }
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout_new</span><span class="p">());</span>
+  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">ClientNetworkLayerTCP_connect</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  struct {
-    UA_Client *client;
-    UA_Boolean isAPump;
-    UA_NodeId PumpId;
-  } nodeIterParam;
-  nodeIterParam.client = client;
-  nodeIterParam.isAPump = UA_FALSE;
+  <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">isAPump</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">PumpId</span><span class="p">;</span>
+  <span class="p">}</span> <span class="n">nodeIterParam</span><span class="p">;</span>
+  <span class="n">nodeIterParam</span><span class="p">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span><span class="p">;</span>
+  <span class="n">nodeIterParam</span><span class="p">.</span><span class="n">isAPump</span> <span class="o">=</span> <span class="n">UA_FALSE</span><span class="p">;</span>
 
-  UA_Client_forEachChildNodeCall(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), nodeIter, (void *) &amp;nodeIterParam);
-  if (nodeIterParam.isAPump == UA_TRUE)
-    printf(&quot;Found at least one pump\n&quot;);
+  <span class="n">UA_Client_forEachChildNodeCall</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">nodeIter</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">nodeIterParam</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">nodeIterParam</span><span class="p">.</span><span class="n">isAPump</span> <span class="o">==</span> <span class="n">UA_TRUE</span><span class="p">)</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Found at least one pump</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
 
-  UA_Client_disconnect(client);
-  UA_Client_delete(client);
-  return 0;
-}
+  <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>If the client is run while the example server is running in the background, it will produce the following output:</p>
@@ -615,41 +639,41 @@ Found Pump2 with NodeId ns=1,i=1509
 </div>
 <div class="section" id="examining-node-copies">
 <h2>Examining node copies<a class="headerlink" href="#examining-node-copies" title="Permalink to this headline">¶</a></h2>
-<p>So far we have always used the getAttribute() functions to inspect node contents. There may be isolated cases where these are insuficient because you want to examine the properties of a node &#8220;in bulk&#8221;. As mentioned in the first tutorials, the user can not directly interact with the servers nodestore; but the userspace may request a copy of a node, including all its attributes and references. The following functions server the purpose of getting and getting rid of node copies:</p>
-<div class="highlight-python"><div class="highlight"><pre>UA_(Server|Client)_getNodeCopy()
-UA_(Server|Client)_destroyNodeCopy()
+<p>So far we have always used the getAttribute() functions to inspect node contents. There may be isolated cases where these are insuficient because you want to examine the properties of a node &#8220;in bulk&#8221;. As mentioned in the first tutorials, the user can not directly interact with the servers nodestore; but the userspace may request a copy of a node, including all its attributes and references. The following functions server the purpose of getting and getting rid of node copies.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_</span><span class="p">(</span><span class="n">Server</span><span class="o">|</span><span class="n">Client</span><span class="p">)</span><span class="n">_getNodeCopy</span><span class="p">()</span>
+<span class="n">UA_</span><span class="p">(</span><span class="n">Server</span><span class="o">|</span><span class="n">Client</span><span class="p">)</span><span class="n">_destroyNodeCopy</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Since you are trying to see a struct (node types) that are usually hidden from userspace, you will have to include <code class="docutils literal"><span class="pre">include/ua_nodes.h</span></code>, <code class="docutils literal"><span class="pre">src/ua_types_encoding_binary.h</span></code> and <code class="docutils literal"><span class="pre">deps/queue.h</span></code> in addition to the previous includes (link them into the includes folder).</p>
 <p>Let&#8217;s suppose we wanted to do something elaborate with our pump instance that was returned by the iterator of the previous example, or simply &#8220;print&#8221; all its fields. We could modify the above client&#8217;s main function like so:</p>
-<div class="highlight-python"><div class="highlight"><pre>int main(void) {
-  UA_Client *client = UA_Client_new(UA_ClientConfig_standard, Logger_Stdout_new());
-  UA_StatusCode retval = UA_Client_connect(client, ClientNetworkLayerTCP_connect, &quot;opc.tcp://localhost:16664&quot;);
-  if(retval != UA_STATUSCODE_GOOD) {
-    UA_Client_delete(client);
-    return retval;
-  }
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout_new</span><span class="p">());</span>
+  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">ClientNetworkLayerTCP_connect</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  struct {
-    UA_Client *client;
-    UA_Boolean isAPump;
-    UA_NodeId PumpId;
-  } nodeIterParam;
-  nodeIterParam.client = client;
-  nodeIterParam.isAPump = UA_FALSE;
+  <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">isAPump</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">PumpId</span><span class="p">;</span>
+  <span class="p">}</span> <span class="n">nodeIterParam</span><span class="p">;</span>
+  <span class="n">nodeIterParam</span><span class="p">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span><span class="p">;</span>
+  <span class="n">nodeIterParam</span><span class="p">.</span><span class="n">isAPump</span> <span class="o">=</span> <span class="n">UA_FALSE</span><span class="p">;</span>
 
-  UA_Client_forEachChildNodeCall(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), nodeIter, (void *) &amp;nodeIterParam);
-  if (nodeIterParam.isAPump == UA_TRUE) {
-    UA_ObjectNode *aPump;
-    UA_Client_getNodeCopy(client, nodeIterParam.PumpId, (void **) &amp;aPump);
-    printf(&quot;The pump %s with NodeId ns=1,i=%d was returned\n&quot;, aPump-&gt;browseName.name.data, aPump-&gt;nodeId.identifier.numeric);
-    UA_Client_deleteNodeCopy(client, (void **) &amp;aPump);
-  }
+  <span class="n">UA_Client_forEachChildNodeCall</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">nodeIter</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">nodeIterParam</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">nodeIterParam</span><span class="p">.</span><span class="n">isAPump</span> <span class="o">==</span> <span class="n">UA_TRUE</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_ObjectNode</span> <span class="o">*</span><span class="n">aPump</span><span class="p">;</span>
+    <span class="n">UA_Client_getNodeCopy</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">nodeIterParam</span><span class="p">.</span><span class="n">PumpId</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">aPump</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;The pump %s with NodeId ns=1,i=%d was returned</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">aPump</span><span class="o">-&gt;</span><span class="n">browseName</span><span class="p">.</span><span class="n">name</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">aPump</span><span class="o">-&gt;</span><span class="n">nodeId</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">);</span>
+    <span class="n">UA_Client_deleteNodeCopy</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">aPump</span><span class="p">);</span>
+  <span class="p">}</span>
 
-  UA_Client_disconnect(client);
-  UA_Client_delete(client);
-  return 0;
-}
+  <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p><strong>Warning</strong> in both examples, we are printing strings contained in UA_String types. These are fundamentaly different from strings in C in that they are <em>not</em> necessarlity NULL terminated; they are exactly as long as the string length indicates. It is quite possible that printf() will keep printing trailing data after the UA_String until it finds a NULL. If you intend to really print strings in an application, use the &#8220;length&#8221; field of the UA_String struct to allocate a null-initialized buffer, then copy the string data into that buffer before printing it.</p>
@@ -664,6 +688,15 @@ UA_(Server|Client)_destroyNodeCopy()
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="datatypes.html" class="btn btn-neutral float-right" title="Data Types" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_server_method.html" class="btn btn-neutral" title="Adding server-side methods" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
