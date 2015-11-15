@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Types &mdash; open62541 1 documentation</title>
+  <title>Data Types Introduction &mdash; open62541 1 documentation</title>
   
 
   
@@ -87,8 +87,8 @@
 <li class="toctree-l1"><a class="reference internal" href="in_a_nutshell.html">OPC UA in a nutshell</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building the Library</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Data Types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#generic-data-type-handling">Generic Data Type Handling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Data Types Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#generic-data-type-handling">Generic Data Type Handling</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#array-handling">Array Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#builtin-data-types">Builtin Data Types</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#number-types">Number-Types</a></li>
@@ -140,7 +140,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="index.html">Docs</a> &raquo;</li>
       
-    <li>Data Types</li>
+    <li>Data Types Introduction</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -154,10 +154,47 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="data-types">
-<h1>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="data-types-introduction">
+<h1>Data Types Introduction<a class="headerlink" href="#data-types-introduction" title="Permalink to this headline">¶</a></h1>
+<p>In open62541, all data types share the same basic API for creation, copying and deletion. Assume that <em>T</em> is the data type in question.</p>
+<dl class="docutils">
+<dt>void T_init(T <a href="#id1"><span class="problematic" id="id2">*</span></a>ptr)</dt>
+<dd>Initialize the data type. This is synonymous with zeroing out the memory, i.e. <em>memset(dataptr, 0, sizeof(T))</em>.</dd>
+<dt>T* T_new()</dt>
+<dd>Allocate and return the memory for the data type. The memory is already initialized.</dd>
+<dt>UA_StatusCode T_copy(const T <a href="#id3"><span class="problematic" id="id4">*</span></a>src, T <a href="#id5"><span class="problematic" id="id6">*</span></a>dst)</dt>
+<dd>Copy the content of the data type. Returns <em>UA_STATUSCODE_GOOD</em> if it succeeded.</dd>
+<dt>void T_deleteMembers(T <a href="#id7"><span class="problematic" id="id8">*</span></a>ptr)</dt>
+<dd>Delete the dynamically allocated content of the data type, but not the data type itself.</dd>
+<dt>void T_delete(T <a href="#id9"><span class="problematic" id="id10">*</span></a>ptr)</dt>
+<dd>Delete the content of the data type and the memory for the data type itself.</dd>
+</dl>
+<p>Here&#8217;s a small example for the UA_String data type. UA_String will be introduced in more detail later on, but you should be able to follow the example already.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* The definition of UA_String copied from ua_types.h */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">length</span><span class="p">;</span> <span class="c1">///&lt; The length of the string</span>
+    <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">data</span><span class="p">;</span> <span class="c1">///&lt; The string&#39;s content (not null-terminated)</span>
+<span class="p">}</span> <span class="n">UA_String</span><span class="p">;</span>
+
+<span class="n">UA_String</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;test1&quot;</span><span class="p">);</span>       <span class="cm">/* s1 points to the statically allocated string buffer */</span>
+<span class="n">UA_String_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s1</span><span class="p">);</span>                     <span class="cm">/* Reset s1 (no memleak due to the statically allocated buffer) */</span>
+
+<span class="n">UA_String</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="s">&quot;test2&quot;</span><span class="p">);</span> <span class="cm">/* s2 points to a new copy of the string buffer (with malloc) */</span>
+<span class="n">UA_String_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s2</span><span class="p">);</span>            <span class="cm">/* Free the content of s2, but not s2 itself */</span>
+
+<span class="n">UA_String</span> <span class="o">*</span><span class="n">s3</span> <span class="o">=</span> <span class="n">UA_String_new</span><span class="p">();</span>         <span class="cm">/* The string s3 is malloced and initialized */</span>
+<span class="o">*</span><span class="n">s3</span> <span class="o">=</span> <span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="s">&quot;test3&quot;</span><span class="p">);</span>          <span class="cm">/* s3 points to a new copy of the string buffer */</span>
+
+<span class="n">UA_String</span> <span class="n">s4</span><span class="p">;</span>
+<span class="n">UA_copy</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s4</span><span class="p">);</span>                        <span class="cm">/* Copy the content of s3 to s4 */</span>
+
+<span class="n">UA_String_delete</span><span class="p">(</span><span class="n">s3</span><span class="p">);</span>                    <span class="cm">/* Free the string buffer and the string itself */</span>
+<span class="n">UA_String_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s4</span><span class="p">);</span>            <span class="cm">/* Again, delete only the string buffer */</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="generic-data-type-handling">
-<h2>Generic Data Type Handling<a class="headerlink" href="#generic-data-type-handling" title="Permalink to this headline">¶</a></h2>
+<h1>Generic Data Type Handling<a class="headerlink" href="#generic-data-type-handling" title="Permalink to this headline">¶</a></h1>
 <p>All data types are combinations of the 25 builtin data types show below. Types
 are described in the UA_DataType structure.</p>
 <dl class="struct">
@@ -342,7 +379,6 @@ copying fails, a deleteMembers is performed and an error code returned.</p>
 <dd><p>Frees the memory of the datatype and its dynamically allocated members.</p>
 </dd></dl>
 
-</div>
 <div class="section" id="array-handling">
 <h2>Array Handling<a class="headerlink" href="#array-handling" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
