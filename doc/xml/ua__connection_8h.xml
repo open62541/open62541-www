@@ -290,26 +290,53 @@
         </inbodydescription>
         <location file="/home/travis/build/acplt/open62541/include/ua_connection.h" line="98"/>
       </memberdef>
-      <memberdef kind="function" id="ua__connection_8h_1a9fcc85108028704b89a87ed879d9cd96" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
-        <type><ref refid="structUA__Job" kindref="compound">UA_Job</ref></type>
-        <definition>UA_Job UA_Connection_completeMessages</definition>
-        <argsstring>(UA_Connection *connection, UA_ByteString received)</argsstring>
+      <memberdef kind="function" id="ua__connection_8h_1afc3823d9170acb40ea506e816d5c2ca1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="ua__statuscodes_8h_1a82f92964aaa5dd1c5a1c5d7e9099883c" kindref="member">UA_StatusCode</ref></type>
+        <definition>UA_StatusCode UA_Connection_completeMessages</definition>
+        <argsstring>(UA_Connection *connection, UA_ByteString *UA_RESTRICT message, UA_Boolean *UA_RESTRICT realloced)</argsstring>
         <name>UA_Connection_completeMessages</name>
         <param>
           <type><ref refid="structUA__Connection" kindref="compound">UA_Connection</ref> *</type>
           <declname>connection</declname>
         </param>
         <param>
-          <type><ref refid="ua__types_8h_1a05a19615d5da9f034fabefd3d02225ee" kindref="member">UA_ByteString</ref></type>
-          <declname>received</declname>
+          <type><ref refid="ua__types_8h_1a05a19615d5da9f034fabefd3d02225ee" kindref="member">UA_ByteString</ref> *<ref refid="ua__config_8h_1aa222b32064cc4bfa8025fb023ced1c31" kindref="member">UA_RESTRICT</ref></type>
+          <declname>message</declname>
+        </param>
+        <param>
+          <type><ref refid="ua__types_8h_1a9a1800cf448ad57727ab920aa254a1a4" kindref="member">UA_Boolean</ref> *<ref refid="ua__config_8h_1aa222b32064cc4bfa8025fb023ced1c31" kindref="member">UA_RESTRICT</ref></type>
+          <declname>realloced</declname>
         </param>
         <briefdescription>
         </briefdescription>
         <detaileddescription>
-<para>Returns a job that contains either a message-bytestring managed by the network layer or a message-bytestring that was newly allocated (or a nothing-job). Half-received messages are attached to the connection. The next completion tries to create a complete message with the next buffer the connection receives. </para>        </detaileddescription>
+<para>The network layer may receive chopped up messages since TCP is a streaming protocol. Furthermore, the networklayer may operate on ringbuffers or statically assigned memory.</para><para>If an entire message is received, it is forwarded directly. But the memory needs to be freed with the networklayer-specific mechanism. If a half message is received, we copy it into a local buffer. Then, the stack-specific free needs to be used.</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>connection</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The connection </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>message</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The received message. The content may be overwritten when a previsouly received buffer is completed. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>realloced</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The Boolean value is set to true if the outgoing message has been reallocated from the network layer. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Returns UA_STATUSCODE_GOOD or an error code. When an error occurs, the ingoing message and the current buffer in the connection are freed. </para></simplesect>
+</para>        </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/travis/build/acplt/open62541/include/ua_connection.h" line="104"/>
+        <location file="/home/travis/build/acplt/open62541/include/ua_connection.h" line="120"/>
       </memberdef>
       </sectiondef>
     <briefdescription>
@@ -391,13 +418,15 @@
 <codeline lineno="97"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="ua__config_8h_1aba46d236acc7541d0ee0a96f8c7f7907" kindref="member">UA_EXPORT</ref><sp/><ref refid="ua__connection_8h_1afca93a6369176013b778d5eed067e163" kindref="member">UA_Connection_detachSecureChannel</ref>(<ref refid="structUA__Connection" kindref="compound">UA_Connection</ref><sp/>*connection);</highlight></codeline>
 <codeline lineno="98"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="ua__config_8h_1aba46d236acc7541d0ee0a96f8c7f7907" kindref="member">UA_EXPORT</ref><sp/><ref refid="ua__connection_8h_1a6833094b30b737a45214b643687a5b13" kindref="member">UA_Connection_attachSecureChannel</ref>(<ref refid="structUA__Connection" kindref="compound">UA_Connection</ref><sp/>*connection,<sp/><ref refid="structUA__SecureChannel" kindref="compound">UA_SecureChannel</ref><sp/>*channel);</highlight></codeline>
 <codeline lineno="99"><highlight class="normal"></highlight></codeline>
-<codeline lineno="104"><highlight class="normal"><ref refid="structUA__Job" kindref="compound">UA_Job</ref><sp/><ref refid="ua__config_8h_1aba46d236acc7541d0ee0a96f8c7f7907" kindref="member">UA_EXPORT</ref><sp/><ref refid="ua__connection_8h_1a9fcc85108028704b89a87ed879d9cd96" kindref="member">UA_Connection_completeMessages</ref>(<ref refid="structUA__Connection" kindref="compound">UA_Connection</ref><sp/>*connection,<sp/><ref refid="structUA__String" kindref="compound">UA_ByteString</ref><sp/>received);</highlight></codeline>
-<codeline lineno="105"><highlight class="normal"></highlight></codeline>
-<codeline lineno="106"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight></codeline>
-<codeline lineno="107"><highlight class="preprocessor"></highlight><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>extern<sp/>&quot;C&quot;</highlight><highlight class="normal"></highlight></codeline>
-<codeline lineno="108"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
-<codeline lineno="109"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
-<codeline lineno="110"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>UA_CONNECTION_H_<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><ref refid="ua__statuscodes_8h_1a82f92964aaa5dd1c5a1c5d7e9099883c" kindref="member">UA_StatusCode</ref><sp/><ref refid="ua__config_8h_1aba46d236acc7541d0ee0a96f8c7f7907" kindref="member">UA_EXPORT</ref></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><ref refid="ua__connection_8h_1afc3823d9170acb40ea506e816d5c2ca1" kindref="member">UA_Connection_completeMessages</ref>(<ref refid="structUA__Connection" kindref="compound">UA_Connection</ref><sp/>*connection,<sp/><ref refid="structUA__String" kindref="compound">UA_ByteString</ref><sp/>*<sp/><ref refid="ua__config_8h_1aa222b32064cc4bfa8025fb023ced1c31" kindref="member">UA_RESTRICT</ref><sp/>message,</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="ua__types_8h_1a9a1800cf448ad57727ab920aa254a1a4" kindref="member">UA_Boolean</ref><sp/>*<sp/><ref refid="ua__config_8h_1aa222b32064cc4bfa8025fb023ced1c31" kindref="member">UA_RESTRICT</ref><sp/>realloced);</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cplusplus</highlight></codeline>
+<codeline lineno="123"><highlight class="preprocessor"></highlight><highlight class="normal">}<sp/></highlight><highlight class="comment">//<sp/>extern<sp/>&quot;C&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+<codeline lineno="125"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>UA_CONNECTION_H_<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
     </programlisting>
     <location file="/home/travis/build/acplt/open62541/include/ua_connection.h"/>
   </compounddef>
