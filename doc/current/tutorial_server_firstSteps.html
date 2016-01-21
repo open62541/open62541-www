@@ -239,32 +239,38 @@ Linking C shared library libopen62541.so
 <h2>Creating your first server<a class="headerlink" href="#creating-your-first-server" title="Permalink to this headline">¶</a></h2>
 <p>Let&#8217;s build a very rudimentary server. Create a separate folder for your application and copy the necessary source files into an a subfolder named <code class="docutils literal"><span class="pre">include</span></code>. Don&#8217;t forget to also copy the shared library. Then create a new C sourcefile called <code class="docutils literal"><span class="pre">myServer.c</span></code>. If you choose to use a shell, the whole process should look like this:</p>
 <div class="highlight-python"><div class="highlight"><pre>:open62541/build&gt; cd ../../
-:&gt; mkdir myServerApp
-:&gt; cd myServerApp
-:myServerApp&gt; mkdir include
-:myServerApp&gt; cp ../open62541/include/* ./include
-:myServerApp&gt; cp ../open62541/examples/*.h ./include
-:myServerApp&gt; cp ../open62541/build/src_generated/*.h ./include
-:myServerApp&gt; cp ../open62541/build/*.so .
-:myServerApp&gt; tree
+:&gt; mkdir myApp
+:&gt; cd myApp
+:myApp&gt; mkdir include
+:myApp&gt; cp ../open62541/include/* ./include
+:myApp&gt; cp ../open62541/src_extra/*.h ./include
+:myApp&gt; cp ../open62541/build/src_generated/*.h ./include
+:myApp&gt; cp ../open62541/build/*.so .
+:myApp&gt; tree
 .
-|-- include
-|   |-- logger_stdout.h
-|   |-- networklayer_tcp.h
-|   |-- networklayer_udp.h
-|   |-- ua_client.h
-|   |-- ua_config.h
-|   |-- ua_config.h.in
-|   |-- ua_connection.h
-|   |-- ua_log.h
-|   |-- ua_nodeids.h
-|   |-- ua_server.h
-|   |-- ua_statuscodes.h
-|   |-- ua_types_generated.h
-|   `-- ua_types.h
-|-- libopen62541.so
-`-- myServer.c
-:myServerApp&gt; touch myServer.c
+├── include
+│   ├── logger_stdout.h
+│   ├── networklayer_tcp.h
+│   ├── networklayer_udp.h
+│   ├── ua_client.h
+│   ├── ua_client_highlevel.h
+│   ├── ua_config.h
+│   ├── ua_config.h.in
+│   ├── ua_connection.h
+│   ├── ua_job.h
+│   ├── ua_log.h
+│   ├── ua_nodeids.h
+│   ├── ua_server_external_ns.h
+│   ├── ua_server.h
+│   ├── ua_statuscodes.h
+│   ├── ua_transport_generated_encoding_binary.h
+│   ├── ua_transport_generated.h
+│   ├── ua_types_generated_encoding_binary.h
+│   ├── ua_types_generated.h
+│   └── ua_types.h
+├── libopen62541.so
+└── myServer.c
+:myApp&gt; touch myServer.c
 </pre></div>
 </div>
 <p>Open myServer.c and write/paste your minimal server application:</p>
@@ -276,11 +282,16 @@ Linking C shared library libopen62541.so
 <span class="cp"># include &quot;networklayer_tcp.h&quot;</span>
 
 <span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
+<span class="n">UA_Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger_Stdout</span><span class="p">;</span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
-  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
+  <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
+  <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">,</span> <span class="n">logger</span><span class="p">);</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger_Stdout</span><span class="p">;</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
   <span class="n">running</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
-  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
   <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
@@ -288,12 +299,12 @@ Linking C shared library libopen62541.so
 </pre></div>
 </div>
 <p>This is all that is needed to start your OPC UA Server. Compile the the server with GCC using the following command:</p>
-<div class="highlight-python"><div class="highlight"><pre>:myServerApp&gt; gcc -Wl,-rpath,`pwd` -I ./include -L ./ ./myServer.c -o myServer  -lopen62541
+<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; gcc -Wl,-rpath,`pwd` -I ./include -L ./ ./myServer.c -o myServer  -lopen62541
 </pre></div>
 </div>
-<p>Some notes: You are using a dynamically linked library (libopen62541.so), which needs to be locates in your dynamic linkers search path. Unless you copy libopen62541.so into a common folder like /lib or /usr/lib, the linker will fail to find the library and complain (i.e. not run the application). <code class="docutils literal"><span class="pre">-Wl,-rpath,`pwd`</span></code> adds your present working directory to the relative searchpaths of the linker when executing the binary (you can also use <code class="docutils literal"><span class="pre">-Wl,-rpath,.</span></code> if the binary and the library are always in the same directory).</p>
+<p>Some notes: You are using a dynamically linked library (libopen62541.so), which needs to be located in your dynamic linkers search path. Unless you copy libopen62541.so into a common folder like /lib or /usr/lib, the linker will fail to find the library and complain (i.e. not run the application). <code class="docutils literal"><span class="pre">-Wl,-rpath,`pwd`</span></code> adds your present working directory to the relative searchpaths of the linker when executing the binary (you can also use <code class="docutils literal"><span class="pre">-Wl,-rpath,.</span></code> if the binary and the library are always in the same directory).</p>
 <p>Now execute the server:</p>
-<div class="highlight-python"><div class="highlight"><pre>:myServerApp&gt; ./myServer
+<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; ./myServer
 </pre></div>
 </div>
 <p>You have now compiled and started your first OPC UA Server. Though quite unspectacular and only terminatable with <code class="docutils literal"><span class="pre">CTRL+C</span></code> (SIGTERM) at the moment, you can already launch it and browse around with UA Expert. The Server will be listening on localhost:16664 - go ahead and give it a try.</p>
@@ -306,27 +317,26 @@ Linking C shared library libopen62541.so
 <span class="cp">#include</span> <span class="cpf">&quot;logger_stdout.h&quot;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&quot;networklayer_tcp.h&quot;</span><span class="cp"></span>
 
-<span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
-<span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
-
+<span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">signal</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">running</span> <span class="o">=</span> <span class="n">UA_FALSE</span><span class="p">;</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="n">UA_FALSE</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
-  <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
-  <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger_Stdout_new</span><span class="p">();</span>
-  <span class="n">UA_Server_setLogger</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">logger</span><span class="p">);</span>
-  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
-  <span class="n">running</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
-  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
-  <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
+    <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">,</span> <span class="n">Logger_Stdout</span><span class="p">);</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger_Stdout</span><span class="p">;</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 
-  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Terminated</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+    <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">nl</span><span class="p">.</span><span class="n">deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nl</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -353,10 +363,10 @@ Terminated
 <p>open62541 is a highly configurable stack that lets you turn several features on or off depending on your needs. This allows you to create anything from a very minimal and ressource saving OPC UA client to a full-fledged server. Picking which features you want is part of the cmake building process. CMake will handle the configuration of Makefiles, definition of precompiler variables and calling of auxilary scripts for you.If the building process above has failed on your system, please make sure that you have all the prerequisites installed and configured properly.</p>
 <p>A detailed list of all configuration options is given in the documentation of open62541. This tutorial will introduce you to some of these options one by one in due course, but I will mention a couple of non-feature related options at this point to give readers a heads-up on the advantages and consequences of using them.</p>
 <p><strong>Warning:</strong> If you change cmake options, always make sure that you have a clean build directory first (unless you know what you are doing). CMake will <em>not</em> reliably detect changes to non-source files, such as source files for scripts and generators. Always run <code class="docutils literal"><span class="pre">make</span> <span class="pre">clean</span></code> between builds, and remove the <code class="docutils literal"><span class="pre">CMakeCache.txt</span></code> file from your build directory to make super-double-extra-sure that your build is clean before executing cmake.</p>
-<p><strong>ENABLE_AMALGAMATION</strong></p>
+<p><strong>UA_ENABLE_AMALGAMATION</strong></p>
 <p>This one might appear quite mysterious at first... this option will enable a python script (tools/amalgate.py) that will merge all headers of open62541 into a single header and c files into a single c file. Why? The most obvious answer is that you might not want to use a shared library in your project, but compile everything into your own binary. Let&#8217;s give that a try... get back into the build folder <code class="docutils literal"><span class="pre">make</span> <span class="pre">clean</span></code> and then try this:</p>
 <div class="highlight-python"><div class="highlight"><pre>:open62541/build&gt; make clean
-:open62541/build&gt; cmake -DENABLE_AMALGAMATION=On ../
+:open62541/build&gt; cmake -DUA_ENABLE_AMALGAMATION=On ../
 :open62541/build&gt; make
 [  5%] Generating open62541.h
 Starting amalgamating file /open62541/build/open62541.h
@@ -378,12 +388,12 @@ Linking C shared library libopen62541.so
 :open62541/build&gt;
 </pre></div>
 </div>
-<p>Switch back to your MyServerApp directory and recompile your binary, this time embedding all open62541 functionality in one executable:</p>
-<div class="highlight-python"><div class="highlight"><pre>:open62541/build&gt; cd ../../myServerApp
+<p>Switch back to your myApp directory and recompile your binary, this time embedding all open62541 functionality in one executable:</p>
+<div class="highlight-python"><div class="highlight"><pre>:open62541/build&gt; cd ../../myApp
 :open62541/build&gt; cp ../open62541/build/open62541.* .
-:myServerApp&gt; gcc -std=c99 -I ./ -c ./open62541.c
-:myServerApp&gt; gcc -std=c99 -I ./include -o myServer myServer.c open62541.o
-:myServerApp&gt; ./myServer
+:myApp&gt; gcc -std=c99 -I ./ -c ./open62541.c
+:myApp&gt; gcc -std=c99 -I ./include -o myServer myServer.c open62541.o
+:myApp&gt; ./myServer
 </pre></div>
 </div>
 <p>You can now start the server and browse around as before. As you might have noticed, no shared library is required anymore. That makes the application more portable or runnable on systems without dynamic linking support and allows you to use functions that are not exported by the library (which propably means we haven&#8217;t documented them as thouroughly...); on the other hand the application is also much bigger, so if you intend to also use a client with open62541, you might be inclined to overthink amalgamation.</p>
@@ -393,11 +403,16 @@ Linking C shared library libopen62541.so
 <span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
 
 <span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
+<span class="n">UA_Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger_Stdout</span><span class="p">;</span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
-  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
+  <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
+  <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">,</span> <span class="n">logger</span><span class="p">);</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger_Stdout</span><span class="p">;</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
   <span class="n">running</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
-  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
   <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
@@ -405,16 +420,16 @@ Linking C shared library libopen62541.so
 </pre></div>
 </div>
 <p>It can now also be compiled without the include directory, i.e.,</p>
-<div class="highlight-python"><div class="highlight"><pre>:myServerApp&gt; gcc -std=c99 myServer.c open62541.c -o myServer
-:myServerApp&gt; ./myServer
+<div class="highlight-python"><div class="highlight"><pre>:myApp&gt; gcc -std=c99 myServer.c open62541.c -o myServer
+:myApp&gt; ./myServer
 </pre></div>
 </div>
 <p>Please note that at times the amalgamation script has... well, bugs. It might include files in the wrong order or include features even though the feature is turned off. Please report problems with amalgamation so we can improve it.</p>
-<p><strong>BUILD_EXAMPLECLIENT</strong> and <strong>BUILD_EXAMPLESERVER</strong></p>
+<p><strong>UA_BUILD_EXAMPLECLIENT</strong> and <strong>UA_BUILD_EXAMPLESERVER</strong></p>
 <p>If you build your stack with the above two options, you will enable the example server/client applications to be built. You can review their sources under <code class="docutils literal"><span class="pre">examples/server.c</span></code> and <code class="docutils literal"><span class="pre">example/client.c</span></code>. These provide a neat reference for just about any features of open62541, as most of them are included in these examples by us (the developers) for testing and demonstration purposes.</p>
-<p>Unfortunately, these examples include just about everything the stack can do... which makes them rather bad examples for newcomers seeking an easy introduction. They are also dynamically configured by the CMake options, so they might be a bit more difficult to read. Non the less you can find any of the concepts demonstrated here in these examples as well and you can build them like so (and this is what you will see when you run them):</p>
+<p>Unfortunately, these examples include just about everything the stack can do... which makes them rather bad examples for newcomers seeking an easy introduction. They are also dynamically configured by the CMake options, so they might be a bit more difficult to read. Nontheless you can find any of the concepts demonstrated here in these examples as well, and you can build them like so (and this is what you will see when you run them):</p>
 <div class="highlight-python"><div class="highlight"><pre>:open62541/build&gt; make clean
-:open62541/build&gt; cmake -DBUILD_EXAMPLECLIENT=On -DBUILD_EXAMPLESERVER=On ../
+:open62541/build&gt; cmake -DUA_BUILD_EXAMPLECLIENT=On -DUA_BUILD_EXAMPLESERVER=On ../
 :open62541/build&gt; make
 :open62541/build&gt; ./server &amp;
 [07/28/2015 21:42:07.977.352] info/communication        Listening on opc.tcp://Cassandra:16664
@@ -449,7 +464,7 @@ Created &#39;NewVariable&#39; with numeric NodeID 177
 :open62541/build&gt;
 </pre></div>
 </div>
-<p><strong>BUILD_DOCUMENTATION</strong></p>
+<p><strong>UA_BUILD_DOCUMENTATION</strong></p>
 <p>If you have doxygen installed, this will produce a reference under <code class="docutils literal"><span class="pre">/doc</span></code> that documents functions that the shared library advertises (i.e. are available to users). We are doing our best to keep the source well commented.</p>
 <p><strong>CMAKE_BUILD_TYPE</strong></p>
 <p>There are several ways of building open62541, and all have their advantages and disadvanted. The build type mainly affects optimization flags (the more release, the heavier the optimization) and the inclusion of debugging symbols. The following are available:</p>

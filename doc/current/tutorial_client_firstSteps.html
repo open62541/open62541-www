@@ -155,28 +155,34 @@
 <p>You should already have a basic server from the previous tutorial. open62541 provides both a server- and clientside API, so creating a client is equally as easy as creating a server. We are going to use dynamic linking (libopen62541.so) from now on, because our client and server will share a lot of code. Reusing the shared library will considerably reduce the overhead. To avoid confusion, remove the amalgated open62541.c/h files from your example directory.</p>
 <p>As a recap, your directory structure should now look like this:</p>
 <div class="highlight-python"><div class="highlight"><pre>:myApp&gt; rm *.o open62541.*
+:myApp&gt; cp ../open62541/build/open62541.h include/
 :myApp&gt; ln -s ../open62541/build/*so ./
 :myApp&gt; tree
 .
-+── include
-│   +── logger_stdout.h
-│   +── networklayer_tcp.h
-│   +── networklayer_udp.h
-│   +── open62541.h
-│   +── ua_client.h
-│   +── ua_config.h
-│   +── ua_config.h.in
-│   +── ua_connection.h
-│   +── ua_log.h
-│   +── ua_nodeids.h
-│   +── ua_server.h
-│   +── ua_statuscodes.h
-│   +── ua_transport_generated.h
-│   +── ua_types_generated.h
-│   +── ua_types.h
-+── libopen62541.so -&gt; ../../open62541/build/libopen62541.so
-+── myServer
-+── myServer.c
+├── include
+│   ├── logger_stdout.h
+│   ├── networklayer_tcp.h
+│   ├── networklayer_udp.h
+│   ├── open62541.h
+│   ├── ua_client.h
+│   ├── ua_client_highlevel.h
+│   ├── ua_config.h
+│   ├── ua_config.h.in
+│   ├── ua_connection.h
+│   ├── ua_job.h
+│   ├── ua_log.h
+│   ├── ua_nodeids.h
+│   ├── ua_server_external_ns.h
+│   ├── ua_server.h
+│   ├── ua_statuscodes.h
+│   ├── ua_transport_generated_encoding_binary.h
+│   ├── ua_transport_generated.h
+│   ├── ua_types_generated_encoding_binary.h
+│   ├── ua_types_generated.h
+│   └── ua_types.h
+├── libopen62541.so -&gt; ../open62541/build/libopen62541.so
+├── myServer
+└── myServer.c
 </pre></div>
 </div>
 <p>Note that I have linked the library into the folder to spare me the trouble of copying it every time I change/rebuild the stack.</p>
@@ -189,8 +195,8 @@
 <span class="cp">#include</span> <span class="cpf">&quot;networklayer_tcp.h&quot;</span><span class="cp"></span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout_new</span><span class="p">());</span>
-  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">ClientNetworkLayerTCP_connect</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout</span><span class="p">);</span>
+  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientConnectionTCP</span><span class="p">,</span><span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
   <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
     <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
@@ -298,6 +304,7 @@ listed types</td>
 <p>In this example we are going to read node (n=0,i=2258), i.e. a node in namespace 0 with a numerical id 2258. This node is present in every server (since it is located in namespace 0) and contains server current time (encoded as UInt64).</p>
 <p>Let us extend the client with with an action reading node&#8217;s value:</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 
 <span class="cp">#include</span> <span class="cpf">&quot;ua_types.h&quot;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&quot;ua_server.h&quot;</span><span class="cp"></span>
@@ -305,8 +312,8 @@ listed types</td>
 <span class="cp">#include</span> <span class="cpf">&quot;networklayer_tcp.h&quot;</span><span class="cp"></span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout_new</span><span class="p">());</span>
-  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">ClientNetworkLayerTCP_connect</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout</span><span class="p">);</span>
+  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientConnectionTCP</span><span class="p">,</span><span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
   <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
     <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
@@ -322,7 +329,7 @@ listed types</td>
   <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">nodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2258</span><span class="p">);</span>
   <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">attributeId</span> <span class="o">=</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">;</span>
 
-  <span class="n">UA_ReadResponse</span> <span class="n">rResp</span> <span class="o">=</span> <span class="n">UA_Client_read</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
+  <span class="n">UA_ReadResponse</span> <span class="n">rResp</span> <span class="o">=</span> <span class="n">UA_Client_Service_read</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">rReq</span><span class="p">);</span>
   <span class="k">if</span><span class="p">(</span><span class="n">rResp</span><span class="p">.</span><span class="n">responseHeader</span><span class="p">.</span><span class="n">serviceResult</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">&amp;&amp;</span>
      <span class="n">rResp</span><span class="p">.</span><span class="n">resultsSize</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">hasValue</span> <span class="o">&amp;&amp;</span>
      <span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
@@ -355,42 +362,42 @@ listed types</td>
 <span class="cp">#include</span> <span class="cpf">&quot;networklayer_tcp.h&quot;</span><span class="cp"></span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout_new</span><span class="p">());</span>
-  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">ClientNetworkLayerTCP_connect</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
-  <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientConnectionTCP</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//variables to store data</span>
+    <span class="n">UA_DateTime</span> <span class="n">raw_date</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">string_date</span><span class="p">;</span>
+
+    <span class="n">UA_ReadRequest</span> <span class="n">rReq</span><span class="p">;</span>
+    <span class="n">UA_ReadRequest_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span> <span class="o">=</span> <span class="n">UA_Array_new</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READVALUEID</span><span class="p">]);</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToReadSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">nodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2258</span><span class="p">);</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">attributeId</span> <span class="o">=</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">;</span>
+
+    <span class="n">UA_ReadResponse</span> <span class="n">rResp</span> <span class="o">=</span> <span class="n">UA_Client_Service_read</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">rReq</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">rResp</span><span class="p">.</span><span class="n">responseHeader</span><span class="p">.</span><span class="n">serviceResult</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">&amp;&amp;</span>
+        <span class="n">rResp</span><span class="p">.</span><span class="n">resultsSize</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">hasValue</span> <span class="o">&amp;&amp;</span>
+        <span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+        <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">.</span><span class="n">type</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">])</span> <span class="p">{</span>
+      <span class="n">raw_date</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">UA_DateTime</span><span class="o">*</span><span class="p">)</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">&quot;raw date is: %&quot;</span> <span class="n">PRId64</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">raw_date</span><span class="p">);</span>
+      <span class="n">string_date</span> <span class="o">=</span> <span class="n">UA_DateTime_toString</span><span class="p">(</span><span class="n">raw_date</span><span class="p">);</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">&quot;string date is: %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">string_date</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">string_date</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_ReadRequest_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
+    <span class="n">UA_ReadResponse_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">);</span>
+    <span class="n">UA_String_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">string_date</span><span class="p">);</span>
+
+    <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
     <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="c1">//variables to store data</span>
-  <span class="n">UA_DateTime</span> <span class="n">raw_date</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-  <span class="n">UA_String</span><span class="o">*</span> <span class="n">string_date</span> <span class="o">=</span> <span class="n">UA_String_new</span><span class="p">();</span>
-
-  <span class="n">UA_ReadRequest</span> <span class="n">rReq</span><span class="p">;</span>
-  <span class="n">UA_ReadRequest_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
-  <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span> <span class="o">=</span> <span class="n">UA_Array_new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READVALUEID</span><span class="p">],</span> <span class="mi">1</span><span class="p">);</span>
-  <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToReadSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-  <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">nodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2258</span><span class="p">);</span>
-  <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">attributeId</span> <span class="o">=</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">;</span>
-
-  <span class="n">UA_ReadResponse</span> <span class="n">rResp</span> <span class="o">=</span> <span class="n">UA_Client_read</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
-  <span class="k">if</span><span class="p">(</span><span class="n">rResp</span><span class="p">.</span><span class="n">responseHeader</span><span class="p">.</span><span class="n">serviceResult</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">&amp;&amp;</span>
-     <span class="n">rResp</span><span class="p">.</span><span class="n">resultsSize</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">hasValue</span> <span class="o">&amp;&amp;</span>
-     <span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-     <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">.</span><span class="n">type</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">])</span> <span class="p">{</span>
-         <span class="n">raw_date</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">UA_DateTime</span><span class="o">*</span><span class="p">)</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
-         <span class="n">printf</span><span class="p">(</span><span class="s">&quot;raw date is: %llu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">raw_date</span><span class="p">);</span>
-         <span class="n">UA_DateTime_toString</span><span class="p">(</span><span class="n">raw_date</span><span class="p">,</span> <span class="n">string_date</span><span class="p">);</span>
-         <span class="n">printf</span><span class="p">(</span><span class="s">&quot;string date is: %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">string_date</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">,</span> <span class="n">string_date</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
-  <span class="p">}</span>
-
-  <span class="n">UA_ReadRequest_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
-  <span class="n">UA_ReadResponse_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">);</span>
-  <span class="n">UA_String_delete</span><span class="p">(</span><span class="n">string_date</span><span class="p">);</span>
-
-  <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
-  <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
-  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
