@@ -170,7 +170,7 @@
 <p>The current server example is very boring and the client doesn&#8217;t do anything but connecting and disconnecting. We will fix that now by adding our own nodes at runtime (as opposed to loading them from an XML file) and we will do so once from our server and once from our client.</p>
 <p>The user does not have direct access to the nodestore of the server; so even the server application cannot directly manipulate the memory nodes are stored in. Instead, a series of API calls allow the userspace to interact with the servers nodestore. How the functions do their job is hidden - especially for the client, who uses services to create/delete nodes. To the user however this provides a substantial simplifaction. Arguments passed to these functions may vary depending on the type of the node; but if they exist for both client and server, they can be used symmetrically.</p>
 <p>You can pick an appropriate function for adding and deleting nodes by sticking to the following regular expression:</p>
-<div class="highlight-python"><div class="highlight"><pre>UA_(Client|Server)_(add|delete)&lt;TYPE&gt;Node();
+<div class="highlight-python"><div class="highlight"><pre><span></span>UA_(Client|Server)_(add|delete)&lt;TYPE&gt;Node();
 </pre></div>
 </div>
 <p>The following table shows which of these functions are currently implemented.</p>
@@ -223,7 +223,7 @@
 </table>
 <p><strong>FIXME</strong>: The client should be able to do more than that. Please check back with us to see if we have come around to implement that feature.</p>
 <p>Let us modify our current server to create a new object node (a folder) that will contain any objects and variables the clients wants to delete.:</p>
-<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
 #include &lt;signal.h&gt;
 
 # include &quot;ua_types.h&quot;
@@ -268,7 +268,7 @@ int main(void) {
 </div>
 <p>If you run the server now and check with UAExpert, you will find a new (empty) folder in /Objects. You may notice the numerous macros for simply creating OPC UA type variables in open62541. The ones used here create literals; we also provide <code class="docutils literal"><span class="pre">UA_&lt;type&gt;_ALLOC</span></code> macros for some of them that allow for storing the variable in a pointer.</p>
 <p>Why was the NodeId myObjectsId passed? When creating dynamic node instances at runtime, chances are high that you will not care which id the node has, as long as you can reference it later. When passing numeric nodeids with a identifier 0 to open62541, the stack evaluates this as &#8220;any non allocated ID in that namespace&#8221; and assign the node a new one. To find out which ID was actually assigned to the new node, you <em>may</em> pass a pointer to a NodeId, which will (after a successfull node insertion) contain the nodeId of the new node. If you don&#8217;t care about the ID of the node, you may also pass NULL as a pointer. The namespace index for nodes you create should never be 0, as that index is reserved for OPC UA&#8217;s self-description (Namespace 0). So the following would have equally worked:</p>
-<div class="highlight-python"><div class="highlight"><pre>UA_StatusCode retval = UA_Server_addObjectNode(
+<div class="highlight-python"><div class="highlight"><pre><span></span>UA_StatusCode retval = UA_Server_addObjectNode(
   server, UA_NODEID_NUMERIC(1,1000), UA_QUALIFIEDNAME(1, &quot;MyObjects&quot;),
   UA_LOCALIZEDTEXT(&quot;en_US&quot;, &quot;MyObjects&quot;),
   UA_LOCALIZEDTEXT(&quot;en_US&quot;, &quot;A folder containing example objects and variables created by the client.&quot;),
@@ -280,7 +280,7 @@ if (retval)
 </pre></div>
 </div>
 <p>However, we will need that nodeId to actually have the client create a couple of nodes. To have the Client actually create a node, say an Object, we just need to pick the propper function and insert it into the example:</p>
-<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
 
 #include &quot;ua_types.h&quot;
 #include &quot;ua_server.h&quot;
@@ -315,7 +315,7 @@ int main(void) {
 </div>
 <p>If you start the server, run the client and take a look at the server with UAExpert afterwards, you will see that the client has created a new node under the &#8216;MyObjects&#8217; node created by the server. We are passing the NodeId (1,0), so the server will pick an appropriate ID for this new node when he creates it.</p>
 <p>Supposing the client wants to clean up? All we need to do is to pass the nodeId returned by the server.:</p>
-<div class="highlight-python"><div class="highlight"><pre>#include &lt;stdio.h&gt;
+<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
 
 #include &quot;ua_types.h&quot;
 #include &quot;ua_server.h&quot;
