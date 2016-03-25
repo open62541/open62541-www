@@ -7,7 +7,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
 SET(CMAKE_TARGET_DEFINITIONS
   "BENCHMARK"
   "UA_NO_AMALGAMATION"
-  "VERSION=80eb5fb"
+  "VERSION=4e529ea"
   )
 
 # Targets to which this target links.
@@ -19,7 +19,7 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "src_generated"
   "../include"
   "../src"
-  "../src_extra"
+  "../plugins"
   "../deps"
   )
 SET(CMAKE_CXX_TARGET_INCLUDE_PATH ${CMAKE_C_TARGET_INCLUDE_PATH})
