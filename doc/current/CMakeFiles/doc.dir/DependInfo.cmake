@@ -7,7 +7,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
 SET(CMAKE_TARGET_DEFINITIONS
   "BENCHMARK"
   "UA_NO_AMALGAMATION"
-  "VERSION=01cbd8c"
+  "VERSION=fbb25e1"
   )
 
 # Targets to which this target links.
