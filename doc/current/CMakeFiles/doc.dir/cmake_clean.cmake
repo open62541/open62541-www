@@ -1,7 +1,7 @@
 FILE(REMOVE_RECURSE
   "CMakeFiles/doc"
   "../doc_src/types.rst"
-  "../doc_src/statuscodes.rst"
+  "../doc_src/constants.rst"
   "../doc_src/types_generated.rst"
 )
 
