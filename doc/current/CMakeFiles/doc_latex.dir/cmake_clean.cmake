@@ -3,6 +3,7 @@ FILE(REMOVE_RECURSE
   "../doc_src/types.rst"
   "../doc_src/constants.rst"
   "../doc_src/types_generated.rst"
+  "../doc_src/server.rst"
 )
 
 # Per-language clean rules from dependency scanning.

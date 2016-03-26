@@ -48,6 +48,7 @@ include doc/CMakeFiles/doc_latex.dir/progress.make
 doc/CMakeFiles/doc_latex: doc_src/types.rst
 doc/CMakeFiles/doc_latex: doc_src/constants.rst
 doc/CMakeFiles/doc_latex: doc_src/types_generated.rst
+doc/CMakeFiles/doc_latex: doc_src/server.rst
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Building LaTeX sources for documentation with Sphinx"
 	cd /home/travis/build/open62541/open62541/build/doc && /home/travis/.local/bin/sphinx-build -b latex -c /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc_latex
@@ -70,10 +71,17 @@ doc_src/types_generated.rst: src_generated/ua_types_generated.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/types_generated.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/build/src_generated/ua_types_generated.h /home/travis/build/open62541/open62541/build/doc_src/types_generated.rst
 
+doc_src/server.rst: ../tools/c2rst.py
+doc_src/server.rst: ../include/ua_server.h
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_5)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/server.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_server.h /home/travis/build/open62541/open62541/build/doc_src/server.rst
+
 doc_latex: doc/CMakeFiles/doc_latex
 doc_latex: doc_src/types.rst
 doc_latex: doc_src/constants.rst
 doc_latex: doc_src/types_generated.rst
+doc_latex: doc_src/server.rst
 doc_latex: doc/CMakeFiles/doc_latex.dir/build.make
 .PHONY : doc_latex
 
