@@ -4,6 +4,8 @@ FILE(REMOVE_RECURSE
   "../doc_src/constants.rst"
   "../doc_src/types_generated.rst"
   "../doc_src/server.rst"
+  "../doc_src/services.rst"
+  "../doc_src/nodestore.rst"
 )
 
 # Per-language clean rules from dependency scanning.
