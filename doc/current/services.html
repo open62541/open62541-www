@@ -159,9 +159,9 @@
   <div class="section" id="services">
 <h1>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h1>
 <p>The services defined in the OPC UA standard.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* All services take as input the server, the current session and pointers to</span>
-<span class="cm">   the request and response. The status code is returned as part of the</span>
-<span class="cm">   response. */</span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Most services take as input the server, the current session and pointers to</span>
+<span class="cm">   the request and response. The possible error codes are returned as part of</span>
+<span class="cm">   the response. */</span>
 <span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Service</span><span class="p">)(</span><span class="n">UA_Server</span><span class="o">*</span><span class="p">,</span> <span class="n">UA_Session</span><span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -247,7 +247,7 @@ Server.</p>
                              <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">);</span>
 
 <span class="cm">/* Add an existing node. The node is assumed to be &quot;finished&quot;, i.e. no</span>
-<span class="cm">   instantiation from inheritance is necessary */</span>
+<span class="cm"> * instantiation from inheritance is necessary */</span>
 <span class="kt">void</span> <span class="nf">Service_AddNodes_existing</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span>
                                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
                                <span class="n">UA_AddNodesResult</span> <span class="o">*</span><span class="n">result</span><span class="p">);</span>
@@ -266,7 +266,8 @@ Server.</p>
                          <span class="n">UA_DeleteNodesResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span> <span class="nf">Service_DeleteNodes_single</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">deleteReferences</span><span class="p">);</span>
+                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                         <span class="n">UA_Boolean</span> <span class="n">deleteReferences</span><span class="p">);</span>
 
 <span class="cm">/* Used to delete one or more References of a Node. */</span>
 <span class="kt">void</span> <span class="nf">Service_DeleteReferences</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
@@ -313,12 +314,18 @@ the AddressSpace or through a View which is a subset of the AddressSpace.</p>
                                            <span class="n">UA_TranslateBrowsePathsToNodeIdsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
 <span class="kt">void</span> <span class="nf">Service_TranslateBrowsePathsToNodeIds_single</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                                                  <span class="k">const</span> <span class="n">UA_BrowsePath</span> <span class="o">*</span><span class="n">path</span><span class="p">,</span> <span class="n">UA_BrowsePathResult</span> <span class="o">*</span><span class="n">result</span><span class="p">);</span>
+                                                  <span class="k">const</span> <span class="n">UA_BrowsePath</span> <span class="o">*</span><span class="n">path</span><span class="p">,</span>
+                                                  <span class="n">UA_BrowsePathResult</span> <span class="o">*</span><span class="n">result</span><span class="p">);</span>
 
+<span class="cm">/* Used by Clients to register the Nodes that they know they will access</span>
+<span class="cm"> * repeatedly (e.g. Write, Call). It allows Servers to set up anything needed so</span>
+<span class="cm"> * that the access operations will be more efficient. */</span>
 <span class="kt">void</span> <span class="nf">Service_RegisterNodes</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                            <span class="k">const</span> <span class="n">UA_RegisterNodesRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                            <span class="n">UA_RegisterNodesResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
+<span class="cm">/* This Service is used to unregister NodeIds that have been obtained via the</span>
+<span class="cm"> * RegisterNodes service. */</span>
 <span class="kt">void</span> <span class="nf">Service_UnregisterNodes</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                              <span class="k">const</span> <span class="n">UA_UnregisterNodesRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                              <span class="n">UA_UnregisterNodesResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
@@ -355,8 +362,6 @@ Nodes.</p>
                          <span class="n">UA_TimestampsToReturn</span> <span class="n">timestamps</span><span class="p">,</span>
                          <span class="k">const</span> <span class="n">UA_ReadValueId</span> <span class="o">*</span><span class="n">id</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">v</span><span class="p">);</span>
 
-<span class="cm">/* Not Implemented: Service_HistoryRead */</span>
-
 <span class="cm">/* Used to write one or more Attributes of one or more Nodes. For constructed</span>
 <span class="cm"> * Attribute values whose elements are indexed, such as an array, this Service</span>
 <span class="cm"> * allows Clients to write the entire set of indexed values as a composite, to</span>
@@ -365,11 +370,10 @@ Nodes.</p>
                    <span class="k">const</span> <span class="n">UA_WriteRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                    <span class="n">UA_WriteResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
-<span class="cm">/* Single attribute writes are exposed to the userspace. The wvalue may be</span>
-<span class="cm">    destroyed (deleteMembers) */</span>
 <span class="n">UA_StatusCode</span> <span class="nf">Service_Write_single</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                                    <span class="k">const</span> <span class="n">UA_WriteValue</span> <span class="o">*</span><span class="n">wvalue</span><span class="p">);</span>
 
+<span class="cm">/* Not Implemented: Service_HistoryRead */</span>
 <span class="cm">/* Not Implemented: Service_HistoryUpdate */</span>
 </pre></div>
 </div>
@@ -379,6 +383,10 @@ Nodes.</p>
 <p>The Method Service Set defines the means to invoke methods. A method shall be
 a component of an Object.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+<span class="cm">/* Used to call (invoke) a list of Methods. Each method call is invoked within</span>
+<span class="cm"> * the context of an existing Session. If the Session is terminated, the results</span>
+<span class="cm"> * of the method&#39;s execution cannot be returned to the Client and are</span>
+<span class="cm"> * discarded. */</span>
 <span class="kt">void</span> <span class="nf">Service_Call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                   <span class="k">const</span> <span class="n">UA_CallRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                   <span class="n">UA_CallResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
@@ -396,6 +404,7 @@ a component of an Object.</p>
 MonitoredItem identifies the item to be monitored and the Subscription to use
 to send Notifications. The item to be monitored may be any Node Attribute.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+
 <span class="cm">/* Used to create and add one or more MonitoredItems to a Subscription. A</span>
 <span class="cm"> * MonitoredItem is deleted automatically by the Server when the Subscription is</span>
 <span class="cm"> * deleted. Deleting a MonitoredItem causes its entire set of triggered item</span>
@@ -405,6 +414,8 @@ to send Notifications. The item to be monitored may be any Node Attribute.</p>
                                   <span class="k">const</span> <span class="n">UA_CreateMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                                   <span class="n">UA_CreateMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
+<span class="cm">/* Used to remove one or more MonitoredItems of a Subscription. When a</span>
+<span class="cm"> * MonitoredItem is deleted, its triggered item links are also deleted. */</span>
 <span class="kt">void</span> <span class="nf">Service_DeleteMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                                   <span class="k">const</span> <span class="n">UA_DeleteMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                                   <span class="n">UA_DeleteMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
@@ -412,6 +423,7 @@ to send Notifications. The item to be monitored may be any Node Attribute.</p>
 <span class="cm">/* Not Implemented: Service_ModifyMonitoredItems */</span>
 <span class="cm">/* Not Implemented: Service_SetMonitoringMode */</span>
 <span class="cm">/* Not Implemented: Service_SetTriggering */</span>
+
 <span class="cp">#endif</span>
 </pre></div>
 </div>
@@ -420,27 +432,45 @@ to send Notifications. The item to be monitored may be any Node Attribute.</p>
 <h2>Subscription Service Set<a class="headerlink" href="#subscription-service-set" title="Permalink to this headline">¶</a></h2>
 <p>Subscriptions are used to report Notifications to the Client.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+
+<span class="cm">/* Used to create a Subscription. Subscriptions monitor a set of MonitoredItems</span>
+<span class="cm"> * for Notifications and return them to the Client in response to Publish</span>
+<span class="cm"> * requests. */</span>
 <span class="kt">void</span> <span class="nf">Service_CreateSubscription</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                                 <span class="k">const</span> <span class="n">UA_CreateSubscriptionRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                                 <span class="n">UA_CreateSubscriptionResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
+<span class="cm">/* Used to modify a Subscription. */</span>
 <span class="kt">void</span> <span class="nf">Service_ModifySubscription</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                                 <span class="k">const</span> <span class="n">UA_ModifySubscriptionRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                                 <span class="n">UA_ModifySubscriptionResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
-<span class="kt">void</span> <span class="nf">Service_DeleteSubscriptions</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_DeleteSubscriptionsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                                 <span class="n">UA_DeleteSubscriptionsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-
+<span class="cm">/* Used for two purposes. First, it is used to acknowledge the receipt of</span>
+<span class="cm"> * NotificationMessages for one or more Subscriptions. Second, it is used to</span>
+<span class="cm"> * request the Server to return a NotificationMessage or a keep-alive</span>
+<span class="cm"> * Message.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Note that the service signature is an exception and does not contain a</span>
+<span class="cm"> * pointer to a PublishResponse. That is because the service queues up publish</span>
+<span class="cm"> * requests internally and sends responses asynchronously based on timeouts. */</span>
 <span class="kt">void</span> <span class="nf">Service_Publish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                      <span class="k">const</span> <span class="n">UA_PublishRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">);</span>
 
+<span class="cm">/* Requests the Subscription to republish a NotificationMessage from its</span>
+<span class="cm"> * retransmission queue. */</span>
 <span class="kt">void</span> <span class="nf">Service_Republish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                        <span class="k">const</span> <span class="n">UA_RepublishRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                        <span class="n">UA_RepublishResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
+<span class="cm">/* Invoked to delete one or more Subscriptions that belong to the Client&#39;s</span>
+<span class="cm"> * Session. */</span>
+<span class="kt">void</span> <span class="nf">Service_DeleteSubscriptions</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_DeleteSubscriptionsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                 <span class="n">UA_DeleteSubscriptionsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+
 <span class="cm">/* Not Implemented: Service_SetPublishingMode */</span>
 <span class="cm">/* Not Implemented: Service_TransferSubscription */</span>
+
 <span class="cp">#endif</span>
 </pre></div>
 </div>
