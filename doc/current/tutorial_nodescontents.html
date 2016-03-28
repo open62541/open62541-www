@@ -272,64 +272,64 @@
 </table>
 <p>The Basenode attributes NodeId and NodeClass uniquely identify that node and cannot be changed (changing them is equal to creating a new node). The DataType, ValueRank and ArrayDimensions are not part of the node attributes in open62541, but instead contained in the UA_Variant data value of that a variable or variableType node (change the value to change these as well).</p>
 <p>Let us use one of some of these functions to slightly alter the Objects node to have a more localized displayname. We will begin on the serverside.:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>
+<span class="c1">#include &lt;signal.h&gt;</span>
 
-# include &quot;ua_types.h&quot;
-# include &quot;ua_server.h&quot;
-# include &quot;logger_stdout.h&quot;
-# include &quot;networklayer_tcp.h&quot;
+<span class="c1"># include &quot;ua_types.h&quot;</span>
+<span class="c1"># include &quot;ua_server.h&quot;</span>
+<span class="c1"># include &quot;logger_stdout.h&quot;</span>
+<span class="c1"># include &quot;networklayer_tcp.h&quot;</span>
 
-UA_Boolean running;
+<span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
 
-void stopHandler(int signal) {
-  running = 0;
-}
+<span class="n">void</span> <span class="n">stopHandler</span><span class="p">(</span><span class="nb">int</span> <span class="n">signal</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main(void) {
-  signal(SIGINT,  stopHandler);
-  signal(SIGTERM, stopHandler);
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="n">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
-  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
-  running = true;
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
+  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
 
-  UA_LocalizedText objectsLocale = UA_LOCALIZEDTEXT(&quot;de_DE&quot;,&quot;Objekkkte&quot;);
-  UA_Server_setAttributeValue(server, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_ATTRIBUTEID_DISPLAYNAME, (void *) &amp;objectsLocale);
+  <span class="n">UA_LocalizedText</span> <span class="n">objectsLocale</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s2">&quot;de_DE&quot;</span><span class="p">,</span><span class="s2">&quot;Objekkkte&quot;</span><span class="p">);</span>
+  <span class="n">UA_Server_setAttributeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">objectsLocale</span><span class="p">);</span>
 
-  UA_Server_run(server, 1, &amp;running);
-  UA_Server_delete(server);
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-  printf(&quot;Bye\n&quot;);
-  return 0;
-}
+  <span class="n">printf</span><span class="p">(</span><span class="s2">&quot;Bye</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Again as a warning: We are using a very lowlevel form of polymorphism here to pass any type value to setAttribute. The type must match, or the server will produce a runtime error (propably a segmentation fault).</p>
 <p>German speakers (and maybe others too) will immediately notice that the localized text is misspelled. There are too many &#8220;k&#8220;&#8216;s there. We will have to fix that, and for practice we will do that using the client.:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>
 
-#include &quot;ua_types.h&quot;
-#include &quot;ua_server.h&quot;
-#include &quot;ua_client.h&quot;
-#include &quot;logger_stdout.h&quot;
-#include &quot;networklayer_tcp.h&quot;
+<span class="c1">#include &quot;ua_types.h&quot;</span>
+<span class="c1">#include &quot;ua_server.h&quot;</span>
+<span class="c1">#include &quot;ua_client.h&quot;</span>
+<span class="c1">#include &quot;logger_stdout.h&quot;</span>
+<span class="c1">#include &quot;networklayer_tcp.h&quot;</span>
 
-int main(void) {
-  UA_Client *client = UA_Client_new(UA_ClientConfig_standard, Logger_Stdout_new());
-  UA_StatusCode retval = UA_Client_connect(client, ClientNetworkLayerTCP_connect, &quot;opc.tcp://localhost:16664&quot;);
-  if(retval != UA_STATUSCODE_GOOD) {
-    UA_Client_delete(client);
-    return retval;
-  }
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="n">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">,</span> <span class="n">Logger_Stdout_new</span><span class="p">());</span>
+  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">ClientNetworkLayerTCP_connect</span><span class="p">,</span> <span class="s2">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+  <span class="p">}</span>
 
-  UA_LocalizedText localeName = UA_LOCALIZEDTEXT(&quot;de_DE&quot;, &quot;Objekte&quot;);
-  retval = UA_Client_setAttributeValue(client, UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_ATTRIBUTEID_DISPLAYNAME, (void *) &amp;localeName);
+  <span class="n">UA_LocalizedText</span> <span class="n">localeName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s2">&quot;de_DE&quot;</span><span class="p">,</span> <span class="s2">&quot;Objekte&quot;</span><span class="p">);</span>
+  <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_setAttributeValue</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">localeName</span><span class="p">);</span>
 
-  UA_Client_disconnect(client);
-  UA_Client_delete(client);
-  return 0;
-}
+  <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -337,57 +337,57 @@ int main(void) {
 <h2>Setting Variable contents<a class="headerlink" href="#setting-variable-contents" title="Permalink to this headline">¶</a></h2>
 <p>In theory, you could use the previously introduced setAttributeValue (or getAttributeValue) to manipulate the contents of variables. This is true for the client, whose only other method of interaction would be filling out a manual write request. We will explore this method first and then take a look at some better ways to handle variables on the server side.</p>
 <p>We will first create a new variable on the server side during startup to introduce variables and variants, which might be quite daunting at first. We will then update it once from the serverside.:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>
+<span class="c1">#include &lt;signal.h&gt;</span>
 
-# include &quot;ua_types.h&quot;
-# include &quot;ua_server.h&quot;
-# include &quot;logger_stdout.h&quot;
-# include &quot;networklayer_tcp.h&quot;
+<span class="c1"># include &quot;ua_types.h&quot;</span>
+<span class="c1"># include &quot;ua_server.h&quot;</span>
+<span class="c1"># include &quot;logger_stdout.h&quot;</span>
+<span class="c1"># include &quot;networklayer_tcp.h&quot;</span>
 
-UA_Boolean running;
+<span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
 
-void stopHandler(int signal) {
-  running = 0;
-}
+<span class="n">void</span> <span class="n">stopHandler</span><span class="p">(</span><span class="nb">int</span> <span class="n">signal</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main(void) {
-  signal(SIGINT,  stopHandler);
-  signal(SIGTERM, stopHandler);
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="n">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
-  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
-  running = true;
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
+  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
 
-  // Create a Int32 as value
-  UA_Variant *myValueVariant = UA_Variant_new();
-  UA_Int32 myValue = 42;
-  UA_Variant_setScalarCopy(myValueVariant, &amp;myValue, &amp;UA_TYPES[UA_TYPES_INT32]);
+  <span class="o">//</span> <span class="n">Create</span> <span class="n">a</span> <span class="n">Int32</span> <span class="k">as</span> <span class="n">value</span>
+  <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">myValueVariant</span> <span class="o">=</span> <span class="n">UA_Variant_new</span><span class="p">();</span>
+  <span class="n">UA_Int32</span> <span class="n">myValue</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+  <span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">myValueVariant</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">myValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
 
-  // Create a variable node containing this value
-  UA_NodeId myVarNode;
-  UA_Server_addVariableNode(server,
-                            UA_NODEID_NUMERIC(1,12345),
-                            UA_QUALIFIEDNAME(1, &quot;MyVar&quot;),
-                            UA_LOCALIZEDTEXT(&quot;en_EN&quot;, &quot;MyVar&quot;),
-                            UA_LOCALIZEDTEXT(&quot;en_EN&quot;, &quot;My Variable Node&quot;),
-                            UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER),
-                            UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
-                            0, 0, myValueVariant, &amp;myVarNode
-                          );
+  <span class="o">//</span> <span class="n">Create</span> <span class="n">a</span> <span class="n">variable</span> <span class="n">node</span> <span class="n">containing</span> <span class="n">this</span> <span class="n">value</span>
+  <span class="n">UA_NodeId</span> <span class="n">myVarNode</span><span class="p">;</span>
+  <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span>
+                            <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12345</span><span class="p">),</span>
+                            <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;MyVar&quot;</span><span class="p">),</span>
+                            <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s2">&quot;en_EN&quot;</span><span class="p">,</span> <span class="s2">&quot;MyVar&quot;</span><span class="p">),</span>
+                            <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s2">&quot;en_EN&quot;</span><span class="p">,</span> <span class="s2">&quot;My Variable Node&quot;</span><span class="p">),</span>
+                            <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span>
+                            <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASCOMPONENT</span><span class="p">),</span>
+                            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">myValueVariant</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">myVarNode</span>
+                          <span class="p">);</span>
 
-  // Update the value to 43
-  UA_Variant *updateMyValueVariant = UA_Variant_new();
-  myValue = 22;
-  UA_Variant_setScalarCopy(updateMyValueVariant, &amp;myValue, &amp;UA_TYPES[UA_TYPES_INT32]);
-  UA_Server_setAttributeValue(server, UA_NODEID_NUMERIC(1,12345), UA_ATTRIBUTEID_VALUE, (void *) updateMyValueVariant);
+  <span class="o">//</span> <span class="n">Update</span> <span class="n">the</span> <span class="n">value</span> <span class="n">to</span> <span class="mi">43</span>
+  <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">updateMyValueVariant</span> <span class="o">=</span> <span class="n">UA_Variant_new</span><span class="p">();</span>
+  <span class="n">myValue</span> <span class="o">=</span> <span class="mi">22</span><span class="p">;</span>
+  <span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">updateMyValueVariant</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">myValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+  <span class="n">UA_Server_setAttributeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12345</span><span class="p">),</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span> <span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="p">)</span> <span class="n">updateMyValueVariant</span><span class="p">);</span>
 
-  UA_Server_run(server, 1, &amp;running);
-  UA_Server_delete(server);
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-  printf(&quot;Bye\n&quot;);
-  return 0;
-}
+  <span class="n">printf</span><span class="p">(</span><span class="s2">&quot;Bye</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Let&#8217;s take a closer look at what was done here. You already know the <em>UA_(Server|Client)_add&lt;Type&gt;Node</em> from the previous tutorial. What is new is the variant datatype. A variant is a container for an arbitrary OPC UA builtin type, which is stored in the field <code class="docutils literal"><span class="pre">`(void</span> <span class="pre">*)</span> <span class="pre">variant-&gt;data`</span></code>. Note that this field is void, which is the same kind of low-level polymorphism we already met in <code class="docutils literal"><span class="pre">`setAttributeValue`</span></code>. So we need to also store the dataType along with the variant to distinguish between contents. A variant can always contain nothing at all, which is a NULL pointer. Variants can also contain arrays of builtin types. In that case the arrayDimensions and arrayDimensionsSize fields of the variant would be set.</p>
@@ -410,46 +410,46 @@ int main(void) {
 <p>The serverside however has a far niftier way to deal with variables, particularly the kind of variable that updates itself continuously. You may notice that we lost control over updating the variable&#8217;s integer as soon as we entered the main look... what if this value needs to be updated regulary?</p>
 <p>The server has a unique way of dealing with variants. Instead of reading a builtin type attached to the variant, the variant can point to a function. Whenever a variable node is read and the variant accessed, that function will be called and asked to provide a UA_DataValue that will be send to the client. The concept of calling a function when something inside the stack happens is a <code class="docutils literal"><span class="pre">callback</span> <span class="pre">function</span></code>. Callback function must have a fixed format, even though you declare them in userspace. You cannot change the type, number or sequence of arguments, and neither can you alter the return type.</p>
 <p>Let&#8217;s turn myVar into an access counter.:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>#include &lt;stdio.h&gt;
-#include &lt;signal.h&gt;
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1">#include &lt;stdio.h&gt;</span>
+<span class="c1">#include &lt;signal.h&gt;</span>
 
-# include &quot;ua_types.h&quot;
-# include &quot;ua_server.h&quot;
-# include &quot;logger_stdout.h&quot;
-# include &quot;networklayer_tcp.h&quot;
+<span class="c1"># include &quot;ua_types.h&quot;</span>
+<span class="c1"># include &quot;ua_server.h&quot;</span>
+<span class="c1"># include &quot;logger_stdout.h&quot;</span>
+<span class="c1"># include &quot;networklayer_tcp.h&quot;</span>
 
-UA_Boolean running;
-UA_Int32 global_accessCounter = 0;
+<span class="n">UA_Boolean</span> <span class="n">running</span><span class="p">;</span>
+<span class="n">UA_Int32</span> <span class="n">global_accessCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-void stopHandler(int signal) {
-  running = 0;
-}
+<span class="n">void</span> <span class="n">stopHandler</span><span class="p">(</span><span class="nb">int</span> <span class="n">signal</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-static UA_StatusCode readMyVar(void *handle, UA_Boolean sourceTimeStamp, const UA_NumericRange *range, UA_DataValue *value) {
-  global_accessCounter++;
-  value-&gt;hasValue = true;
-  UA_Variant_setScalarCopy(&amp;value-&gt;value, &amp;global_accessCounter, &amp;UA_TYPES[UA_TYPES_INT32]);
-  return UA_STATUSCODE_GOOD;
-}
+<span class="n">static</span> <span class="n">UA_StatusCode</span> <span class="n">readMyVar</span><span class="p">(</span><span class="n">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">sourceTimeStamp</span><span class="p">,</span> <span class="n">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="nb">range</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">global_accessCounter</span><span class="o">++</span><span class="p">;</span>
+  <span class="n">value</span><span class="o">-&gt;</span><span class="n">hasValue</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
+  <span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">global_accessCounter</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+  <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
 
-int main(void) {
-  signal(SIGINT,  stopHandler);
-  signal(SIGTERM, stopHandler);
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="n">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-  UA_Server *server = UA_Server_new(UA_ServerConfig_standard);
-  UA_Server_addNetworkLayer(server, ServerNetworkLayerTCP_new(UA_ConnectionConfig_standard, 16664));
-  running = true;
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">UA_ServerConfig_standard</span><span class="p">);</span>
+  <span class="n">UA_Server_addNetworkLayer</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">ServerNetworkLayerTCP_new</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">));</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="n">true</span><span class="p">;</span>
 
-  UA_DataSource myDataSource = (UA_DataSource) {.handle = NULL, .read = readMyVar, .write = NULL};
-  UA_Server_addDataSourceVariableNode(server, myDataSource, UA_QUALIFIEDNAME(1, &quot;MyVar&quot;), UA_NODEID_NUMERIC(1,12345),
-                                      UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER), UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES), NULL);
+  <span class="n">UA_DataSource</span> <span class="n">myDataSource</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_DataSource</span><span class="p">)</span> <span class="p">{</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">,</span> <span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">readMyVar</span><span class="p">,</span> <span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">};</span>
+  <span class="n">UA_Server_addDataSourceVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">myDataSource</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;MyVar&quot;</span><span class="p">),</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12345</span><span class="p">),</span>
+                                      <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">),</span> <span class="n">NULL</span><span class="p">);</span>
 
-  UA_Server_run(server, 1, &amp;running);
-  UA_Server_delete(server);
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-  printf(&quot;Bye\n&quot;);
-  return 0;
-}
+  <span class="n">printf</span><span class="p">(</span><span class="s2">&quot;Bye</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>As you can see, we created a dataSource in main() and pointed the .read field to our read routine. Obviously, you could do the same with write, in which case your function would be called when the write service tries to access this node. The .handle property of the datasource is a pass through argument; this argument will be passed to your function each time it is called and it can be anything you eant (it is also a void* polymorphism). Handles are very handy if for example you want to access the server within your write function, which you can just pass along with the datasource.</p>
