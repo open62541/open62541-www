@@ -50,6 +50,7 @@ doc/CMakeFiles/doc_latex: doc_src/constants.rst
 doc/CMakeFiles/doc_latex: doc_src/types_generated.rst
 doc/CMakeFiles/doc_latex: doc_src/server.rst
 doc/CMakeFiles/doc_latex: doc_src/client.rst
+doc/CMakeFiles/doc_latex: doc_src/client_highlevel.rst
 doc/CMakeFiles/doc_latex: doc_src/log.rst
 doc/CMakeFiles/doc_latex: doc_src/connection.rst
 doc/CMakeFiles/doc_latex: doc_src/services.rst
@@ -88,27 +89,33 @@ doc_src/client.rst: ../include/ua_client.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/client.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_client.h /home/travis/build/open62541/open62541/build/doc_src/client.rst
 
+doc_src/client_highlevel.rst: ../tools/c2rst.py
+doc_src/client_highlevel.rst: ../include/ua_client_highlevel.h
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_7)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/client_highlevel.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_client_highlevel.h /home/travis/build/open62541/open62541/build/doc_src/client_highlevel.rst
+
 doc_src/log.rst: ../tools/c2rst.py
 doc_src/log.rst: ../include/ua_log.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_7)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_8)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/log.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_log.h /home/travis/build/open62541/open62541/build/doc_src/log.rst
 
 doc_src/connection.rst: ../tools/c2rst.py
 doc_src/connection.rst: ../include/ua_connection.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_8)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_9)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/connection.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_connection.h /home/travis/build/open62541/open62541/build/doc_src/connection.rst
 
 doc_src/services.rst: ../tools/c2rst.py
 doc_src/services.rst: ../src/server/ua_services.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_9)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_10)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/services.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/src/server/ua_services.h /home/travis/build/open62541/open62541/build/doc_src/services.rst
 
 doc_src/nodestore.rst: ../tools/c2rst.py
 doc_src/nodestore.rst: ../src/server/ua_nodestore.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_10)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_11)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/nodestore.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/src/server/ua_nodestore.h /home/travis/build/open62541/open62541/build/doc_src/nodestore.rst
 
@@ -118,6 +125,7 @@ doc_latex: doc_src/constants.rst
 doc_latex: doc_src/types_generated.rst
 doc_latex: doc_src/server.rst
 doc_latex: doc_src/client.rst
+doc_latex: doc_src/client_highlevel.rst
 doc_latex: doc_src/log.rst
 doc_latex: doc_src/connection.rst
 doc_latex: doc_src/services.rst
