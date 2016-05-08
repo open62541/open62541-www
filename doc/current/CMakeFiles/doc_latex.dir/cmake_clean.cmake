@@ -5,6 +5,7 @@ FILE(REMOVE_RECURSE
   "../doc_src/types_generated.rst"
   "../doc_src/server.rst"
   "../doc_src/client.rst"
+  "../doc_src/log.rst"
   "../doc_src/services.rst"
   "../doc_src/nodestore.rst"
 )
