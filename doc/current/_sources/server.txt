@@ -22,7 +22,7 @@ loop. So the network layer does not need to be thread-safe.
         * @param logger The logger
         * @return Returns UA_STATUSCODE_GOOD or an error code. */
        UA_StatusCode (*start)(UA_ServerNetworkLayer *nl, UA_Logger logger);
-       
+   
        /* Gets called from the main server loop and returns the jobs (accumulated
         * messages and close events) for dispatch.
         *
