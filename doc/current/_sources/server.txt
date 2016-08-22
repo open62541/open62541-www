@@ -193,6 +193,21 @@ has full rights.
 
 .. code-block:: c
 
+   /* Read an attribute of a node. The specialized functions below provide a more
+    * concise syntax.
+    *
+    * @param server The server object.
+    * @param item ReadValueIds contain the NodeId of the target node, the id of the
+    *             attribute to read and (optionally) an index range to read parts
+    *             of an array only. See the section on NumericRange for the format
+    *             used for array ranges.
+    * @param timestamps Which timestamps to return for the attribute.
+    * @return Returns a DataValue that contains either an error code, or a variant
+    *         with the attribute value and the timestamps. */
+   UA_DataValue
+   UA_Server_read(UA_Server *server, const UA_ReadValueId *item,
+                  UA_TimestampsToReturn timestamps);
+       
    /* Don't use this function. There are typed versions for every supported
     * attribute. */
    UA_StatusCode
@@ -357,6 +372,19 @@ Historizing is currently unsupported
 
 .. code-block:: c
 
+   /* Overwrite an attribute of a node. The specialized functions below provide a
+    * more concise syntax.
+    *
+    * @param server The server object.
+    * @param value WriteValues contain the NodeId of the target node, the id of the
+    *              attribute to overwritten, the actual value and (optionally) an
+    *              index range to replace parts of an array only. of an array only.
+    *              See the section on NumericRange for the format used for array
+    *              ranges.
+    * @return Returns a status code. */
+   UA_StatusCode
+   UA_Server_write(UA_Server *server, const UA_WriteValue *value);
+   
    /* Don't use this function. There are typed versions with no additional
     * overhead. */
    UA_StatusCode

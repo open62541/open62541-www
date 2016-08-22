@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Types &mdash; open62541 d3899ab documentation</title>
+  <title>Data Types &mdash; open62541 4e61d03 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="open62541 d3899ab documentation" href="index.html"/>
+    <link rel="top" title="open62541 4e61d03 documentation" href="index.html"/>
         <link rel="next" title="Standard-Defined Constants" href="constants.html"/>
         <link rel="prev" title="5. Building a simple client" href="tutorial_client_firstSteps.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                d3899ab3ac1b26899d8ce38f80ce38f4915004db
+                4e61d0334bbf9e2118ba4f8d318cd1440735936f
               </div>
             
           
@@ -104,7 +104,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#statuscode">StatusCode</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#array-handling">Array handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#array-handling">Array handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#numericrange">NumericRange</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#builtin-types-part-2">Builtin Types, Part 2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#string">String</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datetime">DateTime</a></li>
@@ -352,6 +355,23 @@ length 0 but points to a sentinel memory address.</p>
 <span class="cm"> * @param type The datatype of the array members */</span>
 <span class="kt">void</span> <span class="nf">UA_Array_delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
 </pre></div>
+</div>
+<div class="section" id="numericrange">
+<span id="id2"></span><h3>NumericRange<a class="headerlink" href="#numericrange" title="Permalink to this headline">¶</a></h3>
+<p>NumericRanges are used to indicate subsets of a (multidimensional) variant
+array. NumericRange has no official type structure in the standard. On the
+wire, it only exists as an encoded string, such as &#8220;1:2,0:3,5&#8221;. The colon
+separates min/max index and the comma separates dimensions. A single value
+indicates a range with a single element (min==max).</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">dimensionsSize</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">UA_NumericRangeDimension</span> <span class="p">{</span>
+        <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
+        <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
+    <span class="p">}</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_NumericRange</span><span class="p">;</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="builtin-types-part-2">
@@ -684,7 +704,7 @@ NodeId.</p>
 </div>
 </div>
 <div class="section" id="variant">
-<span id="id2"></span><h3>Variant<a class="headerlink" href="#variant" title="Permalink to this headline">¶</a></h3>
+<span id="id3"></span><h3>Variant<a class="headerlink" href="#variant" title="Permalink to this headline">¶</a></h3>
 <p>Variants may contain data of any type. See the Section <a class="reference internal" href="#generic-type-handling">Generic Type
 Handling</a> on how types are described. If the data is not of one of the 25
 builtin types, it will be encoded as an <a class="reference internal" href="#extensionobject">ExtensionObject</a> on the wire. (The
@@ -769,20 +789,6 @@ is as follows:</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Variant_setArrayCopy</span><span class="p">(</span><span class="n">UA_Variant</span> <span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">array</span><span class="p">,</span>
                         <span class="kt">size_t</span> <span class="n">arraySize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>NumericRanges are used to indicate subsets of a (multidimensional) variant
-array. NumericRange has no official type structure in the standard. On the
-wire, it only exists as an encoded string, such as &#8220;1:2,0:3,5&#8221;. The colon
-separates min/max index and the comma separates dimensions. A single value
-indicates a range with a single element (min==max).</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="kt">size_t</span> <span class="n">dimensionsSize</span><span class="p">;</span>
-    <span class="k">struct</span> <span class="n">UA_NumericRangeDimension</span> <span class="p">{</span>
-        <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
-        <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
-    <span class="p">}</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_NumericRange</span><span class="p">;</span>
 
 <span class="cm">/* Copy the variant, but use only a subset of the (multidimensional) array into</span>
 <span class="cm"> * a variant. Returns an error code if the variant is not an array or if the</span>
@@ -1010,7 +1016,7 @@ server/client.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'d3899ab',
+            VERSION:'4e61d03',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

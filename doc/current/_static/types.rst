@@ -204,6 +204,27 @@ The following functions are used for handling arrays of any data type.
     * @param type The datatype of the array members */
    void UA_Array_delete(void *p, size_t size, const UA_DataType *type);
    
+.. _numericrange:
+
+NumericRange
+^^^^^^^^^^^^
+
+NumericRanges are used to indicate subsets of a (multidimensional) variant
+array. NumericRange has no official type structure in the standard. On the
+wire, it only exists as an encoded string, such as "1:2,0:3,5". The colon
+separates min/max index and the comma separates dimensions. A single value
+indicates a range with a single element (min==max).
+
+.. code-block:: c
+
+   typedef struct {
+       size_t dimensionsSize;
+       struct UA_NumericRangeDimension {
+           UA_UInt32 min;
+           UA_UInt32 max;
+       } *dimensions;
+   } UA_NumericRange;
+   
 Builtin Types, Part 2
 ---------------------
 
@@ -642,22 +663,6 @@ is as follows:
    UA_StatusCode
    UA_Variant_setArrayCopy(UA_Variant *v, const void *array,
                            size_t arraySize, const UA_DataType *type);
-   
-NumericRanges are used to indicate subsets of a (multidimensional) variant
-array. NumericRange has no official type structure in the standard. On the
-wire, it only exists as an encoded string, such as "1:2,0:3,5". The colon
-separates min/max index and the comma separates dimensions. A single value
-indicates a range with a single element (min==max).
-
-.. code-block:: c
-
-   typedef struct {
-       size_t dimensionsSize;
-       struct UA_NumericRangeDimension {
-           UA_UInt32 min;
-           UA_UInt32 max;
-       } *dimensions;
-   } UA_NumericRange;
    
    /* Copy the variant, but use only a subset of the (multidimensional) array into
     * a variant. Returns an error code if the variant is not an array or if the
