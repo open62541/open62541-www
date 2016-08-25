@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>5. Building a simple client &mdash; open62541 13d6abc documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="open62541 13d6abc documentation" href="index.html"/>
+        <link rel="up" title="Tutorials" href="tutorials.html"/>
+        <link rel="next" title="Data Types" href="types.html"/>
+        <link rel="prev" title="4. Generating an OPC UA Information Model from XML Descriptions" href="tutorial_noderelations.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                13d6abccfaca0953c0a649dd6b4e78cceb0d3a98
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="in_a_nutshell.html">Introduction to OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_firstSteps.html">1. Building a simple server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variables.html">2. Adding variables to a server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">3. Adding a server-side method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_noderelations.html">4. Generating an OPC UA Information Model from XML Descriptions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">5. Building a simple client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reading-a-node-attibute">Reading a node attibute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-tasks">Further tasks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">open62541</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+      
+    <li>5. Building a simple client</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tutorial_client_firstSteps.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="building-a-simple-client">
+<h1>5. Building a simple client<a class="headerlink" href="#building-a-simple-client" title="Permalink to this headline">¶</a></h1>
+<p>You should already have a basic server from the previous tutorials. open62541
+provides both a server- and clientside API, so creating a client is as easy as
+creating a server. Copy the following into a file <cite>myClient.c</cite>:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">);</span>
+  <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Compilation is very much similar to the server example.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open6251.c myClient.c -o myClient
+</pre></div>
+</div>
+<div class="section" id="reading-a-node-attibute">
+<h2>Reading a node attibute<a class="headerlink" href="#reading-a-node-attibute" title="Permalink to this headline">¶</a></h2>
+<p>In this example we are going to connect to the server from the second tutorial
+and read the value-attribute of the added variable node.</p>
+<div class="highlight-c"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;inttypes.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_standard</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:16664&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//variables to store data</span>
+    <span class="n">UA_DateTime</span> <span class="n">raw_date</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">string_date</span><span class="p">;</span>
+
+    <span class="cm">/* create a readrequest with one entry */</span>
+    <span class="n">UA_ReadRequest</span> <span class="n">rReq</span><span class="p">;</span>
+    <span class="n">UA_ReadRequest_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span> <span class="o">=</span> <span class="n">UA_Array_new</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READVALUEID</span><span class="p">]);</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToReadSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="cm">/* define the node and attribute to be read */</span>
+    <span class="cp">#define NS0_CURRENT_TIME 2258</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">nodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">NS0_CURRENT_TIME</span><span class="p">);</span>
+    <span class="n">rReq</span><span class="p">.</span><span class="n">nodesToRead</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">attributeId</span> <span class="o">=</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">;</span>
+
+    <span class="cm">/* call the service and print the result */</span>
+    <span class="n">UA_ReadResponse</span> <span class="n">rResp</span> <span class="o">=</span> <span class="n">UA_Client_Service_read</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">rReq</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">rResp</span><span class="p">.</span><span class="n">responseHeader</span><span class="p">.</span><span class="n">serviceResult</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">&amp;&amp;</span> <span class="n">rResp</span><span class="p">.</span><span class="n">resultsSize</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span>
+       <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">hasValue</span> <span class="o">&amp;&amp;</span> <span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+       <span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">.</span><span class="n">type</span> <span class="o">==</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">])</span> <span class="p">{</span>
+        <span class="n">raw_date</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">UA_DateTime</span><span class="o">*</span><span class="p">)</span><span class="n">rResp</span><span class="p">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;raw date is: %&quot;</span> <span class="n">PRId64</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">raw_date</span><span class="p">);</span>
+        <span class="n">string_date</span> <span class="o">=</span> <span class="n">UA_DateTime_toString</span><span class="p">(</span><span class="n">raw_date</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;string date is: %.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">string_date</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">string_date</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_ReadRequest_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rReq</span><span class="p">);</span>
+    <span class="n">UA_ReadResponse_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rResp</span><span class="p">);</span>
+    <span class="n">UA_String_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">string_date</span><span class="p">);</span>
+
+    <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+    <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="further-tasks">
+<h2>Further tasks<a class="headerlink" href="#further-tasks" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Try to connect to some other OPC UA server by changing
+&#8220;opc.tcp://localhost:16664&#8221; to an appropriate address (remember that the
+queried node is contained in any OPC UA server).</li>
+<li>Try to set the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing an
+&#8220;Int32&#8221; from the example server (which is built in
+<a class="reference internal" href="tutorial_server_firstSteps.html"><span class="doc">1. Building a simple server</span></a>) using &#8220;UA_Client_write&#8221; function. The
+example server needs some more modifications, i.e., changing request types.
+The answer can be found in &#8220;examples/exampleClient.c&#8221;.</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="types.html" class="btn btn-neutral float-right" title="Data Types" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_noderelations.html" class="btn btn-neutral" title="4. Generating an OPC UA Information Model from XML Descriptions" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'13d6abc',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
