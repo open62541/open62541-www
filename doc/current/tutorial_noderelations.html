@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Generating an OPC UA Information Model from XML Descriptions &mdash; open62541 27eb83b documentation</title>
+  <title>Generating an OPC UA Information Model from XML Descriptions &mdash; open62541 d5f82e3 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="open62541 27eb83b documentation" href="index.html"/> 
+    <link rel="top" title="open62541 d5f82e3 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                27eb83b9b65cbfe32d8f010e3a8da3306cd89aec
+                d5f82e32ab24785784f1e5475e64c2d6bed8b4e5
               </div>
             
           
@@ -398,7 +398,7 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
 </pre></div>
 </div>
 <p>The first argument points to the XML definition of the standard-defined namespace 0. Namespace 0 is assumed to be loaded beforehand and provides defintions for data type, reference types, and so. The second argument points to the user-defined information model, whose nodes will be added to the abstract syntax tree. The script will then creates the files <code class="docutils literal"><span class="pre">myNS.c</span></code> and <code class="docutils literal"><span class="pre">myNS.h</span></code> containing the C code necessary to instantiate those namespaces.</p>
-<p>Although it is possible to run the compiler this way, it is highly discouraged. If you care to examine the CMakeLists.txt (toplevel directory), you will find that compiling the stack with <code class="docutils literal"><span class="pre">DENABLE_GENERATE_NAMESPACE0</span></code> will execute the following command:</p>
+<p>Although it is possible to run the compiler this way, it is highly discouraged. If you care to examine the CMakeLists.txt (toplevel directory), you will find that compiling the stack with <code class="docutils literal"><span class="pre">DUA_ENABLE_GENERATE_NAMESPACE0</span></code> will execute the following command:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/generate_open62541CCode.py
   -i ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_AssumeExternal.txt
   -s description -b ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_Blacklist.txt
@@ -406,7 +406,7 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
   ${PROJECT_BINARY_DIR}/src_generated/ua_namespaceinit_generated
 </pre></div>
 </div>
-<p>Albeit a bit more complicated then the previous description, you can see that a the namespace 0 XML file is loaded in the line before the last, and that the output will be in <code class="docutils literal"><span class="pre">ua_namespaceinit_generated.c/h</span></code>. In order to take advantage of the namespace compiler, we will simply append our nodeset to this call and have cmake care for the rest. Modify the CMakeLists.txt line above to contain the relative path to your own XML file like this:</p>
+<p>Albeit a bit more complicated than the previous description, you can see that a the namespace 0 XML file is loaded in the line before the last, and that the output will be in <code class="docutils literal"><span class="pre">ua_namespaceinit_generated.c/h</span></code>. In order to take advantage of the namespace compiler, we will simply append our nodeset to this call and have cmake care for the rest. Modify the CMakeLists.txt line above to contain the relative path to your own XML file like this:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/generate_open62541CCode.py
   -i ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_AssumeExternal.txt
   -s description -b ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_Blacklist.txt
@@ -423,8 +423,8 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
 <li>Compiling the stack</li>
 </ul>
 </div></blockquote>
-<p>After adding your XML file to CMakeLists.txt, rerun cmake in your build directory and enable <code class="docutils literal"><span class="pre">DENABLE_GENERATE_NAMESPACE0</span></code>. Make especially sure that you are using the option <code class="docutils literal"><span class="pre">CMAKE_BUILD_TYPE=Debug</span></code>. The generated namespace contains more than 30000 lines of code and many strings. Optimizing this amount of code with -O2 or -Os options will require several hours on most PCs! Also make sure to enable <code class="docutils literal"><span class="pre">-DENABLE_METHODCALLS</span></code>, as namespace 0 does contain methods that need to be encoded:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ichrispa</span><span class="nd">@Cassandra</span><span class="p">:</span><span class="n">open62541</span><span class="o">/</span><span class="n">build</span><span class="o">&gt;</span> <span class="n">cmake</span> <span class="o">-</span><span class="n">DCMAKE_BUILD_TYPE</span><span class="o">=</span><span class="n">Debug</span> <span class="o">-</span><span class="n">DENABLE_METHODCALLS</span><span class="o">=</span><span class="n">On</span> <span class="o">-</span><span class="n">BUILD_EXAMPLECLIENT</span><span class="o">=</span><span class="n">On</span> <span class="o">-</span><span class="n">BUILD_EXAMPLESERVER</span><span class="o">=</span><span class="n">On</span> <span class="o">-</span><span class="n">DENABLE_GENERATE_NAMESPACE0</span><span class="o">=</span><span class="n">On</span> <span class="o">../</span>
+<p>After adding your XML file to CMakeLists.txt, rerun cmake in your build directory and enable <code class="docutils literal"><span class="pre">DUA_ENABLE_GENERATE_NAMESPACE0</span></code>. Make especially sure that you are using the option <code class="docutils literal"><span class="pre">CMAKE_BUILD_TYPE=Debug</span></code>. The generated namespace contains more than 30000 lines of code and many strings. Optimizing this amount of code with -O2 or -Os options will require several hours on most PCs! Also make sure to enable <code class="docutils literal"><span class="pre">-DUA_ENABLE_METHODCALLS</span></code>, as namespace 0 does contain methods that need to be encoded:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ichrispa</span><span class="nd">@Cassandra</span><span class="p">:</span><span class="n">open62541</span><span class="o">/</span><span class="n">build</span><span class="o">&gt;</span> <span class="n">cmake</span> <span class="o">-</span><span class="n">DCMAKE_BUILD_TYPE</span><span class="o">=</span><span class="n">Debug</span> <span class="o">-</span><span class="n">DUA_ENABLE_METHODCALLS</span><span class="o">=</span><span class="n">On</span> <span class="o">-</span><span class="n">BUILD_EXAMPLECLIENT</span><span class="o">=</span><span class="n">On</span> <span class="o">-</span><span class="n">BUILD_EXAMPLESERVER</span><span class="o">=</span><span class="n">On</span> <span class="o">-</span><span class="n">DUA_ENABLE_GENERATE_NAMESPACE0</span><span class="o">=</span><span class="n">On</span> <span class="o">../</span>
 <span class="o">--</span> <span class="n">Git</span> <span class="n">version</span><span class="p">:</span> <span class="n">v0</span><span class="o">.</span><span class="mf">1.0</span><span class="o">-</span><span class="n">RC4</span><span class="o">-</span><span class="mi">403</span><span class="o">-</span><span class="n">g198597c</span><span class="o">-</span><span class="n">dirty</span>
 <span class="o">--</span> <span class="n">Configuring</span> <span class="n">done</span>
 <span class="o">--</span> <span class="n">Generating</span> <span class="n">done</span>
@@ -483,7 +483,7 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
 </div>
 <p>These definitions are generated for all types, but not variables, objects or views (as their names may be ambiguous and may not a be unique identifier). You can use these definitions in your code as you already used the <code class="docutils literal"><span class="pre">UA_NS0ID_</span></code> equivalents.</p>
 <p>Now switch back to your own source directory and update your libopen62541 library (in case you have not linked it into the build folder). Compile our example server as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>ichrispa@Cassandra:open62541/build-tutorials&gt; gcc -g -std=c99 -Wl,-rpath,`pwd` -I ./include -L . -DENABLE_METHODCALLS -o server ./server.c -lopen62541
+<div class="highlight-default"><div class="highlight"><pre><span></span>ichrispa@Cassandra:open62541/build-tutorials&gt; gcc -g -std=c99 -Wl,-rpath,`pwd` -I ./include -L . -DUA_ENABLE_METHODCALLS -o server ./server.c -lopen62541
 </pre></div>
 </div>
 <p>Note that we need to also define the method-calls here, as the header files may choose to ommit functions such as UA_Server_addMethodNode() if they believe you do not use them. If you run the server, you should now see a new dataType in the browse path <code class="docutils literal"><span class="pre">/Types/ObjectTypes/BaseObjectType/FieldDevice</span></code> when viewing the nodes in UAExpert.</p>
@@ -495,7 +495,7 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
 <li>A structure/DataType you created with a value was not encoded. The namespace compiler can currently not handle nested extensionObjects.</li>
 <li>Nodes are not or wrongly encoded or you get nodeId errors.  The namespace compiler can currently not encode bytestring or guid node id&#8217;s and external server uris are not supported either.</li>
 <li>You get compiler complaints for non-existant variants. Check that you have removed any namespace qualifiers (like &#8220;uax:&#8221;) from the XML file.</li>
-<li>You get &#8220;invalid reference to addMethodNode&#8221; style errors. Make sure <code class="docutils literal"><span class="pre">-DDENABLE_METHODCALLS=On</span></code> is defined.</li>
+<li>You get &#8220;invalid reference to addMethodNode&#8221; style errors. Make sure <code class="docutils literal"><span class="pre">-DUA_ENABLE_METHODCALLS=On</span></code> is defined.</li>
 </ul>
 </dd>
 </dl>
@@ -661,7 +661,7 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'27eb83b',
+            VERSION:'d5f82e3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
