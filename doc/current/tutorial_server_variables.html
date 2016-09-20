@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Adding variables to a server &mdash; open62541 9fcce20 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="open62541 9fcce20 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                9fcce200cb1d150b0e7f6134fc7670876a9949c0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">open62541</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Adding variables to a server</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tutorial_server_variables.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="adding-variables-to-a-server">
+<h1>Adding variables to a server<a class="headerlink" href="#adding-variables-to-a-server" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial shows how to add variable nodes to a server and how these can be
+connected to a physical process in the background.</p>
+<p>This is the code for a server with a single variable node holding an integer. We
+will take this example to explain some of the fundamental concepts of open62541.</p>
+<div class="section" id="variants-and-datatypes">
+<h2>Variants and Datatypes<a class="headerlink" href="#variants-and-datatypes" title="Permalink to this headline">¶</a></h2>
+<p>The datatype <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a> belongs to the built-in datatypes of OPC UA and is
+used as a container type. A variant can hold any other datatype as a scalar
+(except variant) or as an array. Array variants can additionally denote the
+dimensionality of the data (e.g. a 2x3 matrix) in an additional integer array.</p>
+<p>The <cite>UA_VariableAttributes</cite> type contains a variant member <cite>value</cite>. The command
+<code class="code ccode c docutils literal"><span class="name"><span class="pre">UA_Variant_setScalar</span></span><span class="punctuation"><span class="pre">(</span></span><span class="operator"><span class="pre">&amp;</span></span><span class="name"><span class="pre">attr</span></span><span class="punctuation"><span class="pre">.</span></span><span class="name"><span class="pre">value</span></span><span class="punctuation"><span class="pre">,</span></span> <span class="operator"><span class="pre">&amp;</span></span><span class="name"><span class="pre">myInteger</span></span><span class="punctuation"><span class="pre">,</span></span>
+<span class="operator"><span class="pre">&amp;</span></span><span class="name"><span class="pre">UA_TYPES</span></span><span class="punctuation"><span class="pre">[</span></span><span class="name"><span class="pre">UA_TYPES_INT32</span></span><span class="punctuation"><span class="pre">])</span></span></code> sets the variant to point to the integer. Note that
+this does not make a copy of the integer (for which <cite>UA_Variant_setScalarCopy</cite>
+can be used). The variant (and its content) is then copied into the newly
+created node.</p>
+<p>The above code could have used allocations by making copies of all entries of
+the attribute variant. Then, of course, the variant content needs to be deleted
+to prevent memleaks.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">;</span>
+<span class="n">UA_VariableAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">);</span>
+<span class="n">UA_Int32</span> <span class="n">myInteger</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+<span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">myInteger</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+<span class="n">attr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;the answer&quot;</span><span class="p">);</span>
+<span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;the answer&quot;</span><span class="p">);</span>
+
+<span class="cm">/* add the variable node here */</span>
+<span class="n">UA_VariableAttributes_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">);</span> <span class="cm">/* free the allocated memory */</span>
+</pre></div>
+</div>
+<p>Finally, one needs to tell the server where to add the new variable in the
+information model. For that, we state the NodeId of the parent node and the
+(hierarchical) reference to the parent node.</p>
+</div>
+<div class="section" id="nodeids">
+<h2>NodeIds<a class="headerlink" href="#nodeids" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="types.html#nodeid"><span class="std std-ref">NodeId</span></a> is a unique identifier in server&#8217;s context. It contains the
+number of node&#8217;s namespace and either a numeric, string or GUID (Globally
+Unique ID) identifier. The following are some examples for their usage.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">UA_NodeId</span> <span class="n">id1</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1234</span><span class="p">);</span>
+
+<span class="n">UA_NodeId</span> <span class="n">id2</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;testid&quot;</span><span class="p">);</span> <span class="cm">/* points to the static string */</span>
+
+<span class="n">UA_NodeId</span> <span class="n">id3</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;testid&quot;</span><span class="p">);</span> <span class="cm">/* copy to memory */</span>
+<span class="n">UA_NodeId_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id3</span><span class="p">);</span> <span class="cm">/* free the allocated string */</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="adding-a-variable-with-an-external-data-source">
+<h2>Adding a Variable with an external Data Source<a class="headerlink" href="#adding-a-variable-with-an-external-data-source" title="Permalink to this headline">¶</a></h2>
+<p>In order to couple a running process to a variable, a <a class="reference internal" href="server.html#datasource"><span class="std std-ref">Data Source Callback</span></a> is used.
+Consider <code class="docutils literal"><span class="pre">examples/server_datasource.c</span></code> in the repository for an example.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'9fcce20',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
