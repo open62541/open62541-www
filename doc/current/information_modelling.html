@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 41e7d91 documentation</title>
+  <title>Information Modelling &mdash; open62541 f24a597 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="open62541 41e7d91 documentation" href="index.html"/>
+    <link rel="top" title="open62541 f24a597 documentation" href="index.html"/>
         <link rel="next" title="Services" href="services.html"/>
         <link rel="prev" title="Boolean" href="types_generated.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                41e7d913f8854c946a45020563ac747e62745856
+                f24a597fa640c20a6ef339e09eee6bb32e8c2ef4
               </div>
             
           
@@ -365,8 +365,83 @@ destructor callbacks.</p>
 </div>
 <div class="section" id="referencetypenode">
 <span id="id5"></span><h2>ReferenceTypeNode<a class="headerlink" href="#referencetypenode" title="Permalink to this headline">¶</a></h2>
-<p>The OPC UA standard defines a set of ReferenceTypes as a mandatory part of
-OPC UA information models.</p>
+<p>Each reference between two nodes is typed with a ReferenceType that gives
+meaning to the relation. The OPC UA standard defines a set of ReferenceTypes
+as a mandatory part of OPC UA information models.</p>
+<ul class="simple">
+<li>Abstract ReferenceTypes cannot be used in actual references and are only
+used to structure the ReferenceTypes hierarchy</li>
+<li>Symmetric references have the same meaning from the perspective of the
+source and target node</li>
+</ul>
+<p>The figure below shows the hierarchy of the standard ReferenceTypes (arrows
+indicate a <code class="docutils literal"><span class="pre">hasSubType</span></code> relation). Please refer to Part 3 of the OPC UA
+specification for the full semantics of each ReferenceType. The ReferenceType
+hierarchy can be extended with user-defined ReferenceTypes. Many Companion
+Specifications for OPC UA define new ReferenceTypes to be used in their
+domain of interest.</p>
+<img src="_images/graphviz-8d5cd6283eb18e02be296c300c05efa43abafd35.png" alt="digraph tree {
+
+node [height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
+
+references [label=&quot;References\n(Abstract, Symmetric)&quot;]
+hierarchical_references [label=&quot;HierarchicalReferences\n(Abstract)&quot;]
+references -&gt; hierarchical_references
+
+nonhierarchical_references [label=&quot;NonHierarchicalReferences\n(Abstract, Symmetric)&quot;]
+references -&gt; nonhierarchical_references
+
+haschild [label=&quot;HasChild\n(Abstract)&quot;]
+hierarchical_references -&gt; haschild
+
+aggregates [label=&quot;Aggregates\n(Abstract)&quot;]
+haschild -&gt; aggregates
+
+organizes [label=&quot;Organizes&quot;]
+hierarchical_references -&gt; organizes
+
+hascomponent [label=&quot;HasComponent&quot;]
+aggregates -&gt; hascomponent
+
+hasorderedcomponent [label=&quot;HasOrderedComponent&quot;]
+hascomponent -&gt; hasorderedcomponent
+
+hasproperty [label=&quot;HasProperty&quot;]
+aggregates -&gt; hasproperty
+
+hassubtype [label=&quot;HasSubtype&quot;]
+haschild -&gt; hassubtype
+
+hasmodellingrule [label=&quot;HasModellingRule&quot;]
+nonhierarchical_references -&gt; hasmodellingrule
+
+hastypedefinition [label=&quot;HasTypeDefinition&quot;]
+nonhierarchical_references -&gt; hastypedefinition
+
+hasencoding [label=&quot;HasEncoding&quot;]
+nonhierarchical_references -&gt; hasencoding
+
+hasdescription [label=&quot;HasDescription&quot;]
+nonhierarchical_references -&gt; hasdescription
+
+haseventsource [label=&quot;HasEventSource&quot;]
+hierarchical_references -&gt; haseventsource
+
+hasnotifier [label=&quot;HasNotifier&quot;]
+hierarchical_references -&gt; hasnotifier
+
+generatesevent [label=&quot;GeneratesEvent&quot;]
+nonhierarchical_references -&gt; generatesevent
+
+alwaysgeneratesevent [label=&quot;AlwaysGeneratesEvent&quot;]
+generatesevent -&gt; alwaysgeneratesevent
+
+{rank=same hierarchical_references nonhierarchical_references}
+{rank=same generatesevent haseventsource hasmodellingrule
+           hasencoding hassubtype}
+{rank=same alwaysgeneratesevent hasproperty}
+
+}" />
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_NODE_BASEATTRIBUTES</span>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
@@ -450,7 +525,7 @@ open62541.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'41e7d91',
+            VERSION:'f24a597',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
