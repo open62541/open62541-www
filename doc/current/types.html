@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Types &mdash; open62541 4b7bd72 documentation</title>
+  <title>Data Types &mdash; open62541 9c3426a documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="open62541 4b7bd72 documentation" href="index.html"/>
+    <link rel="top" title="open62541 9c3426a documentation" href="index.html"/>
         <link rel="next" title="Boolean" href="types_generated.html"/>
         <link rel="prev" title="Building a simple client" href="tutorial_client_firstSteps.html"/> 
 
@@ -63,7 +63,7 @@
             
             
               <div class="version">
-                4b7bd729a683de89bd269cc47c7905fb66f7a018
+                9c3426a48ee40843ef1dfc5679190572c8952afd
               </div>
             
           
@@ -828,14 +828,44 @@ used. <code class="docutils literal"><span class="pre">UA_Variant_isScalar</span
     <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">arrayDimensions</span><span class="p">;</span>   <span class="cm">/* The length of each dimension */</span>
 <span class="p">}</span> <span class="n">UA_Variant</span><span class="p">;</span>
 
+<span class="cm">/* Returns true if the variant has no value defined (contains neither an array</span>
+<span class="cm"> * nor a scalar value).</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param v The variant</span>
+<span class="cm"> * @return Is the variant empty */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_isEmpty</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">v</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">v</span><span class="o">-&gt;</span><span class="n">type</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+
 <span class="cm">/* Returns true if the variant contains a scalar value. Note that empty variants</span>
 <span class="cm"> * contain an array of length -1 (undefined).</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param v The variant</span>
-<span class="cm"> * @return Does the variant contain a scalar value. */</span>
+<span class="cm"> * @return Does the variant contain a scalar value */</span>
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
 <span class="nf">UA_Variant_isScalar</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">v</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">v</span><span class="o">-&gt;</span><span class="n">arrayLength</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">v</span><span class="o">-&gt;</span><span class="n">data</span> <span class="o">&gt;</span> <span class="n">UA_EMPTY_ARRAY_SENTINEL</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Returns true if the variant contains a scalar value of the given type.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param v The variant</span>
+<span class="cm"> * @param type The data type</span>
+<span class="cm"> * @return Does the variant contain a scalar value of the given type */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_hasScalarType</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">type</span> <span class="o">==</span> <span class="n">v</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/* Returns true if the variant contains an array of the given type.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param v The variant</span>
+<span class="cm"> * @param type The data type</span>
+<span class="cm"> * @return Does the variant contain an array of the given type */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_hasArrayType</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">v</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">!</span><span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="n">type</span> <span class="o">==</span> <span class="n">v</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="cm">/* Set the variant to a scalar value that already resides in memory. The value</span>
@@ -1366,7 +1396,7 @@ server/client.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'4b7bd72',
+            VERSION:'9c3426a',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
