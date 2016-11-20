@@ -359,7 +359,7 @@ ViewNode
 --------
 
 Each View defines a subset of the Nodes in the AddressSpace. Views can be
-used when browsing an informatin model to focus on a subset of nodes and
+used when browsing an information model to focus on a subset of nodes and
 references only. ViewNodes can be created and be interacted with. But their
 use in the :ref:`Browse<view-services>` service is currently unsupported in
 open62541.
@@ -371,5 +371,3 @@ open62541.
        UA_Byte eventNotifier;
        UA_Boolean containsNoLoops;
    } UA_ViewNode;
-   
-

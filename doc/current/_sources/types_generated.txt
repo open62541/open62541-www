@@ -2314,5 +2314,3 @@ QueryFirstRequest
    } UA_QueryFirstRequest;
    
    #define UA_TYPES_QUERYFIRSTREQUEST 162
-   
-

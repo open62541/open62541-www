@@ -850,5 +850,3 @@ Reference Management
                              const UA_NodeId referenceTypeId, UA_Boolean isForward,
                              const UA_ExpandedNodeId targetNodeId,
                              UA_Boolean deleteBidirectional);
-   
-

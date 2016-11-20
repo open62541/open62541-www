@@ -615,5 +615,3 @@ Misc Highlevel Functionality
    UA_StatusCode
    UA_Client_forEachChildNodeCall(UA_Client *client, UA_NodeId parentNodeId,
                                   UA_NodeIteratorCallback callback, void *handle) ;
-   
-

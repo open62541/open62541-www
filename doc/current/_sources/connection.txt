@@ -15,7 +15,7 @@ Connection Config
 
 .. code-block:: c
 
-   typedef struct UA_ConnectionConfig {
+   typedef struct {
        UA_UInt32 protocolVersion;
        UA_UInt32 sendBufferSize;
        UA_UInt32 recvBufferSize;
@@ -30,7 +30,7 @@ Connection Structure
 
 .. code-block:: c
 
-   typedef enum UA_ConnectionState {
+   typedef enum {
        UA_CONNECTION_OPENING,     /* The socket is open, but the HEL/ACK handshake
                                      is not done */
        UA_CONNECTION_ESTABLISHED, /* The socket is open and the connection
@@ -38,6 +38,13 @@ Connection Structure
        UA_CONNECTION_CLOSED,      /* The socket has been closed and the connection
                                      will be deleted */
    } UA_ConnectionState;
+   
+   /* Forward declarations */
+   struct UA_Connection;
+   typedef struct UA_Connection UA_Connection;
+   
+   struct UA_SecureChannel;
+   typedef struct UA_SecureChannel UA_SecureChannel;
    
    struct UA_Connection {
        UA_ConnectionState state;
@@ -87,9 +94,7 @@ Connection Structure
        void (*close)(UA_Connection *connection);
    };
    
-   void UA_Connection_init(UA_Connection *connection);
    void UA_Connection_deleteMembers(UA_Connection *connection);
-   
    
 EndpointURL Helper
 ^^^^^^^^^^^^^^^^^^
@@ -117,5 +122,3 @@ EndpointURL Helper
     * up to that point. */
    size_t
    UA_readNumber(UA_Byte *buf, size_t buflen, UA_UInt32 *number);
-   
-

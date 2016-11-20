@@ -311,5 +311,3 @@ Subscriptions are used to report Notifications to the Client.
                                     UA_DeleteSubscriptionsResponse *response);
    
    /* Not Implemented: Service_TransferSubscription */
-   
-

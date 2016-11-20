@@ -357,8 +357,3 @@ Subscription Service Set
 .. toctree::
 
    client_highlevel
-
-.. code-block:: c
-
-   
-

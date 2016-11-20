@@ -95,5 +95,3 @@ Convenience macros for complex types
    
    #define UA_PRINTF_STRING_FORMAT "\"%.*s\""
    #define UA_PRINTF_STRING_DATA(STRING) (STRING).length, (STRING).data
-   
-

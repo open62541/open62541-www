@@ -45,11 +45,11 @@ CMAKE_BINARY_DIR = /home/travis/build/open62541/open62541/build
 # Include the progress variables for this target.
 include doc/CMakeFiles/doc_pdf.dir/progress.make
 
-doc/CMakeFiles/doc_pdf: ../doc/PDFLATEX_COMPILER-NOTFOUND
+doc/CMakeFiles/doc_pdf: /usr/bin/pdflatex
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating PDF documentation from LaTeX sources"
-	cd /home/travis/build/open62541/open62541/build/doc_latex && PDFLATEX_COMPILER-NOTFOUND -q open62541.tex
-	cd /home/travis/build/open62541/open62541/build/doc_latex && PDFLATEX_COMPILER-NOTFOUND -q open62541.tex
+	cd /home/travis/build/open62541/open62541/build/doc_latex && /usr/bin/pdflatex -q open62541.tex
+	cd /home/travis/build/open62541/open62541/build/doc_latex && /usr/bin/pdflatex -q open62541.tex
 
 doc_pdf: doc/CMakeFiles/doc_pdf
 doc_pdf: doc/CMakeFiles/doc_pdf.dir/build.make

@@ -88,5 +88,3 @@ nodestore.
 
    typedef void (*UA_NodeStore_nodeVisitor)(const UA_Node *node);
    void UA_NodeStore_iterate(UA_NodeStore *ns, UA_NodeStore_nodeVisitor visitor);
-   
-
