@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 fbfd7e1 documentation</title>
+  <title>Information Modelling &mdash; open62541 ade98fc documentation</title>
   
 
   
@@ -33,7 +33,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="open62541 fbfd7e1 documentation" href="index.html"/>
+    <link rel="top" title="open62541 ade98fc documentation" href="index.html"/>
         <link rel="next" title="Services" href="services.html"/>
         <link rel="prev" title="Boolean" href="types_generated.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                fbfd7e14d6af267bd5d7adc4b29d1d6ad3686d74
+                ade98fc17a1fc2891ed395d82d4b4e18721a8e12
               </div>
             
           
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Information Modelling</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#base-node-attributes">Base Node Attributes</a></li>
@@ -171,10 +172,9 @@ up of</p>
 Reference are triples of the form <code class="docutils literal"><span class="pre">(source-nodeid,</span> <span class="pre">referencetype-nodeid,</span>
 <span class="pre">target-nodeid)</span></code>. An example reference between nodes is a
 <code class="docutils literal"><span class="pre">hasTypeDefinition</span></code> reference between a Variable and its VariableType. Some
-ReferenceTypes are <em>hierarchic</em> and must not form <em>directed loops</em>. Every
-node (except <code class="docutils literal"><span class="pre">Root</span></code>) must have at least one hierarchic reference to a
-parent. See the section on <a class="reference internal" href="#referencetypenode"><span class="std std-ref">ReferenceTypes</span></a> for more
-details on possible references and their semantics.</p>
+ReferenceTypes are <em>hierarchic</em> and must not form <em>directed loops</em>. See the
+section on <a class="reference internal" href="#referencetypenode"><span class="std std-ref">ReferenceTypes</span></a> for more details on
+possible references and their semantics.</p>
 <p>The structures defined in this section are <em>not user-facing</em>. The interaction
 with the information model is possible only via the OPC UA <a class="reference internal" href="services.html#services"><span class="std std-ref">Services</span></a>.
 Still, we reproduce how nodes are represented internally so that users may
@@ -378,11 +378,8 @@ used to structure the ReferenceTypes hierarchy</li>
 source and target node</li>
 </ul>
 <p>The figure below shows the hierarchy of the standard ReferenceTypes (arrows
-indicate a <code class="docutils literal"><span class="pre">hasSubType</span></code> relation). Please refer to Part 3 of the OPC UA
-specification for the full semantics of each ReferenceType. The ReferenceType
-hierarchy can be extended with user-defined ReferenceTypes. Many Companion
-Specifications for OPC UA define new ReferenceTypes to be used in their
-domain of interest.</p>
+indicate a <code class="docutils literal"><span class="pre">hasSubType</span></code> relation). Refer to Part 3 of the OPC UA
+specification for the full semantics of each ReferenceType.</p>
 <img src="_images/graphviz-8d5cd6283eb18e02be296c300c05efa43abafd35.png" alt="digraph tree {
 
 node [height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
@@ -445,6 +442,23 @@ generatesevent -&gt; alwaysgeneratesevent
 {rank=same alwaysgeneratesevent hasproperty}
 
 }" />
+<p>The ReferenceType hierarchy can be extended with user-defined ReferenceTypes.
+Many Companion Specifications for OPC UA define new ReferenceTypes to be used
+in their domain of interest.</p>
+<p>For the following example of custom ReferenceTypes, we attempt to model the
+structure of a technical system. For this, we introduce two custom
+ReferenceTypes. First, the hierarchical <code class="docutils literal"><span class="pre">contains</span></code> ReferenceType indicates
+that a system (represented by an OPC UA object) contains a component (or
+subsystem). This gives rise to a tree-structure of containment relations. For
+example, the motor (object) is contained in the car and the crankshaft is
+contained in the motor. Second, the symmetric <code class="docutils literal"><span class="pre">connectedTo</span></code> ReferenceType
+indicates that two components are connected. For example, the motor&#8217;s
+crankshaft is connected to the gear box. Connections are independent of the
+containment hierarchy and can induce a general graph-structure. Further
+subtypes of <code class="docutils literal"><span class="pre">connectedTo</span></code> could be used to differentiate between physical,
+electrical and information related connections. A client can then learn the
+layout of a (physical) system represented in an OPC UA information model
+based on a common understanding of just two custom reference types.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_NODE_BASEATTRIBUTES</span>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
@@ -528,7 +542,7 @@ open62541.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'fbfd7e1',
+            VERSION:'ade98fc',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

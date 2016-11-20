@@ -56,6 +56,7 @@ doc/CMakeFiles/doc_latex: doc_src/connection.rst
 doc/CMakeFiles/doc_latex: doc_src/services.rst
 doc/CMakeFiles/doc_latex: doc_src/nodestore.rst
 doc/CMakeFiles/doc_latex: doc_src/information_modelling.rst
+doc/CMakeFiles/doc_latex: doc_src/protocol.rst
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Building LaTeX sources for documentation with Sphinx"
 	cd /home/travis/build/open62541/open62541/build/doc && /home/travis/.local/bin/sphinx-build -b latex /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc_latex
