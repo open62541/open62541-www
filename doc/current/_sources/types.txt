@@ -540,15 +540,17 @@ Variants can also be *empty*. Then, the pointer to the type description is
    
    #define UA_EMPTY_ARRAY_SENTINEL ((void*)0x01)
    
-   typedef struct {
-       const UA_DataType *type;      /* The data type description */
-       enum {
+   typedef enum {
            UA_VARIANT_DATA,          /* The data has the same lifecycle as the
                                         variant */
            UA_VARIANT_DATA_NODELETE, /* The data is "borrowed" by the variant and
                                         shall not be deleted at the end of the
                                         variant's lifecycle. */
-       } storageType;
+   } UA_VariantStorageType;
+   
+   typedef struct {
+       const UA_DataType *type;      /* The data type description */
+       UA_VariantStorageType storageType;
        size_t arrayLength;           /* The number of elements in the data array */
        void *data;                   /* Points to the scalar or array data */
        size_t arrayDimensionsSize;   /* The number of dimensions */
@@ -686,8 +688,7 @@ target NodeId is stored instead of the decoded value.
 
 .. code-block:: c
 
-   typedef struct {
-       enum {
+   typedef enum {
            UA_EXTENSIONOBJECT_ENCODED_NOBODY     = 0,
            UA_EXTENSIONOBJECT_ENCODED_BYTESTRING = 1,
            UA_EXTENSIONOBJECT_ENCODED_XML        = 2,
@@ -695,7 +696,10 @@ target NodeId is stored instead of the decoded value.
            UA_EXTENSIONOBJECT_DECODED_NODELETE   = 4 /* Don't delete the content
                                                         together with the
                                                         ExtensionObject */
-       } encoding;
+   } UA_ExtensionObjectEncoding;
+   
+   typedef struct {
+       UA_ExtensionObjectEncoding encoding;
        union {
            struct {
                UA_NodeId typeId;   /* The nodeid of the datatype */
