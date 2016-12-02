@@ -321,7 +321,7 @@ has full rights.
    
    static UA_INLINE UA_StatusCode
    UA_Server_readAccessLevel(UA_Server *server, const UA_NodeId nodeId,
-                             UA_UInt32 *outAccessLevel) {
+                             UA_Byte *outAccessLevel) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                outAccessLevel);
    }
@@ -465,9 +465,9 @@ Historizing is currently unsupported
    
    static UA_INLINE UA_StatusCode
    UA_Server_writeAccessLevel(UA_Server *server, const UA_NodeId nodeId,
-                              const UA_UInt32 accessLevel) {
+                              const UA_Byte accessLevel) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
-                                &UA_TYPES[UA_TYPES_UINT32], &accessLevel);
+                                &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
    }
    
    static UA_INLINE UA_StatusCode
