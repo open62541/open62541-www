@@ -104,10 +104,11 @@ The following structure is passed to a new server for configuration.
        UA_UInt32Range lifeTimeCountLimits;
        UA_UInt32Range keepAliveCountLimits;
        UA_UInt32 maxNotificationsPerPublish;
+       UA_UInt32 maxRetransmissionQueueSize; /* 0 -> unlimited size */
    
        /* Limits for MonitoredItems */
        UA_DoubleRange samplingIntervalLimits;
-       UA_UInt32Range queueSizeLimits;
+       UA_UInt32Range queueSizeLimits; /* Negotiated with the client */
    } UA_ServerConfig;
    
    /* Add a new namespace to the server. Returns the index of the new namespace */
