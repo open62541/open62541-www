@@ -752,9 +752,30 @@ be set to a null-pointer.</p>
 <p>Value Callbacks can be attached to variable and variable type nodes. If
 not-null, they are called before reading and after writing respectively.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Pointer to user-provided data for the callback */</span>
     <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>
+
+    <span class="cm">/* Called before the value attribute is read. It is possible to write into the</span>
+<span class="cm">     * value attribute during onRead (using the write service). The node is</span>
+<span class="cm">     * re-opened afterwards so that changes are considered in the following read</span>
+<span class="cm">     * operation.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param handle Points to user-provided data for the callback.</span>
+<span class="cm">     * @param nodeid The identifier of the node.</span>
+<span class="cm">     * @param data Points to the current node value.</span>
+<span class="cm">     * @param range Points to the numeric range the client wants to read from</span>
+<span class="cm">     *        (or NULL). */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onRead</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span>
                    <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">);</span>
+
+    <span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
+<span class="cm">     * writing so that the new value is visible in the callback.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param handle Points to user-provided data for the callback.</span>
+<span class="cm">     * @param nodeid The identifier of the node.</span>
+<span class="cm">     * @param data Points to the current node value (after writing).</span>
+<span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
+<span class="cm">     *        NULL). */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onWrite</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">);</span>
 <span class="p">}</span> <span class="n">UA_ValueCallback</span><span class="p">;</span>
