@@ -343,6 +343,9 @@ An identifier for a node in the address space of an OPC UA Server.
    
    UA_Boolean UA_NodeId_equal(const UA_NodeId *n1, const UA_NodeId *n2);
    
+   /* Returns a non-cryptographic hash for the NodeId */
+   UA_UInt32 UA_NodeId_hash(const UA_NodeId *n);
+   
 The following functions are shorthand for creating NodeIds.
 
 .. code-block:: c
