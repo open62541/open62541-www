@@ -222,7 +222,29 @@ will take this example to explain some of the fundamental concepts of open62541.
 56
 57
 58
-59</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
 
 <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
@@ -274,6 +296,28 @@ will take this example to explain some of the fundamental concepts of open62541.
 
     <span class="n">UA_ValueCallback</span> <span class="n">callback</span> <span class="o">=</span> <span class="p">{(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="mi">7</span><span class="p">,</span> <span class="n">onRead</span><span class="p">,</span> <span class="n">onWrite</span><span class="p">};</span>
     <span class="n">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">myIntegerNodeId</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+
+    <span class="cm">/* 3) Write another value */</span>
+    <span class="n">myInteger</span> <span class="o">=</span> <span class="mi">43</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">myVar</span><span class="p">;</span>
+    <span class="n">UA_Variant_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myVar</span><span class="p">);</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myVar</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">myInteger</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+    <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">myIntegerNodeId</span><span class="p">,</span> <span class="n">myVar</span><span class="p">);</span>
+
+    <span class="cm">/* 4) Set the status code of the value */</span>
+    <span class="n">UA_WriteValue</span> <span class="n">wv</span><span class="p">;</span>
+    <span class="n">UA_WriteValue_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">wv</span><span class="p">);</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">nodeId</span> <span class="o">=</span> <span class="n">myIntegerNodeId</span><span class="p">;</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">attributeId</span> <span class="o">=</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">;</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">UA_STATUSCODE_BADNOTCONNECTED</span><span class="p">;</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">hasStatus</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wv</span><span class="p">);</span>
+
+    <span class="cm">/* 5) Reset to a good statuscode with a value */</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">hasStatus</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">myVar</span><span class="p">;</span>
+    <span class="n">wv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">hasValue</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wv</span><span class="p">);</span>
 
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
     <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
