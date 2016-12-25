@@ -821,75 +821,36 @@ object types.</p>
 </div>
 <div class="section" id="node-addition-and-deletion">
 <span id="addnodes"></span><h3>Node Addition and Deletion<a class="headerlink" href="#node-addition-and-deletion" title="Permalink to this headline">¶</a></h3>
-<p>When creating dynamic node instances at runtime, you may not care about the
-specific NodeId of the new node, as long as you can reference it later. When
-passing numeric NodeIds with a numeric identifier 0, the stack evaluates this
-as &#8220;select a randome free NodeId in that namespace&#8221;. To find out which NodeId
-was actually assigned to the new node, pass a pointer <cite>outNewNodeId</cite>, which
-will (after a successfull node insertion) contain the nodeId of the new node.
-You may also pass NULL pointer if the NodeId is not relevant. The namespace
-index for nodes you create should never be 0, as that index is reserved for
-nodes defined in the OPC UA standard.</p>
-<p>Variables and Objects are instantiated: child-nodes of their variable- or
-objecttype are copied under the new node and, if present, a constructor
-callback. The children are assigned random ids during instantiation. If you
-need a child node to have a specific NodeId, use the
-<code class="docutils literal"><span class="pre">UA_Server_add&lt;Type&gt;Node_begin</span></code> and <code class="docutils literal"><span class="pre">UA_Server_add&lt;Type&gt;Node_finish</span></code>
-methods. The regular <code class="docutils literal"><span class="pre">UA_Server_add&lt;Type&gt;Node</span></code> method calls both the begin
-and finish methods internally. The usage is as follows.</p>
-<ol class="arabic simple">
-<li>Use <code class="docutils literal"><span class="pre">UA_Server_addNode&lt;Type&gt;_begin</span></code> create the node and add it to the
-corresponding NodeStore. There are no consistency checks performed and
-there is no hierarchical reference created to a parent. So the returned
-NodeId is the only way to work with the node.</li>
-<li>Manually add children to the node, set a datasource (if it is a variable),
-and so on.</li>
-<li>Run <code class="docutils literal"><span class="pre">UA_Server_addNode&lt;Type&gt;_finish</span></code> on the node. This internally
-performs consistency checks and completes the instantiation. At this
-point, references to the parent and the type are added as well. When an
-error occurs, the node is deleted (together with its child nodes).</li>
-</ol>
+<p>When creating dynamic node instances at runtime, chances are that you will
+not care about the specific NodeId of the new node, as long as you can
+reference it later. When passing numeric NodeIds with a numeric identifier 0,
+the stack evaluates this as &#8220;select a randome free NodeId in that namespace&#8221;.
+To find out which NodeId was actually assigned to the new node, you may pass
+a pointer <cite>outNewNodeId</cite>, which will (after a successfull node insertion)
+contain the nodeId of the new node. You may also pass NULL pointer if this
+result is not relevant. The namespace index for nodes you create should never
+be 0, as that index is reserved for OPC UA&#8217;s self-description (namespace 0).</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* The instantiation callback is used to track the addition of new nodes. It is</span>
 <span class="cm"> * also called for all sub-nodes contained in an object or variable type node</span>
 <span class="cm"> * that is instantiated. */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
   <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">method</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinitionId</span><span class="p">,</span>
-                          <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinitionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
   <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_InstantiationCallback</span><span class="p">;</span>
 
 <span class="cm">/* Don&#39;t use this function. There are typed versions as inline functions. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">__UA_Server_addNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">parentNodeId</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="o">*</span><span class="n">browseName</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeDefinition</span><span class="p">,</span>
+<span class="nf">__UA_Server_addNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_NodeAttributes</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
                     <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                     <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
-
-<span class="cm">/* Don&#39;t use this function. There are typed versions as inline functions. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">__UA_Server_addNode_begin</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="o">*</span><span class="n">browseName</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_NodeAttributes</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
-                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
-
-<span class="cm">/* Don&#39;t use this function. There are typed versions as inline functions. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">__UA_Server_addNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                           <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">parentNodeId</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeDefinition</span><span class="p">,</span>
-                           <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">);</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
@@ -900,34 +861,11 @@ error occurs, the node is deleted (together with its child nodes).</li>
                           <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
                           <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                           <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLEATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addVariableNode_begin</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
-                                <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
-                                <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                                <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode_begin</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span>
-                                     <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                                     <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
-                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLEATTRIBUTES</span><span class="p">],</span>
-                                     <span class="n">outNewNodeId</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addVariableNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
-                                 <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode_finish</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span>
-                                      <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                                      <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="n">instantiationCallback</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -941,8 +879,8 @@ error occurs, the node is deleted (together with its child nodes).</li>
                               <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                               <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLETYPE</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span>
+                               <span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                               <span class="n">browseName</span><span class="p">,</span> <span class="n">typeDefinition</span><span class="p">,</span>
                                <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLETYPEATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
@@ -957,34 +895,11 @@ error occurs, the node is deleted (together with its child nodes).</li>
                         <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">attr</span><span class="p">,</span>
                         <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                         <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addObjectNode_begin</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
-                              <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
-                              <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode_begin</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span>
-                                     <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                                     <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
-                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTATTRIBUTES</span><span class="p">],</span>
-                                     <span class="n">outNewNodeId</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addObjectNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
-                               <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode_finish</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span>
-                                      <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                                      <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="n">instantiationCallback</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -995,9 +910,9 @@ error occurs, the node is deleted (together with its child nodes).</li>
                             <span class="k">const</span> <span class="n">UA_ObjectTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
                             <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                             <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECTTYPE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECTTYPE</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTTYPEATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
@@ -1010,9 +925,9 @@ error occurs, the node is deleted (together with its child nodes).</li>
                       <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">attr</span><span class="p">,</span>
                       <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                       <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VIEW</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VIEW</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VIEWATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
@@ -1027,8 +942,8 @@ error occurs, the node is deleted (together with its child nodes).</li>
                                <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                                <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_REFERENCETYPE</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+                               <span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                               <span class="n">browseName</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span>
                                <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCETYPEATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
@@ -1043,9 +958,9 @@ error occurs, the node is deleted (together with its child nodes).</li>
                           <span class="k">const</span> <span class="n">UA_DataTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
                           <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
                           <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_DATATYPE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">,</span>
-                               <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_DATATYPE</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATATYPEATTRIBUTES</span><span class="p">],</span>
                                <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
