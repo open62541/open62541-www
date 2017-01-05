@@ -97,6 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#network-layer">Network Layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#access-control">Access Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#repeated-jobs">Repeated jobs</a></li>
@@ -213,6 +214,67 @@ loop. So the network layer does not need to be thread-safe.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="access-control">
+<h2>Access Control<a class="headerlink" href="#access-control" title="Permalink to this headline">¶</a></h2>
+<p>The access control callback is used to authenticate sessions and grant access
+rights accordingly.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Boolean</span> <span class="n">enableAnonymousLogin</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">enableUsernamePasswordLogin</span><span class="p">;</span>
+
+    <span class="cm">/* Authenticate a session */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">activateSession</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                     <span class="k">const</span> <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">userIdentityToken</span><span class="p">,</span>
+                                     <span class="kt">void</span> <span class="o">**</span><span class="n">sessionHandle</span><span class="p">);</span>
+
+    <span class="cm">/* Deauthenticate a session and cleanup */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">closeSession</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">);</span>
+
+    <span class="cm">/* Access control for all nodes*/</span>
+    <span class="n">UA_UInt32</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserRightsMask</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                   <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                   <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+
+    <span class="cm">/* Additional access control for variable nodes */</span>
+    <span class="n">UA_Byte</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserAccessLevel</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                  <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+
+    <span class="cm">/* Additional access control for method nodes */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserExecutable</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">);</span>
+
+    <span class="cm">/* Additional access control for calling a method node in the context of a</span>
+<span class="cm">     * specific object */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserExecutableOnObject</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                            <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">);</span>
+
+    <span class="cm">/* Allow adding a node */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowAddNode</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                               <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_AddNodesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+    <span class="cm">/* Allow adding a reference */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowAddReference</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+    <span class="cm">/* Allow deleting a node */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowDeleteNode</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                  <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_DeleteNodesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+    <span class="cm">/* Allow deleting a reference */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowDeleteReference</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                       <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
+                                       <span class="k">const</span> <span class="n">UA_DeleteReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_AccessControl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="server-configuration">
 <h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline">¶</a></h2>
 <p>The following structure is passed to a new server for configuration.</p>
@@ -240,15 +302,16 @@ loop. So the network layer does not need to be thread-safe.</p>
     <span class="n">UA_ApplicationDescription</span> <span class="n">applicationDescription</span><span class="p">;</span>
     <span class="n">UA_ByteString</span> <span class="n">serverCertificate</span><span class="p">;</span>
 
+    <span class="cm">/* Custom DataTypes */</span>
+    <span class="kt">size_t</span> <span class="n">customDataTypesSize</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
+
     <span class="cm">/* Networking */</span>
     <span class="kt">size_t</span> <span class="n">networkLayersSize</span><span class="p">;</span>
     <span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">networkLayers</span><span class="p">;</span>
 
-    <span class="cm">/* Login */</span>
-    <span class="n">UA_Boolean</span> <span class="n">enableAnonymousLogin</span><span class="p">;</span>
-    <span class="n">UA_Boolean</span> <span class="n">enableUsernamePasswordLogin</span><span class="p">;</span>
-    <span class="kt">size_t</span> <span class="n">usernamePasswordLoginsSize</span><span class="p">;</span>
-    <span class="n">UA_UsernamePasswordLogin</span><span class="o">*</span> <span class="n">usernamePasswordLogins</span><span class="p">;</span>
+    <span class="cm">/* Access Control */</span>
+    <span class="n">UA_AccessControl</span> <span class="n">accessControl</span><span class="p">;</span>
 
     <span class="cm">/* Limits for SecureChannels */</span>
     <span class="n">UA_UInt16</span> <span class="n">maxSecureChannels</span><span class="p">;</span>
@@ -268,6 +331,16 @@ loop. So the network layer does not need to be thread-safe.</p>
     <span class="cm">/* Limits for MonitoredItems */</span>
     <span class="n">UA_DoubleRange</span> <span class="n">samplingIntervalLimits</span><span class="p">;</span>
     <span class="n">UA_UInt32Range</span> <span class="n">queueSizeLimits</span><span class="p">;</span> <span class="cm">/* Negotiated with the client */</span>
+
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+    <span class="cm">/* Discovery */</span>
+    <span class="c1">// timeout in seconds when to automatically remove a registered server from the list,</span>
+    <span class="c1">// if it doesn&#39;t re-register within the given time frame. A value of 0 disables automatic removal.</span>
+    <span class="c1">// Default is 60 Minutes (60*60). Must be bigger than 10 seconds, because cleanup is only triggered approximately</span>
+    <span class="c1">// ervery 10 seconds.</span>
+    <span class="c1">// The server will still be removed depending on the state of the semaphore file.</span>
+    <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
+<span class="cp">#endif</span>
 <span class="p">}</span> <span class="n">UA_ServerConfig</span><span class="p">;</span>
 
 <span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
@@ -514,7 +587,7 @@ has full rights.</p>
 <li>ContainsNoLoop</li>
 </ul>
 <p>The following attributes cannot be written from the server, as they are
-specific to the different users:</p>
+specific to the different users and set by the access control callback:</p>
 <ul class="simple">
 <li>UserWriteMask</li>
 <li>UserAccessLevel</li>
@@ -665,6 +738,31 @@ specific to the different users:</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_forEachChildNodeCall</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
                                <span class="n">UA_NodeIteratorCallback</span> <span class="n">callback</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+ <span class="cm">/**</span>
+<span class="cm"> * Discovery</span>
+<span class="cm"> * --------- */</span>
+
+ <span class="cm">/*</span>
+<span class="cm">  * Register the given server instance at the discovery server.</span>
+<span class="cm">  * This should be called periodically.</span>
+<span class="cm">  * The semaphoreFilePath is optional. If the given file is deleted,</span>
+<span class="cm">  * the server will automatically be unregistered. This could be</span>
+<span class="cm">  * for example a pid file which is deleted if the server crashes.</span>
+<span class="cm">  *</span>
+<span class="cm">  * When the server shuts down you need to call unregister.</span>
+<span class="cm">  */</span>
+ <span class="n">UA_StatusCode</span>
+ <span class="nf">UA_Server_register_discovery</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">semaphoreFilePath</span><span class="p">);</span>
+
+ <span class="cm">/**</span>
+<span class="cm">  * Unregister the given server instance from the discovery server.</span>
+<span class="cm">  * This should only be called when the server is shutting down.</span>
+<span class="cm">  */</span>
+ <span class="n">UA_StatusCode</span>
+ <span class="nf">UA_Server_unregister_discovery</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </div>
@@ -806,7 +904,8 @@ object types.</p>
 <div class="section" id="method-callbacks">
 <h4>Method Callbacks<a class="headerlink" href="#method-callbacks" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">methodHandle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">methodHandle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
                      <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
                      <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
