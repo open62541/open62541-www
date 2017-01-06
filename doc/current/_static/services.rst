@@ -41,12 +41,7 @@ by a Server and to read the security configuration for those Endpoints.
                              const UA_GetEndpointsRequest *request,
                              UA_GetEndpointsResponse *response);
    
-   #ifdef UA_ENABLE_DISCOVERY
-   /* Registers a remote server in the local discovery service. */
-   void Service_RegisterServer(UA_Server *server, UA_Session *session,
-                               const UA_RegisterServerRequest *request,
-                               UA_RegisterServerResponse *response);
-   #endif
+   /* Not Implemented: Service_RegisterServer */
    
 SecureChannel Service Set
 -------------------------

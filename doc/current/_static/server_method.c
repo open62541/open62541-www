@@ -20,8 +20,7 @@ UA_Logger logger = UA_Log_Stdout;
 
 /* Example 1 */
 static UA_StatusCode
-helloWorldMethod(void *handle, const UA_NodeId *objectId,
-                 const UA_NodeId *sessionId, void *sessionHandle,
+helloWorldMethod(void *handle, const UA_NodeId objectId,
                  size_t inputSize, const UA_Variant *input,
                  size_t outputSize, UA_Variant *output) {
     UA_String *inputStr = (UA_String*)input->data;
@@ -39,8 +38,7 @@ helloWorldMethod(void *handle, const UA_NodeId *objectId,
 
 /* Example 2 */
 static UA_StatusCode
-IncInt32ArrayValuesMethod(void *handle, const UA_NodeId *objectId,
-                          const UA_NodeId *sessionId, void *sessionHandle,
+IncInt32ArrayValuesMethod(void *handle, const UA_NodeId objectId,
                           size_t inputSize, const UA_Variant *input,
                           size_t outputSize, UA_Variant *output) {
     UA_Variant_setArrayCopy(output, input->data, 5, &UA_TYPES[UA_TYPES_INT32]);
@@ -52,8 +50,7 @@ IncInt32ArrayValuesMethod(void *handle, const UA_NodeId *objectId,
 
 /* Example 3 */
 static UA_StatusCode
-fooBarMethod(void *handle, const UA_NodeId *objectId,
-             const UA_NodeId *sessionId, void *sessionHandle,
+fooBarMethod(void *handle, const UA_NodeId objectId,
              size_t inputSize, const UA_Variant *input,
              size_t outputSize, UA_Variant *output) {
     /* the same as helloWorld, but returns foobar */
