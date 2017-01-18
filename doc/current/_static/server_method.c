@@ -20,14 +20,13 @@ UA_Logger logger = UA_Log_Stdout;
 
 /* Example 1 */
 static UA_StatusCode
-helloWorldMethod(void *handle, const UA_NodeId *objectId,
-                 const UA_NodeId *sessionId, void *sessionHandle,
+helloWorldMethod(void *handle, const UA_NodeId objectId,
                  size_t inputSize, const UA_Variant *input,
                  size_t outputSize, UA_Variant *output) {
     UA_String *inputStr = (UA_String*)input->data;
     UA_String tmp = UA_STRING_ALLOC("Hello ");
     if(inputStr->length > 0) {
-        tmp.data = (UA_Byte*)realloc(tmp.data, tmp.length + inputStr->length);
+        tmp.data = realloc(tmp.data, tmp.length + inputStr->length);
         memcpy(&tmp.data[tmp.length], inputStr->data, inputStr->length);
         tmp.length += inputStr->length;
     }
@@ -39,8 +38,7 @@ helloWorldMethod(void *handle, const UA_NodeId *objectId,
 
 /* Example 2 */
 static UA_StatusCode
-IncInt32ArrayValuesMethod(void *handle, const UA_NodeId *objectId,
-                          const UA_NodeId *sessionId, void *sessionHandle,
+IncInt32ArrayValuesMethod(void *handle, const UA_NodeId objectId,
                           size_t inputSize, const UA_Variant *input,
                           size_t outputSize, UA_Variant *output) {
     UA_Variant_setArrayCopy(output, input->data, 5, &UA_TYPES[UA_TYPES_INT32]);
@@ -52,15 +50,14 @@ IncInt32ArrayValuesMethod(void *handle, const UA_NodeId *objectId,
 
 /* Example 3 */
 static UA_StatusCode
-fooBarMethod(void *handle, const UA_NodeId *objectId,
-             const UA_NodeId *sessionId, void *sessionHandle,
+fooBarMethod(void *handle, const UA_NodeId objectId,
              size_t inputSize, const UA_Variant *input,
              size_t outputSize, UA_Variant *output) {
     /* the same as helloWorld, but returns foobar */
     UA_String *inputStr = (UA_String*)input->data;
     UA_String tmp = UA_STRING_ALLOC("FooBar! ");
     if(inputStr->length > 0) {
-        tmp.data = (UA_Byte*)realloc(tmp.data, tmp.length + inputStr->length);
+        tmp.data = realloc(tmp.data, tmp.length + inputStr->length);
         memcpy(&tmp.data[tmp.length], inputStr->data, inputStr->length);
         tmp.length += inputStr->length;
     }
