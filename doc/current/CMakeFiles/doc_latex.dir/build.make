@@ -57,6 +57,8 @@ doc/CMakeFiles/doc_latex: doc_src/services.rst
 doc/CMakeFiles/doc_latex: doc_src/nodestore.rst
 doc/CMakeFiles/doc_latex: doc_src/information_modelling.rst
 doc/CMakeFiles/doc_latex: doc_src/protocol.rst
+doc/CMakeFiles/doc_latex: doc_src/tutorial_server_firststeps.rst
+doc/CMakeFiles/doc_latex: doc_src/tutorial_client_firststeps.rst
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Building LaTeX sources for documentation with Sphinx"
 	cd /home/travis/build/open62541/open62541/build/doc && /home/travis/.local/bin/sphinx-build -b latex /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc_latex
@@ -127,6 +129,18 @@ doc_src/information_modelling.rst: ../src/server/ua_nodes.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/information_modelling.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/python/2.7.12/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/src/server/ua_nodes.h /home/travis/build/open62541/open62541/build/doc_src/information_modelling.rst
 
+doc_src/tutorial_server_firststeps.rst: ../tools/c2rst.py
+doc_src/tutorial_server_firststeps.rst: ../examples/tutorials/server_firststeps.c
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_13)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_firststeps.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /opt/python/2.7.12/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorials/server_firststeps.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_firststeps.rst
+
+doc_src/tutorial_client_firststeps.rst: ../tools/c2rst.py
+doc_src/tutorial_client_firststeps.rst: ../examples/tutorials/client_firststeps.c
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_14)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_client_firststeps.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /opt/python/2.7.12/bin/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorials/client_firststeps.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_client_firststeps.rst
+
 doc_latex: doc/CMakeFiles/doc_latex
 doc_latex: doc_src/types.rst
 doc_latex: doc_src/constants.rst
@@ -139,6 +153,8 @@ doc_latex: doc_src/connection.rst
 doc_latex: doc_src/services.rst
 doc_latex: doc_src/nodestore.rst
 doc_latex: doc_src/information_modelling.rst
+doc_latex: doc_src/tutorial_server_firststeps.rst
+doc_latex: doc_src/tutorial_client_firststeps.rst
 doc_latex: doc/CMakeFiles/doc_latex.dir/build.make
 .PHONY : doc_latex
 

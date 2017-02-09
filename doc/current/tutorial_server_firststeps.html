@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variables.html">Adding variables to a server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding a server-side method</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_noderelations.html">Generating an OPC UA Information Model from XML Descriptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firstSteps.html">Building a simple client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a simple client</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
@@ -143,7 +143,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/tutorial_server_firstSteps.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_server_firststeps.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -155,41 +155,18 @@
             
   <div class="section" id="building-a-simple-server">
 <h1>Building a simple server<a class="headerlink" href="#building-a-simple-server" title="Permalink to this headline">¶</a></h1>
-<p>This series of tutorial guide you through your first steps with open62541. For
-compiling the examples, you need a compiler (MS Visual Studio 2015 or newer,
-GCC, Clang and MinGW32 are all known to be working). The compilation
+<p>This series of tutorial guide you through your first steps with open62541.
+For compiling the examples, you need a compiler (MS Visual Studio 2015 or
+newer, GCC, Clang and MinGW32 are all known to be working). The compilation
 instructions are given for GCC but should be straightforward to adapt.</p>
 <p>It will also be very helpful to install an OPC UA Client with a graphical
 frontend, such as UAExpert by Unified Automation. That will enable you to
 examine the information model of any OPC UA server.</p>
 <p>To get started, downdload the open62541 single-file release from
-<a class="reference external" href="http://open62541.org">http://open62541.org</a> or generate it according to the <a class="reference internal" href="building.html#building"><span class="std std-ref">build instructions</span></a> with the &#8220;amalgamation&#8221; option enabled. From now on, we assume you
-have the <code class="docutils literal"><span class="pre">open62541.c/.h</span></code> files in the current folder.</p>
+<a class="reference external" href="http://open62541.org">http://open62541.org</a> or generate it according to the <a class="reference internal" href="building.html#building"><span class="std std-ref">build instructions</span></a> with the &#8220;amalgamation&#8221; option enabled. From now on, we assume
+you have the <code class="docutils literal"><span class="pre">open62541.c/.h</span></code> files in the current folder.</p>
 <p>Now create a new C source-file called <code class="docutils literal"><span class="pre">myServer.c</span></code> with the following content:</p>
-<div class="highlight-c"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
 
 <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
@@ -198,12 +175,12 @@ have the <code class="docutils literal"><span class="pre">open62541.c/.h</span><
 <span class="p">}</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
     <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
     <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span><span class="p">;</span>
-    <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">);</span>
+    <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">4840</span><span class="p">);</span>
     <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
     <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
@@ -214,7 +191,7 @@ have the <code class="docutils literal"><span class="pre">open62541.c/.h</span><
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
-</td></tr></table></div>
+</div>
 <p>This is all that is needed for a simple OPC UA server. Compile the the server
 with GCC using the following command:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myServer.c -o myServer
@@ -225,8 +202,9 @@ with GCC using the following command:</p>
 </pre></div>
 </div>
 <p>You have now compiled and run your first OPC UA server. You can go ahead and
-browse the information model with UA Expert. The server will be listening on
-<code class="docutils literal"><span class="pre">opc.tcp://localhost:16664</span></code> - go ahead and give it a try.</p>
+browse the information model with a generic client, such as UAExpert. The
+server will be listening on <code class="docutils literal"><span class="pre">opc.tcp://localhost:4840</span></code> - go ahead and give
+it a try.</p>
 <p>In the following tutorials, you will be shown how to populate the server&#8217;s
 information model and how to create a client application.</p>
 </div>

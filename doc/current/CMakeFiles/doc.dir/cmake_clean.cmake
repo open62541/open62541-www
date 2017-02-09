@@ -11,6 +11,8 @@ file(REMOVE_RECURSE
   "../doc_src/services.rst"
   "../doc_src/nodestore.rst"
   "../doc_src/information_modelling.rst"
+  "../doc_src/tutorial_server_firststeps.rst"
+  "../doc_src/tutorial_client_firststeps.rst"
 )
 
 # Per-language clean rules from dependency scanning.
