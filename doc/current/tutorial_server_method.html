@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Adding a server-side method &mdash; open62541 0.2.0-rc2 documentation</title>
+  <title>Adding Methods to Objects &mdash; open62541 0.2.0-rc2 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="open62541 0.2.0-rc2 documentation" href="index.html"/>
         <link rel="up" title="Tutorials" href="tutorials.html"/>
-        <link rel="next" title="Generating an OPC UA Information Model from XML Descriptions" href="tutorial_noderelations.html"/>
-        <link rel="prev" title="Adding variables to a server" href="tutorial_server_variables.html"/> 
+        <link rel="next" title="Building a simple client" href="tutorial_client_firststeps.html"/>
+        <link rel="prev" title="Working with Objects and Object types" href="tutorial_server_object.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -92,10 +92,16 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_firststeps.html">Building a simple server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variables.html">Adding variables to a server</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding a server-side method</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_noderelations.html">Generating an OPC UA Information Model from XML Descriptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding variables to a server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_datasource.html">Connecting a Variable with a Physical Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object types</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding Methods to Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-hello-world-method">Example: Hello World Method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#increase-array-values-method">Increase Array Values Method</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a simple client</a></li>
 </ul>
 </li>
@@ -106,6 +112,7 @@
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="namespace_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
 
@@ -139,7 +146,7 @@
       
           <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
       
-    <li>Adding a server-side method</li>
+    <li>Adding Methods to Objects</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -153,206 +160,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="adding-a-server-side-method">
-<h1>Adding a server-side method<a class="headerlink" href="#adding-a-server-side-method" title="Permalink to this headline">¶</a></h1>
-<p>This tutorial demonstrates how to add method nodes to the server. Use an UA
-client, e.g., UaExpert to call the method (right-click on the method node -&gt;
-call).</p>
-<p>The first example shows how to define input and output arguments (lines 72 - 88),
-make the method executable (lines 94,95), add the method node (line 96-101)
-with a specified method callback (lines 10 - 24).</p>
-<p>The second example shows that a method can also be applied on an array
-as input argument and output argument.</p>
-<p>The last example presents a way to bind a new method callback to an already
-instantiated method node.</p>
-<div class="highlight-c"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
-  2
-  3
-  4
-  5
-  6
-  7
-  8
-  9
- 10
- 11
- 12
- 13
- 14
- 15
- 16
- 17
- 18
- 19
- 20
- 21
- 22
- 23
- 24
- 25
- 26
- 27
- 28
- 29
- 30
- 31
- 32
- 33
- 34
- 35
- 36
- 37
- 38
- 39
- 40
- 41
- 42
- 43
- 44
- 45
- 46
- 47
- 48
- 49
- 50
- 51
- 52
- 53
- 54
- 55
- 56
- 57
- 58
- 59
- 60
- 61
- 62
- 63
- 64
- 65
- 66
- 67
- 68
- 69
- 70
- 71
- 72
- 73
- 74
- 75
- 76
- 77
- 78
- 79
- 80
- 81
- 82
- 83
- 84
- 85
- 86
- 87
- 88
- 89
- 90
- 91
- 92
- 93
- 94
- 95
- 96
- 97
- 98
- 99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113
-114
-115
-116
-117
-118
-119
-120
-121
-122
-123
-124
-125
-126
-127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139
-140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152
-153
-154
-155
-156
-157
-158
-159
-160
-161
-162
-163
-164
-165
-166
-167
-168
-169
-170
-171
-172
-173
-174
-175
-176</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+  <div class="section" id="adding-methods-to-objects">
+<h1>Adding Methods to Objects<a class="headerlink" href="#adding-methods-to-objects" title="Permalink to this headline">¶</a></h1>
+<p>An object in an OPC UA information model may contain methods similar to
+objects in a programming language. Methods are represented by a MethodNode.
+Note that several objects may reference the same MethodNode. When an object
+type is instantiated, a reference to the method is added instead of copying
+the MethodNode. Therefore, the identifier of the context object is always
+explicitly stated when a method is called.</p>
+<p>The method callback takes as input a custom data pointer attached to the
+method node, the identifier of the object from which the method is called,
+and two arrays for the input and output arguments. The input and output
+arguments are all of type <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>. Each variant may in turn contain a
+(multi-dimensional) array or scalar of any data type.</p>
+<p>Constraints for the method arguments are defined in terms of data type, value
+rank and array dimension (similar to variable definitions). The argument
+definitions are stored in child VariableNodes of the MethodNode with the
+respective BrowseNames <code class="docutils literal"><span class="pre">(0,</span> <span class="pre">&quot;InputArguments&quot;)</span></code> and <code class="docutils literal"><span class="pre">(0,</span>
+<span class="pre">&quot;OutputArguments&quot;)</span></code>.</p>
+<div class="section" id="example-hello-world-method">
+<h2>Example: Hello World Method<a class="headerlink" href="#example-hello-world-method" title="Permalink to this headline">¶</a></h2>
+<p>The method takes a string scalar and returns a string scalar with &#8220;Hello &#8221;
+prepended. The type and length of the input arguments is checked internally
+by the SDK, so that we don&#8217;t have to verify the arguments in the callback.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
 
-<span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-<span class="n">UA_Logger</span> <span class="n">logger</span> <span class="o">=</span> <span class="n">UA_Log_Stdout</span><span class="p">;</span>
-
-
-<span class="cm">/* Example 1 */</span>
 <span class="k">static</span> <span class="n">UA_StatusCode</span>
-<span class="nf">helloWorldMethod</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
-                 <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
-                 <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">)</span> <span class="p">{</span>
+<span class="nf">helloWorldMethodCallback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+                         <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
+                         <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="o">*</span><span class="n">inputStr</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_String</span><span class="o">*</span><span class="p">)</span><span class="n">input</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
     <span class="n">UA_String</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="s">&quot;Hello &quot;</span><span class="p">);</span>
     <span class="k">if</span><span class="p">(</span><span class="n">inputStr</span><span class="o">-&gt;</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
@@ -362,76 +199,25 @@ instantiated method node.</p>
     <span class="p">}</span>
     <span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tmp</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">]);</span>
     <span class="n">UA_String_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">);</span>
-    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;Hello World was called&quot;</span><span class="p">);</span>
+    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;Hello World was called&quot;</span><span class="p">);</span>
     <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="cm">/* Example 2 */</span>
-<span class="k">static</span> <span class="n">UA_StatusCode</span>
-<span class="nf">IncInt32ArrayValuesMethod</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
-                          <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
-                          <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_Variant_setArrayCopy</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">input</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
-    <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span> <span class="n">input</span><span class="o">-&gt;</span><span class="n">arrayLength</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-        <span class="p">((</span><span class="n">UA_Int32</span><span class="o">*</span><span class="p">)</span><span class="n">output</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">UA_Int32</span><span class="o">*</span><span class="p">)</span><span class="n">input</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addHellWorldMethod</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Argument</span> <span class="n">inputArgument</span><span class="p">;</span>
+    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inputArgument</span><span class="p">);</span>
+    <span class="n">inputArgument</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;A String&quot;</span><span class="p">);</span>
+    <span class="n">inputArgument</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;MyInput&quot;</span><span class="p">);</span>
+    <span class="n">inputArgument</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
+    <span class="n">inputArgument</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="cm">/* scalar */</span>
 
-
-<span class="cm">/* Example 3 */</span>
-<span class="k">static</span> <span class="n">UA_StatusCode</span>
-<span class="nf">fooBarMethod</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
-             <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
-             <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">)</span> <span class="p">{</span>
-    <span class="cm">/* the same as helloWorld, but returns foobar */</span>
-    <span class="n">UA_String</span> <span class="o">*</span><span class="n">inputStr</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_String</span><span class="o">*</span><span class="p">)</span><span class="n">input</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
-    <span class="n">UA_String</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="s">&quot;FooBar! &quot;</span><span class="p">);</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">inputStr</span><span class="o">-&gt;</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">tmp</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">realloc</span><span class="p">(</span><span class="n">tmp</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">tmp</span><span class="p">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">inputStr</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">);</span>
-        <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">tmp</span><span class="p">.</span><span class="n">length</span><span class="p">],</span> <span class="n">inputStr</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">,</span> <span class="n">inputStr</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">);</span>
-        <span class="n">tmp</span><span class="p">.</span><span class="n">length</span> <span class="o">+=</span> <span class="n">inputStr</span><span class="o">-&gt;</span><span class="n">length</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tmp</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">]);</span>
-    <span class="n">UA_String_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">);</span>
-    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;FooBar was called&quot;</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
-    <span class="n">running</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span> <span class="cm">/* catches ctrl-c */</span>
-
-    <span class="cm">/* initialize the server */</span>
-    <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
-    <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span><span class="p">;</span>
-    <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">);</span>
-    <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
-    <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
-
-    <span class="cm">/* Example 1 */</span>
-    <span class="cm">/* add the method node with the callback */</span>
-    <span class="n">UA_Argument</span> <span class="n">inputArguments1</span><span class="p">;</span>
-    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inputArguments1</span><span class="p">);</span>
-    <span class="n">inputArguments1</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">inputArguments1</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="n">inputArguments1</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
-    <span class="n">inputArguments1</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;A String&quot;</span><span class="p">);</span>
-    <span class="n">inputArguments1</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;MyInput&quot;</span><span class="p">);</span>
-    <span class="n">inputArguments1</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-
-    <span class="n">UA_Argument</span> <span class="n">outputArguments1</span><span class="p">;</span>
-    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">outputArguments1</span><span class="p">);</span>
-    <span class="n">outputArguments1</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">outputArguments1</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="n">outputArguments1</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
-    <span class="n">outputArguments1</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;A String&quot;</span><span class="p">);</span>
-    <span class="n">outputArguments1</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;MyOutput&quot;</span><span class="p">);</span>
-    <span class="n">outputArguments1</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_Argument</span> <span class="n">outputArgument</span><span class="p">;</span>
+    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">outputArgument</span><span class="p">);</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;A String&quot;</span><span class="p">);</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;MyOutput&quot;</span><span class="p">);</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="cm">/* scalar */</span>
 
     <span class="n">UA_MethodAttributes</span> <span class="n">helloAttr</span><span class="p">;</span>
     <span class="n">UA_MethodAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">helloAttr</span><span class="p">);</span>
@@ -443,81 +229,112 @@ instantiated method node.</p>
                             <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span>
                             <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASORDEREDCOMPONENT</span><span class="p">),</span>
                             <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;hello world&quot;</span><span class="p">),</span>
-                            <span class="n">helloAttr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">helloWorldMethod</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
-                            <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inputArguments1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">outputArguments1</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+                            <span class="n">helloAttr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">helloWorldMethodCallback</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
+                            <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inputArgument</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">outputArgument</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="increase-array-values-method">
+<h2>Increase Array Values Method<a class="headerlink" href="#increase-array-values-method" title="Permalink to this headline">¶</a></h2>
+<p>The method takes an array of 5 integers and a scalar as input. It returns a
+copy of the array with every entry increased by the scalar.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">IncInt32ArrayMethodCallback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+                            <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
+                            <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">inputArray</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Int32</span><span class="o">*</span><span class="p">)</span><span class="n">input</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">data</span><span class="p">;</span>
+    <span class="n">UA_Int32</span> <span class="n">delta</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">UA_Int32</span><span class="o">*</span><span class="p">)</span><span class="n">input</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">data</span><span class="p">;</span>
 
-    <span class="cm">/* Example 2 */</span>
-    <span class="cm">/* add another method node: output argument as 1d Int32 array*/</span>
-    <span class="n">UA_Argument</span> <span class="n">inputArguments2</span><span class="p">;</span>
-    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inputArguments2</span><span class="p">);</span>
-    <span class="n">inputArguments2</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="o">*</span> <span class="n">pInputDimensions</span> <span class="o">=</span> <span class="n">UA_UInt32_new</span><span class="p">();</span>
-    <span class="n">pInputDimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-    <span class="n">inputArguments2</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">pInputDimensions</span><span class="p">;</span>
-    <span class="n">inputArguments2</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
-    <span class="n">inputArguments2</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span>
-                    <span class="s">&quot;input an array with 5 elements, type int32&quot;</span><span class="p">);</span>
-    <span class="n">inputArguments2</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;int32 value&quot;</span><span class="p">);</span>
-    <span class="n">inputArguments2</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="cm">/* Copy the input array */</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Variant_setArrayCopy</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">inputArray</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                                                   <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
 
-    <span class="n">UA_Argument</span> <span class="n">outputArguments2</span><span class="p">;</span>
-    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">outputArguments2</span><span class="p">);</span>
-    <span class="n">outputArguments2</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="o">*</span> <span class="n">pOutputDimensions</span> <span class="o">=</span> <span class="n">UA_UInt32_new</span><span class="p">();</span>
-    <span class="n">pOutputDimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-    <span class="n">outputArguments2</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">pOutputDimensions</span><span class="p">;</span>
-    <span class="n">outputArguments2</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
-    <span class="n">outputArguments2</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span>
-                                                    <span class="s">&quot;increment each array index&quot;</span><span class="p">);</span>
-    <span class="n">outputArguments2</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;output is the array, &quot;</span>
-                                      <span class="s">&quot;each index is incremented by one&quot;</span><span class="p">);</span>
-    <span class="n">outputArguments2</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="cm">/* Increate the elements */</span>
+    <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">outputArray</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Int32</span><span class="o">*</span><span class="p">)</span><span class="n">output</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">input</span><span class="o">-&gt;</span><span class="n">arrayLength</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">outputArray</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">inputArray</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta</span><span class="p">;</span>
 
+    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addIncInt32ArrayMethod</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* Two input arguments */</span>
+    <span class="n">UA_Argument</span> <span class="n">inputArguments</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;int32[5] array&quot;</span><span class="p">);</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;int32 array&quot;</span><span class="p">);</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">valueRank</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">pInputDimension</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pInputDimension</span><span class="p">;</span>
+
+    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inputArguments</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;int32 delta&quot;</span><span class="p">);</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;int32 delta&quot;</span><span class="p">);</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
+    <span class="n">inputArguments</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="cm">/* scalar */</span>
+
+    <span class="cm">/* One output argument */</span>
+    <span class="n">UA_Argument</span> <span class="n">outputArgument</span><span class="p">;</span>
+    <span class="n">UA_Argument_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">outputArgument</span><span class="p">);</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;int32[5] array&quot;</span><span class="p">);</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;each entry is incremented by the delta&quot;</span><span class="p">);</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">pOutputDimension</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">outputArgument</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pOutputDimension</span><span class="p">;</span>
+
+    <span class="cm">/* Add the method node */</span>
     <span class="n">UA_MethodAttributes</span> <span class="n">incAttr</span><span class="p">;</span>
     <span class="n">UA_MethodAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">incAttr</span><span class="p">);</span>
-    <span class="n">incAttr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;1dArrayExample&quot;</span><span class="p">);</span>
-    <span class="n">incAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;1dArrayExample&quot;</span><span class="p">);</span>
+    <span class="n">incAttr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;IncInt32ArrayValues&quot;</span><span class="p">);</span>
+    <span class="n">incAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;IncInt32ArrayValues&quot;</span><span class="p">);</span>
     <span class="n">incAttr</span><span class="p">.</span><span class="n">executable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
     <span class="n">incAttr</span><span class="p">.</span><span class="n">userExecutable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
     <span class="n">UA_Server_addMethodNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;IncInt32ArrayValues&quot;</span><span class="p">),</span>
                             <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span>
                             <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASCOMPONENT</span><span class="p">),</span>
                             <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;IncInt32ArrayValues&quot;</span><span class="p">),</span>
-                            <span class="n">incAttr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">IncInt32ArrayValuesMethod</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
-                            <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inputArguments2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">outputArguments2</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-
-    <span class="cm">/* Example 3 */</span>
-    <span class="n">UA_MethodAttributes</span> <span class="n">method3Attr</span><span class="p">;</span>
-    <span class="n">UA_MethodAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">method3Attr</span><span class="p">);</span>
-    <span class="n">method3Attr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;FooBar&quot;</span><span class="p">);</span>
-    <span class="n">method3Attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;FooBar&quot;</span><span class="p">);</span>
-    <span class="n">method3Attr</span><span class="p">.</span><span class="n">executable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-    <span class="n">method3Attr</span><span class="p">.</span><span class="n">userExecutable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-    <span class="n">UA_Server_addMethodNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;FooBar&quot;</span><span class="p">),</span>
-                            <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span>
-                            <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASCOMPONENT</span><span class="p">),</span>
-                            <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;FooBar&quot;</span><span class="p">),</span>
-                            <span class="n">method3Attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
-                            <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">inputArguments1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">outputArguments1</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-    <span class="cm">/* If the method node has no callback (because it was instantiated without</span>
-<span class="cm">     * one) or if we just want to change it, this can be done</span>
-<span class="cm">     * UA_Server_setMethodNode_callback() */</span>
-    <span class="n">UA_Server_setMethodNode_callback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span>  <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">62542</span><span class="p">),</span>
-                                     <span class="o">&amp;</span><span class="n">fooBarMethod</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-
-    <span class="cm">/* start server */</span>
-    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
-
-    <span class="cm">/* ctrl-c received -&gt; clean up */</span>
-    <span class="n">UA_UInt32_delete</span><span class="p">(</span><span class="n">pInputDimensions</span><span class="p">);</span>
-    <span class="n">UA_UInt32_delete</span><span class="p">(</span><span class="n">pOutputDimensions</span><span class="p">);</span>
-    <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-    <span class="n">nl</span><span class="p">.</span><span class="n">deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nl</span><span class="p">);</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
+                            <span class="n">incAttr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">IncInt32ArrayMethodCallback</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
+                            <span class="mi">2</span><span class="p">,</span> <span class="n">inputArguments</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">outputArgument</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
-</td></tr></table></div>
+</div>
+<p>It follows the main server code, making use of the above definitions.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+
+    <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
+    <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span> <span class="o">=</span>
+        <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">);</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+
+    <span class="n">addHellWorldMethod</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">addIncInt32ArrayMethod</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+
+    <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+    <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">nl</span><span class="p">.</span><span class="n">deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nl</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -527,10 +344,10 @@ instantiated method node.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tutorial_noderelations.html" class="btn btn-neutral float-right" title="Generating an OPC UA Information Model from XML Descriptions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tutorial_client_firststeps.html" class="btn btn-neutral float-right" title="Building a simple client" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_server_variables.html" class="btn btn-neutral" title="Adding variables to a server" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial_server_object.html" class="btn btn-neutral" title="Working with Objects and Object types" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -9,36 +9,18 @@ the builtin data types are defined manually. All other data types are
 generated from standard XML definitions. Their exact definitions can be
 looked up at https://opcfoundation.org/UA/schemas/Opc.Ua.Types.bsd.xml.
 
-Note that arrays can only be part of a scalar data type and never constitute
-a data type on their own. Also, open62541 does not implement unions so far.
-They are a recent addition to the protocol (since OPC UA v1.03). And so far,
-no service definition makes of unions in the request / response message
-definition. Instead, :ref:`Variants <variant>` are used when values of
-different types are possible.
+For users that are new to open62541, take a look at the :ref:`tutorial for
+working with data types<types-tutorial>` before diving into the
+implementation details.
 
-All data types ``T`` (builtin and generated) share the same basic API for
-creation, copying and deletion:
-
-- ``void T_init(T *ptr)``: Initialize the data type. This is synonymous with
-  zeroing out the memory, i.e. ``memset(ptr, 0, sizeof(T))``.
-- ``T* T_new()``: Allocate and return the memory for the data type. The
-  value is already initialized.
-- ``UA_StatusCode T_copy(const T *src, T *dst)``: Copy the content of the
-  data type. Returns ``UA_STATUSCODE_GOOD`` or
-  ``UA_STATUSCODE_BADOUTOFMEMORY``.
-- ``void T_deleteMembers(T *ptr)``: Delete the dynamically allocated content
-  of the data type and perform a ``T_init`` to reset the type.
-- ``void T_delete(T *ptr)``: Delete the content of the data type and the
-  memory for the data type itself.
+Builtin Types
+-------------
 
 .. code-block:: c
 
    
    #define UA_BUILTIN_TYPES_COUNT 25U
    
-Builtin Types
--------------
-
 Boolean
 ^^^^^^^
 A two-state logical value (true or false).
@@ -211,6 +193,8 @@ of the char-array.
    
    #define UA_STRING_ALLOC(CHARS) UA_String_fromChars(CHARS)
    
+.. _datetime:
+
 DateTime
 ^^^^^^^^
 An instance in time. A DateTime value is encoded as a 64-bit signed integer
@@ -278,8 +262,10 @@ A sequence of octets.
    typedef UA_String UA_ByteString;
    
    static UA_INLINE UA_Boolean
-   UA_ByteString_equal(const UA_ByteString *string1, const UA_ByteString *string2) {
-       return UA_String_equal((const UA_String*)string1, (const UA_String*)string2);
+   UA_ByteString_equal(const UA_ByteString *string1,
+                       const UA_ByteString *string2) {
+       return UA_String_equal((const UA_String*)string1,
+                              (const UA_String*)string2);
    }
    
    /* Allocates memory of size length for the bytestring.
@@ -544,11 +530,11 @@ Variants can also be *empty*. Then, the pointer to the type description is
    #define UA_EMPTY_ARRAY_SENTINEL ((void*)0x01)
    
    typedef enum {
-           UA_VARIANT_DATA,          /* The data has the same lifecycle as the
-                                        variant */
-           UA_VARIANT_DATA_NODELETE, /* The data is "borrowed" by the variant and
-                                        shall not be deleted at the end of the
-                                        variant's lifecycle. */
+       UA_VARIANT_DATA,          /* The data has the same lifecycle as the
+                                    variant */
+       UA_VARIANT_DATA_NODELETE, /* The data is "borrowed" by the variant and
+                                    shall not be deleted at the end of the
+                                    variant's lifecycle. */
    } UA_VariantStorageType;
    
    typedef struct {
@@ -692,13 +678,13 @@ target NodeId is stored instead of the decoded value.
 .. code-block:: c
 
    typedef enum {
-           UA_EXTENSIONOBJECT_ENCODED_NOBODY     = 0,
-           UA_EXTENSIONOBJECT_ENCODED_BYTESTRING = 1,
-           UA_EXTENSIONOBJECT_ENCODED_XML        = 2,
-           UA_EXTENSIONOBJECT_DECODED            = 3,
-           UA_EXTENSIONOBJECT_DECODED_NODELETE   = 4 /* Don't delete the content
-                                                        together with the
-                                                        ExtensionObject */
+       UA_EXTENSIONOBJECT_ENCODED_NOBODY     = 0,
+       UA_EXTENSIONOBJECT_ENCODED_BYTESTRING = 1,
+       UA_EXTENSIONOBJECT_ENCODED_XML        = 2,
+       UA_EXTENSIONOBJECT_DECODED            = 3,
+       UA_EXTENSIONOBJECT_DECODED_NODELETE   = 4 /* Don't delete the content
+                                                    together with the
+                                                    ExtensionObject */
    } UA_ExtensionObjectEncoding;
    
    typedef struct {
@@ -766,13 +752,30 @@ associated with a StatusCode.
 
 Generic Type Handling
 ---------------------
-The builtin types can be combined to data structures. All information about a
-(structured) data type is stored in a ``UA_DataType``. The array ``UA_TYPES``
-contains the description of all standard-defined types and is used for
-handling of generic types.
+
+All information about a (builtin/structured) data type is stored in a
+``UA_DataType``. The array ``UA_TYPES`` contains the description of all
+standard-defined types. This type description is used for the following
+generic operations that work on all types:
+
+- ``void T_init(T *ptr)``: Initialize the data type. This is synonymous with
+  zeroing out the memory, i.e. ``memset(ptr, 0, sizeof(T))``.
+- ``T* T_new()``: Allocate and return the memory for the data type. The
+  value is already initialized.
+- ``UA_StatusCode T_copy(const T *src, T *dst)``: Copy the content of the
+  data type. Returns ``UA_STATUSCODE_GOOD`` or
+  ``UA_STATUSCODE_BADOUTOFMEMORY``.
+- ``void T_deleteMembers(T *ptr)``: Delete the dynamically allocated content
+  of the data type and perform a ``T_init`` to reset the type.
+- ``void T_delete(T *ptr)``: Delete the content of the data type and the
+  memory for the data type itself.
+
+Specializations, such as ``UA_Int32_new()`` are derived from the generic
+type operations as static inline functions.
 
 .. code-block:: c
 
+   
    typedef struct {
    #ifdef UA_ENABLE_TYPENAMES
        const char *memberName;
@@ -926,7 +929,7 @@ indicates a range with a single element (min==max).
        UA_UInt32 min;
        UA_UInt32 max;
    } UA_NumericRangeDimension;
-       
+   
    struct UA_NumericRange {
        size_t dimensionsSize;
        UA_NumericRangeDimension *dimensions;

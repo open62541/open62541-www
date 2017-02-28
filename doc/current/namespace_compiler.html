@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Generating an OPC UA Information Model from XML Descriptions &mdash; open62541 0.2.0-rc2 documentation</title>
+  <title>XML Nodeset Compiler &mdash; open62541 0.2.0-rc2 documentation</title>
   
 
   
@@ -34,9 +34,8 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="open62541 0.2.0-rc2 documentation" href="index.html"/>
-        <link rel="up" title="Tutorials" href="tutorials.html"/>
-        <link rel="next" title="Building a simple client" href="tutorial_client_firststeps.html"/>
-        <link rel="prev" title="Adding a server-side method" href="tutorial_server_method.html"/> 
+        <link rel="next" title="Internals" href="internal.html"/>
+        <link rel="prev" title="Standard-Defined Constants" href="constants.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -91,18 +90,7 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="tutorial_server_firststeps.html">Building a simple server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variables.html">Adding variables to a server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding a server-side method</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Generating an OPC UA Information Model from XML Descriptions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#compile-xml-namespaces">Compile XML Namespaces</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#creating-object-instances">Creating object instances</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a simple client</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
@@ -110,6 +98,10 @@
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">XML Nodeset Compiler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-object-instances">Creating object instances</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
 
@@ -141,13 +133,11 @@
   <ul class="wy-breadcrumbs">
     <li><a href="toc.html">Docs</a> &raquo;</li>
       
-          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
-      
-    <li>Generating an OPC UA Information Model from XML Descriptions</li>
+    <li>XML Nodeset Compiler</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/tutorial_noderelations.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/namespace_compiler.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -157,69 +147,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="generating-an-opc-ua-information-model-from-xml-descriptions">
-<h1>Generating an OPC UA Information Model from XML Descriptions<a class="headerlink" href="#generating-an-opc-ua-information-model-from-xml-descriptions" title="Permalink to this headline">¶</a></h1>
-<p>This tutorial will show you how to create a server from an information model defined in the OPC UA Nodeset XML schema.</p>
-<div class="section" id="compile-xml-namespaces">
-<h2>Compile XML Namespaces<a class="headerlink" href="#compile-xml-namespaces" title="Permalink to this headline">¶</a></h2>
-<p>When writing an application, it is more comfortable to create information models using some comfortable GUI tools. Most tools can export data according the OPC UA Nodeset XML schema. open62541 contains a python based namespace compiler that can transform these information model definitions into a working server.</p>
+  <div class="section" id="xml-nodeset-compiler">
+<h1>XML Nodeset Compiler<a class="headerlink" href="#xml-nodeset-compiler" title="Permalink to this headline">¶</a></h1>
+<p>When writing an application, it is more comfortable to create information models using some GUI tools. Most tools can export data according the OPC UA Nodeset XML schema. open62541 contains a python based namespace compiler that can transform these information model definitions into a working server.</p>
 <p>Note that the namespace compiler you can find in the <em>tools</em> subfolder is <em>not</em> an XML transformation tool but a compiler. That means that it will create an internal representation when parsing the XML files and attempt to understand and verify the correctness of this representation in order to generate C Code.</p>
-<p>We take the following information model snippet as the starting point of the following tutorial.</p>
-<img src="_images/graphviz-c7a56f6004d33167f40dc70f3dd5ca880948f5b3.png" alt="digraph tree {
-
-fixedsize=true;
-node [width=2, height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
-
-node_root [label=&quot;&lt;&lt;ObjectType&gt;&gt;\nFieldDevice&quot;]
-
-{ rank=same
-  point_1 [shape=point]
-  node_1 [label=&quot;&lt;&lt;Variable&gt;&gt;\nManufacturerName&quot;] }
-node_root -&gt; point_1 [arrowhead=none]
-point_1 -&gt; node_1 [label=&quot;hasComponent&quot;]
-
-{ rank=same
-  point_2 [shape=point]
-  node_2 [label=&quot;&lt;&lt;Variable&gt;&gt;\nModelName&quot;] }
-point_1 -&gt; point_2 [arrowhead=none]
-point_2 -&gt; node_2 [label=&quot;hasComponent&quot;]
-
-{  rank=same
-   point_3 [shape=point]
-   node_3 [label=&quot;&lt;&lt;ObjectType&gt;&gt;\nPump&quot;] }
-point_2 -&gt; point_3 [arrowhead=none]
-point_3 -&gt; node_3 [label=&quot;hasSubtype&quot;]
-
-{  rank=same
-   point_4 [shape=point]
-   node_4 [label=&quot;&lt;&lt;Variable&gt;&gt;\nMotorRPM&quot;] }
-node_3 -&gt; point_4 [arrowhead=none]
-point_4 -&gt; node_4 [label=&quot;hasComponent&quot;]
-
-{  rank=same
-   point_5 [shape=point]
-   node_5 [label=&quot;&lt;&lt;Variable&gt;&gt;\nisOn&quot;] }
-point_4 -&gt; point_5 [arrowhead=none]
-point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
-
-{  rank=same
-   point_6 [shape=point]
-   node_6 [label=&quot;&lt;&lt;Method&gt;&gt;\nstartPump&quot;]
-   node_8 [label=&quot;&lt;&lt;Variable&gt;&gt;\nOutputArguments&quot;] }
-point_5 -&gt; point_6 [arrowhead=none]
-point_6 -&gt; node_6 [label=&quot;hasComponent&quot;]
-node_6 -&gt; node_8 [label=&quot;hasProperty&quot;]
-
-{  rank=same
-   point_7 [shape=point]
-   node_7 [label=&quot;&lt;&lt;Method&gt;&gt;\nstopPump&quot;]
-   node_9 [label=&quot;&lt;&lt;Variable&gt;&gt;\nOutputArguments&quot;] }
-point_6 -&gt; point_7 [arrowhead=none]
-point_7 -&gt; node_7 [label=&quot;hasComponent&quot;]
-node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
-
-}" />
-<p>This information model is represented in XML as follows:</p>
+<p>We take the following information model snippet as the starting point of the following tutorial:</p>
 <div class="highlight-xml"><div class="highlight"><pre><span></span><span class="nt">&lt;UANodeSet</span> <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>
            <span class="na">xmlns:uax=</span><span class="s">&quot;http://opcfoundation.org/UA/2008/02/Types.xsd&quot;</span>
            <span class="na">xmlns=</span><span class="s">&quot;http://opcfoundation.org/UA/2011/03/UANodeSet.xsd&quot;</span>
@@ -447,55 +379,10 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ cmake -DCMAKE_BUILD_TYPE<span class="o">=</span>Debug -DUA_ENABLE_METHODCALLS<span class="o">=</span>On <span class="se">\</span>
         -BUILD_EXAMPLECLIENT<span class="o">=</span>On -BUILD_EXAMPLESERVER<span class="o">=</span>On <span class="se">\</span>
         -DUA_ENABLE_GENERATE_NAMESPACE0<span class="o">=</span>On ../
--- Git version: v0.1.0-RC4-403-g198597c-dirty
--- Configuring <span class="k">done</span>
--- Generating <span class="k">done</span>
--- Build files have been written to: /home/ichrispa/work/svn/working_copies/open62541/build
-
 $ make
-<span class="o">[</span>  <span class="m">3</span>%<span class="o">]</span> Generating src_generated/ua_nodeids.h
-<span class="o">[</span>  <span class="m">6</span>%<span class="o">]</span> Generating src_generated/ua_types_generated.c, src_generated/ua_types_generated.h
-<span class="o">[</span> <span class="m">10</span>%<span class="o">]</span> Generating src_generated/ua_transport_generated.c, src_generated/ua_transport_generated.h
-<span class="o">[</span> <span class="m">13</span>%<span class="o">]</span> Generating src_generated/ua_namespaceinit_generated.c, src_generated/ua_namespaceinit_generated.h
 </pre></div>
 </div>
-<p>At this point, the make process will most likely hang for 30-60s until the namespace is parsed, checked, linked and finally generated (be patient). It should continue as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Scanning</span> <span class="n">dependencies</span> <span class="n">of</span> <span class="n">target</span> <span class="n">open62541</span><span class="o">-</span><span class="nb">object</span>
-<span class="p">[</span> <span class="mi">17</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ua_types</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">20</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ua_types_encoding_binary</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">24</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src_generated</span><span class="o">/</span><span class="n">ua_types_generated</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">27</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src_generated</span><span class="o">/</span><span class="n">ua_transport_generated</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">31</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ua_connection</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">34</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ua_securechannel</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">37</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ua_session</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">41</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_server</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">44</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_server_addressspace</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">48</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_server_binary</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">51</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_nodes</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">55</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_server_worker</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">58</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_securechannel_manager</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">62</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_session_manager</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">65</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_discovery</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">68</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_securechannel</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">72</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_session</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">75</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_attribute</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">79</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_nodemanagement</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">82</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_view</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">86</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">client</span><span class="o">/</span><span class="n">ua_client</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">89</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">networklayer_tcp</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">93</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">logger_stdout</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">96</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src_generated</span><span class="o">/</span><span class="n">ua_namespaceinit_generated</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-</pre></div>
-</div>
-<p>And at this point, you are going to see the compiler hanging again. If you specified <code class="docutils literal"><span class="pre">-DCMAKE_BUILD_TYPE=Debug</span></code>, you are looking at about 5-10 seconds of waiting. If you forgot, you can now drink a cup of coffee, go to the movies or take a loved one out for dinner (or abort the build with CTRL+C). Shortly after:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mi">83</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_services_call</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span> <span class="mi">86</span><span class="o">%</span><span class="p">]</span> <span class="n">Building</span> <span class="n">C</span> <span class="nb">object</span> <span class="n">CMakeFiles</span><span class="o">/</span><span class="n">open62541</span><span class="o">-</span><span class="nb">object</span><span class="o">.</span><span class="n">dir</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">server</span><span class="o">/</span><span class="n">ua_nodestore</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">o</span>
-<span class="p">[</span><span class="mi">100</span><span class="o">%</span><span class="p">]</span> <span class="n">Built</span> <span class="n">target</span> <span class="n">open62541</span><span class="o">-</span><span class="nb">object</span>
-<span class="n">Scanning</span> <span class="n">dependencies</span> <span class="n">of</span> <span class="n">target</span> <span class="n">open62541</span>
-<span class="n">Linking</span> <span class="n">C</span> <span class="n">shared</span> <span class="n">library</span> <span class="n">libopen62541</span><span class="o">.</span><span class="n">so</span>
-<span class="p">[</span><span class="mi">100</span><span class="o">%</span><span class="p">]</span> <span class="n">Built</span> <span class="n">target</span> <span class="n">open62541</span>
-</pre></div>
-</div>
+<p>At this point, the make process will most likely hang for 30-60s until the namespace is parsed, checked, linked and finally generated (be patient). If you specified <code class="docutils literal"><span class="pre">-DCMAKE_BUILD_TYPE=Debug</span></code>, you are looking at about 5-10 seconds of waiting. A release build can take a lot longer.</p>
 <p>If you open the header <code class="docutils literal"><span class="pre">src_generated/ua_namespaceinit_generated.h</span></code> and take a short look at the generated defines, you will notice the following definitions have been created:</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#define UA_NS1ID_PROVIDESINPUTTO</span>
 <span class="cp">#define UA_NS1ID_FIELDDEVICE</span>
@@ -504,15 +391,14 @@ $ make
 <span class="cp">#define UA_NS1ID_STOPPUMP</span>
 </pre></div>
 </div>
-<p>These definitions are generated for all types, but not variables, objects or views (as their names may be ambiguous and may not a be unique identifier). You can use these definitions in your code as you already used the <code class="docutils literal"><span class="pre">UA_NS0ID_</span></code> equivalents.</p>
+<p>These definitions are generated for all types, but not variables, objects or views (as their names may be ambiguous and may not a be unique identifier). You can use these definitions in your code for numeric nodeids in namespace 1.</p>
 <p>Now switch back to your own source directory and update your libopen62541 library (in case you have not linked it into the build folder). Compile our example server as follows:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>ichrispa@Cassandra:open62541/build-tutorials&gt; gcc -g -std=c99 -Wl,-rpath,`pwd` -I ./include -L . -DUA_ENABLE_METHODCALLS -o server ./server.c -lopen62541
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ gcc -g -std<span class="o">=</span>c99 -Wl,-rpath,<span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span> -I ./include -L . -DUA_ENABLE_METHODCALLS -o server ./server.c -lopen62541
 </pre></div>
 </div>
 <p>Note that we need to also define the method-calls here, as the header files may choose to ommit functions such as UA_Server_addMethodNode() if they believe you do not use them. If you run the server, you should now see a new dataType in the browse path <code class="docutils literal"><span class="pre">/Types/ObjectTypes/BaseObjectType/FieldDevice</span></code> when viewing the nodes in UAExpert.</p>
-<p>If you take a look at any of the variables, like <code class="docutils literal"><span class="pre">ManufacturerName</span></code>, you will notice it is shown as a Boolean; this is not an error. The node does not include a variant and as you learned in our previous tutorial, it is that variant that would hold the dataType ID.</p>
 <dl class="docutils">
-<dt>A minor list of some of the miriad things that can go wrong:</dt>
+<dt>A minor list of some of the things that can go wrong:</dt>
 <dd><ul class="first last simple">
 <li>Your file was not found. The namespace compiler will complain, print a help message, and exit.</li>
 <li>A structure/DataType you created with a value was not encoded. The namespace compiler can currently not handle nested extensionObjects.</li>
@@ -522,10 +408,9 @@ $ make
 </ul>
 </dd>
 </dl>
-</div>
 <div class="section" id="creating-object-instances">
 <h2>Creating object instances<a class="headerlink" href="#creating-object-instances" title="Permalink to this headline">¶</a></h2>
-<p>Defining an object type is only usefull if it ends up making our lives easier in some way (though it is always the proper thing to do). One of the key benefits of defining object types is being able to create object instances fairly easily. Object instantiation is handled automatically when the typedefinition NodeId points to a valid ObjectType node. All Attributes and Methods contained in the objectType definition will be instantiated along with the object node.</p>
+<p>One of the key benefits of defining object types is being able to create object instances fairly easily. Object instantiation is handled automatically when the typedefinition NodeId points to a valid ObjectType node. All Attributes and Methods contained in the objectType definition will be instantiated along with the object node.</p>
 <p>While variables are copied from the objetType definition (allowing the user for example to attach new dataSources to them), methods are always only linked. This paradigm is identical to languages like C++: The method called is always the same piece of code, but the first argument is a pointer to an object. Likewise, in OPC UA, only one methodCallback can be attached to a specific methodNode. If that methodNode is called, the parent objectId will be passed to the method - it is the methods job to derefence which object instance it belongs to in that moment.</p>
 <p>One of the problems arising from the server internally &#8220;building&#8221; new nodes as described in the type is that the user does not know which template creates which instance. This can be a problem - for example if a specific dataSource should be attached to each variableNode called &#8220;samples&#8221; later on. Unfortunately, we only know which template variable&#8217;s Id the dataSource will be attached to - we do not know the nodeId of the instance of that variable. To easily cover usecases where variable instances Y derived from a definition template X should need to be manipulated in some maner, the stack provides an instantiation callback: Each time a new node is instantiated, the callback gets notified about the relevant data; the callback can then either manipulate the new node itself or just create a map/record for later use.</p>
 <p>Let&#8217;s look at an example that will create a pump instance given the newly defined objectType:</p>
@@ -599,54 +484,6 @@ $ make
 </pre></div>
 </div>
 <p>If you start the server and inspect the nodes with UA Expert, you will find two pumps in the objects folder, which look like this:</p>
-<img src="_images/graphviz-c5757e2011d3ce8034997fc4c5f4f4d9301bf622.png" alt="digraph tree {
-
-fixedsize=true;
-node [width=2, height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
-
-node_root [label=&quot;&lt;&lt;Object&gt;&gt;\nPump&quot;]
-
-{ rank=same
-  point_1 [shape=point]
-  node_1 [label=&quot;&lt;&lt;Variable&gt;&gt;\nManufacturerName&quot;] }
-node_root -&gt; point_1 [arrowhead=none]
-point_1 -&gt; node_1 [label=&quot;hasComponent&quot;]
-
-{ rank=same
-  point_2 [shape=point]
-  node_2 [label=&quot;&lt;&lt;Variable&gt;&gt;\nModelName&quot;] }
-point_1 -&gt; point_2 [arrowhead=none]
-point_2 -&gt; node_2 [label=&quot;hasComponent&quot;]
-
-{  rank=same
-   point_4 [shape=point]
-   node_4 [label=&quot;&lt;&lt;Variable&gt;&gt;\nMotorRPM&quot;] }
-point_2 -&gt; point_4 [arrowhead=none]
-point_4 -&gt; node_4 [label=&quot;hasComponent&quot;]
-
-{  rank=same
-   point_5 [shape=point]
-   node_5 [label=&quot;&lt;&lt;Variable&gt;&gt;\nisOn&quot;] }
-point_4 -&gt; point_5 [arrowhead=none]
-point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
-
-{  rank=same
-   point_6 [shape=point]
-   node_6 [label=&quot;&lt;&lt;Method&gt;&gt;\nstartPump&quot;]
-   node_8 [label=&quot;&lt;&lt;Variable&gt;&gt;\nOutputArguments&quot;] }
-point_5 -&gt; point_6 [arrowhead=none]
-point_6 -&gt; node_6 [label=&quot;hasComponent&quot;]
-node_6 -&gt; node_8 [label=&quot;hasProperty&quot;]
-
-{  rank=same
-   point_7 [shape=point]
-   node_7 [label=&quot;&lt;&lt;Method&gt;&gt;\nstopPump&quot;]
-   node_9 [label=&quot;&lt;&lt;Variable&gt;&gt;\nOutputArguments&quot;] }
-point_6 -&gt; point_7 [arrowhead=none]
-point_7 -&gt; node_7 [label=&quot;hasComponent&quot;]
-node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
-
-}" />
 <p>As you can see the pump has inherited it&#8217;s parents attributes (ManufacturerName and ModelName). You may also notice that the callback was not called for the methods, even though they are obviously where they are supposed to be. Methods, in contrast to objects and variables, are never cloned but instead only linked. The reason is that you will quite propably attach a method callback to a central method, not each object. Objects are instantiated if they are <em>below</em> the object you are creating, so any object (like an object called associatedServer of ServerType) that is part of pump will be instantiated as well. Objects <em>above</em> you object are never instantiated, so the same ServerType object in Fielddevices would have been ommitted (the reason is that the recursive instantiation function protects itself from infinite recursions, which are hard to track when first ascending, then redescending into a tree).</p>
 <p>For each object and variable created by the call, the callback was invoked. The callback gives you the nodeId of the new node along with the Id of the Type template used to create it. You can thereby effectively use setAttributeValue() functions (or others) to adapt the properties of these new nodes, as they can be identified by there templates.</p>
 </div>
@@ -659,10 +496,10 @@ node_7 -&gt; node_9 [label=&quot;hasProperty&quot;]
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tutorial_client_firststeps.html" class="btn btn-neutral float-right" title="Building a simple client" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="internal.html" class="btn btn-neutral float-right" title="Internals" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_server_method.html" class="btn btn-neutral" title="Adding a server-side method" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="constants.html" class="btn btn-neutral" title="Standard-Defined Constants" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
