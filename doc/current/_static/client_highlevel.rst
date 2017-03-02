@@ -14,12 +14,12 @@ the same functionality using the raw :ref:`OPC UA services
 
 Read Attributes
 ^^^^^^^^^^^^^^^
+
 The following functions can be used to retrieve a single node attribute. Use
 the regular service to read several attributes at once.
 
 .. code-block:: c
 
-   
    /* Don't call this function, use the typed versions */
    UA_StatusCode
    __UA_Client_readAttribute(UA_Client *client, const UA_NodeId *nodeId,

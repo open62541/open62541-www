@@ -114,8 +114,6 @@ The following structure is passed to a new server for configuration.
    /* Add a new namespace to the server. Returns the index of the new namespace */
    UA_UInt16 UA_Server_addNamespace(UA_Server *server, const char* name);
    
-.. _server-lifecycle:
-
 Server Lifecycle
 ----------------
 

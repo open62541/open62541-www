@@ -13,8 +13,9 @@ examine the information model of any OPC UA server.
 To get started, downdload the open62541 single-file release from
 http://open62541.org or generate it according to the :ref:`build instructions
 <building>` with the "amalgamation" option enabled. From now on, we assume
-you have the ``open62541.c/.h`` files in the current folder. Now create a new
-C source-file called ``myServer.c`` with the following content:
+you have the ``open62541.c/.h`` files in the current folder.
+
+Now create a new C source-file called ``myServer.c`` with the following content:
 
 .. code-block:: c
 
@@ -24,7 +25,6 @@ C source-file called ``myServer.c`` with the following content:
    
    UA_Boolean running = true;
    static void stopHandler(int sig) {
-       UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, "received ctrl-c");
        running = false;
    }
    
@@ -33,77 +33,35 @@ C source-file called ``myServer.c`` with the following content:
        signal(SIGTERM, stopHandler);
    
        UA_ServerConfig config = UA_ServerConfig_standard;
-       UA_ServerNetworkLayer nl =
-           UA_ServerNetworkLayerTCP(UA_ConnectionConfig_standard, 4840);
+       UA_ServerNetworkLayer nl;
+       nl = UA_ServerNetworkLayerTCP(UA_ConnectionConfig_standard, 4840);
        config.networkLayers = &nl;
        config.networkLayersSize = 1;
        UA_Server *server = UA_Server_new(config);
    
        UA_Server_run(server, &running);
-   
        UA_Server_delete(server);
        nl.deleteMembers(&nl);
        return 0;
    }
    
-This is all that is needed for a simple OPC UA server. With the GCC compiler,
-the following command produces an executable:
+This is all that is needed for a simple OPC UA server. Compile the the server
+with GCC using the following command:
 
 .. code-block:: bash
 
    $ gcc -std=c99 open62541.c myServer.c -o myServer
 
-Now start the server (stop with ctrl-c):
+Now start the server (and stop with ctrl-c):
 
 .. code-block:: bash
 
    $ ./myServer
 
 You have now compiled and run your first OPC UA server. You can go ahead and
-browse the information model with client. The server is listening on
-``opc.tcp://localhost:4840``. In the next two sections, we will continue to
-explain the different parts of the code in detail.
+browse the information model with a generic client, such as UAExpert. The
+server will be listening on ``opc.tcp://localhost:4840`` - go ahead and give
+it a try.
 
-Server Configuration and Plugins
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-*open62541* provides a flexible framework for building OPC UA servers and
-clients. The goals is to have a core library that accomodates for all use
-cases and runs on all platforms. Users can then adjust the library to fit
-their use case via configuration and by developing (platform-specific)
-plugins. The core library is based on C99 only and does not even require
-basic POSIX support. For example, the lowlevel networking code is implemented
-as an exchangeable plugin. But don't worry. *open62541* provides plugin
-implementations for most platforms and sensible default configurations
-out-of-the-box.
-
-In the above server code, we simply take the default server configuration and
-add a single TCP network layer that is listerning on port 4840.
-
-Server Lifecycle
-^^^^^^^^^^^^^^^^
-The code in this example shows the three parts for server lifecycle
-management: Creating a server, running the server, and deleting the server.
-Creating and deleting a server is trivial once the configuration is set up.
-The server is started with ``UA_Server_run``. Internally, the server then
-uses timeouts to schedule regular tasks. Between the timeouts, the server
-listens on the network layer for incoming messages.
-
-You might ask how the server knows when to stop running. For this, we have
-created a global variable ``running``. Furthermore, we have registered the
-method ``stopHandler`` that catches the signal (interrupt) the program
-receives when the operating systems tries to close it. This happens for
-example when you press ctrl-c in a terminal program. The signal handler then
-sets the variable ``running`` to false and the server shuts down once it
-takes back control. [#f1]_
-
-In order to integrated OPC UA in a single-threaded application with its own
-mainloop (for example provided by a GUI toolkit), one can alternatively drive
-the server manually. See the section of the server documentation on
-:ref:`server-lifecycle` for details.
-
-The server configuration and lifecycle management is needed for all servers.
-We will use it in the following tutorials without further comment.
-
-.. [#f1] Be careful with global variables in multi-threaded applications. You
-         might want to allocate the ``running`` variable on the heap.
+In the following tutorials, you will be shown how to populate the server's
+information model and how to create a client application.
