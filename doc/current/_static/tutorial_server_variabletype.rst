@@ -78,12 +78,12 @@ instances of the type. In the following function, adding a variable of
 *2DPoint* type with a string value fails because The value does not match the
 variable type constraints.
 
-
-
-
-
 .. code-block:: c
 
+   
+   static void
+   addVariableFail(UA_Server *server) {
+       /* Prepare the node attributes */
        UA_VariableAttributes vAttr;
        UA_VariableAttributes_init(&vAttr);
        vAttr.dataType = UA_TYPES[UA_TYPES_DOUBLE].typeId;
