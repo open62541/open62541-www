@@ -1,4 +1,4 @@
-Building a simple client
+Building a Simple Client
 ------------------------
 
 You should already have a basic server from the previous tutorials. open62541
@@ -7,6 +7,7 @@ creating a server. Copy the following into a file `myClient.c`:
 
 .. code-block:: c
 
+   
    #include <stdio.h>
    #include "open62541.h"
    
