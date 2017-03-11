@@ -47,7 +47,7 @@ Compilation is similar to the server example.
 
 .. code-block:: bash
 
-    $ gcc -std=c99 open62541.c myClient.c -o myClient
+    $ gcc -std=c99 open6251.c myClient.c -o myClient
 
 Further tasks
 ^^^^^^^^^^^^^
