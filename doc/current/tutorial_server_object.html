@@ -299,7 +299,7 @@ that&#8217;s not exactly a clean solution.) Furthermore, we might have more devi
 than just pumps. And we require all devices to share some common structure.
 The solution is to define ObjectTypes in a hierarchy with inheritance
 relations.</p>
-<img src="_images/graphviz-26ac881b67e467a9b77200266e628d9646014c6b.png" alt="digraph tree {
+<img src="_images/graphviz-5eaf25a30c42d86e57969c260aef0821cb66270b.png" alt="digraph tree {
 
 fixedsize=true;
 node [width=2, height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
@@ -308,7 +308,7 @@ node_root [label=&lt; &lt;I&gt;ObjectTypeNode&lt;/I&gt;&lt;BR/&gt;Device &gt;]
 
 { rank=same
   point_1 [shape=point]
-  node_1 [label=&lt; &lt;I&gt;VariableNode&lt;/I&gt;&lt;BR/&gt;ManufacturerName &gt;] }
+  node_1 [label=&lt; &lt;I&gt;VariableNode&lt;/I&gt;&lt;BR/&gt;ManufacturerName&lt;BR/&gt;(mandatory) &gt;] }
 node_root -&gt; point_1 [arrowhead=none]
 point_1 -&gt; node_1 [label=&quot;hasComponent&quot;]
 
@@ -326,7 +326,7 @@ point_3 -&gt; node_3 [label=&quot;hasSubtype&quot;]
 
 {  rank=same
    point_4 [shape=point]
-   node_4 [label=&lt; &lt;I&gt;VariableNode&lt;/I&gt;&lt;BR/&gt;Status &gt;] }
+   node_4 [label=&lt; &lt;I&gt;VariableNode&lt;/I&gt;&lt;BR/&gt;Status&lt;BR/&gt;(mandatory) &gt;] }
 node_3 -&gt; point_4 [arrowhead=none]
 point_4 -&gt; node_4 [label=&quot;hasComponent&quot;]
 
@@ -337,6 +337,9 @@ point_4 -&gt; point_5 [arrowhead=none]
 point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
 
 }" />
+<p>Children that are marked mandatory are automatically instantiated together
+with the parent object. This is indicated by a <cite>hasModellingRule</cite> reference
+to an object that representes the <cite>mandatory</cite> modelling rule.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* predefined identifier for later use */</span>
 <span class="n">UA_NodeId</span> <span class="n">pumpTypeId</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="n">UA_NODEIDTYPE_NUMERIC</span><span class="p">,</span> <span class="p">{</span><span class="mi">1001</span><span class="p">}};</span>
 
@@ -356,10 +359,16 @@ point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
     <span class="n">UA_VariableAttributes</span> <span class="n">mnAttr</span><span class="p">;</span>
     <span class="n">UA_VariableAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mnAttr</span><span class="p">);</span>
     <span class="n">mnAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;ManufacturerName&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">manufacturerNameId</span><span class="p">;</span>
     <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">deviceTypeId</span><span class="p">,</span>
                               <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASCOMPONENT</span><span class="p">),</span>
                               <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;ManufacturerName&quot;</span><span class="p">),</span>
-                              <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">mnAttr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+                              <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">mnAttr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">manufacturerNameId</span><span class="p">);</span>
+    <span class="cm">/* Make the manufacturer name mandatory */</span>
+    <span class="n">UA_Server_addReference</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">manufacturerNameId</span><span class="p">,</span>
+                           <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASMODELLINGRULE</span><span class="p">),</span>
+                           <span class="n">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_MODELLINGRULE_MANDATORY</span><span class="p">),</span> <span class="nb">true</span><span class="p">);</span>
+
 
     <span class="n">UA_VariableAttributes</span> <span class="n">modelAttr</span><span class="p">;</span>
     <span class="n">UA_VariableAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">modelAttr</span><span class="p">);</span>
@@ -382,10 +391,15 @@ point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
     <span class="n">UA_VariableAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">statusAttr</span><span class="p">);</span>
     <span class="n">statusAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;Status&quot;</span><span class="p">);</span>
     <span class="n">statusAttr</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">statusId</span><span class="p">;</span>
     <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">pumpTypeId</span><span class="p">,</span>
                               <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASCOMPONENT</span><span class="p">),</span>
                               <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;Status&quot;</span><span class="p">),</span>
-                              <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">statusAttr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+                              <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">statusAttr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">statusId</span><span class="p">);</span>
+    <span class="cm">/* Make the status variable mandatory */</span>
+    <span class="n">UA_Server_addReference</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">statusId</span><span class="p">,</span>
+                           <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASMODELLINGRULE</span><span class="p">),</span>
+                           <span class="n">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_MODELLINGRULE_MANDATORY</span><span class="p">),</span> <span class="nb">true</span><span class="p">);</span>
 
     <span class="n">UA_VariableAttributes</span> <span class="n">rpmAttr</span><span class="p">;</span>
     <span class="n">UA_VariableAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rpmAttr</span><span class="p">);</span>
@@ -399,10 +413,10 @@ point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
 </pre></div>
 </div>
 <p>Now we add the derived ObjectType for the pump that inherits from the device
-object type. The resulting object contains all four inherited child
-variables. The object has a reference of type <code class="docutils literal"><span class="pre">hasTypeDefinition</span></code> to the
-object type. Clients can browse this information at runtime and adjust
-accordingly.</p>
+object type. The resulting object contains all mandatory child variables.
+These are simply copied over from the object type. The object has a reference
+of type <code class="docutils literal"><span class="pre">hasTypeDefinition</span></code> to the object type, so that clients can detect
+the type-instance relation at runtime.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addPumpObjectInstance</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_ObjectAttributes</span> <span class="n">oAttr</span><span class="p">;</span>
