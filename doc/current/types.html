@@ -121,6 +121,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#expandednodeid">ExpandedNodeId</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#qualifiedname">QualifiedName</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#localizedtext">LocalizedText</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numericrange">NumericRange</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variant">Variant</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#extensionobject">ExtensionObject</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datavalue">DataValue</a></li>
@@ -128,10 +129,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#generic-type-handling">Generic Type Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#array-handling">Array handling</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#numericrange">NumericRange</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#array-handling">Array handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#random-number-generator">Random Number Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generated-data-type-definitions">Generated Data Type Definitions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="types_generated.html">Boolean</a></li>
@@ -813,8 +811,27 @@ which represents the number of 100 nanosecond intervals since January 1, 1601
 </pre></div>
 </div>
 </div>
+<div class="section" id="numericrange">
+<span id="id5"></span><h3>NumericRange<a class="headerlink" href="#numericrange" title="Permalink to this headline">¶</a></h3>
+<p>NumericRanges are used to indicate subsets of a (multidimensional) array.
+They no official data type in the OPC UA standard and are transmitted only
+with a string encoding, such as &#8220;1:2,0:3,5&#8221;. The colon separates min/max
+index and the comma separates dimensions. A single value indicates a range
+with a single element (min==max).</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_NumericRangeDimension</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span>  <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">dimensionsSize</span><span class="p">;</span>
+    <span class="n">UA_NumericRangeDimension</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_NumericRange</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="variant">
-<span id="id5"></span><h3>Variant<a class="headerlink" href="#variant" title="Permalink to this headline">¶</a></h3>
+<span id="id6"></span><h3>Variant<a class="headerlink" href="#variant" title="Permalink to this headline">¶</a></h3>
 <p>Variants may contain values of any type together with a description of the
 content. See the section on <a class="reference internal" href="#generic-types"><span class="std std-ref">Generic Type Handling</span></a> on how types are described.
 The standard mandates that variants contain built-in data types only. If the
@@ -844,10 +861,6 @@ used. <code class="docutils literal"><span class="pre">UA_Variant_isScalar</span
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Forward declaration. See the section on Generic Type Handling */</span>
 <span class="k">struct</span> <span class="n">UA_DataType</span><span class="p">;</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_DataType</span> <span class="n">UA_DataType</span><span class="p">;</span>
-
-<span class="cm">/* Forward declaration. See the section on Array Handling */</span>
-<span class="k">struct</span> <span class="n">UA_NumericRange</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_NumericRange</span> <span class="n">UA_NumericRange</span><span class="p">;</span>
 
 <span class="cp">#define UA_EMPTY_ARRAY_SENTINEL ((void*)0x01)</span>
 
@@ -990,7 +1003,7 @@ used. <code class="docutils literal"><span class="pre">UA_Variant_isScalar</span
 </div>
 </div>
 <div class="section" id="extensionobject">
-<span id="id6"></span><h3>ExtensionObject<a class="headerlink" href="#extensionobject" title="Permalink to this headline">¶</a></h3>
+<span id="id7"></span><h3>ExtensionObject<a class="headerlink" href="#extensionobject" title="Permalink to this headline">¶</a></h3>
 <p>ExtensionObjects may contain scalars of any data type. Even those that are
 unknown to the receiver. See the section on <a class="reference internal" href="#generic-types"><span class="std std-ref">Generic Type Handling</span></a> on how types
 are described. If the received data type is unkown, the encoded string and
@@ -1022,7 +1035,7 @@ target NodeId is stored instead of the decoded value.</p>
 </div>
 </div>
 <div class="section" id="datavalue">
-<span id="id7"></span><h3>DataValue<a class="headerlink" href="#datavalue" title="Permalink to this headline">¶</a></h3>
+<span id="id8"></span><h3>DataValue<a class="headerlink" href="#datavalue" title="Permalink to this headline">¶</a></h3>
 <p>A data value with an associated status code and timestamps.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_Boolean</span>    <span class="nl">hasValue</span>             <span class="p">:</span> <span class="mi">1</span><span class="p">;</span>
@@ -1180,7 +1193,7 @@ following method to retrieve the data type description.</p>
 </div>
 </div>
 <div class="section" id="array-handling">
-<span id="id8"></span><h2>Array handling<a class="headerlink" href="#array-handling" title="Permalink to this headline">¶</a></h2>
+<span id="id9"></span><h2>Array handling<a class="headerlink" href="#array-handling" title="Permalink to this headline">¶</a></h2>
 <p>In OPC UA, arrays can have a length of zero or more with the usual meaning.
 In addition, arrays can be undefined. Then, they don&#8217;t even have a length. In
 the binary encoding, this is indicated by an array of length -1.</p>
@@ -1213,25 +1226,6 @@ length 0 but a data pointer <code class="docutils literal"><span class="pre">UA_
 <span class="cm"> * @param type The datatype of the array members */</span>
 <span class="kt">void</span> <span class="nf">UA_Array_delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
 </pre></div>
-</div>
-<div class="section" id="numericrange">
-<span id="id9"></span><h3>NumericRange<a class="headerlink" href="#numericrange" title="Permalink to this headline">¶</a></h3>
-<p>NumericRanges are used to indicate subsets of a (multidimensional) variant
-array. NumericRange has no official type structure in the standard. On the
-wire, it only exists as an encoded string, such as &#8220;1:2,0:3,5&#8221;. The colon
-separates min/max index and the comma separates dimensions. A single value
-indicates a range with a single element (min==max).</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_NumericRangeDimension</span><span class="p">;</span>
-
-<span class="k">struct</span> <span class="n">UA_NumericRange</span> <span class="p">{</span>
-    <span class="kt">size_t</span> <span class="n">dimensionsSize</span><span class="p">;</span>
-    <span class="n">UA_NumericRangeDimension</span> <span class="o">*</span><span class="n">dimensions</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="random-number-generator">

@@ -483,6 +483,29 @@ Human readable text with an optional locale identifier.
        lt.text = UA_STRING_ALLOC(text); return lt;
    }
    
+.. _numericrange:
+
+NumericRange
+^^^^^^^^^^^^
+
+NumericRanges are used to indicate subsets of a (multidimensional) array.
+They no official data type in the OPC UA standard and are transmitted only
+with a string encoding, such as "1:2,0:3,5". The colon separates min/max
+index and the comma separates dimensions. A single value indicates a range
+with a single element (min==max).
+
+.. code-block:: c
+
+   typedef struct {
+       UA_UInt32 min;
+       UA_UInt32 max;
+   } UA_NumericRangeDimension;
+   
+   typedef struct  {
+       size_t dimensionsSize;
+       UA_NumericRangeDimension *dimensions;
+   } UA_NumericRange;
+   
 .. _variant:
 
 Variant
@@ -522,10 +545,6 @@ Variants can also be *empty*. Then, the pointer to the type description is
    /* Forward declaration. See the section on Generic Type Handling */
    struct UA_DataType;
    typedef struct UA_DataType UA_DataType;
-   
-   /* Forward declaration. See the section on Array Handling */
-   struct UA_NumericRange;
-   typedef struct UA_NumericRange UA_NumericRange;
    
    #define UA_EMPTY_ARRAY_SENTINEL ((void*)0x01)
    
@@ -911,29 +930,6 @@ length 0 but a data pointer ``UA_EMPTY_ARRAY_SENTINEL``.
     * @param size The size of the array
     * @param type The datatype of the array members */
    void UA_Array_delete(void *p, size_t size, const UA_DataType *type);
-   
-.. _numericrange:
-
-NumericRange
-^^^^^^^^^^^^
-
-NumericRanges are used to indicate subsets of a (multidimensional) variant
-array. NumericRange has no official type structure in the standard. On the
-wire, it only exists as an encoded string, such as "1:2,0:3,5". The colon
-separates min/max index and the comma separates dimensions. A single value
-indicates a range with a single element (min==max).
-
-.. code-block:: c
-
-   typedef struct {
-       UA_UInt32 min;
-       UA_UInt32 max;
-   } UA_NumericRangeDimension;
-   
-   struct UA_NumericRange {
-       size_t dimensionsSize;
-       UA_NumericRangeDimension *dimensions;
-   };
    
 Random Number Generator
 -----------------------
