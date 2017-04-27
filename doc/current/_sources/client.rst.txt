@@ -184,8 +184,8 @@ NodeManagement Service Set
    UA_Client_Service_addReferences(UA_Client *client,
                                    const UA_AddReferencesRequest request) {
        UA_AddReferencesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_ADDNODESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_ADDNODESRESPONSE]);
+       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_ADDREFERENCESREQUEST],
+                           &response, &UA_TYPES[UA_TYPES_ADDREFERENCESRESPONSE]);
        return response;
    }
    
@@ -202,8 +202,8 @@ NodeManagement Service Set
    UA_Client_Service_deleteReferences(UA_Client *client,
                                       const UA_DeleteReferencesRequest request) {
        UA_DeleteReferencesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_DELETENODESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_DELETENODESRESPONSE]);
+       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_DELETEREFERENCESREQUEST],
+                           &response, &UA_TYPES[UA_TYPES_DELETEREFERENCESRESPONSE]);
        return response;
    }
    
