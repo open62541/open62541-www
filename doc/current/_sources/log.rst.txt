@@ -112,7 +112,7 @@ Convenience macros for complex types
 
 .. code-block:: c
 
-   #define UA_PRINTF_GUID_FORMAT "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}"
+   #define UA_PRINTF_GUID_FORMAT "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x"
    #define UA_PRINTF_GUID_DATA(GUID) (GUID).data1, (GUID).data2, (GUID).data3, \
            (GUID).data4[0], (GUID).data4[1], (GUID).data4[2], (GUID).data4[3], \
            (GUID).data4[4], (GUID).data4[5], (GUID).data4[6], (GUID).data4[7]
