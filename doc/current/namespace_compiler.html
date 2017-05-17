@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>XML Nodeset Compiler &mdash; open62541 0.2.0-rc2 documentation</title>
+  <title>XML Nodeset Compiler &mdash; open62541 0.2.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="open62541 0.2.0-rc2 documentation" href="index.html"/>
+    <link rel="top" title="open62541 0.2.0 documentation" href="index.html"/>
         <link rel="next" title="Internals" href="internal.html"/>
         <link rel="prev" title="Standard-Defined Constants" href="constants.html"/> 
 
@@ -369,7 +369,7 @@
 <span class="nt">&lt;/UANodeSet&gt;</span>
 </pre></div>
 </div>
-<p><strong>TODO</strong> Some modelers prepends the namespace qualifier &#8220;uax:&#8221; to some fields - this is not supported by the namespace compiler, who has strict aliasing rules concerning field names. If a datatype defines a field called &#8220;Argument&#8221;, the compiler expects to find &#8220;&lt;Argument&gt;&#8221; tags, not &#8220;&lt;uax:Argument&gt;&#8221;.</p>
+<p><strong>TODO</strong> Some modelers prepends the namespace qualifier “uax:” to some fields - this is not supported by the namespace compiler, who has strict aliasing rules concerning field names. If a datatype defines a field called “Argument”, the compiler expects to find “&lt;Argument&gt;” tags, not “&lt;uax:Argument&gt;”.</p>
 <p>In its simplest form, an invokation of the namespace compiler will look like this:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ python ./generate_open62541CCode.py &lt;Opc.Ua.NodeSet2.xml&gt; myNS.xml myNS
 </pre></div>
@@ -392,7 +392,7 @@
   ${PROJECT_BINARY_DIR}/src_generated/ua_namespaceinit_generated
 </pre></div>
 </div>
-<p>Always make sure that your XML file comes <em>after</em> namespace 0. Also, take into consideration that any node ID&#8217;s you specify that already exist in previous files will overwrite the previous file (yes, you could intentionally overwrite the NS0 Server node if you wanted to). The namespace compiler will now automatically embedd you namespace definitions into the namespace of the server. So in total, all that was necessary was:</p>
+<p>Always make sure that your XML file comes <em>after</em> namespace 0. Also, take into consideration that any node ID’s you specify that already exist in previous files will overwrite the previous file (yes, you could intentionally overwrite the NS0 Server node if you wanted to). The namespace compiler will now automatically embedd you namespace definitions into the namespace of the server. So in total, all that was necessary was:</p>
 <blockquote>
 <div><ul class="simple">
 <li>Creating your namespace XML description</li>
@@ -427,9 +427,9 @@ $ make
 <dd><ul class="first last simple">
 <li>Your file was not found. The namespace compiler will complain, print a help message, and exit.</li>
 <li>A structure/DataType you created with a value was not encoded. The namespace compiler can currently not handle nested extensionObjects.</li>
-<li>Nodes are not or wrongly encoded or you get nodeId errors.  The namespace compiler can currently not encode bytestring or guid node id&#8217;s and external server uris are not supported either.</li>
-<li>You get compiler complaints for non-existant variants. Check that you have removed any namespace qualifiers (like &#8220;uax:&#8221;) from the XML file.</li>
-<li>You get &#8220;invalid reference to addMethodNode&#8221; style errors. Make sure <code class="docutils literal"><span class="pre">-DUA_ENABLE_METHODCALLS=On</span></code> is defined.</li>
+<li>Nodes are not or wrongly encoded or you get nodeId errors.  The namespace compiler can currently not encode bytestring or guid node id’s and external server uris are not supported either.</li>
+<li>You get compiler complaints for non-existant variants. Check that you have removed any namespace qualifiers (like “uax:”) from the XML file.</li>
+<li>You get “invalid reference to addMethodNode” style errors. Make sure <code class="docutils literal"><span class="pre">-DUA_ENABLE_METHODCALLS=On</span></code> is defined.</li>
 </ul>
 </dd>
 </dl>
@@ -437,8 +437,8 @@ $ make
 <h2>Creating object instances<a class="headerlink" href="#creating-object-instances" title="Permalink to this headline">¶</a></h2>
 <p>One of the key benefits of defining object types is being able to create object instances fairly easily. Object instantiation is handled automatically when the typedefinition NodeId points to a valid ObjectType node. All Attributes and Methods contained in the objectType definition will be instantiated along with the object node.</p>
 <p>While variables are copied from the objetType definition (allowing the user for example to attach new dataSources to them), methods are always only linked. This paradigm is identical to languages like C++: The method called is always the same piece of code, but the first argument is a pointer to an object. Likewise, in OPC UA, only one methodCallback can be attached to a specific methodNode. If that methodNode is called, the parent objectId will be passed to the method - it is the methods job to derefence which object instance it belongs to in that moment.</p>
-<p>One of the problems arising from the server internally &#8220;building&#8221; new nodes as described in the type is that the user does not know which template creates which instance. This can be a problem - for example if a specific dataSource should be attached to each variableNode called &#8220;samples&#8221; later on. Unfortunately, we only know which template variable&#8217;s Id the dataSource will be attached to - we do not know the nodeId of the instance of that variable. To easily cover usecases where variable instances Y derived from a definition template X should need to be manipulated in some maner, the stack provides an instantiation callback: Each time a new node is instantiated, the callback gets notified about the relevant data; the callback can then either manipulate the new node itself or just create a map/record for later use.</p>
-<p>Let&#8217;s look at an example that will create a pump instance given the newly defined objectType:</p>
+<p>One of the problems arising from the server internally “building” new nodes as described in the type is that the user does not know which template creates which instance. This can be a problem - for example if a specific dataSource should be attached to each variableNode called “samples” later on. Unfortunately, we only know which template variable’s Id the dataSource will be attached to - we do not know the nodeId of the instance of that variable. To easily cover usecases where variable instances Y derived from a definition template X should need to be manipulated in some maner, the stack provides an instantiation callback: Each time a new node is instantiated, the callback gets notified about the relevant data; the callback can then either manipulate the new node itself or just create a map/record for later use.</p>
+<p>Let’s look at an example that will create a pump instance given the newly defined objectType:</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
 
@@ -509,7 +509,7 @@ $ make
 </pre></div>
 </div>
 <p>If you start the server and inspect the nodes with UA Expert, you will find two pumps in the objects folder, which look like this:</p>
-<p>As you can see the pump has inherited it&#8217;s parents attributes (ManufacturerName and ModelName). You may also notice that the callback was not called for the methods, even though they are obviously where they are supposed to be. Methods, in contrast to objects and variables, are never cloned but instead only linked. The reason is that you will quite propably attach a method callback to a central method, not each object. Objects are instantiated if they are <em>below</em> the object you are creating, so any object (like an object called associatedServer of ServerType) that is part of pump will be instantiated as well. Objects <em>above</em> you object are never instantiated, so the same ServerType object in Fielddevices would have been ommitted (the reason is that the recursive instantiation function protects itself from infinite recursions, which are hard to track when first ascending, then redescending into a tree).</p>
+<p>As you can see the pump has inherited it’s parents attributes (ManufacturerName and ModelName). You may also notice that the callback was not called for the methods, even though they are obviously where they are supposed to be. Methods, in contrast to objects and variables, are never cloned but instead only linked. The reason is that you will quite propably attach a method callback to a central method, not each object. Objects are instantiated if they are <em>below</em> the object you are creating, so any object (like an object called associatedServer of ServerType) that is part of pump will be instantiated as well. Objects <em>above</em> you object are never instantiated, so the same ServerType object in Fielddevices would have been ommitted (the reason is that the recursive instantiation function protects itself from infinite recursions, which are hard to track when first ascending, then redescending into a tree).</p>
 <p>For each object and variable created by the call, the callback was invoked. The callback gives you the nodeId of the new node along with the Id of the Type template used to create it. You can thereby effectively use setAttributeValue() functions (or others) to adapt the properties of these new nodes, as they can be identified by there templates.</p>
 </div>
 </div>
@@ -558,7 +558,7 @@ $ make
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.2.0-rc2',
+            VERSION:'0.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
