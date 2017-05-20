@@ -205,7 +205,9 @@ authoritative definition of the service and their behaviour.</p>
 <h2>Discovery Service Set<a class="headerlink" href="#discovery-service-set" title="Permalink to this headline">¶</a></h2>
 <p>This Service Set defines Services used to discover the Endpoints implemented
 by a Server and to read the security configuration for those Endpoints.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">Service_FindServers</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Returns the Servers known to a Server or Discovery Server.</span>
+<span class="cm"> * The Client may reduce the number of results returned by specifying filter criteria */</span>
+<span class="kt">void</span> <span class="nf">Service_FindServers</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                          <span class="k">const</span> <span class="n">UA_FindServersRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                          <span class="n">UA_FindServersResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
@@ -215,7 +217,33 @@ by a Server and to read the security configuration for those Endpoints.</p>
                           <span class="k">const</span> <span class="n">UA_GetEndpointsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                           <span class="n">UA_GetEndpointsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
-<span class="cm">/* Not Implemented: Service_RegisterServer */</span>
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+
+<span class="cp"># ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
+<span class="cm">/* Returns the Servers known to a Discovery Server. Unlike FindServer,</span>
+<span class="cm"> * this Service is only implemented by Discovery Servers. It additionally</span>
+<span class="cm"> * Returns servery which may have been detected trough Multicast */</span>
+<span class="kt">void</span> <span class="nf">Service_FindServersOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_FindServersOnNetworkRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                  <span class="n">UA_FindServersOnNetworkResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+<span class="cp"># endif </span><span class="c1">// UA_ENABLE_DISCOVERY_MULTICAST</span>
+
+<span class="cm">/* Registers a remote server in the local discovery service. */</span>
+<span class="kt">void</span> <span class="nf">Service_RegisterServer</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_RegisterServerRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                            <span class="n">UA_RegisterServerResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+
+<span class="cm">/* Checks if a registration timed out and removes that registration.</span>
+<span class="cm"> * Should be called periodically in main loop */</span>
+<span class="kt">void</span> <span class="nf">UA_Discovery_cleanupTimedOut</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="n">nowMonotonic</span><span class="p">);</span>
+
+<span class="cm">/* This Service allows a Server to register its DiscoveryUrls and capabilities</span>
+<span class="cm"> * with a Discovery Server. It extends the registration information from</span>
+<span class="cm"> * RegisterServer with information necessary for FindServersOnNetwork. */</span>
+<span class="kt">void</span> <span class="nf">Service_RegisterServer2</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_RegisterServer2Request</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                            <span class="n">UA_RegisterServer2Response</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+<span class="cp">#endif </span><span class="c1">// UA_ENABLE_DISCOVERY</span>
 </pre></div>
 </div>
 </div>

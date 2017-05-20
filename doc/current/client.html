@@ -105,6 +105,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Client</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#client-lifecycle">Client Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#manage-the-connection">Manage the Connection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#raw-services">Raw Services</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#attribute-service-set">Attribute Service Set</a></li>
@@ -210,6 +211,10 @@ subscriptions. The user will have to periodically call
     <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
     <span class="n">UA_ConnectionConfig</span> <span class="n">localConnectionConfig</span><span class="p">;</span>
     <span class="n">UA_ConnectClientConnection</span> <span class="n">connectionFunc</span><span class="p">;</span>
+
+    <span class="cm">/* Custom DataTypes */</span>
+    <span class="kt">size_t</span> <span class="n">customDataTypesSize</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ClientConfig</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -253,12 +258,13 @@ subscriptions. The user will have to periodically call
 </pre></div>
 </div>
 </div>
-<div class="section" id="manage-the-connection">
-<h2>Manage the Connection<a class="headerlink" href="#manage-the-connection" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="discovery">
+<h2>Discovery<a class="headerlink" href="#discovery" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Gets a list of endpoints of a server</span>
 <span class="cm"> *</span>
-<span class="cm"> * @param client to use</span>
-<span class="cm"> * @param server url to connect (for example &quot;opc.tcp://localhost:16664&quot;)</span>
+<span class="cm"> * @param client to use. Must be connected to the same endpoint given in</span>
+<span class="cm"> *        serverUrl or otherwise in disconnected state.</span>
+<span class="cm"> * @param serverUrl url to connect (for example &quot;opc.tcp://localhost:16664&quot;)</span>
 <span class="cm"> * @param endpointDescriptionsSize size of the array of endpoint descriptions</span>
 <span class="cm"> * @param endpointDescriptions array of endpoint descriptions that is allocated</span>
 <span class="cm"> *        by the function (you need to free manually)</span>
@@ -268,7 +274,62 @@ subscriptions. The user will have to periodically call
                        <span class="kt">size_t</span><span class="o">*</span> <span class="n">endpointDescriptionsSize</span><span class="p">,</span>
                        <span class="n">UA_EndpointDescription</span><span class="o">**</span> <span class="n">endpointDescriptions</span><span class="p">);</span>
 
-<span class="cm">/* Connect to the selected server</span>
+<span class="cm">/* Gets a list of all registered servers at the given server.</span>
+<span class="cm"> *</span>
+<span class="cm"> * You can pass an optional filter for serverUris. If the given server is not registered,</span>
+<span class="cm"> * an empty array will be returned. If the server is registered, only that application</span>
+<span class="cm"> * description will be returned.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Additionally you can optionally indicate which locale you want for the server name</span>
+<span class="cm"> * in the returned application description. The array indicates the order of preference.</span>
+<span class="cm"> * A server may have localized names.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param client to use. Must be connected to the same endpoint given in</span>
+<span class="cm"> *        serverUrl or otherwise in disconnected state.</span>
+<span class="cm"> * @param serverUrl url to connect (for example &quot;opc.tcp://localhost:16664&quot;)</span>
+<span class="cm"> * @param serverUrisSize Optional filter for specific server uris</span>
+<span class="cm"> * @param serverUris Optional filter for specific server uris</span>
+<span class="cm"> * @param localeIdsSize Optional indication which locale you prefer</span>
+<span class="cm"> * @param localeIds Optional indication which locale you prefer</span>
+<span class="cm"> * @param registeredServersSize size of returned array, i.e., number of found/registered servers</span>
+<span class="cm"> * @param registeredServers array containing found/registered servers</span>
+<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_findServers</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">serverUrl</span><span class="p">,</span>
+                      <span class="kt">size_t</span> <span class="n">serverUrisSize</span><span class="p">,</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">serverUris</span><span class="p">,</span>
+                      <span class="kt">size_t</span> <span class="n">localeIdsSize</span><span class="p">,</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">localeIds</span><span class="p">,</span>
+                      <span class="kt">size_t</span> <span class="o">*</span><span class="n">registeredServersSize</span><span class="p">,</span>
+                      <span class="n">UA_ApplicationDescription</span> <span class="o">**</span><span class="n">registeredServers</span><span class="p">);</span>
+
+<span class="cm">/* Get a list of all known server in the network. Only supported by LDS servers.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param client to use. Must be connected to the same endpoint given in</span>
+<span class="cm"> * serverUrl or otherwise in disconnected state.</span>
+<span class="cm"> * @param serverUrl url to connect (for example &quot;opc.tcp://localhost:16664&quot;)</span>
+<span class="cm"> * @param startingRecordId optional. Only return the records with an ID higher</span>
+<span class="cm"> *        or equal the given. Can be used for pagination to only get a subset of</span>
+<span class="cm"> *        the full list</span>
+<span class="cm"> * @param maxRecordsToReturn optional. Only return this number of records</span>
+
+<span class="cm"> * @param serverCapabilityFilterSize optional. Filter the returned list to only</span>
+<span class="cm"> *        get servers with given capabilities, e.g. &quot;LDS&quot;</span>
+<span class="cm"> * @param serverCapabilityFilter optional. Filter the returned list to only get</span>
+<span class="cm"> *        servers with given capabilities, e.g. &quot;LDS&quot;</span>
+<span class="cm"> * @param serverOnNetworkSize size of returned array, i.e., number of</span>
+<span class="cm"> *        known/registered servers</span>
+<span class="cm"> * @param serverOnNetwork array containing known/registered servers</span>
+<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_findServersOnNetwork</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">serverUrl</span><span class="p">,</span>
+                     <span class="n">UA_UInt32</span> <span class="n">startingRecordId</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxRecordsToReturn</span><span class="p">,</span>
+                     <span class="kt">size_t</span> <span class="n">serverCapabilityFilterSize</span><span class="p">,</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">serverCapabilityFilter</span><span class="p">,</span>
+                     <span class="kt">size_t</span> <span class="o">*</span><span class="n">serverOnNetworkSize</span><span class="p">,</span> <span class="n">UA_ServerOnNetwork</span> <span class="o">**</span><span class="n">serverOnNetwork</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="manage-the-connection">
+<h2>Manage the Connection<a class="headerlink" href="#manage-the-connection" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Connect to the selected server</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param client to use</span>
 <span class="cm"> * @param endpointURL to connect (for example &quot;opc.tcp://localhost:16664&quot;)</span>

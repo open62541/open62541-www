@@ -278,27 +278,22 @@ without being aware of the underlying transport technology.</p>
 </div>
 <div class="section" id="endpointurl-helper">
 <h2>EndpointURL Helper<a class="headerlink" href="#endpointurl-helper" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Split the given endpoint url into hostname and port</span>
-<span class="cm"> * @param endpointUrl The endpoint URL to split up</span>
-<span class="cm"> * @param hostname the target array for hostname. Has to be at least 256 size.</span>
-<span class="cm"> *        If an IPv6 address is given, hostname contains e.g.</span>
-<span class="cm"> *        &#39;[2001:0db8:85a3::8a2e:0370:7334]&#39;</span>
-<span class="cm"> * @param port set to the port of the url or 0</span>
-<span class="cm"> * @param path pointing to the end of given endpointUrl or to NULL if no</span>
-<span class="cm"> *        path given. The starting &#39;/&#39; is NOT included in path</span>
-<span class="cm"> * @return UA_STATUSCODE_BADOUTOFRANGE if url too long,</span>
-<span class="cm"> *         UA_STATUSCODE_BADATTRIBUTEIDINVALID if url not starting with</span>
-<span class="cm"> *         &#39;opc.tcp://&#39;, UA_STATUSCODE_GOOD on success</span>
-<span class="cm"> */</span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Split the given endpoint url into hostname, port and path. All arguments must</span>
+<span class="cm"> * be non-NULL. EndpointUrls have the form &quot;opc.tcp://hostname:port/path&quot;, port</span>
+<span class="cm"> * and path may be omitted (together with the prefix colon and slash).</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param endpointUrl The endpoint URL.</span>
+<span class="cm"> * @param outHostname Set to the parsed hostname. The string points into the</span>
+<span class="cm"> *        original endpointUrl, so no memory is allocated. If an IPv6 address is</span>
+<span class="cm"> *        given, hostname contains e.g. &#39;[2001:0db8:85a3::8a2e:0370:7334]&#39;</span>
+<span class="cm"> * @param outPort Set to the port of the url or left unchanged.</span>
+<span class="cm"> * @param outPath Set to the path if one is present in the endpointUrl. The</span>
+<span class="cm"> *        starting (and trailing) &#39;/&#39; is NOT included in the path. The string</span>
+<span class="cm"> *        points into the original endpointUrl, so no memory is allocated.</span>
+<span class="cm"> * @return Returns UA_STATUSCODE_BADTCPENDPOINTURLINVALID if parsing failed. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_EndpointUrl_split</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">hostname</span><span class="p">,</span>
-                     <span class="n">UA_UInt16</span> <span class="o">*</span> <span class="n">port</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span> <span class="n">path</span><span class="p">);</span>
-
-<span class="cm">/* Convert given byte string to a positive number. Returns the number of valid</span>
-<span class="cm"> * digits. Stops if a non-digit char is found and returns the number of digits</span>
-<span class="cm"> * up to that point. */</span>
-<span class="kt">size_t</span>
-<span class="nf">UA_readNumber</span><span class="p">(</span><span class="n">UA_Byte</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">buflen</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">number</span><span class="p">);</span>
+<span class="nf">UA_parseEndpointUrl</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">outHostname</span><span class="p">,</span>
+                    <span class="n">UA_UInt16</span> <span class="o">*</span><span class="n">outPort</span><span class="p">,</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">outPath</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

@@ -44,7 +44,6 @@ correctness of casting from ``UA_Node`` to a specific node type.
        UA_LocalizedText displayName;               \
        UA_LocalizedText description;               \
        UA_UInt32 writeMask;                        \
-       UA_UInt32 userWriteMask;                    \
        size_t referencesSize;                      \
        UA_ReferenceNode *references;
    
@@ -147,7 +146,6 @@ Consistency between the array dimensions attribute in the variable and its
        UA_NODE_BASEATTRIBUTES
        UA_NODE_VARIABLEATTRIBUTES
        UA_Byte accessLevel;
-       UA_Byte userAccessLevel;
        UA_Double minimumSamplingInterval;
        UA_Boolean historizing; /* currently unsupported */
    } UA_VariableNode;
@@ -194,7 +192,6 @@ providing context* is part of a Call request message.
    typedef struct {
        UA_NODE_BASEATTRIBUTES
        UA_Boolean executable;
-       UA_Boolean userExecutable;
    
        /* Members specific to open62541 */
        void *methodHandle;

@@ -30,6 +30,10 @@ Client Configuration
        UA_Logger logger;
        UA_ConnectionConfig localConnectionConfig;
        UA_ConnectClientConnection connectionFunc;
+   
+       /* Custom DataTypes */
+       size_t customDataTypesSize;
+       const UA_DataType *customDataTypes;
    } UA_ClientConfig;
    
 Client Lifecycle
@@ -72,15 +76,17 @@ Client Lifecycle
    /* Delete a client */
    void UA_Client_delete(UA_Client *client);
    
-Manage the Connection
----------------------
+Discovery
+---------
 
 .. code-block:: c
 
+   
    /* Gets a list of endpoints of a server
     *
-    * @param client to use
-    * @param server url to connect (for example "opc.tcp://localhost:16664")
+    * @param client to use. Must be connected to the same endpoint given in
+    *        serverUrl or otherwise in disconnected state.
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
     * @param endpointDescriptionsSize size of the array of endpoint descriptions
     * @param endpointDescriptions array of endpoint descriptions that is allocated
     *        by the function (you need to free manually)
@@ -89,6 +95,63 @@ Manage the Connection
    UA_Client_getEndpoints(UA_Client *client, const char *serverUrl,
                           size_t* endpointDescriptionsSize,
                           UA_EndpointDescription** endpointDescriptions);
+   
+   /* Gets a list of all registered servers at the given server.
+    *
+    * You can pass an optional filter for serverUris. If the given server is not registered,
+    * an empty array will be returned. If the server is registered, only that application
+    * description will be returned.
+    *
+    * Additionally you can optionally indicate which locale you want for the server name
+    * in the returned application description. The array indicates the order of preference.
+    * A server may have localized names.
+    *
+    * @param client to use. Must be connected to the same endpoint given in
+    *        serverUrl or otherwise in disconnected state.
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
+    * @param serverUrisSize Optional filter for specific server uris
+    * @param serverUris Optional filter for specific server uris
+    * @param localeIdsSize Optional indication which locale you prefer
+    * @param localeIds Optional indication which locale you prefer
+    * @param registeredServersSize size of returned array, i.e., number of found/registered servers
+    * @param registeredServers array containing found/registered servers
+    * @return Indicates whether the operation succeeded or returns an error code */
+   UA_StatusCode
+   UA_Client_findServers(UA_Client *client, const char *serverUrl,
+                         size_t serverUrisSize, UA_String *serverUris,
+                         size_t localeIdsSize, UA_String *localeIds,
+                         size_t *registeredServersSize,
+                         UA_ApplicationDescription **registeredServers);
+   
+   /* Get a list of all known server in the network. Only supported by LDS servers.
+    *
+    * @param client to use. Must be connected to the same endpoint given in
+    * serverUrl or otherwise in disconnected state.
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
+    * @param startingRecordId optional. Only return the records with an ID higher
+    *        or equal the given. Can be used for pagination to only get a subset of
+    *        the full list
+    * @param maxRecordsToReturn optional. Only return this number of records
+   
+    * @param serverCapabilityFilterSize optional. Filter the returned list to only
+    *        get servers with given capabilities, e.g. "LDS"
+    * @param serverCapabilityFilter optional. Filter the returned list to only get
+    *        servers with given capabilities, e.g. "LDS"
+    * @param serverOnNetworkSize size of returned array, i.e., number of
+    *        known/registered servers
+    * @param serverOnNetwork array containing known/registered servers
+    * @return Indicates whether the operation succeeded or returns an error code */
+   UA_StatusCode
+   UA_Client_findServersOnNetwork(UA_Client *client, const char *serverUrl,
+                        UA_UInt32 startingRecordId, UA_UInt32 maxRecordsToReturn,
+                        size_t serverCapabilityFilterSize, UA_String *serverCapabilityFilter,
+                        size_t *serverOnNetworkSize, UA_ServerOnNetwork **serverOnNetwork);
+   
+Manage the Connection
+---------------------
+
+.. code-block:: c
+
    
    /* Connect to the selected server
     *
