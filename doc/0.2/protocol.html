@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Protocol &mdash; open62541 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="open62541 0.2.0 documentation" href="index.html"/>
+        <link rel="next" title="Data Types" href="types.html"/>
+        <link rel="prev" title="Building a Simple Client" href="tutorial_client_firststeps.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#establishing-a-connection">Establishing a Connection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structure-of-a-protocol-message">Structure of a protocol message</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="namespace_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html">Docs</a> &raquo;</li>
+        
+      <li>Protocol</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/protocol.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="protocol">
+<span id="id1"></span><h1>Protocol<a class="headerlink" href="#protocol" title="Permalink to this headline">¶</a></h1>
+<p>In this section, we give an overview on the OPC UA binary protocol. We focus on
+binary since that is what has been implemented in open62541. The TCP-based
+binary protocol is by far the most common transport layer for OPC UA. The
+general concepts also translate to HTTP and SOAP-based communication defined in
+the standard. Communication in OPC UA is best understood by starting with the
+following key principles:</p>
+<dl class="docutils">
+<dt>Request / Response</dt>
+<dd>All communication is based on the Request/Response pattern. Only clients can
+send a request to a server. And servers can only send responses to a request.
+Usually, the server is hosted on the (physical) device, such as a sensor or a
+machine tool.</dd>
+<dt>Asynchronous Responses</dt>
+<dd>A server does not have to immediately respond to requests and responses may be
+sent in a different order. This keeps the server responsive when it takes time
+until a specific request has been processed (e.g. a method call or when
+reading from a sensor with delay). Furthermore, Subscriptions (aka
+push-notifications) are implemented via special requests where the response is
+delayed until a notification is generated.</dd>
+</dl>
+<div class="section" id="establishing-a-connection">
+<h2>Establishing a Connection<a class="headerlink" href="#establishing-a-connection" title="Permalink to this headline">¶</a></h2>
+<p>A client-server connection in OPC UA consists of three nested levels: The raw
+connection, a SecureChannel and the Session. For full details, see Part 6 of the
+OPC UA standard.</p>
+<dl class="docutils">
+<dt>Raw Connection</dt>
+<dd>The raw connection is created by opening a TCP connection to the corresponding
+hostname and port and an initial HEL/ACK handshake. The handshake establishes
+the basic settings of the connection, such as the maximum message length.</dd>
+<dt>SecureChannel</dt>
+<dd><p class="first">SecureChannels are created on top of the raw TCP connection. A SecureChannel
+is established with an <em>OpenSecureChannel</em> request and response message pair.
+<strong>Attention!</strong> Even though a SecureChannel is mandatory, encryption might
+still be disabled. The <em>SecurityMode</em> of a SecureChannel can be either
+<code class="docutils literal"><span class="pre">None</span></code>, <code class="docutils literal"><span class="pre">Sign</span></code>, or <code class="docutils literal"><span class="pre">SignAndEncrypt</span></code>. As of version 0.2 of open6251,
+message signing and encryption is still under ongoing development.</p>
+<p>With message signing or encryption enabled, the <em>OpenSecureChannel</em> messages
+are encrypted using an asymmetric encryption algorithm (public-key
+cryptography) <a class="footnote-reference" href="#key-mgmnt" id="id2">[1]</a>. As part of the <em>OpenSecureChannel</em> messages,
+client and server establish a common secret over an initially unsecure
+channel. For subsequent messages, the common secret is used for symmetric
+encryption, which has the advantage of being much faster.</p>
+<p>Different <em>SecurityPolicies</em> – defined in part 7 of the OPC UA standard –
+specify the algorithms for asymmetric and symmetric encryption, encryption key
+lengths, hash functions for message signing, and so on. Example
+SecurityPolicies are <code class="docutils literal"><span class="pre">None</span></code> for transmission of cleartext and
+<code class="docutils literal"><span class="pre">Basic256Sha256</span></code> which mandates a variant of RSA with SHA256 certificate
+hashing for asymmetric encryption and AES256 for symmetric encryption.</p>
+<p class="last">The possible SecurityPolicies of a server are described with a list of
+<em>Endpoints</em>. An endpoint jointly defines the SecurityMode, SecurityPolicy and
+means for authenticating a session (discussed in the next section) in order to
+connect to a certain server. The <em>GetEndpoints</em> service returns a list of
+available endpoints. This service can usually be invoked without a session and
+from an unencrypted SecureChannel. This allows clients to first discover
+available endpoints and then use an appropriate SecurityPolicy that might be
+required to open a session.</p>
+</dd>
+<dt>Session</dt>
+<dd><p class="first">Sessions are created on top of a SecureChannel. This ensures that users may
+authenticate without sending their credentials, such as username and password,
+in cleartext. Currently defined authentication mechanisms are anonymous login,
+username/password, Kerberos and x509 certificates. The latter requires that
+the request message is accompanied by a signature to prove that the sender is
+in posession of the private key with which the certificate was created.</p>
+<p class="last">There are two message exchanges required to establish a session:
+<em>CreateSession</em> and <em>ActicateSession</em>. The ActivateSession service can be used
+to switch an existing session to a different SecureChannel. This is important,
+for example when the connection broke down and the existing session is
+reused with a new SecureChannel.</p>
+</dd>
+</dl>
+<table class="docutils footnote" frame="void" id="key-mgmnt" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>This entails that the client and server exchange so-called
+public keys. The public keys might come with a certificate from a key-signing
+authority or be verified against an external key repository. But we will not
+discuss certificate management in detail in this section.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="structure-of-a-protocol-message">
+<h2>Structure of a protocol message<a class="headerlink" href="#structure-of-a-protocol-message" title="Permalink to this headline">¶</a></h2>
+<p>For the following introduction to the structure of OPC UA protocol messages,
+consider the example OPC UA binary conversation, recorded and displayed with the
+<a class="reference external" href="https://www.wireshark.org/">Wireshark</a> tool, shown in <a class="reference internal" href="#ua-wireshark"><span class="std std-numref">Fig. 1</span></a>.</p>
+<div class="figure" id="id3" style="width: 100%">
+<span id="ua-wireshark"></span><img alt="OPC UA conversation in Wireshark" src="_images/ua-wireshark.png" />
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">OPC UA conversation displayed in Wireshark</span></p>
+</div>
+<p>The top part of the Wireshark window shows the messages from the conversation in
+order. The green line contains the applied filter. Here, we want to see the OPC
+UA protocol messages only. The first messages (from TCP packets 49 to 56) show
+the client opening an unencrypted SecureChannel and retrieving the server’s
+endpoints. Then, starting with packet 63, a new connection and SecureChannel are
+created in conformance with one of the endpoints. On top of this SecureChannel,
+the client can then create and activate a session. The following <em>ReadRequest</em>
+message is selected and covered in more detail in the bottom windows.</p>
+<p>The bottom left window shows the structure of the selected <em>ReadRequest</em>
+message. The purpose of the message is invoking the <em>Read</em> <a class="reference internal" href="services.html#services"><span class="std std-ref">service</span></a>. The message is structured into a header and a message body. Note
+that we do not consider encryption or signing of messages here.</p>
+<dl class="docutils">
+<dt>Message Header</dt>
+<dd>As stated before, OPC UA defines an asynchronous protocol. So responses may be
+out of order. The message header contains some basic information, such as the
+length of the message, as well as necessary information to relate messages to
+a SecureChannel and each request to the corresponding response. “Chunking”
+refers to the splitting and reassembling of messages that are longer than the
+maximum network packet size.</dd>
+<dt>Message Body</dt>
+<dd>Every OPC UA <a class="reference internal" href="services.html#services"><span class="std std-ref">service</span></a> has a signature in the form of a
+request and response data structure. These are defined according to the OPC UA
+protocol <a class="reference internal" href="types.html#types"><span class="std std-ref">type system</span></a>. See especially the <a class="reference internal" href="types.html#generated-types"><span class="std std-ref">auto-generated
+type definitions</span></a> for the data types corresponding to service
+requests and responses. The message body begins with the identifier of the
+following data type. Then, the main payload of the message follows.</dd>
+</dl>
+<p>The bottom right window shows the binary payload of the selected <em>ReadRequest</em>
+message. The message header is highlighted in light-grey. The message body in
+blue highlighting shows the encoded <em>ReadRequest</em> data structure.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="types.html" class="btn btn-neutral float-right" title="Data Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tutorial_client_firststeps.html" class="btn btn-neutral" title="Building a Simple Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
