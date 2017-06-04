@@ -37,6 +37,14 @@ correctness of casting from ``UA_Node`` to a specific node type.
 
 .. code-block:: c
 
+   /* List of reference targets with the same reference type and direction */
+   typedef struct {
+       UA_NodeId referenceTypeId;
+       UA_Boolean isInverse;
+       size_t targetIdsSize;
+       UA_ExpandedNodeId *targetIds;
+   } UA_NodeReferenceKind;
+   
    #define UA_NODE_BASEATTRIBUTES                  \
        UA_NodeId nodeId;                           \
        UA_NodeClass nodeClass;                     \
@@ -45,7 +53,7 @@ correctness of casting from ``UA_Node`` to a specific node type.
        UA_LocalizedText description;               \
        UA_UInt32 writeMask;                        \
        size_t referencesSize;                      \
-       UA_ReferenceNode *references;
+       UA_NodeReferenceKind *references;
    
    typedef struct {
        UA_NODE_BASEATTRIBUTES

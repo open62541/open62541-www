@@ -214,7 +214,15 @@ an integer <a class="reference internal" href="constants.html#attribute-id"><spa
 <p>Internally, open62541 uses <code class="docutils literal"><span class="pre">UA_Node</span></code> in places where the exact node type is
 not known or not important. The <code class="docutils literal"><span class="pre">nodeClass</span></code> attribute is used to ensure the
 correctness of casting from <code class="docutils literal"><span class="pre">UA_Node</span></code> to a specific node type.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#define UA_NODE_BASEATTRIBUTES                  \</span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* List of reference targets with the same reference type and direction */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">targetIdsSize</span><span class="p">;</span>
+    <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">targetIds</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_NodeReferenceKind</span><span class="p">;</span>
+
+<span class="cp">#define UA_NODE_BASEATTRIBUTES                  \</span>
 <span class="cp">    UA_NodeId nodeId;                           \</span>
 <span class="cp">    UA_NodeClass nodeClass;                     \</span>
 <span class="cp">    UA_QualifiedName browseName;                \</span>
@@ -222,7 +230,7 @@ correctness of casting from <code class="docutils literal"><span class="pre">UA_
 <span class="cp">    UA_LocalizedText description;               \</span>
 <span class="cp">    UA_UInt32 writeMask;                        \</span>
 <span class="cp">    size_t referencesSize;                      \</span>
-<span class="cp">    UA_ReferenceNode *references;</span>
+<span class="cp">    UA_NodeReferenceKind *references;</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_NODE_BASEATTRIBUTES</span>
