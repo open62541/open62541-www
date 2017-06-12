@@ -78,7 +78,7 @@ implementations for most platforms and sensible default configurations
 out-of-the-box.
 
 In the above server code, we simply take the default server configuration and
-add a single TCP network layer that is listerning on port 4840.
+add a single TCP network layer that is listening on port 4840.
 
 Server Lifecycle
 ^^^^^^^^^^^^^^^^
@@ -97,7 +97,7 @@ example when you press ctrl-c in a terminal program. The signal handler then
 sets the variable ``running`` to false and the server shuts down once it
 takes back control. [#f1]_
 
-In order to integrated OPC UA in a single-threaded application with its own
+In order to integrate OPC UA in a single-threaded application with its own
 mainloop (for example provided by a GUI toolkit), one can alternatively drive
 the server manually. See the section of the server documentation on
 :ref:`server-lifecycle` for details.
