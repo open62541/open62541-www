@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Logging &mdash; open62541 0.3.0 documentation</title>
+  <title>Logging Plugin API &mdash; open62541 0.3.0 documentation</title>
   
 
   
@@ -37,7 +37,8 @@
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="open62541 0.3.0 documentation" href="index.html"/>
         <link rel="up" title="Internals" href="internal.html"/>
-        <link rel="prev" title="Networking" href="connection.html"/> 
+        <link rel="next" title="Nodestore" href="nodestore.html"/>
+        <link rel="prev" title="Access Control Plugin API" href="plugin_access_control.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -106,12 +107,13 @@
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="namespace_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="nodestore.html">Nodestore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="connection.html">Networking</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_access_control.html">Access Control Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging Plugin API</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#convenience-macros-for-complex-types">Convenience macros for complex types</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="nodestore.html">Nodestore</a></li>
 </ul>
 </li>
 </ul>
@@ -160,13 +162,13 @@
         
           <li><a href="internal.html">Internals</a> &raquo;</li>
         
-      <li>Logging</li>
+      <li>Logging Plugin API</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/log.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/plugin_log.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -179,14 +181,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="logging">
-<h1>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h1>
-<p>Servers and clients may contain a logger. Every logger needs to implement the
-<cite>UA_Logger</cite> signature. An example logger that writes to stdout is provided in
-the plugins folder.</p>
-<p>Every log-message consists of a log-level, a log-category and a string
-message content. The timestamp of the log-message is created within the
-logger.</p>
+  <div class="section" id="logging-plugin-api">
+<h1>Logging Plugin API<a class="headerlink" href="#logging-plugin-api" title="Permalink to this headline">¶</a></h1>
+<p>Servers and clients must define a logger in their configuration. The logger
+is just a function pointer. Every log-message consists of a log-level, a
+log-category and a string message content. The timestamp of the log-message
+is created within the logger.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
     <span class="n">UA_LOGLEVEL_TRACE</span><span class="p">,</span>
     <span class="n">UA_LOGLEVEL_DEBUG</span><span class="p">,</span>
@@ -206,76 +206,64 @@ logger.</p>
 <span class="p">}</span> <span class="n">UA_LogCategory</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>The signature of the logger. The msg string and following varargs are
-formatted according to the rules of the printf command.</p>
-<p>Do not use the logger directly but make use of the following macros that take
-the minimum log-level defined in ua_config.h into account.</p>
+<p>The message string and following varargs are formatted according to the rules
+of the printf command. Do not call the logger directly. Instead, make use of
+the convenience macros that take the minimum log-level defined in ua_config.h
+into account.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Logger</span><span class="p">)(</span><span class="n">UA_LogLevel</span> <span class="n">level</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span>
                           <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="kt">va_list</span> <span class="n">args</span><span class="p">);</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_LOG_TRACE</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
 <span class="cp">#if UA_LOGLEVEL &lt;= 100</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
-        <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_TRACE</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-        <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_TRACE</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_LOG_DEBUG</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
 <span class="cp">#if UA_LOGLEVEL &lt;= 200</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
-        <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_DEBUG</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-        <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_DEBUG</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
 <span class="cp">#if UA_LOGLEVEL &lt;= 300</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
-        <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_INFO</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-        <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_INFO</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
 <span class="cp">#if UA_LOGLEVEL &lt;= 400</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
-        <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_WARNING</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-        <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_WARNING</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
 <span class="cp">#if UA_LOGLEVEL &lt;= 500</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
-        <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_ERROR</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-        <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_ERROR</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_LOG_FATAL</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
 <span class="cp">#if UA_LOGLEVEL &lt;= 600</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
-        <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_FATAL</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
-        <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
-    <span class="p">}</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_FATAL</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
 </pre></div>
@@ -304,8 +292,10 @@ the minimum log-level defined in ua_config.h into account.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="nodestore.html" class="btn btn-neutral float-right" title="Nodestore" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="connection.html" class="btn btn-neutral" title="Networking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="plugin_access_control.html" class="btn btn-neutral" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

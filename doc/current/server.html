@@ -102,11 +102,9 @@
 <li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#network-layer">Network Layer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#access-control">Access Control</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#repeated-jobs">Repeated jobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#repeated-callbacks">Repeated Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reading-and-writing-node-attributes">Reading and Writing Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#browsing">Browsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
@@ -123,6 +121,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -194,126 +193,10 @@
             
   <div class="section" id="server">
 <span id="id1"></span><h1>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="network-layer">
-<h2>Network Layer<a class="headerlink" href="#network-layer" title="Permalink to this headline">¶</a></h2>
-<p>Interface to the binary network layers. The functions in the network layer
-are never called in parallel but only sequentially from the server’s main
-loop. So the network layer does not need to be thread-safe.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">UA_ServerNetworkLayer</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ServerNetworkLayer</span> <span class="n">UA_ServerNetworkLayer</span><span class="p">;</span>
-
-<span class="k">struct</span> <span class="n">UA_ServerNetworkLayer</span> <span class="p">{</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span> <span class="c1">// pointer to internal data</span>
-    <span class="n">UA_String</span> <span class="n">discoveryUrl</span><span class="p">;</span>
-
-    <span class="cm">/* Starts listening on the the networklayer.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param nl The network layer</span>
-<span class="cm">     * @param logger The logger</span>
-<span class="cm">     * @return Returns UA_STATUSCODE_GOOD or an error code. */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">)(</span><span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">nl</span><span class="p">,</span> <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">);</span>
-
-    <span class="cm">/* Gets called from the main server loop and returns the jobs (accumulated</span>
-<span class="cm">     * messages and close events) for dispatch.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param nl The network layer</span>
-<span class="cm">     * @param jobs When the returned integer is &gt;0, *jobs points to an array of</span>
-<span class="cm">     *        UA_Job of the returned size.</span>
-<span class="cm">     * @param timeout The timeout during which an event must arrive in</span>
-<span class="cm">     *        microseconds</span>
-<span class="cm">     * @return The size of the jobs array. If the result is negative,</span>
-<span class="cm">     *         an error has occurred. */</span>
-    <span class="kt">size_t</span> <span class="p">(</span><span class="o">*</span><span class="n">getJobs</span><span class="p">)(</span><span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">nl</span><span class="p">,</span> <span class="n">UA_Job</span> <span class="o">**</span><span class="n">jobs</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">);</span>
-
-    <span class="cm">/* Closes the network connection and returns all the jobs that need to be</span>
-<span class="cm">     * finished before the network layer can be safely deleted.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param nl The network layer</span>
-<span class="cm">     * @param jobs When the returned integer is &gt;0, jobs points to an array of</span>
-<span class="cm">     *        UA_Job of the returned size.</span>
-<span class="cm">     * @return The size of the jobs array. If the result is negative,</span>
-<span class="cm">     *         an error has occurred. */</span>
-    <span class="kt">size_t</span> <span class="p">(</span><span class="o">*</span><span class="n">stop</span><span class="p">)(</span><span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">nl</span><span class="p">,</span> <span class="n">UA_Job</span> <span class="o">**</span><span class="n">jobs</span><span class="p">);</span>
-
-    <span class="cm">/** Deletes the network content. Call only after stopping. */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteMembers</span><span class="p">)(</span><span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">nl</span><span class="p">);</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="access-control">
-<h2>Access Control<a class="headerlink" href="#access-control" title="Permalink to this headline">¶</a></h2>
-<p>The access control callback is used to authenticate sessions and grant access
-rights accordingly.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* These booleans are used to create endpoints for the possible</span>
-<span class="cm">     * authentication methods */</span>
-    <span class="n">UA_Boolean</span> <span class="n">enableAnonymousLogin</span><span class="p">;</span>
-    <span class="n">UA_Boolean</span> <span class="n">enableUsernamePasswordLogin</span><span class="p">;</span>
-
-    <span class="cm">/* Authenticate a session. The session handle is attached to the session and</span>
-<span class="cm">     * passed into the node-based access control callbacks. */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">activateSession</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                     <span class="k">const</span> <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">userIdentityToken</span><span class="p">,</span>
-                                     <span class="kt">void</span> <span class="o">**</span><span class="n">sessionHandle</span><span class="p">);</span>
-
-    <span class="cm">/* Deauthenticate a session and cleanup */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">closeSession</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">);</span>
-
-    <span class="cm">/* Access control for all nodes*/</span>
-    <span class="n">UA_UInt32</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserRightsMask</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                   <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                   <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
-
-    <span class="cm">/* Additional access control for variable nodes */</span>
-    <span class="n">UA_Byte</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserAccessLevel</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                  <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
-
-    <span class="cm">/* Additional access control for method nodes */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserExecutable</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">);</span>
-
-    <span class="cm">/* Additional access control for calling a method node in the context of a</span>
-<span class="cm">     * specific object */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">getUserExecutableOnObject</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                            <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
-                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">);</span>
-
-    <span class="cm">/* Allow adding a node */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowAddNode</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                               <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">UA_AddNodesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-    <span class="cm">/* Allow adding a reference */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowAddReference</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                    <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-    <span class="cm">/* Allow deleting a node */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowDeleteNode</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                  <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_DeleteNodesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-    <span class="cm">/* Allow deleting a reference */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowDeleteReference</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                       <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                                       <span class="k">const</span> <span class="n">UA_DeleteReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_AccessControl</span><span class="p">;</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="server-configuration">
 <h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline">¶</a></h2>
-<p>The following structure is passed to a new server for configuration.</p>
+<p>The configuration structure is passed to the server during initialization.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_String</span> <span class="n">username</span><span class="p">;</span>
-    <span class="n">UA_String</span> <span class="n">password</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_UsernamePasswordLogin</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
     <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_UInt32Range</span><span class="p">;</span>
@@ -378,10 +261,6 @@ rights accordingly.</p>
     <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
 <span class="cp">#endif</span>
 <span class="p">}</span> <span class="n">UA_ServerConfig</span><span class="p">;</span>
-
-<span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
-<span class="n">UA_UInt16</span>
-<span class="nf">UA_Server_addNamespace</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -391,8 +270,7 @@ rights accordingly.</p>
 <span class="kt">void</span> <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* Runs the main loop of the server. In each iteration, this calls into the</span>
-<span class="cm"> * networklayers to see if jobs have arrived and checks if repeated jobs need to</span>
-<span class="cm"> * be triggered.</span>
+<span class="cm"> * networklayers to see if messages have arrived.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
 <span class="cm"> * @param running The loop is run as long as *running is true.</span>
@@ -412,7 +290,7 @@ rights accordingly.</p>
 <span class="cm"> *        Otherwise, the timouts for the networklayers are set to zero.</span>
 <span class="cm"> *        The default max wait time is 50millisec.</span>
 <span class="cm"> * @return Returns how long we can wait until the next scheduled</span>
-<span class="cm"> *         job (in millisec) */</span>
+<span class="cm"> *         callback (in ms) */</span>
 <span class="n">UA_UInt16</span>
 <span class="nf">UA_Server_run_iterate</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">waitInternal</span><span class="p">);</span>
 
@@ -422,31 +300,37 @@ rights accordingly.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="repeated-jobs">
-<h2>Repeated jobs<a class="headerlink" href="#repeated-jobs" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Add a job for cyclic repetition to the server.</span>
+<div class="section" id="repeated-callbacks">
+<h2>Repeated Callbacks<a class="headerlink" href="#repeated-callbacks" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ServerCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="cm">/* Add a callback for cyclic repetition to the server.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
-<span class="cm"> * @param job The job that shall be added.</span>
-<span class="cm"> * @param interval The job shall be repeatedly executed with the given interval</span>
+<span class="cm"> * @param callback The callback that shall be added.</span>
+<span class="cm"> * @param interval The callback shall be repeatedly executed with the given interval</span>
 <span class="cm"> *        (in ms). The interval must be larger than 5ms. The first execution</span>
 <span class="cm"> *        occurs at now() + interval at the latest.</span>
-<span class="cm"> * @param jobId Set to the guid of the repeated job. This can be used to cancel</span>
-<span class="cm"> *        the job later on. If the pointer is null, the guid is not set.</span>
+<span class="cm"> * @param callbackId Set to the identifier of the repeated callback . This can be used to cancel</span>
+<span class="cm"> *        the callback later on. If the pointer is null, the identifier is not set.</span>
 <span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned.</span>
 <span class="cm"> *         An error code otherwise. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addRepeatedJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Job</span> <span class="n">job</span><span class="p">,</span>
-                         <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">,</span> <span class="n">UA_Guid</span> <span class="o">*</span><span class="n">jobId</span><span class="p">);</span>
+<span class="nf">UA_Server_addRepeatedCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">,</span>
+                              <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
 
-<span class="cm">/* Remove repeated job.</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_changeRepeatedCallbackInterval</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">,</span>
+                                         <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">);</span>
+
+<span class="cm">/* Remove a repeated callback.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
-<span class="cm"> * @param jobId The id of the job that shall be removed.</span>
+<span class="cm"> * @param callbackId The id of the callback that shall be removed.</span>
 <span class="cm"> * @return Upon sucess, UA_STATUSCODE_GOOD is returned.</span>
 <span class="cm"> *         An error code otherwise. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_removeRepeatedJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Guid</span> <span class="n">jobId</span><span class="p">);</span>
+<span class="nf">UA_Server_removeRepeatedCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -810,7 +694,7 @@ specific to the different users and set by the access control callback:</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_unregister_discovery</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">);</span>
 
- <span class="cm">/* Adds a periodic job to register the server with the LDS (local discovery server)</span>
+ <span class="cm">/* Adds a periodic callback to register the server with the LDS (local discovery server)</span>
 <span class="cm">  * periodically. The interval between each register call is given as second parameter.</span>
 <span class="cm">  * It should be 10 minutes by default (= 10*60*1000).</span>
 <span class="cm">  *</span>
@@ -818,26 +702,26 @@ specific to the different users and set by the access control callback:</p>
 <span class="cm">  * If it is 0, the first register call will be after intervalMs milliseconds,</span>
 <span class="cm">  * otherwise the server&#39;s first register will be after delayFirstRegisterMs.</span>
 <span class="cm">  *</span>
-<span class="cm">  * When you manually unregister the server, you also need to cancel the periodic job,</span>
-<span class="cm">  * otherwise it will be automatically be registered again.</span>
+<span class="cm">  * When you manually unregister the server, you also need to cancel the</span>
+<span class="cm">  * periodic callback, otherwise it will be automatically be registered again.</span>
 <span class="cm">  *</span>
 <span class="cm">  * @param server</span>
 <span class="cm">  * @param discoveryServerUrl if set to NULL, the default value</span>
 <span class="cm">  *        &#39;opc.tcp://localhost:4840&#39; will be used</span>
 <span class="cm">  * @param intervalMs</span>
 <span class="cm">  * @param delayFirstRegisterMs</span>
-<span class="cm">  * @param periodicJobId */</span>
+<span class="cm">  * @param periodicCallbackId */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addPeriodicServerRegisterJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">,</span>
-                                       <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">intervalMs</span><span class="p">,</span>
-                                       <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">delayFirstRegisterMs</span><span class="p">,</span>
-                                       <span class="n">UA_Guid</span><span class="o">*</span> <span class="n">periodicJobId</span><span class="p">);</span>
+<span class="nf">UA_Server_addPeriodicServerRegisterCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">,</span>
+                                            <span class="n">UA_UInt32</span> <span class="n">intervalMs</span><span class="p">,</span>
+                                            <span class="n">UA_UInt32</span> <span class="n">delayFirstRegisterMs</span><span class="p">,</span>
+                                            <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">periodicCallbackId</span><span class="p">);</span>
 
 <span class="cm">/* Callback for RegisterServer. Data is passed from the register call */</span>
 <span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Server_registerServerCallback</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_RegisteredServer</span> <span class="o">*</span><span class="n">registeredServer</span><span class="p">,</span>
                                                  <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
 
-<span class="cm">/* Set the callback which is called if another server registeres or unregisteres</span>
+<span class="cm">/* Set the callback which is called if another server registeres or unregisters</span>
 <span class="cm"> * with this instance. If called multiple times, previous data will be</span>
 <span class="cm"> * overwritten.</span>
 <span class="cm"> *</span>
@@ -1235,6 +1119,13 @@ value to manifest at a specific memory location, please use a
                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="n">targetNodeId</span><span class="p">,</span>
                           <span class="n">UA_Boolean</span> <span class="n">deleteBidirectional</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
+<span class="n">UA_UInt16</span> <span class="nf">UA_Server_addNamespace</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

@@ -5,7 +5,7 @@ Data Types
 
 The OPC UA protocol defines 25 builtin data types and three ways of combining
 them into higher-order types: arrays, structures and unions. In open62541,
-the builtin data types are defined manually. All other data types are
+only the builtin data types are defined manually. All other data types are
 generated from standard XML definitions. Their exact definitions can be
 looked up at https://opcfoundation.org/UA/schemas/Opc.Ua.Types.bsd.xml.
 
@@ -16,11 +16,6 @@ implementation details.
 Builtin Types
 -------------
 
-.. code-block:: c
-
-   
-   #define UA_BUILTIN_TYPES_COUNT 25U
-   
 Boolean
 ^^^^^^^
 A two-state logical value (true or false).
@@ -179,7 +174,7 @@ A sequence of Unicode characters. Strings are just an array of UA_Byte.
    
    extern const UA_String UA_STRING_NULL;
    
-``UA_STRING`` returns a string pointing to the preallocated char-array.
+``UA_STRING`` returns a string pointing to the original char-array.
 ``UA_STRING_ALLOC`` is shorthand for ``UA_String_fromChars`` and makes a copy
 of the char-array.
 

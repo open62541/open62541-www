@@ -1,13 +1,10 @@
-Logging
--------
+Logging Plugin API
+==================
 
-Servers and clients may contain a logger. Every logger needs to implement the
-`UA_Logger` signature. An example logger that writes to stdout is provided in
-the plugins folder.
-
-Every log-message consists of a log-level, a log-category and a string
-message content. The timestamp of the log-message is created within the
-logger.
+Servers and clients must define a logger in their configuration. The logger
+is just a function pointer. Every log-message consists of a log-level, a
+log-category and a string message content. The timestamp of the log-message
+is created within the logger.
 
 .. code-block:: c
 
@@ -30,85 +27,73 @@ logger.
        UA_LOGCATEGORY_USERLAND
    } UA_LogCategory;
    
-The signature of the logger. The msg string and following varargs are
-formatted according to the rules of the printf command.
-
-Do not use the logger directly but make use of the following macros that take
-the minimum log-level defined in ua_config.h into account.
+The message string and following varargs are formatted according to the rules
+of the printf command. Do not call the logger directly. Instead, make use of
+the convenience macros that take the minimum log-level defined in ua_config.h
+into account.
 
 .. code-block:: c
 
+   
    typedef void (*UA_Logger)(UA_LogLevel level, UA_LogCategory category,
                              const char *msg, va_list args);
    
    static UA_INLINE void
    UA_LOG_TRACE(UA_Logger logger, UA_LogCategory category, const char *msg, ...) {
    #if UA_LOGLEVEL <= 100
-       if(logger) {
-           va_list args; va_start(args, msg);
-           logger(UA_LOGLEVEL_TRACE, category, msg, args);
-           va_end(args);
-       }
+       va_list args; va_start(args, msg);
+       logger(UA_LOGLEVEL_TRACE, category, msg, args);
+       va_end(args);
    #endif
    }
    
    static UA_INLINE void
    UA_LOG_DEBUG(UA_Logger logger, UA_LogCategory category, const char *msg, ...) {
    #if UA_LOGLEVEL <= 200
-       if(logger) {
-           va_list args; va_start(args, msg);
-           logger(UA_LOGLEVEL_DEBUG, category, msg, args);
-           va_end(args);
-       }
+       va_list args; va_start(args, msg);
+       logger(UA_LOGLEVEL_DEBUG, category, msg, args);
+       va_end(args);
    #endif
    }
    
    static UA_INLINE void
    UA_LOG_INFO(UA_Logger logger, UA_LogCategory category, const char *msg, ...) {
    #if UA_LOGLEVEL <= 300
-       if(logger) {
-           va_list args; va_start(args, msg);
-           logger(UA_LOGLEVEL_INFO, category, msg, args);
-           va_end(args);
-       }
+       va_list args; va_start(args, msg);
+       logger(UA_LOGLEVEL_INFO, category, msg, args);
+       va_end(args);
    #endif
    }
    
    static UA_INLINE void
    UA_LOG_WARNING(UA_Logger logger, UA_LogCategory category, const char *msg, ...) {
    #if UA_LOGLEVEL <= 400
-       if(logger) {
-           va_list args; va_start(args, msg);
-           logger(UA_LOGLEVEL_WARNING, category, msg, args);
-           va_end(args);
-       }
+       va_list args; va_start(args, msg);
+       logger(UA_LOGLEVEL_WARNING, category, msg, args);
+       va_end(args);
    #endif
    }
    
    static UA_INLINE void
    UA_LOG_ERROR(UA_Logger logger, UA_LogCategory category, const char *msg, ...) {
    #if UA_LOGLEVEL <= 500
-       if(logger) {
-           va_list args; va_start(args, msg);
-           logger(UA_LOGLEVEL_ERROR, category, msg, args);
-           va_end(args);
-       }
+       va_list args; va_start(args, msg);
+       logger(UA_LOGLEVEL_ERROR, category, msg, args);
+       va_end(args);
    #endif
    }
    
    static UA_INLINE void
    UA_LOG_FATAL(UA_Logger logger, UA_LogCategory category, const char *msg, ...) {
    #if UA_LOGLEVEL <= 600
-       if(logger) {
-           va_list args; va_start(args, msg);
-           logger(UA_LOGLEVEL_FATAL, category, msg, args);
-           va_end(args);
-       }
+       va_list args; va_start(args, msg);
+       logger(UA_LOGLEVEL_FATAL, category, msg, args);
+       va_end(args);
    #endif
    }
    
 Convenience macros for complex types
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------
 
 .. code-block:: c
 

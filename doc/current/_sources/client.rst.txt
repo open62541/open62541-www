@@ -19,9 +19,6 @@ Client Configuration
 
 .. code-block:: c
 
-   typedef UA_Connection
-   (*UA_ConnectClientConnection)(UA_ConnectionConfig localConf,
-                                 const char *endpointUrl, UA_Logger logger);
    
    typedef struct UA_ClientConfig {
        UA_UInt32 timeout;               /* Sync response timeout */
