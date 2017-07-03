@@ -256,9 +256,9 @@ networking plugins with a clear interface to the main open62541 library.</p>
     <span class="cm">/* Release the buffer of a received message */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">releaseRecvBuffer</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
 
-    <span class="cm">/* Close the connection. The network layer closes the socket, removes</span>
-<span class="cm">     * internal pointers to the connection and calls</span>
-<span class="cm">     * UA_Server_removeConnection. */</span>
+    <span class="cm">/* Close the connection. The network layer closes the socket. This is picked</span>
+<span class="cm">     * up during the next &#39;listen&#39; and the connection is freed in the network</span>
+<span class="cm">     * layer. */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">close</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">);</span>
 
     <span class="cm">/* To be called only from within the server (and not the network layer).</span>
@@ -310,8 +310,9 @@ until a message is received or the duration times out.</p>
     <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">)(</span><span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">nl</span><span class="p">);</span>
 
     <span class="cm">/* Listen for new and closed connections and arriving packets. Calls</span>
-<span class="cm">     * UA_Server_processBinaryMessage for the arriving packets. Calls</span>
-<span class="cm">     * UA_Server_removeConnection for closed connections.</span>
+<span class="cm">     * UA_Server_processBinaryMessage for the arriving packets. Closed</span>
+<span class="cm">     * connections are picked up here and forwarded to</span>
+<span class="cm">     * UA_Server_removeConnection where they are cleaned up and freed.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param nl The network layer</span>
 <span class="cm">     * @param server The server for processing the incoming packets and for</span>
