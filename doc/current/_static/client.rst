@@ -177,8 +177,8 @@ Manage the Connection
    
 .. _client-services:
 
-Raw Services
-------------
+Services
+--------
 The raw OPC UA services are exposed to the client. But most of them time, it
 is better to use the convenience functions from ``ua_client_highlevel.h``
 that wrap the raw services.
@@ -413,6 +413,32 @@ Subscription Service Set
    }
    
    #endif
+   
+.. _client-async-services:
+
+Asynchronous Services
+---------------------
+All OPC UA services are asynchronous in nature. So several service calls can
+be made without waiting for a response first. Responess may come in a
+different ordering.
+
+.. code-block:: c
+
+   
+   typedef void
+   (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
+                                    UA_UInt32 requestId, const void *response);
+   
+   /* Don't use this function. Use the type versions below instead. */
+   UA_StatusCode
+   __UA_Client_AsyncService(UA_Client *client, const void *request,
+                            const UA_DataType *requestType,
+                            UA_ClientAsyncServiceCallback callback,
+                            const UA_DataType *responseType,
+                            void *userdata, UA_UInt32 *requestId);
+   
+   UA_StatusCode
+   UA_Client_runAsync(UA_Client *client, UA_UInt16 timeout);
    
 .. toctree::
 

@@ -107,17 +107,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#client-lifecycle">Client Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#manage-the-connection">Manage the Connection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#raw-services">Raw Services</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#services">Services</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#attribute-service-set">Attribute Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#method-service-set">Method Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nodemanagement-service-set">NodeManagement Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#view-service-set">View Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#query-service-set">Query Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#monitoreditem-service-set">MonitoredItem Service Set</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#subscription-service-set">Subscription Service Set</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subscription-service-set">Subscription Service Set</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#asynchronous-services">Asynchronous Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a></li>
 </ul>
 </li>
 </ul>
@@ -352,8 +353,8 @@ subscriptions. The user will have to periodically call
 </pre></div>
 </div>
 </div>
-<div class="section" id="raw-services">
-<span id="client-services"></span><h2>Raw Services<a class="headerlink" href="#raw-services" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="services">
+<span id="client-services"></span><h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
 <p>The raw OPC UA services are exposed to the client. But most of them time, it
 is better to use the convenience functions from <code class="docutils literal"><span class="pre">ua_client_highlevel.h</span></code>
 that wrap the raw services.</p>
@@ -579,6 +580,29 @@ that wrap the raw services.</p>
 <span class="cp">#endif</span>
 </pre></div>
 </div>
+</div>
+</div>
+<div class="section" id="asynchronous-services">
+<span id="client-async-services"></span><h2>Asynchronous Services<a class="headerlink" href="#asynchronous-services" title="Permalink to this headline">¶</a></h2>
+<p>All OPC UA services are asynchronous in nature. So several service calls can
+be made without waiting for a response first. Responess may come in a
+different ordering.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+                                 <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+
+<span class="cm">/* Don&#39;t use this function. Use the type versions below instead. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span>
+                         <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span>
+                         <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_runAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">);</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a><ul>
@@ -591,7 +615,6 @@ that wrap the raw services.</p>
 </ul>
 </li>
 </ul>
-</div>
 </div>
 </div>
 </div>
