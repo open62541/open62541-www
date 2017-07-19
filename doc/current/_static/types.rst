@@ -546,7 +546,7 @@ Variants can also be *empty*. Then, the pointer to the type description is
    typedef enum {
        UA_VARIANT_DATA,          /* The data has the same lifecycle as the
                                     variant */
-       UA_VARIANT_DATA_NODELETE, /* The data is "borrowed" by the variant and
+       UA_VARIANT_DATA_NODELETE /* The data is "borrowed" by the variant and
                                     shall not be deleted at the end of the
                                     variant's lifecycle. */
    } UA_VariantStorageType;

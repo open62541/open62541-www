@@ -29,7 +29,7 @@ networking plugins with a clear interface to the main open62541 library.
                                    * is not done */
        UA_CONNECTION_ESTABLISHED, /* The socket is open and the connection
                                    * configured */
-       UA_CONNECTION_CLOSED,      /* The socket has been closed and the connection
+       UA_CONNECTION_CLOSED      /* The socket has been closed and the connection
                                    * will be deleted */
    } UA_ConnectionState;
    
