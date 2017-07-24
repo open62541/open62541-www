@@ -109,6 +109,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#ua-build-group">UA_BUILD_* group</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ua-enable-group">UA_ENABLE_* group</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-a-shared-library">Building a shared library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#minimizing-the-binary-size">Minimizing the binary size</a></li>
 </ul>
 </li>
 </ul>
@@ -300,6 +301,13 @@ make
 </div>
 <div class="section" id="build-options">
 <h2>Build Options<a class="headerlink" href="#build-options" title="Permalink to this headline">¶</a></h2>
+<p>The open62541 project uses CMake to manage the build options, for code
+generation and to generate build projects for the different systems and IDEs.
+The tools <em>ccmake</em> or <em>cmake-gui</em> can be used to graphically set the build
+options.</p>
+<p>Most options can be changed manually in <code class="file docutils literal"><span class="pre">ua_config.h</span></code> (<code class="file docutils literal"><span class="pre">open62541.h</span></code>
+for the single-file release) after the code generation. But usually there is no
+need to adjust them.</p>
 <div class="section" id="build-type-and-logging">
 <h3>Build Type and Logging<a class="headerlink" href="#build-type-and-logging" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -312,21 +320,20 @@ make
 </ul>
 </dd>
 <dt><strong>UA_LOGLEVEL</strong></dt>
-<dd><p class="first">The level of logging events that are reported</p>
+<dd><p class="first">The SDK logs events of the level defined in <code class="docutils literal"><span class="pre">UA_LOGLEVEL</span></code> and above only.
+The logging event levels are as follows:</p>
 <blockquote class="last">
 <div><ul class="simple">
-<li>600: Fatal and all below</li>
-<li>500: Error and all below</li>
-<li>400: Error and all below</li>
-<li>300: Info and all below</li>
-<li>200: Debug and all below</li>
-<li>100: Trace and all below</li>
+<li>600: Fatal</li>
+<li>500: Error</li>
+<li>400: Warning</li>
+<li>300: Info</li>
+<li>200: Debug</li>
+<li>100: Trace</li>
 </ul>
 </div></blockquote>
 </dd>
 </dl>
-<p>Further options that are not inherited from the CMake configuration are defined
-in <code class="file docutils literal"><span class="pre">ua_config.h</span></code>. Usually there is no need to adjust them.</p>
 </div>
 <div class="section" id="ua-build-group">
 <h3>UA_BUILD_* group<a class="headerlink" href="#ua-build-group" title="Permalink to this headline">¶</a></h3>
@@ -355,7 +362,7 @@ specified by the following options:</p>
 <dt><strong>UA_ENABLE_NODEMANAGEMENT</strong></dt>
 <dd>Enable dynamic addition and removal of nodes at runtime</dd>
 <dt><strong>UA_ENABLE_AMALGAMATION</strong></dt>
-<dd>Compile a single-file release files <code class="file docutils literal"><span class="pre">open62541.c</span></code> and <code class="file docutils literal"><span class="pre">open62541.h</span></code></dd>
+<dd>Compile a single-file release into the files <code class="file docutils literal"><span class="pre">open62541.c</span></code> and <code class="file docutils literal"><span class="pre">open62541.h</span></code></dd>
 <dt><strong>UA_ENABLE_MULTITHREADING</strong></dt>
 <dd>Enable multi-threading support</dd>
 <dt><strong>UA_ENABLE_COVERAGE</strong></dt>
@@ -365,7 +372,9 @@ specified by the following options:</p>
 be visible in the cmake GUIs.</p>
 <dl class="docutils">
 <dt><strong>UA_ENABLE_TYPENAMES</strong></dt>
-<dd>Add the type and member names to the UA_DataType structure</dd>
+<dd>Add the type and member names to the UA_DataType structure. Enabled by default.</dd>
+<dt><strong>UA_ENABLE_STATUSCODE_DESCRIPTIONS</strong></dt>
+<dd>Compile the human-readable name of the StatusCodes into the binary. Enabled by default.</dd>
 <dt><strong>UA_ENABLE_GENERATE_NAMESPACE0</strong></dt>
 <dd>Generate and load UA XML Namespace 0 definition
 <code class="docutils literal"><span class="pre">UA_GENERATE_NAMESPACE0_FILE</span></code> is used to specify the file for NS0 generation from namespace0 folder. Default value is <code class="docutils literal"><span class="pre">Opc.Ua.NodeSet2.xml</span></code></dd>
@@ -379,8 +388,26 @@ be visible in the cmake GUIs.</p>
 </div>
 <div class="section" id="building-a-shared-library">
 <h3>Building a shared library<a class="headerlink" href="#building-a-shared-library" title="Permalink to this headline">¶</a></h3>
-<p>open62541 is small enough that most users will want to statically link the library into their programs. If a shared library (.dll, .so) is required, this can be enabled in CMake with the <cite>BUILD_SHARED_LIBS</cite> option.
-Note that this option modifies the <code class="file docutils literal"><span class="pre">ua_config.h</span></code> file that is also included in <code class="file docutils literal"><span class="pre">open62541.h</span></code> for the single-file distribution.</p>
+<p>open62541 is small enough that most users will want to statically link the
+library into their programs. If a shared library (.dll, .so) is required, this
+can be enabled in CMake with the <code class="docutils literal"><span class="pre">BUILD_SHARED_LIBS</span></code> option. Note that this
+option modifies the <code class="file docutils literal"><span class="pre">ua_config.h</span></code> file that is also included in
+<code class="file docutils literal"><span class="pre">open62541.h</span></code> for the single-file distribution.</p>
+</div>
+<div class="section" id="minimizing-the-binary-size">
+<h3>Minimizing the binary size<a class="headerlink" href="#minimizing-the-binary-size" title="Permalink to this headline">¶</a></h3>
+<p>The size of the generated binary can be reduced considerably by adjusting the
+build configuration. First, in CMake, the build type can be set to
+<code class="docutils literal"><span class="pre">CMAKE_BUILD_TYPE=MinSizeRel</span></code>. This sets the compiler flags to minimize the
+binary size. The build type also strips out debug information. Second, the
+binary size can be reduced by removing features via the build-flags described
+above.</p>
+<p>Especially, logging takes up a lot of space in the binary and might not be
+needed in embedded scenarios. Setting <code class="docutils literal"><span class="pre">UA_LOGLEVEL</span></code> to a value above 600
+(=FATAL) disables all logging. In addition, the feature-flags
+<code class="docutils literal"><span class="pre">UA_ENABLE_TYPENAMES</span></code> and <code class="docutils literal"><span class="pre">UA_ENABLE_STATUSCODE_DESCRIPTIONS</span></code> add static
+information to the binary that is only used for human-readable logging and
+debugging.</p>
 </div>
 </div>
 </div>

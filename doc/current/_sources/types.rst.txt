@@ -135,26 +135,13 @@ specific code.
 
    typedef uint32_t UA_StatusCode;
    
-   typedef struct {
-       UA_StatusCode code;      /* The numeric value of the StatusCode */
-       const char* name;        /* The symbolic name */
-       const char* explanation; /* Short message explaining the StatusCode */
-   } UA_StatusCodeDescription;
-   
-   /* Returns the description of the StatusCode. Never returns NULL, but a generic
-    * description for invalid StatusCodes instead. */
-   const UA_StatusCodeDescription *
-   UA_StatusCode_description(UA_StatusCode code);
-   
-   static UA_INLINE const char *
-   UA_StatusCode_name(UA_StatusCode code) {
-       return UA_StatusCode_description(code)->name;
-   }
-   
-   static UA_INLINE const char *
-   UA_StatusCode_explanation(UA_StatusCode code) {
-       return UA_StatusCode_description(code)->explanation;
-   }
+   /* Returns the human-readable name of the StatusCode. If no matching StatusCode
+    * is found, a default string for "Unknown" is returned. This feature might be
+    * disabled to create a smaller binary with the
+    * UA_ENABLE_STATUSCODE_DESCRIPTIONS build-flag. Then the function returns an
+    * empty string for every StatusCode. */
+   const char *
+   UA_StatusCode_name(UA_StatusCode code);
    
 String
 ^^^^^^
@@ -948,3 +935,32 @@ The following data types were auto-generated from a definition in XML format.
 .. toctree::
 
    types_generated
+
+.. code-block:: c
+
+   
+Deprecated Data Types API
+-------------------------
+The following definitions are deprecated and will be removed in future
+releases of open62541.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_StatusCode code;      /* The numeric value of the StatusCode */
+       const char* name;        /* The symbolic name */
+       const char* explanation; /* Short message explaining the StatusCode */
+   } UA_StatusCodeDescription;
+   
+   extern const UA_StatusCodeDescription statusCodeExplanation_default;
+   
+   UA_DEPRECATED static UA_INLINE const UA_StatusCodeDescription *
+   UA_StatusCode_description(UA_StatusCode code) {
+       return &statusCodeExplanation_default;
+   }
+   
+   UA_DEPRECATED static UA_INLINE const char *
+   UA_StatusCode_explanation(UA_StatusCode code) {
+       return statusCodeExplanation_default.name;
+   }

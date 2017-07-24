@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="types_generated.html#queryfirstrequest">QueryFirstRequest</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#deprecated-data-types-api">Deprecated Data Types API</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
@@ -494,26 +495,13 @@ or an operation. See the section <a class="reference internal" href="constants.h
 specific code.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="kt">uint32_t</span> <span class="n">UA_StatusCode</span><span class="p">;</span>
 
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">;</span>      <span class="cm">/* The numeric value of the StatusCode */</span>
-    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">;</span>        <span class="cm">/* The symbolic name */</span>
-    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">explanation</span><span class="p">;</span> <span class="cm">/* Short message explaining the StatusCode */</span>
-<span class="p">}</span> <span class="n">UA_StatusCodeDescription</span><span class="p">;</span>
-
-<span class="cm">/* Returns the description of the StatusCode. Never returns NULL, but a generic</span>
-<span class="cm"> * description for invalid StatusCodes instead. */</span>
-<span class="k">const</span> <span class="n">UA_StatusCodeDescription</span> <span class="o">*</span>
-<span class="nf">UA_StatusCode_description</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">);</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span>
-<span class="nf">UA_StatusCode_name</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">UA_StatusCode_description</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span>
-<span class="nf">UA_StatusCode_explanation</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">UA_StatusCode_description</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">explanation</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="cm">/* Returns the human-readable name of the StatusCode. If no matching StatusCode</span>
+<span class="cm"> * is found, a default string for &quot;Unknown&quot; is returned. This feature might be</span>
+<span class="cm"> * disabled to create a smaller binary with the</span>
+<span class="cm"> * UA_ENABLE_STATUSCODE_DESCRIPTIONS build-flag. Then the function returns an</span>
+<span class="cm"> * empty string for every StatusCode. */</span>
+<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span>
+<span class="nf">UA_StatusCode_name</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -1425,6 +1413,33 @@ server/client.</p>
 <li class="toctree-l1"><a class="reference internal" href="types_generated.html#createsessionresponse">CreateSessionResponse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types_generated.html#queryfirstrequest">QueryFirstRequest</a></li>
 </ul>
+</div>
+<div class="highlight-c"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deprecated-data-types-api">
+<h2>Deprecated Data Types API<a class="headerlink" href="#deprecated-data-types-api" title="Permalink to this headline">¶</a></h2>
+<p>The following definitions are deprecated and will be removed in future
+releases of open62541.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">;</span>      <span class="cm">/* The numeric value of the StatusCode */</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">;</span>        <span class="cm">/* The symbolic name */</span>
+    <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">explanation</span><span class="p">;</span> <span class="cm">/* Short message explaining the StatusCode */</span>
+<span class="p">}</span> <span class="n">UA_StatusCodeDescription</span><span class="p">;</span>
+
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_StatusCodeDescription</span> <span class="n">statusCodeExplanation_default</span><span class="p">;</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="k">const</span> <span class="n">UA_StatusCodeDescription</span> <span class="o">*</span>
+<span class="nf">UA_StatusCode_description</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">statusCodeExplanation_default</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span>
+<span class="nf">UA_StatusCode_explanation</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">statusCodeExplanation_default</span><span class="p">.</span><span class="n">name</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
 </div>
 </div>
 </div>
