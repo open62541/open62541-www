@@ -246,8 +246,7 @@ by the SDK, so that we don’t have to verify the arguments in the callback.</p>
     <span class="n">outputArgument</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
     <span class="n">outputArgument</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="cm">/* scalar */</span>
 
-    <span class="n">UA_MethodAttributes</span> <span class="n">helloAttr</span><span class="p">;</span>
-    <span class="n">UA_MethodAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">helloAttr</span><span class="p">);</span>
+    <span class="n">UA_MethodAttributes</span> <span class="n">helloAttr</span> <span class="o">=</span> <span class="n">UA_MethodAttributes_default</span><span class="p">;</span>
     <span class="n">helloAttr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;Say `Hello World`&quot;</span><span class="p">);</span>
     <span class="n">helloAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;Hello World&quot;</span><span class="p">);</span>
     <span class="n">helloAttr</span><span class="p">.</span><span class="n">executable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
@@ -319,8 +318,7 @@ copy of the array with every entry increased by the scalar.</p>
     <span class="n">outputArgument</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">pOutputDimension</span><span class="p">;</span>
 
     <span class="cm">/* Add the method node */</span>
-    <span class="n">UA_MethodAttributes</span> <span class="n">incAttr</span><span class="p">;</span>
-    <span class="n">UA_MethodAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">incAttr</span><span class="p">);</span>
+    <span class="n">UA_MethodAttributes</span> <span class="n">incAttr</span> <span class="o">=</span> <span class="n">UA_MethodAttributes_default</span><span class="p">;</span>
     <span class="n">incAttr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;IncInt32ArrayValues&quot;</span><span class="p">);</span>
     <span class="n">incAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span> <span class="s">&quot;IncInt32ArrayValues&quot;</span><span class="p">);</span>
     <span class="n">incAttr</span><span class="p">.</span><span class="n">executable</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
@@ -345,20 +343,16 @@ copy of the array with every entry increased by the scalar.</p>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-    <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
-    <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span> <span class="o">=</span>
-        <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">16664</span><span class="p">);</span>
-    <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
-    <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
     <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 
     <span class="n">addHellWorldMethod</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">addIncInt32ArrayMethod</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-    <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
     <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-    <span class="n">nl</span><span class="p">.</span><span class="n">deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nl</span><span class="p">);</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">UA_ServerConfig_delete</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>

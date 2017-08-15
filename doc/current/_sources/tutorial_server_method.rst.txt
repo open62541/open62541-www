@@ -66,8 +66,7 @@ by the SDK, so that we don't have to verify the arguments in the callback.
        outputArgument.dataType = UA_TYPES[UA_TYPES_STRING].typeId;
        outputArgument.valueRank = -1; /* scalar */
    
-       UA_MethodAttributes helloAttr;
-       UA_MethodAttributes_init(&helloAttr);
+       UA_MethodAttributes helloAttr = UA_MethodAttributes_default;
        helloAttr.description = UA_LOCALIZEDTEXT("en_US","Say `Hello World`");
        helloAttr.displayName = UA_LOCALIZEDTEXT("en_US","Hello World");
        helloAttr.executable = true;
@@ -141,8 +140,7 @@ copy of the array with every entry increased by the scalar.
        outputArgument.arrayDimensions = &pOutputDimension;
    
        /* Add the method node */
-       UA_MethodAttributes incAttr;
-       UA_MethodAttributes_init(&incAttr);
+       UA_MethodAttributes incAttr = UA_MethodAttributes_default;
        incAttr.description = UA_LOCALIZEDTEXT("en_US", "IncInt32ArrayValues");
        incAttr.displayName = UA_LOCALIZEDTEXT("en_US", "IncInt32ArrayValues");
        incAttr.executable = true;
@@ -170,18 +168,14 @@ It follows the main server code, making use of the above definitions.
        signal(SIGINT, stopHandler);
        signal(SIGTERM, stopHandler);
    
-       UA_ServerConfig config = UA_ServerConfig_standard;
-       UA_ServerNetworkLayer nl =
-           UA_ServerNetworkLayerTCP(UA_ConnectionConfig_standard, 16664);
-       config.networkLayers = &nl;
-       config.networkLayersSize = 1;
+       UA_ServerConfig *config = UA_ServerConfig_new_default();
        UA_Server *server = UA_Server_new(config);
    
        addHellWorldMethod(server);
        addIncInt32ArrayMethod(server);
    
-       UA_Server_run(server, &running);
+       UA_StatusCode retval = UA_Server_run(server, &running);
        UA_Server_delete(server);
-       nl.deleteMembers(&nl);
-       return 0;
+       UA_ServerConfig_delete(config);
+       return (int)retval;
    }

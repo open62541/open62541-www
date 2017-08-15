@@ -24,7 +24,8 @@ is created within the logger.
        UA_LOGCATEGORY_SESSION,
        UA_LOGCATEGORY_SERVER,
        UA_LOGCATEGORY_CLIENT,
-       UA_LOGCATEGORY_USERLAND
+       UA_LOGCATEGORY_USERLAND,
+       UA_LOGCATEGORY_SECURITYPOLICY
    } UA_LogCategory;
    
 The message string and following varargs are formatted according to the rules
