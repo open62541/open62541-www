@@ -249,9 +249,10 @@ to synchronize a variable value with an external representation. They attach
 callbacks to the variable that are executed before every read and after every
 write operation.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
-<span class="nf">beforeReadTime</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
-               <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Server</span><span class="o">*</span><span class="p">)</span><span class="n">handle</span><span class="p">;</span>
+<span class="nf">beforeReadTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_DateTime</span> <span class="n">now</span> <span class="o">=</span> <span class="n">UA_DateTime_now</span><span class="p">();</span>
     <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
     <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">now</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
@@ -260,8 +261,10 @@ write operation.</p>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="kt">void</span>
-<span class="nf">afterWriteTime</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
-               <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">)</span> <span class="p">{</span>
+<span class="nf">afterWriteTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
                 <span class="s">&quot;The variable was updated&quot;</span><span class="p">);</span>
 <span class="p">}</span>
@@ -270,7 +273,6 @@ write operation.</p>
 <span class="nf">addValueCallbackToCurrentTimeVariable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time&quot;</span><span class="p">);</span>
     <span class="n">UA_ValueCallback</span> <span class="n">callback</span> <span class="p">;</span>
-    <span class="n">callback</span><span class="p">.</span><span class="n">handle</span> <span class="o">=</span> <span class="n">server</span><span class="p">;</span>
     <span class="n">callback</span><span class="p">.</span><span class="n">onRead</span> <span class="o">=</span> <span class="n">beforeReadTime</span><span class="p">;</span>
     <span class="n">callback</span><span class="p">.</span><span class="n">onWrite</span> <span class="o">=</span> <span class="n">afterWriteTime</span><span class="p">;</span>
     <span class="n">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">currentNodeId</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
@@ -286,8 +288,11 @@ and write request to a callback function. Upon reading, the callback provides
 copy of the current value. Internally, the data source needs to implement its
 own memory management.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
-<span class="nf">readCurrentTime</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">sourceTimeStamp</span><span class="p">,</span>
-                <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">dataValue</span><span class="p">)</span> <span class="p">{</span>
+<span class="nf">readCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
+                <span class="n">UA_Boolean</span> <span class="n">sourceTimeStamp</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">dataValue</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_DateTime</span> <span class="n">now</span> <span class="o">=</span> <span class="n">UA_DateTime_now</span><span class="p">();</span>
     <span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dataValue</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">now</span><span class="p">,</span>
                              <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
@@ -296,8 +301,10 @@ own memory management.</p>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_StatusCode</span>
-<span class="nf">writeCurrentTime</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
-                 <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">)</span> <span class="p">{</span>
+<span class="nf">writeCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
+                 <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
                 <span class="s">&quot;Changing the system time is not implemented&quot;</span><span class="p">);</span>
     <span class="k">return</span> <span class="n">UA_STATUSCODE_BADINTERNALERROR</span><span class="p">;</span>
@@ -316,13 +323,12 @@ own memory management.</p>
     <span class="n">UA_NodeId</span> <span class="n">variableTypeNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NULL</span><span class="p">;</span>
 
     <span class="n">UA_DataSource</span> <span class="n">timeDataSource</span><span class="p">;</span>
-    <span class="n">timeDataSource</span><span class="p">.</span><span class="n">handle</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
     <span class="n">timeDataSource</span><span class="p">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">readCurrentTime</span><span class="p">;</span>
     <span class="n">timeDataSource</span><span class="p">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">writeCurrentTime</span><span class="p">;</span>
     <span class="n">UA_Server_addDataSourceVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">currentNodeId</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
                                         <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">currentName</span><span class="p">,</span>
                                         <span class="n">variableTypeNodeId</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span>
-                                        <span class="n">timeDataSource</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+                                        <span class="n">timeDataSource</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>

@@ -102,24 +102,19 @@
 <li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#repeated-callbacks">Repeated Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reading-and-writing-node-attributes">Reading and Writing Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#browsing">Browsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#method-call">Method Call</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#node-management">Node Management</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#callback-mechanisms">Callback Mechanisms</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#value-callback">Value Callback</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#object-lifecycle-management-callbacks">Object Lifecycle Management Callbacks</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#information-model-callbacks">Information Model Callbacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-callback">Value Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#node-addition-and-deletion">Node Addition and Deletion</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#node-addition-and-deletion">Node Addition and Deletion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#deprecated-server-api">Deprecated Server API</a><ul>
@@ -197,79 +192,6 @@
             
   <div class="section" id="server">
 <span id="id1"></span><h1>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="server-configuration">
-<h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline">¶</a></h2>
-<p>The configuration structure is passed to the server during initialization.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_UInt32Range</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_Double</span> <span class="n">min</span><span class="p">;</span>
-    <span class="n">UA_Double</span> <span class="n">max</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_DoubleRange</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* only if multithreading is enabled */</span>
-    <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
-
-    <span class="cm">/* Server Description */</span>
-    <span class="n">UA_BuildInfo</span> <span class="n">buildInfo</span><span class="p">;</span>
-    <span class="n">UA_ApplicationDescription</span> <span class="n">applicationDescription</span><span class="p">;</span>
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
-    <span class="n">UA_String</span> <span class="n">mdnsServerName</span><span class="p">;</span>
-    <span class="kt">size_t</span> <span class="n">serverCapabilitiesSize</span><span class="p">;</span>
-    <span class="n">UA_String</span> <span class="o">*</span><span class="n">serverCapabilities</span><span class="p">;</span>
-<span class="cp">#endif</span>
-
-    <span class="cm">/* Custom DataTypes */</span>
-    <span class="kt">size_t</span> <span class="n">customDataTypesSize</span><span class="p">;</span>
-    <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
-
-    <span class="cm">/* Networking */</span>
-    <span class="kt">size_t</span> <span class="n">networkLayersSize</span><span class="p">;</span>
-    <span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">networkLayers</span><span class="p">;</span>
-
-    <span class="cm">/* Available endpoints */</span>
-    <span class="n">UA_Endpoints</span> <span class="n">endpoints</span><span class="p">;</span>
-
-    <span class="cm">/* Access Control */</span>
-    <span class="n">UA_AccessControl</span> <span class="n">accessControl</span><span class="p">;</span>
-
-    <span class="cm">/* Limits for SecureChannels */</span>
-    <span class="n">UA_UInt16</span> <span class="n">maxSecureChannels</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">maxSecurityTokenLifetime</span><span class="p">;</span> <span class="cm">/* in ms */</span>
-
-    <span class="cm">/* Limits for Sessions */</span>
-    <span class="n">UA_UInt16</span> <span class="n">maxSessions</span><span class="p">;</span>
-    <span class="n">UA_Double</span> <span class="n">maxSessionTimeout</span><span class="p">;</span> <span class="cm">/* in ms */</span>
-
-    <span class="cm">/* Limits for Subscriptions */</span>
-    <span class="n">UA_DoubleRange</span> <span class="n">publishingIntervalLimits</span><span class="p">;</span>
-    <span class="n">UA_UInt32Range</span> <span class="n">lifeTimeCountLimits</span><span class="p">;</span>
-    <span class="n">UA_UInt32Range</span> <span class="n">keepAliveCountLimits</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">maxNotificationsPerPublish</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">maxRetransmissionQueueSize</span><span class="p">;</span> <span class="cm">/* 0 -&gt; unlimited size */</span>
-
-    <span class="cm">/* Limits for MonitoredItems */</span>
-    <span class="n">UA_DoubleRange</span> <span class="n">samplingIntervalLimits</span><span class="p">;</span>
-    <span class="n">UA_UInt32Range</span> <span class="n">queueSizeLimits</span><span class="p">;</span> <span class="cm">/* Negotiated with the client */</span>
-
-    <span class="cm">/* Discovery */</span>
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
-    <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
-<span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
-<span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
-<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
-<span class="cm">     * ervery 10 seconds. The server will still be removed depending on the</span>
-<span class="cm">     * state of the semaphore file. */</span>
-    <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
-<span class="cp">#endif</span>
-<span class="p">}</span> <span class="n">UA_ServerConfig</span><span class="p">;</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="server-lifecycle">
 <span id="id2"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
@@ -287,7 +209,8 @@
 
 <span class="cm">/* The prologue part of UA_Server_run (no need to use if you call</span>
 <span class="cm"> * UA_Server_run) */</span>
-<span class="n">UA_StatusCode</span> <span class="nf">UA_Server_run_startup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_run_startup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* Executes a single iteration of the server&#39;s main loop.</span>
 <span class="cm"> *</span>
@@ -302,7 +225,8 @@
 
 <span class="cm">/* The epilogue part of UA_Server_run (no need to use if you call</span>
 <span class="cm"> * UA_Server_run) */</span>
-<span class="n">UA_StatusCode</span> <span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -777,33 +701,91 @@ specific to the different users and set by the access control callback:</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="method-call">
-<h2>Method Call<a class="headerlink" href="#method-call" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
-<span class="n">UA_CallMethodResult</span>
-<span class="nf">UA_Server_call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_CallMethodRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">);</span>
-<span class="cp">#endif</span>
+<div class="section" id="information-model-callbacks">
+<h2>Information Model Callbacks<a class="headerlink" href="#information-model-callbacks" title="Permalink to this headline">¶</a></h2>
+<p>There are three places where a callback from an information model to
+user-defined code can happen.</p>
+<ul class="simple">
+<li>Custom node constructors and destructors</li>
+<li>Linking VariableNodes with an external data source</li>
+<li>MethodNode callbacks</li>
+</ul>
+<div class="section" id="node-lifecycle-constructors-destructors-and-node-contexts">
+<span id="node-lifecycle"></span><h3>Node Lifecycle: Constructors, Destructors and Node Contexts<a class="headerlink" href="#node-lifecycle-constructors-destructors-and-node-contexts" title="Permalink to this headline">¶</a></h3>
+<p>To finalize the instantiation of a node, a (user-defined) constructor
+callback is executed. There can be both a global constructor for all nodes
+and node-type constructor specific to the TypeDefinition of the new node
+(attached to an ObjectTypeNode or VariableTypeNode).</p>
+<p>In the hierarchy of ObjectTypes and VariableTypes, only the constructor of
+the (lowest) type defined for the new node is executed. Note that every
+Object and Variable can have only one <code class="docutils literal"><span class="pre">isTypeOf</span></code> reference. But type-nodes
+can technically have several <code class="docutils literal"><span class="pre">hasSubType</span></code> references to implement multiple
+inheritance. Issues of (multiple) inheritance in the constructor need to be
+solved by the user.</p>
+<p>When a node is destroyed, the node-type destructor is called before the
+global destructor. So the overall node lifecycle is as follows:</p>
+<ol class="arabic simple">
+<li>Global Constructor (set in the server config)</li>
+<li>Node-Type Constructor (for VariableType or ObjectTypes)</li>
+<li>(Usage-period of the Node)</li>
+<li>Node-Type Destructor</li>
+<li>Global Destructor</li>
+</ol>
+<p>The constructor and destructor callbacks can be set to <code class="docutils literal"><span class="pre">NULL</span></code> and are not
+used in that case. If the node-type constructor fails, the global destructor
+will be called before removing the node. The destructors are assumed to never
+fail.</p>
+<p>Every node carries a user-context and a constructor-context pointer. The
+user-context is used to attach custom data to a node. But the (user-defined)
+constructors and destructors may replace the user-context pointer if they
+wish to do so. The initial value for the constructor-context is <code class="docutils literal"><span class="pre">NULL</span></code>.
+When the <code class="docutils literal"><span class="pre">AddNodes</span></code> service is used over the network, the user-context
+pointer of the new node is also initially set to <code class="docutils literal"><span class="pre">NULL</span></code>.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* To be set in the server config. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+    <span class="cm">/* Can be NULL. The context cannot be replaced since the node is destroyed</span>
+<span class="cm">     * immediately afterwards anyway. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+    <span class="cm">/* Can be NULL. May replace the nodeContext. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_NodeTypeLifecycle</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setNodeTypeLifecycle</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                               <span class="n">UA_NodeTypeLifecycle</span> <span class="n">lifecycle</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getNodeContext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+<span class="cm">/* Careful! The user has to ensure that the destructor callbacks still work. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setNodeContext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="node-management">
-<h2>Node Management<a class="headerlink" href="#node-management" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="callback-mechanisms">
-<h3>Callback Mechanisms<a class="headerlink" href="#callback-mechanisms" title="Permalink to this headline">¶</a></h3>
-<p>There are four mechanisms for callbacks from the node-based information model
-into userspace:</p>
-<ul class="simple">
-<li>Datasources for variable nodes, where the variable content is managed
-externally</li>
-<li>Value-callbacks for variable nodes, where userspace is notified when a
-read/write occurs</li>
-<li>Object lifecycle management, where a user-defined constructor and
-destructor is added to an object type</li>
-<li>Method callbacks, where a user-defined method is exposed in the information
-model</li>
-</ul>
 <div class="section" id="data-source-callback">
-<span id="datasource"></span><h4>Data Source Callback<a class="headerlink" href="#data-source-callback" title="Permalink to this headline">¶</a></h4>
+<span id="datasource"></span><h3>Data Source Callback<a class="headerlink" href="#data-source-callback" title="Permalink to this headline">¶</a></h3>
 <p>The server has a unique way of dealing with the content of variables. Instead
 of storing a variant attached to the variable node, the node can point to a
 function with a local data provider. Whenever the value attribute is read,
@@ -812,8 +794,6 @@ that contains the value content and additional timestamps.</p>
 <p>It is expected that the read callback is implemented. The write callback can
 be set to a null-pointer.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span> <span class="cm">/* A custom pointer to reuse the same datasource functions for</span>
-<span class="cm">                     multiple sources */</span>
     <span class="cm">/* Copies the data from the source into the provided value.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param handle An optional pointer to user-defined data for the</span>
@@ -831,8 +811,9 @@ be set to a null-pointer.</p>
 <span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
 <span class="cm">     *         original caller are set in the value. If an error is returned,</span>
 <span class="cm">     *         then no releasing of the value is done. */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span>
-                          <span class="n">UA_Boolean</span> <span class="n">includeSourceTimeStamp</span><span class="p">,</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">includeSourceTimeStamp</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
     <span class="cm">/* Write into a data source. The write member of UA_DataSource can be empty</span>
@@ -844,10 +825,11 @@ be set to a null-pointer.</p>
 <span class="cm">     * @param data The data to be written into the data source</span>
 <span class="cm">     * @param range An optional data range. If the data source is scalar or does</span>
 <span class="cm">     *        not support writing of ranges, then an error code is returned.</span>
-<span class="cm">     * @return Returns a status code that is returned to the user</span>
-<span class="cm">     */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">);</span>
+<span class="cm">     * @return Returns a status code that is returned to the user */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 <span class="p">}</span> <span class="n">UA_DataSource</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span>
@@ -857,13 +839,10 @@ be set to a null-pointer.</p>
 </div>
 </div>
 <div class="section" id="value-callback">
-<span id="id3"></span><h4>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h4>
+<span id="id3"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
 <p>Value Callbacks can be attached to variable and variable type nodes. If
-not-null, they are called before reading and after writing respectively.</p>
+not <code class="docutils literal"><span class="pre">NULL</span></code>, they are called before reading and after writing respectively.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Pointer to user-provided data for the callback */</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>
-
     <span class="cm">/* Called before the value attribute is read. It is possible to write into the</span>
 <span class="cm">     * value attribute during onRead (using the write service). The node is</span>
 <span class="cm">     * re-opened afterwards so that changes are considered in the following read</span>
@@ -874,80 +853,85 @@ not-null, they are called before reading and after writing respectively.</p>
 <span class="cm">     * @param data Points to the current node value.</span>
 <span class="cm">     * @param range Points to the numeric range the client wants to read from</span>
 <span class="cm">     *        (or NULL). */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onRead</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span>
-                   <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onRead</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                   <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
+                   <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
     <span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
 <span class="cm">     * writing so that the new value is visible in the callback.</span>
 <span class="cm">     *</span>
-<span class="cm">     * @param handle Points to user-provided data for the callback.</span>
+<span class="cm">     * @param server The server executing the callback</span>
+<span class="cm">     * @sessionId The identifier of the session</span>
+<span class="cm">     * @sessionContext Additional data attached to the session</span>
+<span class="cm">     *                 in the access control layer</span>
 <span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param data Points to the current node value (after writing).</span>
+<span class="cm">     * @param nodeUserContext Additional data attached to the node by</span>
+<span class="cm">     *        the user.</span>
+<span class="cm">     * @param nodeConstructorContext Additional data attached to the node</span>
+<span class="cm">     *        by the type constructor(s).</span>
 <span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
 <span class="cm">     *        NULL). */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onWrite</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeid</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onWrite</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
 <span class="p">}</span> <span class="n">UA_ValueCallback</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+<span class="nf">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
                                         <span class="k">const</span> <span class="n">UA_ValueCallback</span> <span class="n">callback</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="object-lifecycle-management-callbacks">
-<span id="object-lifecycle"></span><h4>Object Lifecycle Management Callbacks<a class="headerlink" href="#object-lifecycle-management-callbacks" title="Permalink to this headline">¶</a></h4>
-<p>Lifecycle management adds constructor and destructor callbacks to
-object types.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Returns the instance handle that is then attached to the node */</span>
-    <span class="kt">void</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">instance</span><span class="p">);</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">instance</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">instanceHandle</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_ObjectLifecycleManagement</span><span class="p">;</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setObjectTypeNode_lifecycleManagement</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                                <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
-                                                <span class="n">UA_ObjectLifecycleManagement</span> <span class="n">olm</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="method-callbacks">
-<h4>Method Callbacks<a class="headerlink" href="#method-callbacks" title="Permalink to this headline">¶</a></h4>
+<h3>Method Callbacks<a class="headerlink" href="#method-callbacks" title="Permalink to this headline">¶</a></h3>
+<p>Method callbacks are set to <cite>NULL</cite> (not executable) when a method node is added
+over the network. In theory, it is possible to add a callback via
+<code class="docutils literal"><span class="pre">UA_Server_setMethodNode_callback</span></code> within the global constructor when adding
+methods over the network is really wanted.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">methodHandle</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">,</span>
-                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionHandle</span><span class="p">,</span>
-                     <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
-                     <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">);</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">methodContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">objectContext</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span>
+                     <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
 <span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setMethodNode_callback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">methodNodeId</span><span class="p">,</span>
-                                 <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="nf">UA_Server_setMethodNode_callback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">methodNodeId</span><span class="p">,</span>
+                                 <span class="n">UA_MethodCallback</span> <span class="n">methodCallback</span><span class="p">);</span>
+<span class="n">UA_CallMethodResult</span>
+<span class="nf">UA_Server_call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_CallMethodRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">);</span>
+
 <span class="cp">#endif</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="node-addition-and-deletion">
-<span id="addnodes"></span><h3>Node Addition and Deletion<a class="headerlink" href="#node-addition-and-deletion" title="Permalink to this headline">¶</a></h3>
+<span id="addnodes"></span><h2>Node Addition and Deletion<a class="headerlink" href="#node-addition-and-deletion" title="Permalink to this headline">¶</a></h2>
 <p>When creating dynamic node instances at runtime, chances are that you will
 not care about the specific NodeId of the new node, as long as you can
 reference it later. When passing numeric NodeIds with a numeric identifier 0,
 the stack evaluates this as “select a random unassigned numeric NodeId in
 that namespace”. To find out which NodeId was actually assigned to the new
 node, you may pass a pointer <cite>outNewNodeId</cite>, which will (after a successfull
-node insertion) contain the nodeId of the new node. You may also pass NULL
-pointer if this result is not relevant. The namespace index for nodes you
-create should never be 0, as that index is reserved for OPC UA’s
-self-description (namespace * 0).</p>
+node insertion) contain the nodeId of the new node. You may also pass a
+<code class="docutils literal"><span class="pre">NULL</span></code> pointer if this result is not needed.</p>
+<p>See the Section <a class="reference internal" href="#node-lifecycle"><span class="std std-ref">Node Lifecycle: Constructors, Destructors and Node Contexts</span></a> on constructors and on attaching
+user-defined data to nodes.</p>
 <p>The methods for node addition and deletion take mostly const arguments that
 are not modified. When creating a node, a deep copy of the node identifier,
 node attributes, etc. is created. Therefore, it is possible to call for
-example <cite>UA_Server_addVariablenode</cite> with a value attribute (a <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>)
-pointing to a memory location on the stack. If you need changes to a variable
-value to manifest at a specific memory location, please use a
-<a class="reference internal" href="#datasource"><span class="std std-ref">Data Source Callback</span></a> or a <a class="reference internal" href="#value-callback"><span class="std std-ref">Value Callback</span></a>.</p>
+example <code class="docutils literal"><span class="pre">UA_Server_addVariablenode</span></code> with a value attribute (a
+<a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>) pointing to a memory location on the stack. If you need
+changes to a variable value to manifest at a specific memory location, please
+use a <a class="reference internal" href="#datasource"><span class="std std-ref">Data Source Callback</span></a> or a <a class="reference internal" href="#value-callback"><span class="std std-ref">Value Callback</span></a>.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Protect against redundant definitions for server/client */</span>
 <span class="cp">#ifndef UA_DEFAULT_ATTRIBUTES_DEFINED</span>
 <span class="cp">#define UA_DEFAULT_ATTRIBUTES_DEFINED</span>
@@ -965,15 +949,6 @@ value to manifest at a specific memory location, please use a
 <span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">UA_ViewAttributes_default</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
-<span class="cm">/* The instantiation callback is used to track the addition of new nodes. It is</span>
-<span class="cm"> * also called for all sub-nodes contained in an object or variable type node</span>
-<span class="cm"> * that is instantiated. */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-  <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">method</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinitionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
-  <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_InstantiationCallback</span><span class="p">;</span>
-
 <span class="cm">/* Don&#39;t use this function. There are typed versions as inline functions. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">__UA_Server_addNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
@@ -984,8 +959,7 @@ value to manifest at a specific memory location, please use a
                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeDefinition</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_NodeAttributes</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
-                    <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                    <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
@@ -994,13 +968,12 @@ value to manifest at a specific memory location, please use a
                           <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                          <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLEATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -1011,14 +984,13 @@ value to manifest at a specific memory location, please use a
                               <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
                               <span class="k">const</span> <span class="n">UA_VariableTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                              <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                              <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLETYPE</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
                                <span class="n">browseName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span>
                                <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLETYPEATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -1028,13 +1000,12 @@ value to manifest at a specific memory location, please use a
                         <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                        <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                        <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -1043,13 +1014,12 @@ value to manifest at a specific memory location, please use a
                             <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">UA_ObjectTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                            <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                            <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECTTYPE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTTYPEATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -1058,13 +1028,12 @@ value to manifest at a specific memory location, please use a
                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                       <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                       <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                      <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                      <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VIEW</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VIEWATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -1074,14 +1043,13 @@ value to manifest at a specific memory location, please use a
                                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                                <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                                <span class="k">const</span> <span class="n">UA_ReferenceTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                               <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                               <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                               <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_REFERENCETYPE</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
                                <span class="n">browseName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
                                <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCETYPEATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
@@ -1091,13 +1059,12 @@ value to manifest at a specific memory location, please use a
                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_DataTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                          <span class="n">UA_InstantiationCallback</span> <span class="o">*</span><span class="n">instantiationCallback</span><span class="p">,</span>
-                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_DATATYPE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATATYPEATTRIBUTES</span><span class="p">],</span>
-                               <span class="n">instantiationCallback</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="n">UA_StatusCode</span>
@@ -1109,28 +1076,22 @@ value to manifest at a specific memory location, please use a
                                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
                                     <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
                                     <span class="k">const</span> <span class="n">UA_DataSource</span> <span class="n">dataSource</span><span class="p">,</span>
-                                    <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+                                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
 
-<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addMethodNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
-                        <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">attr</span><span class="p">,</span>
-                        <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">,</span>
-                        <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span>
-                        <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">inputArguments</span><span class="p">,</span>
-                        <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span>
-                        <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">outputArguments</span><span class="p">,</span>
-                        <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
-<span class="cp">#endif</span>
+                        <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">attr</span><span class="p">,</span> <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span>
+                        <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">inputArguments</span><span class="p">,</span>
+                        <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">outputArguments</span><span class="p">,</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_deleteNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
                      <span class="n">UA_Boolean</span> <span class="n">deleteReferences</span><span class="p">);</span>
 </pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="reference-management">

@@ -425,11 +425,11 @@ especially useful when an object is instantiated at runtime (with the
 AddNodes service) and the integration with an underlying process canot be
 manually defined. In the following constructor example, we simply set the
 pump status to on.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">s</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="cm">/* required to get the server pointer into the constructor</span>
-<span class="cm">                        function (will change for v0.3) */</span>
-
-<span class="k">static</span> <span class="kt">void</span> <span class="o">*</span>
-<span class="nf">pumpTypeConstructor</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">instance</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">pumpTypeConstructor</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeContext</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span> <span class="s">&quot;New pump created&quot;</span><span class="p">);</span>
 
     <span class="cm">/* Find the NodeId of the status child variable */</span>
@@ -442,33 +442,34 @@ pump status to on.</p>
 
     <span class="n">UA_BrowsePath</span> <span class="n">bp</span><span class="p">;</span>
     <span class="n">UA_BrowsePath_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bp</span><span class="p">);</span>
-    <span class="n">bp</span><span class="p">.</span><span class="n">startingNode</span> <span class="o">=</span> <span class="n">instance</span><span class="p">;</span>
+    <span class="n">bp</span><span class="p">.</span><span class="n">startingNode</span> <span class="o">=</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">;</span>
     <span class="n">bp</span><span class="p">.</span><span class="n">relativePath</span><span class="p">.</span><span class="n">elementsSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="n">bp</span><span class="p">.</span><span class="n">relativePath</span><span class="p">.</span><span class="n">elements</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">rpe</span><span class="p">;</span>
 
     <span class="n">UA_BrowsePathResult</span> <span class="n">bpr</span> <span class="o">=</span>
-        <span class="n">UA_Server_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bp</span><span class="p">);</span>
+        <span class="n">UA_Server_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bp</span><span class="p">);</span>
     <span class="k">if</span><span class="p">(</span><span class="n">bpr</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">||</span>
        <span class="n">bpr</span><span class="p">.</span><span class="n">targetsSize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">bpr</span><span class="p">.</span><span class="n">statusCode</span><span class="p">;</span>
 
     <span class="cm">/* Set the status value */</span>
     <span class="n">UA_Boolean</span> <span class="n">status</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
     <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
     <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">status</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
-    <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">bpr</span><span class="p">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">targetId</span><span class="p">.</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+    <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">bpr</span><span class="p">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">targetId</span><span class="p">.</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
     <span class="n">UA_BrowsePathResult_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bpr</span><span class="p">);</span>
 
-    <span class="cm">/* The return pointer of the constructor is attached to the ObjectNode */</span>
-    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="cm">/* At this point we could replace the node context .. */</span>
+
+    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addPumpTypeConstructor</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_ObjectLifecycleManagement</span> <span class="n">olm</span><span class="p">;</span>
-    <span class="n">olm</span><span class="p">.</span><span class="n">constructor</span> <span class="o">=</span> <span class="n">pumpTypeConstructor</span><span class="p">;</span>
-    <span class="n">olm</span><span class="p">.</span><span class="n">destructor</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    <span class="n">UA_Server_setObjectTypeNode_lifecycleManagement</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">pumpTypeId</span><span class="p">,</span> <span class="n">olm</span><span class="p">);</span>
+    <span class="n">UA_NodeTypeLifecycle</span> <span class="n">lifecycle</span><span class="p">;</span>
+    <span class="n">lifecycle</span><span class="p">.</span><span class="n">constructor</span> <span class="o">=</span> <span class="n">pumpTypeConstructor</span><span class="p">;</span>
+    <span class="n">lifecycle</span><span class="p">.</span><span class="n">destructor</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">UA_Server_setNodeTypeLifecycle</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">pumpTypeId</span><span class="p">,</span> <span class="n">lifecycle</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -485,7 +486,6 @@ pump status to on.</p>
 
     <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
     <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">server</span><span class="p">;</span> <span class="cm">/* required for the constructor */</span>
 
     <span class="n">manuallyDefinePump</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">defineObjectTypes</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
