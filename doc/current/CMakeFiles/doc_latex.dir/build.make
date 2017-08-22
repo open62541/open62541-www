@@ -57,7 +57,6 @@ doc/CMakeFiles/doc_latex: doc_src/services.rst
 doc/CMakeFiles/doc_latex: doc_src/plugin_access_control.rst
 doc/CMakeFiles/doc_latex: doc_src/nodestore.rst
 doc/CMakeFiles/doc_latex: doc_src/information_modelling.rst
-doc/CMakeFiles/doc_latex: doc_src/protocol.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_datatypes.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_client_firststeps.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_server_firststeps.rst
