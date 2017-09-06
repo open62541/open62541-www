@@ -39,9 +39,9 @@ variable.
    static void
    addCurrentTimeVariable(UA_Server *server) {
        UA_DateTime now = 0;
-       UA_VariableAttributes attr;
-       UA_VariableAttributes_init(&attr);
+       UA_VariableAttributes attr = UA_VariableAttributes_default;
        attr.displayName = UA_LOCALIZEDTEXT("en_US", "Current time");
+       attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
        UA_Variant_setScalar(&attr.value, &now, &UA_TYPES[UA_TYPES_DATETIME]);
    
        UA_NodeId currentNodeId = UA_NODEID_STRING(1, "current-time");
@@ -135,9 +135,9 @@ own memory management.
    
    static void
    addCurrentTimeDataSourceVariable(UA_Server *server) {
-       UA_VariableAttributes attr;
-       UA_VariableAttributes_init(&attr);
+       UA_VariableAttributes attr = UA_VariableAttributes_default;
        attr.displayName = UA_LOCALIZEDTEXT("en_US", "Current time - data source");
+       attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
    
        UA_NodeId currentNodeId = UA_NODEID_STRING(1, "current-time-datasource");
        UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, "current-time-datasource");

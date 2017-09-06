@@ -6,6 +6,9 @@ to a server. First, we add a new variable to the server. Take a look at the
 definition of the ``UA_VariableAttrbitues`` structure to see the list of all
 attributes defined for VariableNodes.
 
+Note that the default settings have the AccessLevel of the variable value as
+read only. See below for making the variable writable.
+
 .. code-block:: c
 
    
@@ -22,6 +25,7 @@ attributes defined for VariableNodes.
        attr.description = UA_LOCALIZEDTEXT("en_US","the answer");
        attr.displayName = UA_LOCALIZEDTEXT("en_US","the answer");
        attr.dataType = UA_TYPES[UA_TYPES_INT32].typeId;
+       attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
    
        /* Add the variable node to the information model */
        UA_NodeId myIntegerNodeId = UA_NODEID_STRING(1, "the.answer");
