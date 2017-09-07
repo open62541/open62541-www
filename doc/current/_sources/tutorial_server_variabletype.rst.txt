@@ -29,7 +29,7 @@ VariableTypeNode to the hierarchy of variable types.
        UA_UInt32 arrayDims[1] = {2};
        vtAttr.arrayDimensions = arrayDims;
        vtAttr.arrayDimensionsSize = 1;
-       vtAttr.displayName = UA_LOCALIZEDTEXT("en_US", "2DPoint Type");
+       vtAttr.displayName = UA_LOCALIZEDTEXT("en-US", "2DPoint Type");
    
        /* a matching default value is required */
        UA_Double zero[2] = {0.0, 0.0};
@@ -60,7 +60,7 @@ is copied during instantiation.
        UA_UInt32 arrayDims[1] = {2};
        vAttr.arrayDimensions = arrayDims;
        vAttr.arrayDimensionsSize = 1;
-       vAttr.displayName = UA_LOCALIZEDTEXT("en_US", "2DPoint Variable");
+       vAttr.displayName = UA_LOCALIZEDTEXT("en-US", "2DPoint Variable");
        vAttr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
        /* vAttr.value is left empty, the server instantiates with the default value */
    
@@ -86,7 +86,7 @@ variable type constraints.
        UA_VariableAttributes vAttr = UA_VariableAttributes_default;
        vAttr.dataType = UA_TYPES[UA_TYPES_DOUBLE].typeId;
        vAttr.valueRank = -1; /* a scalar. this is not allowed per the variable type */
-       vAttr.displayName = UA_LOCALIZEDTEXT("en_US", "2DPoint Variable (fail)");
+       vAttr.displayName = UA_LOCALIZEDTEXT("en-US", "2DPoint Variable (fail)");
        UA_String s = UA_STRING("2dpoint?");
        UA_Variant_setScalar(&vAttr.value, &s, &UA_TYPES[UA_TYPES_STRING]);
    
