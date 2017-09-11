@@ -141,8 +141,8 @@ the regular service to read several attributes at once.
    
    UA_StatusCode
    UA_Client_readArrayDimensionsAttribute(UA_Client *client, const UA_NodeId nodeId,
-                                          UA_UInt32 **outArrayDimensions,
-                                          size_t *outArrayDimensionsSize);
+                                          size_t *outArrayDimensionsSize,
+                                          UA_UInt32 **outArrayDimensions);
    
    static UA_INLINE UA_StatusCode
    UA_Client_readAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
@@ -324,8 +324,8 @@ time. Use the regular write service to write several attributes at once.
    
    UA_StatusCode
    UA_Client_writeArrayDimensionsAttribute(UA_Client *client, const UA_NodeId nodeId,
-                                           const UA_UInt32 *newArrayDimensions,
-                                           size_t newArrayDimensionsSize);
+                                           size_t newArrayDimensionsSize,
+                                           const UA_UInt32 *newArrayDimensions);
    
    static UA_INLINE UA_StatusCode
    UA_Client_writeAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
