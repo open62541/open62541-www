@@ -254,8 +254,10 @@ A bit mask which specifies what should be returned in a browse response.
        UA_BROWSERESULTMASK_TYPEDEFINITION = 32,
        UA_BROWSERESULTMASK_ALL = 63,
        UA_BROWSERESULTMASK_REFERENCETYPEINFO = 3,
-       UA_BROWSERESULTMASK_TARGETINFO = 60
+       UA_BROWSERESULTMASK_TARGETINFO = 60,
+       __UA_BROWSERESULTMASK_FORCE32BIT = 0x7fffffff
    } UA_BrowseResultMask;
+   UA_STATIC_ASSERT(sizeof(UA_BrowseResultMask) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_BROWSERESULTMASK 29
    
@@ -421,8 +423,10 @@ The bits used to specify default attributes for a new node.
        UA_NODEATTRIBUTESMASK_VARIABLETYPE = 3958902,
        UA_NODEATTRIBUTESMASK_METHOD = 1466724,
        UA_NODEATTRIBUTESMASK_REFERENCETYPE = 1371236,
-       UA_NODEATTRIBUTESMASK_VIEW = 1335532
+       UA_NODEATTRIBUTESMASK_VIEW = 1335532,
+       __UA_NODEATTRIBUTESMASK_FORCE32BIT = 0x7fffffff
    } UA_NodeAttributesMask;
+   UA_STATIC_ASSERT(sizeof(UA_NodeAttributesMask) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_NODEATTRIBUTESMASK 38
    
@@ -434,8 +438,10 @@ MonitoringMode
    typedef enum {
        UA_MONITORINGMODE_DISABLED = 0,
        UA_MONITORINGMODE_SAMPLING = 1,
-       UA_MONITORINGMODE_REPORTING = 2
+       UA_MONITORINGMODE_REPORTING = 2,
+       __UA_MONITORINGMODE_FORCE32BIT = 0x7fffffff
    } UA_MonitoringMode;
+   UA_STATIC_ASSERT(sizeof(UA_MonitoringMode) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_MONITORINGMODE 39
    
@@ -510,8 +516,10 @@ The directions of the references to return.
        UA_BROWSEDIRECTION_FORWARD = 0,
        UA_BROWSEDIRECTION_INVERSE = 1,
        UA_BROWSEDIRECTION_BOTH = 2,
-       UA_BROWSEDIRECTION_INVALID = 3
+       UA_BROWSEDIRECTION_INVALID = 3,
+       __UA_BROWSEDIRECTION_FORCE32BIT = 0x7fffffff
    } UA_BrowseDirection;
+   UA_STATIC_ASSERT(sizeof(UA_BrowseDirection) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_BROWSEDIRECTION 44
    
@@ -635,8 +643,10 @@ TimestampsToReturn
        UA_TIMESTAMPSTORETURN_SERVER = 1,
        UA_TIMESTAMPSTORETURN_BOTH = 2,
        UA_TIMESTAMPSTORETURN_NEITHER = 3,
-       UA_TIMESTAMPSTORETURN_INVALID = 4
+       UA_TIMESTAMPSTORETURN_INVALID = 4,
+       __UA_TIMESTAMPSTORETURN_FORCE32BIT = 0x7fffffff
    } UA_TimestampsToReturn;
+   UA_STATIC_ASSERT(sizeof(UA_TimestampsToReturn) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_TIMESTAMPSTORETURN 53
    
@@ -735,8 +745,10 @@ The type of security to use on a message.
        UA_MESSAGESECURITYMODE_INVALID = 0,
        UA_MESSAGESECURITYMODE_NONE = 1,
        UA_MESSAGESECURITYMODE_SIGN = 2,
-       UA_MESSAGESECURITYMODE_SIGNANDENCRYPT = 3
+       UA_MESSAGESECURITYMODE_SIGNANDENCRYPT = 3,
+       __UA_MESSAGESECURITYMODE_FORCE32BIT = 0x7fffffff
    } UA_MessageSecurityMode;
+   UA_STATIC_ASSERT(sizeof(UA_MessageSecurityMode) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_MESSAGESECURITYMODE 60
    
@@ -836,8 +848,10 @@ DeadbandType
    typedef enum {
        UA_DEADBANDTYPE_NONE = 0,
        UA_DEADBANDTYPE_ABSOLUTE = 1,
-       UA_DEADBANDTYPE_PERCENT = 2
+       UA_DEADBANDTYPE_PERCENT = 2,
+       __UA_DEADBANDTYPE_FORCE32BIT = 0x7fffffff
    } UA_DeadbandType;
+   UA_STATIC_ASSERT(sizeof(UA_DeadbandType) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_DEADBANDTYPE 67
    
@@ -849,8 +863,10 @@ Indicates whether a token if being created or renewed.
 
    typedef enum {
        UA_SECURITYTOKENREQUESTTYPE_ISSUE = 0,
-       UA_SECURITYTOKENREQUESTTYPE_RENEW = 1
+       UA_SECURITYTOKENREQUESTTYPE_RENEW = 1,
+       __UA_SECURITYTOKENREQUESTTYPE_FORCE32BIT = 0x7fffffff
    } UA_SecurityTokenRequestType;
+   UA_STATIC_ASSERT(sizeof(UA_SecurityTokenRequestType) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_SECURITYTOKENREQUESTTYPE 68
    
@@ -862,8 +878,10 @@ DataChangeTrigger
    typedef enum {
        UA_DATACHANGETRIGGER_STATUS = 0,
        UA_DATACHANGETRIGGER_STATUSVALUE = 1,
-       UA_DATACHANGETRIGGER_STATUSVALUETIMESTAMP = 2
+       UA_DATACHANGETRIGGER_STATUSVALUETIMESTAMP = 2,
+       __UA_DATACHANGETRIGGER_FORCE32BIT = 0x7fffffff
    } UA_DataChangeTrigger;
+   UA_STATIC_ASSERT(sizeof(UA_DataChangeTrigger) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_DATACHANGETRIGGER 69
    
@@ -898,8 +916,10 @@ A mask specifying the class of the node.
        UA_NODECLASS_VARIABLETYPE = 16,
        UA_NODECLASS_REFERENCETYPE = 32,
        UA_NODECLASS_DATATYPE = 64,
-       UA_NODECLASS_VIEW = 128
+       UA_NODECLASS_VIEW = 128,
+       __UA_NODECLASS_FORCE32BIT = 0x7fffffff
    } UA_NodeClass;
+   UA_STATIC_ASSERT(sizeof(UA_NodeClass) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_NODECLASS 71
    
@@ -1185,8 +1205,10 @@ The type of identifier used in a node id.
        UA_IDTYPE_NUMERIC = 0,
        UA_IDTYPE_STRING = 1,
        UA_IDTYPE_GUID = 2,
-       UA_IDTYPE_OPAQUE = 3
+       UA_IDTYPE_OPAQUE = 3,
+       __UA_IDTYPE_FORCE32BIT = 0x7fffffff
    } UA_IdType;
+   UA_STATIC_ASSERT(sizeof(UA_IdType) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_IDTYPE 91
    
@@ -1200,8 +1222,10 @@ The possible user token types.
        UA_USERTOKENTYPE_ANONYMOUS = 0,
        UA_USERTOKENTYPE_USERNAME = 1,
        UA_USERTOKENTYPE_CERTIFICATE = 2,
-       UA_USERTOKENTYPE_ISSUEDTOKEN = 3
+       UA_USERTOKENTYPE_ISSUEDTOKEN = 3,
+       __UA_USERTOKENTYPE_FORCE32BIT = 0x7fffffff
    } UA_UserTokenType;
+   UA_STATIC_ASSERT(sizeof(UA_UserTokenType) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_USERTOKENTYPE 92
    
@@ -1249,8 +1273,10 @@ The types of applications.
        UA_APPLICATIONTYPE_SERVER = 0,
        UA_APPLICATIONTYPE_CLIENT = 1,
        UA_APPLICATIONTYPE_CLIENTANDSERVER = 2,
-       UA_APPLICATIONTYPE_DISCOVERYSERVER = 3
+       UA_APPLICATIONTYPE_DISCOVERYSERVER = 3,
+       __UA_APPLICATIONTYPE_FORCE32BIT = 0x7fffffff
    } UA_ApplicationType;
+   UA_STATIC_ASSERT(sizeof(UA_ApplicationType) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_APPLICATIONTYPE 95
    
@@ -1267,8 +1293,10 @@ ServerState
        UA_SERVERSTATE_SHUTDOWN = 4,
        UA_SERVERSTATE_TEST = 5,
        UA_SERVERSTATE_COMMUNICATIONFAULT = 6,
-       UA_SERVERSTATE_UNKNOWN = 7
+       UA_SERVERSTATE_UNKNOWN = 7,
+       __UA_SERVERSTATE_FORCE32BIT = 0x7fffffff
    } UA_ServerState;
+   UA_STATIC_ASSERT(sizeof(UA_ServerState) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_SERVERSTATE 96
    
@@ -1336,8 +1364,10 @@ FilterOperator
        UA_FILTEROPERATOR_OFTYPE = 14,
        UA_FILTEROPERATOR_RELATEDTO = 15,
        UA_FILTEROPERATOR_BITWISEAND = 16,
-       UA_FILTEROPERATOR_BITWISEOR = 17
+       UA_FILTEROPERATOR_BITWISEOR = 17,
+       __UA_FILTEROPERATOR_FORCE32BIT = 0x7fffffff
    } UA_FilterOperator;
+   UA_STATIC_ASSERT(sizeof(UA_FilterOperator) == sizeof(UA_Int32), enum_must_be_32bit);
    
    #define UA_TYPES_FILTEROPERATOR 100
    
