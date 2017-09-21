@@ -375,6 +375,8 @@ A NodeId that allows the namespace URI to be specified instead of an index.
        UA_UInt32 serverIndex;
    } UA_ExpandedNodeId;
    
+   extern const UA_ExpandedNodeId UA_EXPANDEDNODEID_NULL;
+   
 The following functions are shorthand for creating ExpandedNodeIds.
 
 .. code-block:: c

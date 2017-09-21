@@ -56,7 +56,6 @@ doc/CMakeFiles/doc_latex: doc_src/plugin_network.rst
 doc/CMakeFiles/doc_latex: doc_src/services.rst
 doc/CMakeFiles/doc_latex: doc_src/plugin_access_control.rst
 doc/CMakeFiles/doc_latex: doc_src/nodestore.rst
-doc/CMakeFiles/doc_latex: doc_src/information_modelling.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_datatypes.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_client_firststeps.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_server_firststeps.rst
@@ -130,62 +129,56 @@ doc_src/plugin_access_control.rst: ../include/ua_plugin_access_control.h
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_access_control.h /home/travis/build/open62541/open62541/build/doc_src/plugin_access_control.rst
 
 doc_src/nodestore.rst: ../tools/c2rst.py
-doc_src/nodestore.rst: ../src/server/ua_nodestore.h
+doc_src/nodestore.rst: ../include/ua_plugin_nodestore.h
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_12)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/nodestore.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/src/server/ua_nodestore.h /home/travis/build/open62541/open62541/build/doc_src/nodestore.rst
-
-doc_src/information_modelling.rst: ../tools/c2rst.py
-doc_src/information_modelling.rst: ../src/server/ua_nodes.h
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_13)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/information_modelling.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/src/server/ua_nodes.h /home/travis/build/open62541/open62541/build/doc_src/information_modelling.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_nodestore.h /home/travis/build/open62541/open62541/build/doc_src/nodestore.rst
 
 doc_src/tutorial_datatypes.rst: ../tools/c2rst.py
 doc_src/tutorial_datatypes.rst: ../examples/tutorial_datatypes.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_14)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_13)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_datatypes.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_datatypes.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_datatypes.rst
 
 doc_src/tutorial_client_firststeps.rst: ../tools/c2rst.py
 doc_src/tutorial_client_firststeps.rst: ../examples/tutorial_client_firststeps.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_15)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_14)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_client_firststeps.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_client_firststeps.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_client_firststeps.rst
 
 doc_src/tutorial_server_firststeps.rst: ../tools/c2rst.py
 doc_src/tutorial_server_firststeps.rst: ../examples/tutorial_server_firststeps.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_16)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_15)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_firststeps.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_firststeps.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_firststeps.rst
 
 doc_src/tutorial_server_variable.rst: ../tools/c2rst.py
 doc_src/tutorial_server_variable.rst: ../examples/tutorial_server_variable.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_17)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_16)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_variable.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_variable.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_variable.rst
 
 doc_src/tutorial_server_variabletype.rst: ../tools/c2rst.py
 doc_src/tutorial_server_variabletype.rst: ../examples/tutorial_server_variabletype.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_18)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_17)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_variabletype.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_variabletype.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_variabletype.rst
 
 doc_src/tutorial_server_datasource.rst: ../tools/c2rst.py
 doc_src/tutorial_server_datasource.rst: ../examples/tutorial_server_datasource.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_19)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_18)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_datasource.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_datasource.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_datasource.rst
 
 doc_src/tutorial_server_object.rst: ../tools/c2rst.py
 doc_src/tutorial_server_object.rst: ../examples/tutorial_server_object.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_20)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_19)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_object.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_object.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_object.rst
 
 doc_src/tutorial_server_method.rst: ../tools/c2rst.py
 doc_src/tutorial_server_method.rst: ../examples/tutorial_server_method.c
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_21)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/travis/build/open62541/open62541/build/CMakeFiles $(CMAKE_PROGRESS_20)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../doc_src/tutorial_server_method.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /opt/pyenv/shims/python /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_method.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_method.rst
 
@@ -201,7 +194,6 @@ doc_latex: doc_src/plugin_network.rst
 doc_latex: doc_src/services.rst
 doc_latex: doc_src/plugin_access_control.rst
 doc_latex: doc_src/nodestore.rst
-doc_latex: doc_src/information_modelling.rst
 doc_latex: doc_src/tutorial_datatypes.rst
 doc_latex: doc_src/tutorial_client_firststeps.rst
 doc_latex: doc_src/tutorial_server_firststeps.rst

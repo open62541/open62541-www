@@ -99,7 +99,6 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
@@ -1087,7 +1086,39 @@ use a <a class="reference internal" href="#datasource"><span class="std std-ref"
                         <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">inputArguments</span><span class="p">,</span>
                         <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">outputArguments</span><span class="p">,</span>
                         <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The method pair UA_Server_addNode_begin and _finish splits the AddNodes
+service in two parts. This is useful if the node shall be modified before
+finish the instantiation. For example to add children with specific NodeIds.
+Otherwise, mandatory children (e.g. of an ObjectType) are added with
+pseudo-random unique NodeIds. Existing children are detected during the
+_finish part via their matching BrowseName.</p>
+<p>The _begin method prepares the node and adds it to the nodestore. It may copy
+some unassigned attributes from the TypeDefinition node internally. The
+_finish method adds the references to the parent (and the TypeDefinition if
+applicable), copies mandatory children, performs type-checking of variables
+and calls the node constructor(s) at the end. The _finish method may remove
+the node if it encounters an error.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* The ``attr`` argument must have a type according to the NodeClass.</span>
+<span class="cm"> * ``VariableAttributes`` for variables, ``ObjectAttributes`` for objects, and</span>
+<span class="cm"> * so on. Missing attributes are taken from the TypeDefinition node if</span>
+<span class="cm"> * applicable. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addNode_begin</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
 
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinitionId</span><span class="p">);</span>
+
+<span class="cm">/* Deletes a node and optionally all references leading to the node. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_deleteNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
                      <span class="n">UA_Boolean</span> <span class="n">deleteReferences</span><span class="p">);</span>

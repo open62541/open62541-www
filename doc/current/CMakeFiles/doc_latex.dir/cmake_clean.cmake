@@ -11,7 +11,6 @@ file(REMOVE_RECURSE
   "../doc_src/services.rst"
   "../doc_src/plugin_access_control.rst"
   "../doc_src/nodestore.rst"
-  "../doc_src/information_modelling.rst"
   "../doc_src/tutorial_datatypes.rst"
   "../doc_src/tutorial_client_firststeps.rst"
   "../doc_src/tutorial_server_firststeps.rst"
