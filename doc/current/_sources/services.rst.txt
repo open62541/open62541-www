@@ -108,7 +108,7 @@ Integrity for Message exchange during a Session.
 
 .. code-block:: c
 
-   void Service_OpenSecureChannel(UA_Server *server, UA_Connection *connection,
+   void Service_OpenSecureChannel(UA_Server *server, UA_SecureChannel* channel,
                                   const UA_OpenSecureChannelRequest *request,
                                   UA_OpenSecureChannelResponse *response);
    
