@@ -108,6 +108,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#build-type-and-logging">Build Type and Logging</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ua-build-group">UA_BUILD_* group</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#ua-enable-group">UA_ENABLE_* group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ua-debug-group">UA_DEBUG_* group</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-a-shared-library">Building a shared library</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#minimizing-the-binary-size">Minimizing the binary size</a></li>
 </ul>
@@ -118,6 +119,7 @@
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
@@ -201,7 +203,7 @@ gcc -std<span class="o">=</span>c99 open62541.c server_variable.c -o server
 <h2>Building the Library<a class="headerlink" href="#building-the-library" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="building-with-cmake-on-ubuntu-or-debian">
 <h3>Building with CMake on Ubuntu or Debian<a class="headerlink" href="#building-with-cmake-on-ubuntu-or-debian" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install git build-essential gcc pkg-config cmake python
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install git build-essential gcc pkg-config cmake python python-six
 
 <span class="c1"># enable additional features</span>
 sudo apt-get install liburcu-dev <span class="c1"># for multithreading</span>
@@ -231,9 +233,10 @@ make doc_pdf <span class="c1"># pdf documentation (requires LaTeX)</span>
 with MinGW, just replace the compiler selection in the call to CMake.</p>
 <ul class="simple">
 <li>Download and install<ul>
-<li>Python 2.7.x (Python 3.x should work, too): <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a></li>
+<li>Python 2.7.x (Python 3.x works as well): <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a></li>
+<li>Install python-six with the pip package manager (<code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">six</span></code>)</li>
 <li>CMake: <a class="reference external" href="http://www.cmake.org/cmake/resources/software.html">http://www.cmake.org/cmake/resources/software.html</a></li>
-<li>Microsoft Visual Studio 2015 Community Edition: <a class="reference external" href="https://www.visualstudio.com/products/visual-studio-community-vs">https://www.visualstudio.com/products/visual-studio-community-vs</a></li>
+<li>Microsoft Visual Studio: <a class="reference external" href="https://www.visualstudio.com/products/visual-studio-community-vs">https://www.visualstudio.com/products/visual-studio-community-vs</a></li>
 </ul>
 </li>
 <li>Download the open62541 sources (using git or as a zipfile from github)</li>
@@ -262,6 +265,7 @@ with MinGW, just replace the compiler selection in the call to CMake.</p>
 <li>Run the following in a shell</li>
 </ul>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>brew install cmake
+pip install six <span class="c1"># python 2/3 compatibility workarounds</span>
 pip install sphinx <span class="c1"># for documentation generation</span>
 pip install sphinx_rtd_theme <span class="c1"># documentation style</span>
 brew install graphviz <span class="c1"># for graphics in the documentation</span>
@@ -377,10 +381,18 @@ be visible in the cmake GUIs.</p>
 <dt><strong>UA_ENABLE_GENERATE_NAMESPACE0</strong></dt>
 <dd>Generate and load UA XML Namespace 0 definition
 <code class="docutils literal"><span class="pre">UA_GENERATE_NAMESPACE0_FILE</span></code> is used to specify the file for NS0 generation from namespace0 folder. Default value is <code class="docutils literal"><span class="pre">Opc.Ua.NodeSet2.xml</span></code></dd>
-<dt><strong>UA_ENABLE_EMBEDDED_LIBC</strong></dt>
-<dd>Use a custom implementation of some libc functions that might be missing on embedded targets (e.g. string handling).</dd>
 <dt><strong>UA_ENABLE_NONSTANDARD_UDP</strong></dt>
 <dd>Enable udp extension</dd>
+</dl>
+</div>
+<div class="section" id="ua-debug-group">
+<h3>UA_DEBUG_* group<a class="headerlink" href="#ua-debug-group" title="Permalink to this headline">¶</a></h3>
+<p>This group contains build options mainly useful for development of the library itself.</p>
+<dl class="docutils">
+<dt><strong>UA_DEBUG</strong></dt>
+<dd>Enable assertions and additional definitions not intended for production builds</dd>
+<dt><strong>UA_DEBUG_DUMP_PKGS</strong></dt>
+<dd>Dump every package received by the server as hexdump format</dd>
 </dl>
 </div>
 <div class="section" id="building-a-shared-library">

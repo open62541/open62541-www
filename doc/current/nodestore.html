@@ -36,8 +36,8 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="open62541 0.3.0dev documentation" href="index.html"/>
-        <link rel="up" title="Internals" href="internal.html"/>
-        <link rel="prev" title="Logging Plugin API" href="plugin_log.html"/> 
+        <link rel="next" title="Server" href="server.html"/>
+        <link rel="prev" title="Services" href="services.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -100,34 +100,29 @@
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Information Modelling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#base-node-attributes">Base Node Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-type">Data Type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-rank">Value Rank</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#array-dimensions">Array Dimensions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methodnode">MethodNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objecttypenode">ObjectTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodestore-plugin-api">Nodestore Plugin API</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="namespace_compiler.html">XML Nodeset Compiler</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_access_control.html">Access Control Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Information Modelling</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#base-node-attributes">Base Node Attributes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#data-type">Data Type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#value-rank">Value Rank</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#array-dimensions">Array Dimensions</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#methodnode">MethodNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#objecttypenode">ObjectTypeNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#viewnode">ViewNode</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#nodestore">Nodestore</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
 
             
@@ -171,8 +166,6 @@
   <ul class="wy-breadcrumbs">
     
       <li><a href="toc.html">Docs</a> &raquo;</li>
-        
-          <li><a href="internal.html">Internals</a> &raquo;</li>
         
       <li>Information Modelling</li>
     
@@ -247,38 +240,6 @@ correctness of casting from <code class="docutils literal"><span class="pre">UA_
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_NODE_BASEATTRIBUTES</span>
 <span class="p">}</span> <span class="n">UA_Node</span><span class="p">;</span>
-
-<span class="cm">/* The following methods specialize internally for the different node classes</span>
-<span class="cm"> * (distinguished by the nodeClass member) */</span>
-
-<span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
-<span class="cm"> * and so on). The attributes are copied. Note that the attributes structs do</span>
-<span class="cm"> * not contain NodeId, NodeClass and BrowseName. The NodeClass of the node needs</span>
-<span class="cm"> * to be correctly set before calling this method. UA_Node_deleteMembers is</span>
-<span class="cm"> * called on the node when an error occurs internally. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_setAttributes</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attributes</span><span class="p">,</span>
-                      <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">);</span>
-
-<span class="cm">/* Reset the destination node and copy the content of the source */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_copy</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">src</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">dst</span><span class="p">);</span>
-
-<span class="cm">/* Add a single reference to the node */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-<span class="cm">/* Delete a single reference from the node */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_deleteReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DeleteReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
-
-<span class="cm">/* Delete all references of the node */</span>
-<span class="kt">void</span>
-<span class="nf">UA_Node_deleteReferences</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
-
-<span class="cm">/* Remove all malloc&#39;ed members of the node */</span>
-<span class="kt">void</span>
-<span class="nf">UA_Node_deleteMembers</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -573,16 +534,15 @@ open62541.</p>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="nodestore">
-<h1>Nodestore<a class="headerlink" href="#nodestore" title="Permalink to this headline">¶</a></h1>
-<p>The following definitions are used for implementing node storage plugins.
-Most users will want to use one of the predefined Nodestores.</p>
-<p>Warning! Endusers should not manually edit nodes. Please use the server API
-for that. Otherwise, the consistency checks of the server are omitted. This
-can crash the application eventually.</p>
-<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+<div class="section" id="nodestore-plugin-api">
+<h2>Nodestore Plugin API<a class="headerlink" href="#nodestore-plugin-api" title="Permalink to this headline">¶</a></h2>
+<p>The following definitions are used for implementing custom node storage
+backends. <strong>Most users will want to use the default nodestore and don’t need
+to work with the nodestore API</strong>.</p>
+<p>Outside of custom nodestore implementations, users should not manually edit
+nodes. Please use the OPC UA services for that. Otherwise, all consistency
+checks are omitted. This can crash the application eventually.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="cm">/* Nodestore context and lifecycle */</span>
@@ -636,6 +596,39 @@ can crash the application eventually.</p>
 <span class="p">}</span> <span class="n">UA_Nodestore</span><span class="p">;</span>
 </pre></div>
 </div>
+<p>The following methods specialize internally for the different node classes
+(distinguished by the nodeClass member)</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
+<span class="cm"> * and so on). The attributes are copied. Note that the attributes structs do</span>
+<span class="cm"> * not contain NodeId, NodeClass and BrowseName. The NodeClass of the node needs</span>
+<span class="cm"> * to be correctly set before calling this method. UA_Node_deleteMembers is</span>
+<span class="cm"> * called on the node when an error occurs internally. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_setAttributes</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attributes</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">);</span>
+
+<span class="cm">/* Reset the destination node and copy the content of the source */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_copy</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">src</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="cm">/* Add a single reference to the node */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+<span class="cm">/* Delete a single reference from the node */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_deleteReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DeleteReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+<span class="cm">/* Delete all references of the node */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_deleteReferences</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+<span class="cm">/* Remove all malloc&#39;ed members of the node */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_deleteMembers</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -648,8 +641,10 @@ can crash the application eventually.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="server.html" class="btn btn-neutral float-right" title="Server" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="plugin_log.html" class="btn btn-neutral" title="Logging Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="services.html" class="btn btn-neutral" title="Services" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
