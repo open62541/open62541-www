@@ -489,6 +489,10 @@ The following methods specialize internally for the different node classes
    UA_StatusCode
    UA_Node_copy(const UA_Node *src, UA_Node *dst);
    
+   /* Allocate new node and copy the values from src */
+   UA_Node *
+   UA_Node_copy_alloc(const UA_Node *src);
+   
    /* Add a single reference to the node */
    UA_StatusCode
    UA_Node_addReference(UA_Node *node, const UA_AddReferencesItem *item);
