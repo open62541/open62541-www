@@ -609,7 +609,8 @@ See also :ref:`here <client-subscriptions>`.
                                             UA_NodeId nodeId, UA_UInt32 attributeID,
                                             UA_MonitoredItemHandlingFunction hf,
                                             void *hfContext,
-                                            UA_UInt32 *newMonitoredItemId);
+                                            UA_UInt32 *newMonitoredItemId,
+                                            UA_Double samplingInterval);
    
    UA_StatusCode
    UA_Client_Subscriptions_removeMonitoredItem(UA_Client *client,
