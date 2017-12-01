@@ -42,6 +42,7 @@ networking plugins with a clear interface to the main open62541 library.
        UA_Int32 sockfd;                 /* Most connectivity solutions run on
                                          * sockets. Having the socket id here
                                          * simplifies the design. */
+       UA_DateTime openingDate;         /* The date the connection was created */
        void *handle;                    /* A pointer to internal data */
        UA_ByteString incompleteMessage; /* A half-received message (TCP is a
                                          * streaming protocol) is stored here */
