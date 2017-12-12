@@ -561,26 +561,26 @@ of the char-array.</p>
 <p>An instance in time. A DateTime value is encoded as a 64-bit signed integer
 which represents the number of 100 nanosecond intervals since January 1, 1601
 (UTC).</p>
+<p>The methods providing an interface to the system clock are provided by a
+“plugin” that is statically linked with the library.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="kt">int64_t</span> <span class="n">UA_DateTime</span><span class="p">;</span>
 
-<span class="cm">/* Multiply to convert units for time difference computations */</span>
-<span class="cp">#define UA_USEC_TO_DATETIME 10LL</span>
-<span class="cp">#define UA_MSEC_TO_DATETIME (UA_USEC_TO_DATETIME * 1000LL)</span>
-<span class="cp">#define UA_SEC_TO_DATETIME (UA_MSEC_TO_DATETIME * 1000LL)</span>
-<span class="cp">#define UA_DATETIME_TO_USEC (1/10.0)</span>
-<span class="cp">#define UA_DATETIME_TO_MSEC (UA_DATETIME_TO_USEC / 1000.0)</span>
-<span class="cp">#define UA_DATETIME_TO_SEC (UA_DATETIME_TO_MSEC / 1000.0)</span>
+<span class="cm">/* Multiples to convert durations to DateTime */</span>
+<span class="cp">#define UA_DATETIME_USEC 10LL</span>
+<span class="cp">#define UA_DATETIME_MSEC (UA_DATETIME_USEC * 1000LL)</span>
+<span class="cp">#define UA_DATETIME_SEC (UA_DATETIME_MSEC * 1000LL)</span>
 
-<span class="cm">/* Datetime of 1 Jan 1970 00:00 UTC */</span>
-<span class="cp">#define UA_DATETIME_UNIX_EPOCH (11644473600LL * UA_SEC_TO_DATETIME)</span>
-
-<span class="cm">/* The current time */</span>
+<span class="cm">/* The current time in UTC time */</span>
 <span class="n">UA_DateTime</span> <span class="nf">UA_DateTime_now</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
-<span class="cm">/* CPU clock invariant to system time changes. Use only for time diffs, not</span>
-<span class="cm"> * current time */</span>
+<span class="cm">/* Offset between local time and UTC time */</span>
+<span class="n">UA_Int64</span> <span class="nf">UA_DateTime_localTimeUtcOffset</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="cm">/* CPU clock invariant to system time changes. Use only to measure durations,</span>
+<span class="cm"> * not absolute time. */</span>
 <span class="n">UA_DateTime</span> <span class="nf">UA_DateTime_nowMonotonic</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
+<span class="cm">/* Represents a Datetime as a structure */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_DateTimeStruct</span> <span class="p">{</span>
     <span class="n">UA_UInt16</span> <span class="n">nanoSec</span><span class="p">;</span>
     <span class="n">UA_UInt16</span> <span class="n">microSec</span><span class="p">;</span>
@@ -595,7 +595,23 @@ which represents the number of 100 nanosecond intervals since January 1, 1601
 
 <span class="n">UA_DateTimeStruct</span> <span class="nf">UA_DateTime_toStruct</span><span class="p">(</span><span class="n">UA_DateTime</span> <span class="n">t</span><span class="p">);</span>
 
-<span class="n">UA_String</span> <span class="nf">UA_DateTime_toString</span><span class="p">(</span><span class="n">UA_DateTime</span> <span class="n">t</span><span class="p">);</span>
+<span class="cm">/* The C99 standard (7.23.1) says: &quot;The range and precision of times</span>
+<span class="cm"> * representable in clock_t and time_t are implementation-defined.&quot; On most</span>
+<span class="cm"> * systems, time_t is a 4 or 8 byte integer counting seconds since the UTC Unix</span>
+<span class="cm"> * epoch. The following methods are used for conversion. */</span>
+
+<span class="cm">/* Datetime of 1 Jan 1970 00:00 */</span>
+<span class="cp">#define UA_DATETIME_UNIX_EPOCH (11644473600LL * UA_DATETIME_SEC)</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Int64</span>
+<span class="nf">UA_DateTime_toUnixTime</span><span class="p">(</span><span class="n">UA_DateTime</span> <span class="n">date</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">date</span> <span class="o">-</span> <span class="n">UA_DATETIME_UNIX_EPOCH</span><span class="p">)</span> <span class="o">/</span> <span class="n">UA_DATETIME_SEC</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_DateTime</span>
+<span class="nf">UA_DateTime_fromUnixTime</span><span class="p">(</span><span class="n">UA_Int64</span> <span class="n">unixDate</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">unixDate</span> <span class="o">*</span> <span class="n">UA_DATETIME_SEC</span><span class="p">)</span> <span class="o">+</span> <span class="n">UA_DATETIME_UNIX_EPOCH</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -1496,6 +1512,22 @@ releases of open62541.</p>
 <span class="nf">UA_StatusCode_explanation</span><span class="p">(</span><span class="n">UA_StatusCode</span> <span class="n">code</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">statusCodeExplanation_default</span><span class="p">.</span><span class="n">name</span><span class="p">;</span>
 <span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="n">UA_String</span>
+<span class="nf">UA_DateTime_toString</span><span class="p">(</span><span class="n">UA_DateTime</span> <span class="n">t</span><span class="p">);</span>
+
+<span class="cm">/* The old DateTime conversion macros */</span>
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">double</span>
+<span class="nf">deprecatedDateTimeMultiple</span><span class="p">(</span><span class="kt">double</span> <span class="n">multiple</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">multiple</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">#define UA_USEC_TO_DATETIME deprecatedDateTimeMultiple((UA_Double)UA_DATETIME_USEC)</span>
+<span class="cp">#define UA_MSEC_TO_DATETIME deprecatedDateTimeMultiple((UA_Double)UA_DATETIME_MSEC)</span>
+<span class="cp">#define UA_SEC_TO_DATETIME deprecatedDateTimeMultiple((UA_Double)UA_DATETIME_SEC)</span>
+<span class="cp">#define UA_DATETIME_TO_USEC deprecatedDateTimeMultiple(1.0 / ((UA_Double)UA_DATETIME_USEC))</span>
+<span class="cp">#define UA_DATETIME_TO_MSEC deprecatedDateTimeMultiple(1.0 / ((UA_Double)UA_DATETIME_MSEC))</span>
+<span class="cp">#define UA_DATETIME_TO_SEC deprecatedDateTimeMultiple(1.0 / ((UA_Double)UA_DATETIME_SEC))</span>
 </pre></div>
 </div>
 </div>
