@@ -26,6 +26,9 @@ part of the response.
    typedef void (*UA_Service)(UA_Server*, UA_Session*,
                               const void *request, void *response);
    
+   typedef UA_StatusCode (*UA_InSituService)(UA_Server*, UA_Session*, UA_MessageContext *mc,
+                                             const void *request, UA_ResponseHeader *rh);
+   
 Discovery Service Set
 ---------------------
 This Service Set defines Services used to discover the Endpoints implemented
@@ -327,9 +330,8 @@ or to read ranges of elements of the composite.
 
 .. code-block:: c
 
-   void Service_Read(UA_Server *server, UA_Session *session,
-                     const UA_ReadRequest *request,
-                     UA_ReadResponse *response);
+   UA_StatusCode Service_Read(UA_Server *server, UA_Session *session, UA_MessageContext *mc,
+                              const UA_ReadRequest *request, UA_ResponseHeader *responseHeader);
    
 Write Service
 ^^^^^^^^^^^^^

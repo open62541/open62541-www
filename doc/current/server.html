@@ -796,6 +796,18 @@ be set to a null-pointer.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="cm">/* Copies the data from the source into the provided value.</span>
 <span class="cm">     *</span>
+<span class="cm">     * !! ZERO-COPY OPERATIONS POSSIBLE !!</span>
+<span class="cm">     * It is not required to return a copy of the actual content data. You can</span>
+<span class="cm">     * return a pointer to memory owned by the user. Memory can be reused</span>
+<span class="cm">     * between read callbacks of a DataSource, as the result is already encoded</span>
+<span class="cm">     * on the network buffer between each read operation.</span>
+<span class="cm">     *</span>
+<span class="cm">     * To use zero-copy reads, set the value of the `value-&gt;value` Variant</span>
+<span class="cm">     * without copying, e.g. with `UA_Variant_setScalar`. Then, also set</span>
+<span class="cm">     * `value-&gt;value.storageType` to `UA_VARIANT_DATA_NODELETE` to prevent the</span>
+<span class="cm">     * memory being cleaned up. Don&#39;t forget to also set `value-&gt;hasValue` to</span>
+<span class="cm">     * true to indicate the presence of a value.</span>
+<span class="cm">     *</span>
 <span class="cm">     * @param handle An optional pointer to user-defined data for the</span>
 <span class="cm">     *        specific data source</span>
 <span class="cm">     * @param nodeid Id of the read node</span>
@@ -816,8 +828,8 @@ be set to a null-pointer.</p>
                           <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">includeSourceTimeStamp</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
-    <span class="cm">/* Write into a data source. The write member of UA_DataSource can be empty</span>
-<span class="cm">     * if the operation is unsupported.</span>
+    <span class="cm">/* Write into a data source. This method pointer can be NULL if the</span>
+<span class="cm">     * operation is unsupported.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param handle An optional pointer to user-defined data for the</span>
 <span class="cm">     *        specific data source</span>
