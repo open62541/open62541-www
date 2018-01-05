@@ -761,37 +761,53 @@ See also <a class="reference internal" href="#client-subscriptions"><span class=
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Client_Subscriptions_manuallySendPublishRequest</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
 
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_MonitoredEventHandlingFunction</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span>
-                                                  <span class="k">const</span> <span class="kt">size_t</span> <span class="n">nEventFields</span><span class="p">,</span>
-                                                  <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">eventFields</span><span class="p">,</span>
-                                                  <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_addMonitoredEvent</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">attributeID</span><span class="p">,</span>
-                                          <span class="n">UA_SimpleAttributeOperand</span> <span class="o">*</span><span class="n">selectClause</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="kt">size_t</span> <span class="n">nSelectClauses</span><span class="p">,</span>
-                                          <span class="n">UA_ContentFilterElement</span> <span class="o">*</span><span class="n">whereClause</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="kt">size_t</span> <span class="n">nWhereClauses</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="n">UA_MonitoredEventHandlingFunction</span> <span class="n">hf</span><span class="p">,</span>
-                                          <span class="kt">void</span> <span class="o">*</span><span class="n">hfContext</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemId</span><span class="p">);</span>
-
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_MonitoredItemHandlingFunction</span><span class="p">)(</span><span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span>
-                                                 <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">,</span>
+<span class="cm">/* Addition of monitored DataChanges */</span>
+<span class="cm">/* TODO for v0.4: Rename method to _DataChange. */</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_MonitoredItemHandlingFunction</span><span class="p">)(</span><span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">,</span>
                                                  <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_addMonitoredItem</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                         <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
+<span class="nf">UA_Client_Subscriptions_addMonitoredItems</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
+                                          <span class="n">UA_MonitoredItemCreateRequest</span> <span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">itemsSize</span><span class="p">,</span>
+                                          <span class="n">UA_MonitoredItemHandlingFunction</span> <span class="o">**</span><span class="n">hfs</span><span class="p">,</span>
+                                          <span class="kt">void</span> <span class="o">**</span><span class="n">hfContexts</span><span class="p">,</span> <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">itemResults</span><span class="p">,</span>
+                                          <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemIds</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_Subscriptions_addMonitoredItem</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
                                          <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">attributeID</span><span class="p">,</span>
                                          <span class="n">UA_MonitoredItemHandlingFunction</span> <span class="n">hf</span><span class="p">,</span>
                                          <span class="kt">void</span> <span class="o">*</span><span class="n">hfContext</span><span class="p">,</span>
                                          <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemId</span><span class="p">,</span>
                                          <span class="n">UA_Double</span> <span class="n">samplingInterval</span><span class="p">);</span>
 
+<span class="cm">/* Monitored Events have different payloads from DataChanges. So they use a</span>
+<span class="cm"> * different callback method signature. */</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_MonitoredEventHandlingFunction</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="kt">size_t</span> <span class="n">nEventFields</span><span class="p">,</span>
+                                                  <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">eventFields</span><span class="p">,</span>
+                                                  <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
+
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_removeMonitoredItem</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                            <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
+<span class="nf">UA_Client_Subscriptions_addMonitoredEvents</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
+                                           <span class="n">UA_MonitoredItemCreateRequest</span> <span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">itemsSize</span><span class="p">,</span>
+                                           <span class="n">UA_MonitoredEventHandlingFunction</span> <span class="o">**</span><span class="n">hfs</span><span class="p">,</span>
+                                           <span class="kt">void</span> <span class="o">**</span><span class="n">hfContexts</span><span class="p">,</span> <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">itemResults</span><span class="p">,</span>
+                                           <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemIds</span><span class="p">);</span>
+
+<span class="cm">/* TODO for 0.4: attribute is fix for events. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_Subscriptions_addMonitoredEvent</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">attributeID</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">UA_SimpleAttributeOperand</span> <span class="o">*</span><span class="n">selectClauses</span><span class="p">,</span>
+                                          <span class="kt">size_t</span> <span class="n">selectClausesSize</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">UA_ContentFilterElement</span> <span class="o">*</span><span class="n">whereClauses</span><span class="p">,</span>
+                                          <span class="kt">size_t</span> <span class="n">whereClausesSize</span><span class="p">,</span>
+                                          <span class="k">const</span> <span class="n">UA_MonitoredEventHandlingFunction</span> <span class="n">hf</span><span class="p">,</span>
+                                          <span class="kt">void</span> <span class="o">*</span><span class="n">hfContext</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_Subscriptions_removeMonitoredItem</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
                                             <span class="n">UA_UInt32</span> <span class="n">monitoredItemId</span><span class="p">);</span>
 
 <span class="cp">#endif</span>
