@@ -592,7 +592,7 @@ See also :ref:`here <client-subscriptions>`.
    UA_StatusCode
    UA_Client_Subscriptions_addMonitoredItems(UA_Client *client, const UA_UInt32 subscriptionId,
                                              UA_MonitoredItemCreateRequest *items, size_t itemsSize,
-                                             UA_MonitoredItemHandlingFunction **hfs,
+                                             UA_MonitoredItemHandlingFunction *hfs,
                                              void **hfContexts, UA_StatusCode *itemResults,
                                              UA_UInt32 *newMonitoredItemIds);
    
@@ -614,7 +614,7 @@ See also :ref:`here <client-subscriptions>`.
    UA_StatusCode
    UA_Client_Subscriptions_addMonitoredEvents(UA_Client *client, const UA_UInt32 subscriptionId,
                                               UA_MonitoredItemCreateRequest *items, size_t itemsSize,
-                                              UA_MonitoredEventHandlingFunction **hfs,
+                                              UA_MonitoredEventHandlingFunction *hfs,
                                               void **hfContexts, UA_StatusCode *itemResults,
                                               UA_UInt32 *newMonitoredItemIds);
    
