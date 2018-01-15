@@ -329,6 +329,10 @@ with the OPC UA standard.
    #define UA_STATUSCODE_BADSYNTAXERROR 0x80b60000 // A value had an invalid syntax.
    #define UA_STATUSCODE_BADMAXCONNECTIONSREACHED 0x80b70000 // The operation could not be finished because all available connections are in use.
    
+   /* These StatusCodes are manually generated. */
+   #define UA_STATUSCODE_INFOTYPE_DATAVALUE 0x00000400
+   #define UA_STATUSCODE_INFOBITS_OVERFLOW 0x00000080
+   
 Namespace Zero NodeIds
 ----------------------
 Numeric identifiers of standard-defined nodes in namespace zero. The
