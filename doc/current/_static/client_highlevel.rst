@@ -633,6 +633,10 @@ See also :ref:`here <client-subscriptions>`.
    UA_Client_Subscriptions_removeMonitoredItem(UA_Client *client, UA_UInt32 subscriptionId,
                                                UA_UInt32 monitoredItemId);
    
+   UA_StatusCode
+   UA_Client_Subscriptions_removeMonitoredItems(UA_Client *client, UA_UInt32 subscriptionId,
+                                                UA_UInt32 *monitoredItemId, size_t itemsSize,
+                                                UA_StatusCode *itemResults);
    #endif
    
 Misc Highlevel Functionality
