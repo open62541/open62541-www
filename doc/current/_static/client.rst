@@ -59,6 +59,7 @@ Client Configuration
    
        /* Callback function */
        UA_ClientStateCallback stateCallback;
+       void *clientContext;
    } UA_ClientConfig;
    
    
@@ -69,6 +70,10 @@ Client Configuration
    /* Get the client connection status */
    UA_ClientState
    UA_Client_getState(UA_Client *client);
+   
+   /* Get the client context */
+   void *
+   UA_Client_getContext(UA_Client *client);
    
    /* Reset a client */
    void
