@@ -3,6 +3,8 @@
 Server
 ======
 
+.. include:: server_config.rst
+
 .. _server-lifecycle:
 
 Server Lifecycle

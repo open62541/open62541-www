@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#repeated-callbacks">Repeated Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reading-and-writing-node-attributes">Reading and Writing Node Attributes</a></li>
@@ -192,8 +193,145 @@
             
   <div class="section" id="server">
 <span id="id1"></span><h1>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="server-configuration">
+<span id="id2"></span><h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The configuration structure is passed to the server during initialization.
+The server expects that the configuration is not modified during runtime.
+Currently, only one server can use a configuration at a time. During
+shutdown, the server will clean up the parts of the configuration that are
+modified at runtime through the provided API.</p>
+<p>Examples for configurations are provided in the <code class="docutils literal"><span class="pre">/plugins</span></code> folder.
+The usual usage is as follows:</p>
+<ol class="arabic simple">
+<li>Create a server configuration with default settings as a starting point</li>
+<li>Modifiy the configuration, e.g. by adding a server certificate</li>
+<li>Instantiate a server with it</li>
+<li>After shutdown of the server, clean up the configuration (free memory)</li>
+</ol>
+<p>The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide a good starting point for this.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_UInt32Range</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Duration</span> <span class="n">min</span><span class="p">;</span>
+    <span class="n">UA_Duration</span> <span class="n">max</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DurationRange</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">UA_ServerConfig</span> <span class="p">{</span>
+    <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* only if multithreading is enabled */</span>
+    <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
+
+    <span class="cm">/* Server Description */</span>
+    <span class="n">UA_BuildInfo</span> <span class="n">buildInfo</span><span class="p">;</span>
+    <span class="n">UA_ApplicationDescription</span> <span class="n">applicationDescription</span><span class="p">;</span>
+    <span class="n">UA_ByteString</span> <span class="n">serverCertificate</span><span class="p">;</span>
+
+    <span class="cm">/* MDNS Discovery */</span>
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+    <span class="n">UA_String</span> <span class="n">mdnsServerName</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">serverCapabilitiesSize</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="o">*</span><span class="n">serverCapabilities</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+    <span class="cm">/* Custom DataTypes */</span>
+    <span class="kt">size_t</span> <span class="n">customDataTypesSize</span><span class="p">;</span>
+    <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section on <a class="reference internal" href="types.html#generic-types"><span class="std std-ref">Generic Type Handling</span></a>. Examples for working
+with custom data types are provided in
+<code class="docutils literal"><span class="pre">/examples/custom_datatype/</span></code>.</p>
+</div>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Nodestore */</span>
+<span class="n">UA_Nodestore</span> <span class="n">nodestore</span><span class="p">;</span>
+
+<span class="cm">/* Networking */</span>
+<span class="kt">size_t</span> <span class="n">networkLayersSize</span><span class="p">;</span>
+<span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">networkLayers</span><span class="p">;</span>
+<span class="n">UA_String</span> <span class="n">customHostname</span><span class="p">;</span>
+
+<span class="cm">/* Available endpoints */</span>
+<span class="kt">size_t</span> <span class="n">endpointsSize</span><span class="p">;</span>
+<span class="n">UA_Endpoint</span> <span class="o">*</span><span class="n">endpoints</span><span class="p">;</span>
+
+<span class="cm">/* Node Lifecycle callbacks */</span>
+<span class="n">UA_GlobalNodeLifecycle</span> <span class="n">nodeLifecycle</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section for <a class="reference internal" href="#node-lifecycle"><span class="std std-ref">node lifecycle
+handling</span></a>.</p>
+</div>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Access Control */</span>
+<span class="n">UA_AccessControl</span> <span class="n">accessControl</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section for <a class="reference internal" href="plugin_access_control.html#access-control"><span class="std std-ref">access-control
+handling</span></a>.</p>
+</div>
+<div class="highlight-c"><div class="highlight"><pre><span></span>    <span class="cm">/* Certificate Verification */</span>
+    <span class="n">UA_CertificateVerification</span> <span class="n">certificateVerification</span><span class="p">;</span>
+
+    <span class="cm">/* Limits for SecureChannels */</span>
+    <span class="n">UA_UInt16</span> <span class="n">maxSecureChannels</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxSecurityTokenLifetime</span><span class="p">;</span> <span class="cm">/* in ms */</span>
+
+    <span class="cm">/* Limits for Sessions */</span>
+    <span class="n">UA_UInt16</span> <span class="n">maxSessions</span><span class="p">;</span>
+    <span class="n">UA_Double</span> <span class="n">maxSessionTimeout</span><span class="p">;</span> <span class="cm">/* in ms */</span>
+
+    <span class="cm">/* Operation limits */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerRead</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerWrite</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerMethodCall</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerBrowse</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerRegisterNodes</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerTranslateBrowsePathsToNodeIds</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerNodeManagement</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxMonitoredItemsPerCall</span><span class="p">;</span>
+
+    <span class="cm">/* Limits for Requests */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxReferencesPerNode</span><span class="p">;</span>
+
+    <span class="cm">/* Limits for Subscriptions */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxSubscriptionsPerSession</span><span class="p">;</span>
+    <span class="n">UA_DurationRange</span> <span class="n">publishingIntervalLimits</span><span class="p">;</span>
+    <span class="n">UA_UInt32Range</span> <span class="n">lifeTimeCountLimits</span><span class="p">;</span>
+    <span class="n">UA_UInt32Range</span> <span class="n">keepAliveCountLimits</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNotificationsPerPublish</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxRetransmissionQueueSize</span><span class="p">;</span> <span class="cm">/* 0 -&gt; unlimited size */</span>
+
+    <span class="cm">/* Limits for MonitoredItems */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxMonitoredItemsPerSubscription</span><span class="p">;</span>
+    <span class="n">UA_DurationRange</span> <span class="n">samplingIntervalLimits</span><span class="p">;</span>
+    <span class="n">UA_UInt32Range</span> <span class="n">queueSizeLimits</span><span class="p">;</span> <span class="cm">/* Negotiated with the client */</span>
+
+    <span class="cm">/* Limits for PublishRequests */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxPublishReqPerSession</span><span class="p">;</span>
+
+    <span class="cm">/* Discovery */</span>
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+    <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
+<span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
+<span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
+<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
+<span class="cm">     * ervery 10 seconds. The server will still be removed depending on the</span>
+<span class="cm">     * state of the semaphore file. */</span>
+    <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
+<span class="cp">#endif</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="server-lifecycle">
-<span id="id2"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
+<span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 <span class="kt">void</span> <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
@@ -851,7 +989,7 @@ be set to a null-pointer.</p>
 </div>
 </div>
 <div class="section" id="value-callback">
-<span id="id3"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
+<span id="id4"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
 <p>Value Callbacks can be attached to variable and variable type nodes. If
 not <code class="docutils literal"><span class="pre">NULL</span></code>, they are called before reading and after writing respectively.</p>
 <div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>

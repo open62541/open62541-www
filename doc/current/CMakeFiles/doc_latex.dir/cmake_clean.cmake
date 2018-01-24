@@ -4,6 +4,7 @@ file(REMOVE_RECURSE
   "../doc_src/constants.rst"
   "../doc_src/types_generated.rst"
   "../doc_src/server.rst"
+  "../doc_src/server_config.rst"
   "../doc_src/client.rst"
   "../doc_src/client_highlevel.rst"
   "../doc_src/plugin_log.rst"
