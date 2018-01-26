@@ -403,7 +403,7 @@ the triggered items.
 .. code-block:: c
 
    void Service_CreateMonitoredItems(UA_Server *server, UA_Session *session,
-                                     const UA_CreateMonitoredItemsRequest *request, 
+                                     const UA_CreateMonitoredItemsRequest *request,
                                      UA_CreateMonitoredItemsResponse *response);
    
 DeleteMonitoredItems Service

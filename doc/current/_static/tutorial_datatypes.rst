@@ -46,7 +46,7 @@ sure to compare with the type definitions in ``ua_types.h``.
        UA_String_deleteMembers(&s4);
        if(!eq)
            return;
-       
+   
        /* Structured Type */
        UA_CallRequest cr;
        UA_init(&cr, &UA_TYPES[UA_TYPES_CALLREQUEST]); /* Generic method */
