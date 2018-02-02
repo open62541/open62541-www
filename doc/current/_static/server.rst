@@ -986,6 +986,14 @@ the node if it encounters an error.
                             const UA_NodeId referenceTypeId,
                             const UA_NodeId typeDefinitionId);
    
+   UA_StatusCode
+   UA_Server_addMethodNode_finish(UA_Server *server, const UA_NodeId nodeId,
+                            const UA_NodeId parentNodeId,
+                            const UA_NodeId referenceTypeId,
+                            UA_MethodCallback method,
+                            size_t inputArgumentsSize, const UA_Argument* inputArguments,
+                            size_t outputArgumentsSize, const UA_Argument* outputArguments);
+   
    /* Deletes a node and optionally all references leading to the node. */
    UA_StatusCode
    UA_Server_deleteNode(UA_Server *server, const UA_NodeId nodeId,
