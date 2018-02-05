@@ -586,8 +586,8 @@ See also :ref:`here <client-subscriptions>`.
    
    /* Addition of monitored DataChanges */
    /* TODO for v0.4: Rename method to _DataChange. */
-   typedef void (*UA_MonitoredItemHandlingFunction)(UA_UInt32 monId, UA_DataValue *value,
-                                                    void *context);
+   typedef void (*UA_MonitoredItemHandlingFunction)(UA_Client *client, UA_UInt32 monId,
+                                                    UA_DataValue *value, void *context);
    
    UA_StatusCode
    UA_Client_Subscriptions_addMonitoredItems(UA_Client *client, const UA_UInt32 subscriptionId,
@@ -606,7 +606,8 @@ See also :ref:`here <client-subscriptions>`.
    
    /* Monitored Events have different payloads from DataChanges. So they use a
     * different callback method signature. */
-   typedef void (*UA_MonitoredEventHandlingFunction)(const UA_UInt32 monId,
+   typedef void (*UA_MonitoredEventHandlingFunction)(UA_Client *client,
+                                                     const UA_UInt32 monId,
                                                      const size_t nEventFields,
                                                      const UA_Variant *eventFields,
                                                      void *context);
