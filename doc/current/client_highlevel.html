@@ -106,6 +106,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="client.html">Client</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="client.html#client-lifecycle">Client Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client.html#client-lifecycle-callback">Client Lifecycle callback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#subscription-inactivity-callback">Subscription Inactivity callback</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client.html#client-configuration">Client Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client.html#connect-to-a-server">Connect to a Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client.html#discovery">Discovery</a></li>
@@ -116,7 +117,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#write-attributes">Write Attributes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#method-calling">Method Calling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#node-management">Node Management</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#subscriptions-handling">Subscriptions Handling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
 </ul>
 </li>
@@ -732,94 +732,6 @@ time. Use the regular write service to write several attributes at once.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="subscriptions-handling">
-<span id="client-subscriptions"></span><h2>Subscriptions Handling<a class="headerlink" href="#subscriptions-handling" title="Permalink to this headline">¶</a></h2>
-<p>At this time, the client does not yet contain its own thread or event-driven
-main-loop. So the client will not perform any actions automatically in the
-background. This is especially relevant for subscriptions. The user will have
-to periodically call <cite>UA_Client_Subscriptions_manuallySendPublishRequest</cite>.
-See also <a class="reference internal" href="#client-subscriptions"><span class="std std-ref">here</span></a>.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_Double</span> <span class="n">requestedPublishingInterval</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">requestedLifetimeCount</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">requestedMaxKeepAliveCount</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">maxNotificationsPerPublish</span><span class="p">;</span>
-    <span class="n">UA_Boolean</span> <span class="n">publishingEnabled</span><span class="p">;</span>
-    <span class="n">UA_Byte</span> <span class="n">priority</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_SubscriptionSettings</span><span class="p">;</span>
-
-<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_SubscriptionSettings</span> <span class="n">UA_SubscriptionSettings_default</span><span class="p">;</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_new</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_SubscriptionSettings</span> <span class="n">settings</span><span class="p">,</span>
-                            <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newSubscriptionId</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_remove</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_manuallySendPublishRequest</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
-
-<span class="cm">/* Addition of monitored DataChanges */</span>
-<span class="cm">/* TODO for v0.4: Rename method to _DataChange. */</span>
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_MonitoredItemHandlingFunction</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span>
-                                                 <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_addMonitoredItems</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                          <span class="n">UA_MonitoredItemCreateRequest</span> <span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">itemsSize</span><span class="p">,</span>
-                                          <span class="n">UA_MonitoredItemHandlingFunction</span> <span class="o">*</span><span class="n">hfs</span><span class="p">,</span>
-                                          <span class="kt">void</span> <span class="o">**</span><span class="n">hfContexts</span><span class="p">,</span> <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">itemResults</span><span class="p">,</span>
-                                          <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemIds</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_addMonitoredItem</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                         <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">attributeID</span><span class="p">,</span>
-                                         <span class="n">UA_MonitoredItemHandlingFunction</span> <span class="n">hf</span><span class="p">,</span>
-                                         <span class="kt">void</span> <span class="o">*</span><span class="n">hfContext</span><span class="p">,</span>
-                                         <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemId</span><span class="p">,</span>
-                                         <span class="n">UA_Double</span> <span class="n">samplingInterval</span><span class="p">);</span>
-
-<span class="cm">/* Monitored Events have different payloads from DataChanges. So they use a</span>
-<span class="cm"> * different callback method signature. */</span>
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_MonitoredEventHandlingFunction</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                                  <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span>
-                                                  <span class="k">const</span> <span class="kt">size_t</span> <span class="n">nEventFields</span><span class="p">,</span>
-                                                  <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">eventFields</span><span class="p">,</span>
-                                                  <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_addMonitoredEvents</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                           <span class="n">UA_MonitoredItemCreateRequest</span> <span class="o">*</span><span class="n">items</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">itemsSize</span><span class="p">,</span>
-                                           <span class="n">UA_MonitoredEventHandlingFunction</span> <span class="o">*</span><span class="n">hfs</span><span class="p">,</span>
-                                           <span class="kt">void</span> <span class="o">**</span><span class="n">hfContexts</span><span class="p">,</span> <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">itemResults</span><span class="p">,</span>
-                                           <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemIds</span><span class="p">);</span>
-
-<span class="cm">/* TODO for 0.4: attribute is fix for events. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_addMonitoredEvent</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">attributeID</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="n">UA_SimpleAttributeOperand</span> <span class="o">*</span><span class="n">selectClauses</span><span class="p">,</span>
-                                          <span class="kt">size_t</span> <span class="n">selectClausesSize</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="n">UA_ContentFilterElement</span> <span class="o">*</span><span class="n">whereClauses</span><span class="p">,</span>
-                                          <span class="kt">size_t</span> <span class="n">whereClausesSize</span><span class="p">,</span>
-                                          <span class="k">const</span> <span class="n">UA_MonitoredEventHandlingFunction</span> <span class="n">hf</span><span class="p">,</span>
-                                          <span class="kt">void</span> <span class="o">*</span><span class="n">hfContext</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newMonitoredItemId</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_removeMonitoredItem</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                            <span class="n">UA_UInt32</span> <span class="n">monitoredItemId</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_Subscriptions_removeMonitoredItems</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
-                                             <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">monitoredItemId</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">itemsSize</span><span class="p">,</span>
-                                             <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">itemResults</span><span class="p">);</span>
-<span class="cp">#endif</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="misc-highlevel-functionality">
 <h2>Misc Highlevel Functionality<a class="headerlink" href="#misc-highlevel-functionality" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Get the namespace-index of a namespace-URI</span>
@@ -837,10 +749,8 @@ See also <a class="reference internal" href="#client-subscriptions"><span class=
 <span class="cp">#define HAVE_NODEITER_CALLBACK</span>
 <span class="cm">/* Iterate over all nodes referenced by parentNodeId by calling the callback</span>
 <span class="cm">   function for each child node */</span>
-<span class="k">typedef</span> <span class="nf">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span> <span class="n">childId</span><span class="p">,</span>
-                                                 <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">,</span>
-                                                 <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
-                                                 <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="nf">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span> <span class="n">childId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">,</span>
+                                                 <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
 <span class="cp">#endif</span>
 
 <span class="n">UA_StatusCode</span>

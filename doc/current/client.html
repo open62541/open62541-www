@@ -105,6 +105,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Client</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#client-lifecycle">Client Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#client-lifecycle-callback">Client Lifecycle callback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#subscription-inactivity-callback">Subscription Inactivity callback</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#connect-to-a-server">Connect to a Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
@@ -114,8 +115,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#nodemanagement-service-set">NodeManagement Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#view-service-set">View Service Set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#query-service-set">Query Service Set</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#monitoreditem-service-set">MonitoredItem Service Set</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#subscription-service-set">Subscription Service Set</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#asynchronous-services">Asynchronous Services</a><ul>
@@ -199,7 +198,7 @@ abstractions</span></a>.</p>
 event-driven main-loop. So the client will not perform any actions
 automatically in the background. This is especially relevant for
 subscriptions. The user will have to periodically call
-<cite>UA_Client_Subscriptions_manuallySendPublishRequest</cite>. See also <a class="reference internal" href="client_highlevel.html#client-subscriptions"><span class="std std-ref">here</span></a>.</p>
+<cite>UA_Client_Subscriptions_manuallySendPublishRequest</cite>. See also <span class="xref std std-ref">here</span>.</p>
 <div class="section" id="client-lifecycle">
 <h2>Client Lifecycle<a class="headerlink" href="#client-lifecycle" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
@@ -221,6 +220,14 @@ subscriptions. The user will have to periodically call
 </pre></div>
 </div>
 </div>
+<div class="section" id="subscription-inactivity-callback">
+<h2>Subscription Inactivity callback<a class="headerlink" href="#subscription-inactivity-callback" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_SubscriptionInactivityCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">subContext</span><span class="p">);</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="client-configuration">
 <h2>Client Configuration<a class="headerlink" href="#client-configuration" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ClientConfig</span> <span class="p">{</span>
@@ -237,7 +244,15 @@ subscriptions. The user will have to periodically call
 
     <span class="cm">/* Callback function */</span>
     <span class="n">UA_ClientStateCallback</span> <span class="n">stateCallback</span><span class="p">;</span>
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+    <span class="n">UA_SubscriptionInactivityCallback</span> <span class="n">subscriptionInactivityCallback</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
     <span class="kt">void</span> <span class="o">*</span><span class="n">clientContext</span><span class="p">;</span>
+
+    <span class="cm">/* number of PublishResponse standing in the sever */</span>
+    <span class="cm">/* 0 = background task disabled                    */</span>
+    <span class="n">UA_UInt16</span> <span class="n">outStandingPublishRequests</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ClientConfig</span><span class="p">;</span>
 
 
@@ -522,76 +537,6 @@ that wrap the raw services.</p>
                         <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
     <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
 <span class="p">}</span>
-
-<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="monitoreditem-service-set">
-<h3>MonitoredItem Service Set<a class="headerlink" href="#monitoreditem-service-set" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_CreateMonitoredItemsResponse</span>
-<span class="nf">UA_Client_Service_createMonitoredItems</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_CreateMonitoredItemsRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_CreateMonitoredItemsResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CREATEMONITOREDITEMSREQUEST</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CREATEMONITOREDITEMSRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_DeleteMonitoredItemsResponse</span>
-<span class="nf">UA_Client_Service_deleteMonitoredItems</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_DeleteMonitoredItemsRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_DeleteMonitoredItemsResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETEMONITOREDITEMSREQUEST</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETEMONITOREDITEMSRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="subscription-service-set">
-<h3>Subscription Service Set<a class="headerlink" href="#subscription-service-set" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_CreateSubscriptionResponse</span>
-<span class="nf">UA_Client_Service_createSubscription</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                   <span class="k">const</span> <span class="n">UA_CreateSubscriptionRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_CreateSubscriptionResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CREATESUBSCRIPTIONREQUEST</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CREATESUBSCRIPTIONRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ModifySubscriptionResponse</span>
-<span class="nf">UA_Client_Service_modifySubscription</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                   <span class="k">const</span> <span class="n">UA_ModifySubscriptionRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_ModifySubscriptionResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_MODIFYSUBSCRIPTIONREQUEST</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_MODIFYSUBSCRIPTIONRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_DeleteSubscriptionsResponse</span>
-<span class="nf">UA_Client_Service_deleteSubscriptions</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_DeleteSubscriptionsRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_DeleteSubscriptionsResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETESUBSCRIPTIONSREQUEST</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETESUBSCRIPTIONSRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_PublishResponse</span>
-<span class="nf">UA_Client_Service_publish</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_PublishRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_PublishResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_PUBLISHREQUEST</span><span class="p">],</span>
-                        <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_PUBLISHRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="cp">#endif</span>
 </pre></div>
 </div>
 </div>
@@ -601,11 +546,30 @@ that wrap the raw services.</p>
 <p>All OPC UA services are asynchronous in nature. So several service calls can
 be made without waiting for a response first. Responess may come in a
 different ordering.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
-                                 <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Listen on the network and process arriving asynchronous responses in the</span>
+<span class="cm"> * background. Internal housekeeping and subscription management is done as</span>
+<span class="cm"> * well. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_runAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">);</span>
 
-<span class="cm">/* Don&#39;t use this function. Use the type versions below instead. */</span>
+<span class="k">typedef</span> <span class="nf">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+                                 <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">);</span>
+
+<span class="cm">/* Use the type versions of this method. See below. However, the general</span>
+<span class="cm"> * mechanism of async service calls is explained here.</span>
+<span class="cm"> *</span>
+<span class="cm"> * We say that an async service call has been dispatched once this method</span>
+<span class="cm"> * returns UA_STATUSCODE_GOOD. If there is an error after an async service has</span>
+<span class="cm"> * been dispatched, the callback is called with an &quot;empty&quot; response where the</span>
+<span class="cm"> * statusCode has been set accordingly. This is also done if the client is</span>
+<span class="cm"> * shutting down and the list of dispatched async services is emptied.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client is shutting down is</span>
+<span class="cm"> * UA_STATUSCODE_BADSHUTDOWN.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The userdata and requestId arguments can be NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                          <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span>
@@ -613,8 +577,45 @@ different ordering.</p>
                          <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span>
                          <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
 
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_runAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">);</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_AsyncService_read</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ReadRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                            <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                            <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">request</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READREQUEST</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READRESPONSE</span><span class="p">],</span>
+                                    <span class="n">userdata</span><span class="p">,</span> <span class="n">requestId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_AsyncService_write</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_WriteRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                             <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                             <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">request</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_WRITEREQUEST</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_WRITERESPONSE</span><span class="p">],</span>
+                                    <span class="n">userdata</span><span class="p">,</span> <span class="n">requestId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_AsyncService_call</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_CallRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                            <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                            <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">request</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CALLREQUEST</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CALLRESPONSE</span><span class="p">],</span>
+                                    <span class="n">userdata</span><span class="p">,</span> <span class="n">requestId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_AsyncService_browse</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_BrowseRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                              <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                              <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">request</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSEREQUEST</span><span class="p">],</span> <span class="n">callback</span><span class="p">,</span>
+                                    <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSERESPONSE</span><span class="p">],</span>
+                                    <span class="n">userdata</span><span class="p">,</span> <span class="n">requestId</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">
@@ -624,7 +625,6 @@ different ordering.</p>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#write-attributes">Write Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#method-calling">Method Calling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#node-management">Node Management</a></li>
-<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#subscriptions-handling">Subscriptions Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
 </ul>
 </li>
