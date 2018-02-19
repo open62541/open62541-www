@@ -393,6 +393,9 @@ A NodeId that allows the namespace URI to be specified instead of an index.
        UA_UInt32 serverIndex;
    } UA_ExpandedNodeId;
    
+   UA_Boolean UA_ExpandedNodeId_equal(const UA_ExpandedNodeId *n1,
+                                                const UA_ExpandedNodeId *n2);
+   
    extern const UA_ExpandedNodeId UA_EXPANDEDNODEID_NULL;
    
 The following functions are shorthand for creating ExpandedNodeIds.
@@ -464,6 +467,10 @@ A name qualified by a namespace.
        UA_QualifiedName qn; qn.namespaceIndex = nsIndex;
        qn.name = UA_STRING_ALLOC(chars); return qn;
    }
+   
+   UA_Boolean
+   UA_QualifiedName_equal(const UA_QualifiedName *qn1,
+                          const UA_QualifiedName *qn2);
    
 LocalizedText
 ^^^^^^^^^^^^^
