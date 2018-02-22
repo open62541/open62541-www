@@ -34,7 +34,7 @@ read only. See below for making the variable writable.
        UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
        UA_Server_addVariableNode(server, myIntegerNodeId, parentNodeId,
                                  parentReferenceNodeId, myIntegerName,
-                                 UA_NODEID_NULL, attr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), attr, NULL, NULL);
    }
    
 Now we change the value with the write service. This uses the same service

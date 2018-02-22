@@ -90,7 +90,7 @@ variable type constraints.
        UA_String s = UA_STRING("2dpoint?");
        UA_Variant_setScalar(&vAttr.value, &s, &UA_TYPES[UA_TYPES_STRING]);
    
-       /* Add the node */
+       /* Add the node will return UA_STATUSCODE_BADTYPEMISMATCH*/
        UA_Server_addVariableNode(server, UA_NODEID_NULL,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER),
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),

@@ -65,7 +65,7 @@ tutorial and was already covered.
        UA_Server_addObjectNode(server, UA_NODEID_NULL,
                                UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER),
                                UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES),
-                               UA_QUALIFIEDNAME(1, "Pump (Manual)"), UA_NODEID_NULL,
+                               UA_QUALIFIEDNAME(1, "Pump (Manual)"), UA_NODEID_NUMERIC(0, UA_NS0ID_BASEOBJECTTYPE),
                                oAttr, NULL, &pumpId);
    
        UA_VariableAttributes mnAttr = UA_VariableAttributes_default;
@@ -75,7 +75,7 @@ tutorial and was already covered.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, pumpId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "ManufacturerName"),
-                                 UA_NODEID_NULL, mnAttr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, NULL, NULL);
    
        UA_VariableAttributes modelAttr = UA_VariableAttributes_default;
        UA_String modelName = UA_STRING("Mega Pump 3000");
@@ -84,7 +84,7 @@ tutorial and was already covered.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, pumpId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "ModelName"),
-                                 UA_NODEID_NULL, modelAttr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), modelAttr, NULL, NULL);
    
        UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
        UA_Boolean status = true;
@@ -93,7 +93,7 @@ tutorial and was already covered.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, pumpId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "Status"),
-                                 UA_NODEID_NULL, statusAttr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), statusAttr, NULL, NULL);
    
        UA_VariableAttributes rpmAttr = UA_VariableAttributes_default;
        UA_Double rpm = 50.0;
@@ -102,7 +102,7 @@ tutorial and was already covered.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, pumpId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "MotorRPMs"),
-                                 UA_NODEID_NULL, rpmAttr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), rpmAttr, NULL, NULL);
    }
    
 Object types, type hierarchies and instantiation
@@ -184,7 +184,7 @@ to an object that representes the `mandatory` modelling rule.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, deviceTypeId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "ManufacturerName"),
-                                 UA_NODEID_NULL, mnAttr, NULL, &manufacturerNameId);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), mnAttr, NULL, &manufacturerNameId);
        /* Make the manufacturer name mandatory */
        UA_Server_addReference(server, manufacturerNameId,
                               UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -196,7 +196,7 @@ to an object that representes the `mandatory` modelling rule.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, deviceTypeId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "ModelName"),
-                                 UA_NODEID_NULL, modelAttr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), modelAttr, NULL, NULL);
    
        /* Define the object type for "Pump" */
        UA_ObjectTypeAttributes ptAttr = UA_ObjectTypeAttributes_default;
@@ -213,7 +213,7 @@ to an object that representes the `mandatory` modelling rule.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, pumpTypeId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "Status"),
-                                 UA_NODEID_NULL, statusAttr, NULL, &statusId);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), statusAttr, NULL, &statusId);
        /* Make the status variable mandatory */
        UA_Server_addReference(server, statusId,
                               UA_NODEID_NUMERIC(0, UA_NS0ID_HASMODELLINGRULE),
@@ -225,7 +225,7 @@ to an object that representes the `mandatory` modelling rule.
        UA_Server_addVariableNode(server, UA_NODEID_NULL, pumpTypeId,
                                  UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
                                  UA_QUALIFIEDNAME(1, "MotorRPMs"),
-                                 UA_NODEID_NULL, rpmAttr, NULL, NULL);
+                                 UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), rpmAttr, NULL, NULL);
    }
    
 Now we add the derived ObjectType for the pump that inherits from the device
