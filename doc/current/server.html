@@ -1264,34 +1264,50 @@ finish the instantiation. For example to add children with specific NodeIds.
 Otherwise, mandatory children (e.g. of an ObjectType) are added with
 pseudo-random unique NodeIds. Existing children are detected during the
 _finish part via their matching BrowseName.</p>
-<p>The _begin method prepares the node and adds it to the nodestore. It may copy
-some unassigned attributes from the TypeDefinition node internally. The
-_finish method adds the references to the parent (and the TypeDefinition if
-applicable), copies mandatory children, performs type-checking of variables
-and calls the node constructor(s) at the end. The _finish method may remove
-the node if it encounters an error.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The ``attr`` argument must have a type according to the NodeClass.</span>
-<span class="cm"> * ``VariableAttributes`` for variables, ``ObjectAttributes`` for objects, and</span>
-<span class="cm"> * so on. Missing attributes are taken from the TypeDefinition node if</span>
-<span class="cm"> * applicable. */</span>
-<span class="n">UA_StatusCode</span>
+<dl class="docutils">
+<dt>The _begin method:</dt>
+<dd><ul class="first last simple">
+<li>prepares the node and adds it to the nodestore</li>
+<li>copies some unassigned attributes from the TypeDefinition node internally</li>
+<li>adds the references to the parent (and the TypeDefinition if applicable)</li>
+<li>performs type-checking of variables.</li>
+</ul>
+</dd>
+</dl>
+<p>You can add an object node without a parent if you set the parentNodeId and
+referenceTypeId to UA_NODE_ID_NULL. Then you need to add the parent reference
+and hasTypeDef reference yourself before calling the _finish method.
+Not that this is only allowed for object nodes.</p>
+<dl class="docutils">
+<dt>The _finish method:</dt>
+<dd><ul class="first last simple">
+<li>copies mandatory children</li>
+<li>calls the node constructor(s) at the end</li>
+<li>may remove the node if it encounters an error.</li>
+</ul>
+</dd>
+</dl>
+<p>The special UA_Server_addMethodNode_finish method needs to be used for
+method nodes, since there you need to explicitly specifiy the input
+and output arguments which are added in the finish step (if not yet already there)</p>
+<p><code class="docutils literal notranslate"><span class="pre">VariableAttributes</span></code> for variables, <code class="docutils literal notranslate"><span class="pre">ObjectAttributes</span></code> for objects, and
+so on. Missing attributes are taken from the TypeDefinition node if
+applicable.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addNode_begin</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
                         <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
                         <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
-                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
-                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
-                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinitionId</span><span class="p">);</span>
+<span class="nf">UA_Server_addNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addMethodNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
-                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
-                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
                          <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span>
                          <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">inputArguments</span><span class="p">,</span>
                          <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">outputArguments</span><span class="p">);</span>
