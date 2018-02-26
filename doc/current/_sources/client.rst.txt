@@ -110,7 +110,7 @@ Connect to a Server
    /* Connect to the server
     *
     * @param client to use
-    * @param endpointURL to connect (for example "opc.tcp://localhost:16664")
+    * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
     * @return Indicates whether the operation succeeded or returns an error code */
    UA_StatusCode
    UA_Client_connect(UA_Client *client, const char *endpointUrl);
@@ -118,7 +118,7 @@ Connect to a Server
    /* Connect to the selected server with the given username and password
     *
     * @param client to use
-    * @param endpointURL to connect (for example "opc.tcp://localhost:16664")
+    * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
     * @param username
     * @param password
     * @return Indicates whether the operation succeeded or returns an error code */
@@ -148,7 +148,7 @@ Discovery
     *
     * @param client to use. Must be connected to the same endpoint given in
     *        serverUrl or otherwise in disconnected state.
-    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
     * @param endpointDescriptionsSize size of the array of endpoint descriptions
     * @param endpointDescriptions array of endpoint descriptions that is allocated
     *        by the function (you need to free manually)
@@ -170,7 +170,7 @@ Discovery
     *
     * @param client to use. Must be connected to the same endpoint given in
     *        serverUrl or otherwise in disconnected state.
-    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
     * @param serverUrisSize Optional filter for specific server uris
     * @param serverUris Optional filter for specific server uris
     * @param localeIdsSize Optional indication which locale you prefer
@@ -189,7 +189,7 @@ Discovery
     *
     * @param client to use. Must be connected to the same endpoint given in
     * serverUrl or otherwise in disconnected state.
-    * @param serverUrl url to connect (for example "opc.tcp://localhost:16664")
+    * @param serverUrl url to connect (for example "opc.tcp://localhost:4840")
     * @param startingRecordId optional. Only return the records with an ID higher
     *        or equal the given. Can be used for pagination to only get a subset of
     *        the full list
