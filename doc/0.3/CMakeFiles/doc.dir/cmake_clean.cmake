@@ -6,6 +6,7 @@ file(REMOVE_RECURSE
   "../doc_src/server.rst"
   "../doc_src/server_config.rst"
   "../doc_src/client.rst"
+  "../doc_src/client_subscriptions.rst"
   "../doc_src/client_highlevel.rst"
   "../doc_src/client_config.rst"
   "../doc_src/plugin_log.rst"

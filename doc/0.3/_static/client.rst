@@ -14,6 +14,9 @@ subscriptions. The user will have to periodically call
 `UA_Client_Subscriptions_manuallySendPublishRequest`. See also :ref:`here
 <client-subscriptions>`.
 
+
+.. include:: client_config.rst
+
 Client Lifecycle
 ----------------
 
@@ -152,6 +155,7 @@ Discovery
 
 Services
 --------
+
 The raw OPC UA services are exposed to the client. But most of them time, it
 is better to use the convenience functions from ``ua_client_highlevel.h``
 that wrap the raw services.
@@ -164,11 +168,9 @@ that wrap the raw services.
                        const UA_DataType *requestType, void *response,
                        const UA_DataType *responseType);
    
-Attribute Service Set
-^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * Attribute Service Set
+    * ^^^^^^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_ReadResponse
    UA_Client_Service_read(UA_Client *client, const UA_ReadRequest request) {
        UA_ReadResponse response;
@@ -185,11 +187,9 @@ Attribute Service Set
        return response;
    }
    
-Method Service Set
-^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * Method Service Set
+    * ^^^^^^^^^^^^^^^^^^ */
    #ifdef UA_ENABLE_METHODCALLS
    static UA_INLINE UA_CallResponse
    UA_Client_Service_call(UA_Client *client, const UA_CallRequest request) {
@@ -200,11 +200,9 @@ Method Service Set
    }
    #endif
    
-NodeManagement Service Set
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * NodeManagement Service Set
+    * ^^^^^^^^^^^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_AddNodesResponse
    UA_Client_Service_addNodes(UA_Client *client, const UA_AddNodesRequest request) {
        UA_AddNodesResponse response;
@@ -240,11 +238,9 @@ NodeManagement Service Set
        return response;
    }
    
-View Service Set
-^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * View Service Set
+    * ^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_BrowseResponse
    UA_Client_Service_browse(UA_Client *client, const UA_BrowseRequest request) {
        UA_BrowseResponse response;
@@ -292,11 +288,9 @@ View Service Set
        return response;
    }
    
-Query Service Set
-^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * Query Service Set
+    * ^^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_QueryFirstResponse
    UA_Client_Service_queryFirst(UA_Client *client,
                                 const UA_QueryFirstRequest request) {
