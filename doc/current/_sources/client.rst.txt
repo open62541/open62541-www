@@ -14,72 +14,14 @@ subscriptions. The user will have to periodically call
 `UA_Client_Subscriptions_manuallySendPublishRequest`. See also :ref:`here
 <client-subscriptions>`.
 
+
+.. include:: client_config.rst
+
 Client Lifecycle
 ----------------
 
 .. code-block:: c
 
-   
-   typedef enum {
-       UA_CLIENTSTATE_DISCONNECTED,        /* The client is disconnected */
-       UA_CLIENTSTATE_CONNECTED,           /* A TCP connection to the server is open */
-       UA_CLIENTSTATE_SECURECHANNEL,       /* A SecureChannel to the server is open */
-       UA_CLIENTSTATE_SESSION,             /* A session with the server is open */
-       UA_CLIENTSTATE_SESSION_RENEWED      /* A session with the server is open (renewed) */
-   } UA_ClientState;
-   
-   struct UA_Client;
-   typedef struct UA_Client UA_Client;
-   
-Client Lifecycle callback
--------------------------
-
-.. code-block:: c
-
-   
-   typedef void (*UA_ClientStateCallback)(UA_Client *client, UA_ClientState clientState);
-   
-Subscription Inactivity callback
--------------------------
-
-.. code-block:: c
-
-   
-   #ifdef UA_ENABLE_SUBSCRIPTIONS
-   typedef void (*UA_SubscriptionInactivityCallback)(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
-   #endif
-   
-Client Configuration
---------------------
-
-.. code-block:: c
-
-   
-   typedef struct UA_ClientConfig {
-       UA_UInt32 timeout;               /* Sync response timeout in ms */
-       UA_UInt32 secureChannelLifeTime; /* Lifetime in ms (then the channel needs
-                                           to be renewed) */
-       UA_Logger logger;
-       UA_ConnectionConfig localConnectionConfig;
-       UA_ConnectClientConnection connectionFunc;
-   
-       /* Custom DataTypes */
-       size_t customDataTypesSize;
-       const UA_DataType *customDataTypes;
-   
-       /* Callback function */
-       UA_ClientStateCallback stateCallback;
-   #ifdef UA_ENABLE_SUBSCRIPTIONS
-       UA_SubscriptionInactivityCallback subscriptionInactivityCallback;
-   #endif
-   
-       void *clientContext;
-   
-       /* number of PublishResponse standing in the sever */
-       /* 0 = background task disabled                    */
-       UA_UInt16 outStandingPublishRequests;
-   } UA_ClientConfig;
-   
    
    /* Create a new client */
    UA_Client *
@@ -213,6 +155,7 @@ Discovery
 
 Services
 --------
+
 The raw OPC UA services are exposed to the client. But most of them time, it
 is better to use the convenience functions from ``ua_client_highlevel.h``
 that wrap the raw services.
@@ -225,11 +168,9 @@ that wrap the raw services.
                        const UA_DataType *requestType, void *response,
                        const UA_DataType *responseType);
    
-Attribute Service Set
-^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * Attribute Service Set
+    * ^^^^^^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_ReadResponse
    UA_Client_Service_read(UA_Client *client, const UA_ReadRequest request) {
        UA_ReadResponse response;
@@ -246,11 +187,9 @@ Attribute Service Set
        return response;
    }
    
-Method Service Set
-^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * Method Service Set
+    * ^^^^^^^^^^^^^^^^^^ */
    #ifdef UA_ENABLE_METHODCALLS
    static UA_INLINE UA_CallResponse
    UA_Client_Service_call(UA_Client *client, const UA_CallRequest request) {
@@ -261,11 +200,9 @@ Method Service Set
    }
    #endif
    
-NodeManagement Service Set
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * NodeManagement Service Set
+    * ^^^^^^^^^^^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_AddNodesResponse
    UA_Client_Service_addNodes(UA_Client *client, const UA_AddNodesRequest request) {
        UA_AddNodesResponse response;
@@ -301,11 +238,9 @@ NodeManagement Service Set
        return response;
    }
    
-View Service Set
-^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * View Service Set
+    * ^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_BrowseResponse
    UA_Client_Service_browse(UA_Client *client, const UA_BrowseRequest request) {
        UA_BrowseResponse response;
@@ -353,11 +288,9 @@ View Service Set
        return response;
    }
    
-Query Service Set
-^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+   /*
+    * Query Service Set
+    * ^^^^^^^^^^^^^^^^^ */
    static UA_INLINE UA_QueryFirstResponse
    UA_Client_Service_queryFirst(UA_Client *client,
                                 const UA_QueryFirstRequest request) {
