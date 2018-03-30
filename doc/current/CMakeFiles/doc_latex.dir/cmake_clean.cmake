@@ -22,6 +22,8 @@ file(REMOVE_RECURSE
   "../doc_src/tutorial_server_datasource.rst"
   "../doc_src/tutorial_server_object.rst"
   "../doc_src/tutorial_server_method.rst"
+  "../doc_src/plugin_pubsub_connection.rst"
+  "../doc_src/pubsub.rst"
 )
 
 # Per-language clean rules from dependency scanning.
