@@ -103,7 +103,17 @@
 <li class="toctree-l2"><a class="reference internal" href="plugin_access_control.html">Access Control Plugin API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin_pubsub_connection.html">PubSub Connection Plugin API</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Publish/Subscribe</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Publish/Subscribe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#connections">Connections</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#connection-handling">Connection handling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#publisheddatasets">PublishedDataSets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#publisheddataset-handling">PublishedDataSet handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -186,6 +196,35 @@ with broker based protocols like MQTT and AMQP or brokerless implementations lik
 <li>Call the add[element] function and pass in the configuration.</li>
 <li>The add[element] function returns the unique nodeId of the internally created element.</li>
 </ol>
+<p>Take a look on the PubSub Tutorials for mor details about the API usage.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------+</span>
+<span class="o">|</span> <span class="n">UA_Server</span> <span class="o">|</span>
+<span class="o">+-----------+</span>
+ <span class="o">|</span>    <span class="o">|</span>
+ <span class="o">|</span>    <span class="o">|</span>
+ <span class="o">|</span>    <span class="o">|</span>
+ <span class="o">|</span>    <span class="o">|</span>  <span class="o">+----------------------+</span>
+ <span class="o">|</span>    <span class="o">+-&gt;|</span> <span class="n">UA_PubSubConnections</span> <span class="o">|</span>  <span class="n">UA_Server_addPubSubConnection</span>
+ <span class="o">|</span>       <span class="o">+----------------------+</span>
+ <span class="o">|</span>        <span class="o">|</span>    <span class="o">|</span>
+ <span class="o">|</span>        <span class="o">|</span>    <span class="o">|</span>    <span class="o">+-----------------------+</span>
+ <span class="o">|</span>        <span class="o">|</span>    <span class="o">+---&gt;|</span> <span class="n">UA_PubSubWriterGroups</span> <span class="o">|</span>
+ <span class="o">|</span>        <span class="o">|</span>         <span class="o">+-----------------------+</span>
+ <span class="o">|</span>        <span class="o">|</span>
+ <span class="o">|</span>        <span class="o">|</span>         <span class="o">+-----------------------+</span>
+ <span class="o">|</span>        <span class="o">+--------&gt;|</span> <span class="n">UA_PubSubReaderGroups</span> <span class="o">|</span>
+ <span class="o">|</span>                  <span class="o">+-----------------------+</span>
+ <span class="o">|</span>
+ <span class="o">|</span>       <span class="o">+---------------------------+</span>
+ <span class="o">+------&gt;|</span> <span class="n">UA_PubSubPublishedDataSet</span> <span class="o">|</span>  <span class="n">UA_Server_addPublishedDataSet</span>
+         <span class="o">+---------------------------+</span>
+</pre></div>
+</div>
+<div class="section" id="connections">
+<h2>Connections<a class="headerlink" href="#connections" title="Permalink to this headline">¶</a></h2>
+<p>The PubSub connections are the abstraction between the concrete transport protocol
+and the PubSub functionality. It is possible to create multiple connections with
+different transport protocols at runtime.</p>
 <p>Take a look on the PubSub Tutorials for mor details about the API usage.
 Connections
 ———–</p>
@@ -202,20 +241,99 @@ Connections
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">connectionProperties</span><span class="p">;</span>
     <span class="n">UA_Variant</span> <span class="n">connectionTransportSettings</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_PubSubConnectionConfig</span><span class="p">;</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_PubSubConnection_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">connectionIdentifier</span><span class="p">,</span>
-                              <span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 </pre></div>
 </div>
-<p><strong>Create and Remove Connections</strong></p>
+<div class="section" id="connection-handling">
+<h3>Connection handling<a class="headerlink" href="#connection-handling" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addPubSubConnection</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">connectionConfig</span><span class="p">,</span>
                               <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">connectionIdentifier</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_removePubSubConnection</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">connectionIdentifier</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_PubSubConnection_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">connectionIdentifier</span><span class="p">,</span>
+                              <span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 </pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="publisheddatasets">
+<h2>PublishedDataSets<a class="headerlink" href="#publisheddatasets" title="Permalink to this headline">¶</a></h2>
+<p>The PublishedDataSets (PDS) are containers for the published information. The PDS contain
+the published variables and meta informations. The metainformations are commonly autogenerated
+or given as constant argument as part of the template functions. The template functions are standard
+defined and should only be used for configuration tools. You should normally
+create a empty PDS and call the functions to add new fields.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">addResult</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">fieldAddResultsSize</span><span class="p">;</span>
+    <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">fieldAddResults</span><span class="p">;</span>
+    <span class="n">UA_ConfigurationVersionDataType</span> <span class="n">configurationVersion</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_AddPublishedDataSetResult</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDITEMS</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDEVENTS</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDITEMS_TEMPLATE</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDEVENTS_TEMPLATE</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">UA_PublishedDataSetType</span><span class="p">;</span>
+
+<span class="cm">/* The UA_PUBSUB_DATASET_PUBLISHEDITEMS has currently no additional members</span>
+<span class="cm"> * and thus no dedicated config structure.</span>
+<span class="cm"> */</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_DataSetMetaDataType</span> <span class="n">metaData</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">variablesToAddSize</span><span class="p">;</span>
+    <span class="n">UA_PublishedVariableDataType</span> <span class="o">*</span><span class="n">variablesToAdd</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedDataItemsTemplateConfig</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NodeId</span> <span class="n">eventNotfier</span><span class="p">;</span>
+    <span class="n">UA_ContentFilter</span> <span class="n">filter</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedEventConfig</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_DataSetMetaDataType</span> <span class="n">metaData</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">eventNotfier</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">selectedFieldsSize</span><span class="p">;</span>
+    <span class="n">UA_SimpleAttributeOperand</span> <span class="o">*</span><span class="n">selectedFields</span><span class="p">;</span>
+    <span class="n">UA_ContentFilter</span> <span class="n">filter</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedEventTemplateConfig</span><span class="p">;</span>
+
+<span class="cm">/* Configuration structure for PubSubDataSet */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_PublishedDataSetType</span> <span class="n">publishedDataSetType</span><span class="p">;</span>
+    <span class="k">union</span><span class="p">{</span>
+        <span class="cm">/* The UA_PUBSUB_DATASET_PUBLISHEDITEMS has currently no additional members</span>
+<span class="cm">         * and thus no dedicated config structure.*/</span>
+        <span class="n">UA_PublishedDataItemsTemplateConfig</span> <span class="n">itemsTemplate</span><span class="p">;</span>
+        <span class="n">UA_PublishedEventConfig</span> <span class="n">event</span><span class="p">;</span>
+        <span class="n">UA_PublishedEventTemplateConfig</span> <span class="n">eventTemplate</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">config</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedDataSetConfig</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="publisheddataset-handling">
+<h3>PublishedDataSet handling<a class="headerlink" href="#publisheddataset-handling" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_AddPublishedDataSetResult</span>
+<span class="nf">UA_Server_addPublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">publishedDataSetConfig</span><span class="p">,</span>
+                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">pdsIdentifier</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removePublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">pdsIdentifier</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_PublishedDataSet_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">publishedDataSetIdentifier</span><span class="p">,</span>
+                              <span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+<span class="kt">void</span>
+<span class="nf">UA_PublishedDataSetConfig_deleteMembers</span><span class="p">(</span><span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
