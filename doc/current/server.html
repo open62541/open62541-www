@@ -111,10 +111,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#node-addition-and-deletion">Node Addition and Deletion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#deprecated-server-api">Deprecated Server API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ua-job-api">UA_Job API</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -1343,48 +1339,6 @@ applicable.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
 <span class="n">UA_UInt16</span> <span class="nf">UA_Server_addNamespace</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
 </pre></div>
-</div>
-</div>
-<div class="section" id="deprecated-server-api">
-<h2>Deprecated Server API<a class="headerlink" href="#deprecated-server-api" title="Permalink to this headline">¶</a></h2>
-<p>This file contains outdated API definitions that are kept for backwards
-compatibility. Please switch to the new API, as the following definitions
-will be removed eventually.</p>
-<div class="section" id="ua-job-api">
-<h3>UA_Job API<a class="headerlink" href="#ua-job-api" title="Permalink to this headline">¶</a></h3>
-<p>UA_Job was replaced since it unnecessarily exposed server internals to the
-end-user. Please use plain UA_ServerCallbacks instead. The following UA_Job
-definition contains just the fraction of the original struct that was useful
-to end-users.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UA_JOBTYPE_METHODCALL</span>
-<span class="p">}</span> <span class="n">UA_JobType</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_JobType</span> <span class="n">type</span><span class="p">;</span>
-    <span class="k">union</span> <span class="p">{</span>
-        <span class="k">struct</span> <span class="p">{</span>
-            <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">;</span>
-            <span class="n">UA_ServerCallback</span> <span class="n">method</span><span class="p">;</span>
-        <span class="p">}</span> <span class="n">methodCall</span><span class="p">;</span>
-    <span class="p">}</span> <span class="n">job</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_Job</span><span class="p">;</span>
-
-<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addRepeatedJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Job</span> <span class="n">job</span><span class="p">,</span>
-                         <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">,</span> <span class="n">UA_Guid</span> <span class="o">*</span><span class="n">jobId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">UA_Server_addRepeatedCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">job</span><span class="p">.</span><span class="n">job</span><span class="p">.</span><span class="n">methodCall</span><span class="p">.</span><span class="n">method</span><span class="p">,</span>
-                                         <span class="n">job</span><span class="p">.</span><span class="n">job</span><span class="p">.</span><span class="n">methodCall</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span>
-                                         <span class="p">(</span><span class="n">UA_UInt64</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">jobId</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_removeRepeatedJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Guid</span> <span class="n">jobId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">UA_Server_removeRepeatedCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span>
-                                            <span class="o">*</span><span class="p">(</span><span class="n">UA_UInt64</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">jobId</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
 </div>
 </div>
 </div>
