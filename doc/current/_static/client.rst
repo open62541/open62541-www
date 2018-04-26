@@ -155,6 +155,7 @@ Discovery
                          size_t *registeredServersSize,
                          UA_ApplicationDescription **registeredServers);
    
+   #ifdef UA_ENABLE_DISCOVERY
    /* Get a list of all known server in the network. Only supported by LDS servers.
     *
     * @param client to use. Must be connected to the same endpoint given in
@@ -178,6 +179,7 @@ Discovery
                                   UA_UInt32 startingRecordId, UA_UInt32 maxRecordsToReturn,
                                   size_t serverCapabilityFilterSize, UA_String *serverCapabilityFilter,
                                   size_t *serverOnNetworkSize, UA_ServerOnNetwork **serverOnNetwork);
+   #endif
    
 .. _client-services:
 
@@ -399,6 +401,8 @@ different ordering.
                                        userdata, requestId);
    }
    
+   #ifdef UA_ENABLE_METHODCALLS
+       
    static UA_INLINE UA_StatusCode
    UA_Client_AsyncService_call(UA_Client *client, const UA_CallRequest *request,
                                UA_ClientAsyncServiceCallback callback,
@@ -408,6 +412,8 @@ different ordering.
                                        &UA_TYPES[UA_TYPES_CALLRESPONSE],
                                        userdata, requestId);
    }
+   
+   #endif
    
    static UA_INLINE UA_StatusCode
    UA_Client_AsyncService_browse(UA_Client *client, const UA_BrowseRequest *request,

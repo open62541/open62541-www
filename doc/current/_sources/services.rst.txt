@@ -382,9 +382,11 @@ the method's execution cannot be returned to the Client and are discarded.
 
 .. code-block:: c
 
+   #ifdef UA_ENABLE_METHODCALLS
    void Service_Call(UA_Server *server, UA_Session *session,
                      const UA_CallRequest *request,
                      UA_CallResponse *response);
+   #endif
    
 MonitoredItem Service Set
 -------------------------

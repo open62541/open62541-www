@@ -944,6 +944,8 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                        const UA_DataSource dataSource,
                                        void *nodeContext, UA_NodeId *outNewNodeId);
    
+   #ifdef UA_ENABLE_METHODCALLS
+   
    UA_StatusCode
    UA_Server_addMethodNodeEx(UA_Server *server, const UA_NodeId requestedNewNodeId,
                              const UA_NodeId parentNodeId,
@@ -972,6 +974,8 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                         outputArgumentsSize, outputArguments, UA_NODEID_NULL, NULL,
                                         nodeContext, outNewNodeId);
    }
+   
+   #endif
    
    
 The method pair UA_Server_addNode_begin and _finish splits the AddNodes
@@ -1022,11 +1026,15 @@ applicable.
    UA_StatusCode
    UA_Server_addNode_finish(UA_Server *server, const UA_NodeId nodeId);
    
+   #ifdef UA_ENABLE_METHODCALLS
+   
    UA_StatusCode
    UA_Server_addMethodNode_finish(UA_Server *server, const UA_NodeId nodeId,
                             UA_MethodCallback method,
                             size_t inputArgumentsSize, const UA_Argument* inputArguments,
                             size_t outputArgumentsSize, const UA_Argument* outputArguments);
+   
+   #endif
    
    /* Deletes a node and optionally all references leading to the node. */
    UA_StatusCode
