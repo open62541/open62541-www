@@ -105,6 +105,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#value-callback">Value Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#local-monitoreditems">Local MonitoredItems</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
 </ul>
 </li>
@@ -1032,6 +1033,54 @@ not <code class="docutils literal notranslate"><span class="pre">NULL</span></co
 <span class="nf">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
                                         <span class="k">const</span> <span class="n">UA_ValueCallback</span> <span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="local-monitoreditems">
+<span id="id5"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this headline">¶</a></h3>
+<p>MonitoredItems are used with the Subscription mechanism of OPC UA to
+transported notifications for data changes and events. MonitoredItems can
+also be registered locally. Notifications are then forwarded to a
+user-defined callback instead of a remote client.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Server_DataChangeNotificationCallback</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">monitoredItemId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
+     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">attributeId</span><span class="p">,</span>
+     <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Server_EventNotificationCallback</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">monContext</span><span class="p">,</span>
+     <span class="kt">size_t</span> <span class="n">nEventFields</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">eventFields</span><span class="p">);</span>
+
+<span class="cm">/* Create a local MonitoredItem with a sampling interval that detects data</span>
+<span class="cm"> * changes.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server executing the MonitoredItem</span>
+<span class="cm"> * @timestampsToReturn Shall timestamps be added to the value for the callback?</span>
+<span class="cm"> * @item The parameters of the new MonitoredItem. Note that the attribute of the</span>
+<span class="cm"> *       ReadValueId (the node that is monitored) can not be</span>
+<span class="cm"> *       ``UA_ATTRIBUTEID_EVENTNOTIFIER``. A different callback type needs to be</span>
+<span class="cm"> *       registered for event notifications.</span>
+<span class="cm"> * @monitoredItemContext A pointer that is forwarded with the callback</span>
+<span class="cm"> * @callback The callback that is executed on detected data changes</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return Returns a description of the created MonitoredItem. The structure</span>
+<span class="cm"> * also contains a StatusCode (in case of an error) and the identifier of the</span>
+<span class="cm"> * new MonitoredItem. */</span>
+<span class="n">UA_MonitoredItemCreateResult</span>
+<span class="nf">UA_Server_createDataChangeMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+          <span class="n">UA_TimestampsToReturn</span> <span class="n">timestampsToReturn</span><span class="p">,</span>
+          <span class="k">const</span> <span class="n">UA_MonitoredItemCreateRequest</span> <span class="n">item</span><span class="p">,</span>
+          <span class="kt">void</span> <span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
+          <span class="n">UA_Server_DataChangeNotificationCallback</span> <span class="n">callback</span><span class="p">);</span>
+
+<span class="cm">/* UA_MonitoredItemCreateResult */</span>
+<span class="cm">/* UA_Server_createEventMonitoredItem(UA_Server *server, */</span>
+<span class="cm">/*           UA_TimestampsToReturn timestampsToReturn, */</span>
+<span class="cm">/*           const UA_MonitoredItemCreateRequest item, void *context, */</span>
+<span class="cm">/*           UA_Server_EventNotificationCallback callback); */</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_deleteMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">monitoredItemId</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

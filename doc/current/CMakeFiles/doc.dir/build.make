@@ -75,6 +75,7 @@ doc/CMakeFiles/doc: doc_src/tutorial_server_firststeps.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_variable.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_variabletype.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_datasource.rst
+doc/CMakeFiles/doc: doc_src/tutorial_server_monitoreditems.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_object.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_method.rst
 doc/CMakeFiles/doc: doc_src/tutorial_pubsub_publish.rst
@@ -188,29 +189,34 @@ doc_src/tutorial_server_datasource.rst: ../examples/tutorial_server_datasource.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating ../doc_src/tutorial_server_datasource.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_datasource.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_datasource.rst
 
+doc_src/tutorial_server_monitoreditems.rst: ../tools/c2rst.py
+doc_src/tutorial_server_monitoreditems.rst: ../examples/tutorial_server_monitoreditems.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating ../doc_src/tutorial_server_monitoreditems.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_monitoreditems.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_monitoreditems.rst
+
 doc_src/tutorial_server_object.rst: ../tools/c2rst.py
 doc_src/tutorial_server_object.rst: ../examples/tutorial_server_object.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating ../doc_src/tutorial_server_object.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating ../doc_src/tutorial_server_object.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_object.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_object.rst
 
 doc_src/tutorial_server_method.rst: ../tools/c2rst.py
 doc_src/tutorial_server_method.rst: ../examples/tutorial_server_method.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating ../doc_src/tutorial_server_method.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating ../doc_src/tutorial_server_method.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_method.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_method.rst
 
 doc_src/tutorial_pubsub_publish.rst: ../tools/c2rst.py
 doc_src/tutorial_pubsub_publish.rst: ../examples/pubsub/tutorial_pubsub_publish.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating ../doc_src/tutorial_pubsub_publish.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating ../doc_src/tutorial_pubsub_publish.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/pubsub/tutorial_pubsub_publish.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_pubsub_publish.rst
 
 doc_src/plugin_pubsub_connection.rst: ../tools/c2rst.py
 doc_src/plugin_pubsub_connection.rst: ../include/ua_plugin_pubsub.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating ../doc_src/plugin_pubsub_connection.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating ../doc_src/plugin_pubsub_connection.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_pubsub.h /home/travis/build/open62541/open62541/build/doc_src/plugin_pubsub_connection.rst
 
 doc_src/pubsub.rst: ../tools/c2rst.py
 doc_src/pubsub.rst: ../include/ua_server_pubsub.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating ../doc_src/pubsub.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating ../doc_src/pubsub.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_server_pubsub.h /home/travis/build/open62541/open62541/build/doc_src/pubsub.rst
 
 doc: doc/CMakeFiles/doc
@@ -235,6 +241,7 @@ doc: doc_src/tutorial_server_firststeps.rst
 doc: doc_src/tutorial_server_variable.rst
 doc: doc_src/tutorial_server_variabletype.rst
 doc: doc_src/tutorial_server_datasource.rst
+doc: doc_src/tutorial_server_monitoreditems.rst
 doc: doc_src/tutorial_server_object.rst
 doc: doc_src/tutorial_server_method.rst
 doc: doc_src/tutorial_pubsub_publish.rst
