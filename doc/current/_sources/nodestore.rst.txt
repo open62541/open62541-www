@@ -216,6 +216,17 @@ providing context* is part of a Call request message.
        UA_MethodCallback method;
    } UA_MethodNode;
    
+   
+Attributes for nodes which are capable of generating events
+
+.. code-block:: c
+
+   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+   /* Store active monitoredItems on this node */
+   # define UA_EVENT_ATTRIBUTES                                         \
+       struct UA_MonitoredItem *monitoredItemQueue;
+   #endif
+   
 ObjectNode
 ----------
 
@@ -229,6 +240,9 @@ objects.
    
    typedef struct {
        UA_NODE_BASEATTRIBUTES
+   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+       UA_EVENT_ATTRIBUTES
+   #endif
        UA_Byte eventNotifier;
    } UA_ObjectNode;
    

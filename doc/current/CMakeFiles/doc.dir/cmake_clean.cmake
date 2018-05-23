@@ -27,6 +27,7 @@ file(REMOVE_RECURSE
   "../doc_src/tutorial_pubsub_publish.rst"
   "../doc_src/plugin_pubsub_connection.rst"
   "../doc_src/pubsub.rst"
+  "../doc_src/tutorial_server_events.rst"
 )
 
 # Per-language clean rules from dependency scanning.

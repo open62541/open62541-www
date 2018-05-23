@@ -81,6 +81,7 @@ doc/CMakeFiles/doc: doc_src/tutorial_server_method.rst
 doc/CMakeFiles/doc: doc_src/tutorial_pubsub_publish.rst
 doc/CMakeFiles/doc: doc_src/plugin_pubsub_connection.rst
 doc/CMakeFiles/doc: doc_src/pubsub.rst
+doc/CMakeFiles/doc: doc_src/tutorial_server_events.rst
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building HTML documentation with Sphinx"
 	cd /home/travis/build/open62541/open62541/build/doc && /home/travis/.local/bin/sphinx-build -b html /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc
 
@@ -219,6 +220,11 @@ doc_src/pubsub.rst: ../include/ua_server_pubsub.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating ../doc_src/pubsub.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_server_pubsub.h /home/travis/build/open62541/open62541/build/doc_src/pubsub.rst
 
+doc_src/tutorial_server_events.rst: ../tools/c2rst.py
+doc_src/tutorial_server_events.rst: ../examples/tutorial_server_events.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Generating ../doc_src/tutorial_server_events.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/tutorial_server_events.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_server_events.rst
+
 doc: doc/CMakeFiles/doc
 doc: doc_src/types.rst
 doc: doc_src/constants.rst
@@ -247,6 +253,7 @@ doc: doc_src/tutorial_server_method.rst
 doc: doc_src/tutorial_pubsub_publish.rst
 doc: doc_src/plugin_pubsub_connection.rst
 doc: doc_src/pubsub.rst
+doc: doc_src/tutorial_server_events.rst
 doc: doc/CMakeFiles/doc.dir/build.make
 
 .PHONY : doc
