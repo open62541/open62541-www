@@ -109,6 +109,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#interacting-with-objects">Interacting with Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#node-addition-and-deletion">Node Addition and Deletion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
@@ -1090,10 +1091,11 @@ user-defined callback instead of a remote client.</p>
 </div>
 <div class="section" id="method-callbacks">
 <h3>Method Callbacks<a class="headerlink" href="#method-callbacks" title="Permalink to this headline">¶</a></h3>
-<p>Method callbacks are set to <cite>NULL</cite> (not executable) when a method node is added
-over the network. In theory, it is possible to add a callback via
-<code class="docutils literal notranslate"><span class="pre">UA_Server_setMethodNode_callback</span></code> within the global constructor when adding
-methods over the network is really wanted.</p>
+<p>Method callbacks are set to <cite>NULL</cite> (not executable) when a method node is
+added over the network. In theory, it is possible to add a callback via
+<code class="docutils literal notranslate"><span class="pre">UA_Server_setMethodNode_callback</span></code> within the global constructor when
+adding methods over the network is really wanted. See the Section
+<a class="reference internal" href="#object-interaction"><span class="std std-ref">Interacting with Objects</span></a> for calling methods on an object.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
                      <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
@@ -1103,17 +1105,57 @@ methods over the network is really wanted.</p>
                      <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
 <span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
-
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_setMethodNode_callback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                                  <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">methodNodeId</span><span class="p">,</span>
                                  <span class="n">UA_MethodCallback</span> <span class="n">methodCallback</span><span class="p">);</span>
-<span class="n">UA_CallMethodResult</span>
-<span class="nf">UA_Server_call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_CallMethodRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">);</span>
-
 <span class="cp">#endif</span>
 </pre></div>
 </div>
+</div>
+</div>
+<div class="section" id="interacting-with-objects">
+<span id="object-interaction"></span><h2>Interacting with Objects<a class="headerlink" href="#interacting-with-objects" title="Permalink to this headline">¶</a></h2>
+<p>Objects in the information model are represented as ObjectNodes. Some
+convenience functions are provided to simplify the interaction with objects.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Write an object property. The property is represented as a VariableNode with</span>
+<span class="cm"> * a ``HasProperty`` reference from the ObjectNode. The VariableNode is</span>
+<span class="cm"> * identified by its BrowseName. Writing the property sets the value attribute</span>
+<span class="cm"> * of the VariableNode.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param objectId The identifier of the object (node)</span>
+<span class="cm"> * @param propertyName The name of the property</span>
+<span class="cm"> * @param value The value to be set for the event attribute</span>
+<span class="cm"> * @return The StatusCode for setting the event attribute */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeObjectProperty</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">propertyName</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">);</span>
+
+<span class="cm">/* Directly point to the scalar value instead of a variant */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+                                     <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">propertyName</span><span class="p">,</span>
+                                     <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">value</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+
+<span class="cm">/* Read an object property.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param objectId The identifier of the object (node)</span>
+<span class="cm"> * @param propertyName The name of the property</span>
+<span class="cm"> * @param value Contains the property value after reading. Must not be NULL.</span>
+<span class="cm"> * @return The StatusCode for setting the event attribute */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readObjectProperty</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">propertyName</span><span class="p">,</span>
+                             <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+<span class="n">UA_CallMethodResult</span>
+<span class="nf">UA_Server_call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_CallMethodRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">);</span>
+<span class="cp">#endif</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="node-addition-and-deletion">
@@ -1411,10 +1453,11 @@ the method. This can be useful if events with the similar attributes are trigger
 cause the node to be deleted.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
 
-<span class="cm">/* The EventQueueOverflowEventType is defined as abstract, therefore we can not create an instance of that type</span>
-<span class="cm"> * directly, but need to create a subtype. The following is an arbitrary number which shall refer to our internal</span>
-<span class="cm"> * overflow type.</span>
-<span class="cm"> * This is already posted on the OPC Foundation bug tracker under the following link for clarification:</span>
+<span class="cm">/* The EventQueueOverflowEventType is defined as abstract, therefore we can not</span>
+<span class="cm"> * create an instance of that type directly, but need to create a subtype. The</span>
+<span class="cm"> * following is an arbitrary number which shall refer to our internal overflow</span>
+<span class="cm"> * type. This is already posted on the OPC Foundation bug tracker under the</span>
+<span class="cm"> * following link for clarification:</span>
 <span class="cm"> * https://opcfoundation-onlineapplications.org/mantis/view.php?id=4206 */</span>
 <span class="cp"># define UA_NS0ID_SIMPLEOVERFLOWEVENTTYPE 4035</span>
 
@@ -1428,7 +1471,8 @@ cause the node to be deleted.</p>
 <span class="nf">UA_Server_createEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">eventType</span><span class="p">,</span>
                       <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNodeId</span><span class="p">);</span>
 
-<span class="cm">/* Triggers a node representation of an event by applying EventFilters and adding the event to the appropriate queues.</span>
+<span class="cm">/* Triggers a node representation of an event by applying EventFilters and</span>
+<span class="cm">   adding the event to the appropriate queues.</span>
 <span class="cm"> * @param server The server object</span>
 <span class="cm"> * @param eventNodeId The NodeId of the node representation of the event which should be triggered</span>
 <span class="cm"> * @param outEvent the EventId of the new event</span>

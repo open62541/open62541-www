@@ -191,33 +191,21 @@ hold a lot of information and can be filtered so the client only receives the sp
 <h2>Emitting events by calling methods<a class="headerlink" href="#emitting-events-by-calling-methods" title="Permalink to this headline">¶</a></h2>
 <p>The following example will be based on the server method tutorial. We will be
 creating a method node which generates an event from the server node.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
-
-<span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-<span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
 <p>The event we want to generate should be very simple. Since the <cite>BaseEventType</cite> is abstract,
 we will have to create our own event type. <cite>EventTypes</cite> are saved internally as <cite>ObjectTypes</cite>,
 so add the type as you would a new <cite>ObjectType</cite>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_NodeId</span> <span class="n">eventType</span><span class="p">;</span>
 
-<span class="k">static</span> <span class="n">UA_StatusCode</span> <span class="nf">addNewEventType</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">addNewEventType</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_ObjectTypeAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_ObjectTypeAttributes_default</span><span class="p">;</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;SimpleEventType&quot;</span><span class="p">);</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;The simple event type we created&quot;</span><span class="p">);</span>
-
-    <span class="n">UA_Server_addObjectTypeNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span>
-                                <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEEVENTTYPE</span><span class="p">),</span>
-                                <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASSUBTYPE</span><span class="p">),</span>
-                                <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;SimpleEventType&quot;</span><span class="p">),</span>
-                                <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">eventType</span><span class="p">);</span>
-    <span class="n">UA_LocalizedText_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">displayName</span><span class="p">);</span>
-    <span class="n">UA_LocalizedText_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">description</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;SimpleEventType&quot;</span><span class="p">);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;The simple event type we created&quot;</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">UA_Server_addObjectTypeNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+                                       <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEEVENTTYPE</span><span class="p">),</span>
+                                       <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASSUBTYPE</span><span class="p">),</span>
+                                       <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;SimpleEventType&quot;</span><span class="p">),</span>
+                                       <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">eventType</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -229,53 +217,23 @@ All we need for this is our <cite>EventType</cite>. Once we have our event node,
 we can define the attributes the event has the same way we would define the attributes of an object node. It is not
 necessary to define the attributes <cite>EventId</cite>, <cite>ReceiveTime</cite>, <cite>SourceNode</cite> or <cite>EventType</cite> since these are set
 automatically by the server. In this example, we will only be setting <cite>Severity</cite> and <cite>Message</cite>.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span> <span class="nf">setUpEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outId</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_StatusCode</span> <span class="n">retval</span><span class="p">;</span>
-    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_createEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">eventType</span><span class="p">,</span> <span class="n">outId</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">setUpEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_createEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">eventType</span><span class="p">,</span> <span class="n">outId</span><span class="p">);</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span>
                        <span class="s">&quot;createEvent failed. StatusCode %s&quot;</span><span class="p">,</span> <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
         <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
-    <span class="n">UA_RelativePathElement</span> <span class="n">rpe</span><span class="p">;</span>
-    <span class="n">UA_RelativePathElement_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rpe</span><span class="p">);</span>
-    <span class="n">rpe</span><span class="p">.</span><span class="n">referenceTypeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASPROPERTY</span><span class="p">);</span>
-    <span class="n">rpe</span><span class="p">.</span><span class="n">isInverse</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-    <span class="n">rpe</span><span class="p">.</span><span class="n">includeSubtypes</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-
-    <span class="n">UA_BrowsePath</span> <span class="n">bp</span><span class="p">;</span>
-    <span class="n">UA_BrowsePath_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bp</span><span class="p">);</span>
-    <span class="n">bp</span><span class="p">.</span><span class="n">startingNode</span> <span class="o">=</span> <span class="o">*</span><span class="n">outId</span><span class="p">;</span>
-    <span class="n">bp</span><span class="p">.</span><span class="n">relativePath</span><span class="p">.</span><span class="n">elementsSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="n">bp</span><span class="p">.</span><span class="n">relativePath</span><span class="p">.</span><span class="n">elements</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">rpe</span><span class="p">;</span>
-
-    <span class="cm">/* severity */</span>
-    <span class="n">rpe</span><span class="p">.</span><span class="n">targetName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Severity&quot;</span><span class="p">);</span>
-    <span class="n">UA_BrowsePathResult</span> <span class="n">bpr</span> <span class="o">=</span> <span class="n">UA_Server_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bp</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">bpr</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">||</span> <span class="n">bpr</span><span class="p">.</span><span class="n">targetsSize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span> <span class="s">&quot;Event is missing severity attribute.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-        <span class="k">return</span> <span class="n">bpr</span><span class="p">.</span><span class="n">statusCode</span><span class="p">;</span>
-    <span class="p">}</span>
+    <span class="cm">/* Set the Event Attributes */</span>
     <span class="n">UA_UInt16</span> <span class="n">eventSeverity</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
-    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">eventSeverity</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
-    <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">bpr</span><span class="p">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">targetId</span><span class="p">.</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+    <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">outId</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Severity&quot;</span><span class="p">),</span>
+                                         <span class="o">&amp;</span><span class="n">eventSeverity</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
 
-    <span class="n">UA_BrowsePathResult_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bpr</span><span class="p">);</span>
-
-    <span class="cm">/* message */</span>
-    <span class="n">rpe</span><span class="p">.</span><span class="n">targetName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Message&quot;</span><span class="p">);</span>
-    <span class="n">bpr</span> <span class="o">=</span> <span class="n">UA_Server_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">bp</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">bpr</span><span class="p">.</span><span class="n">statusCode</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">||</span> <span class="n">bpr</span><span class="p">.</span><span class="n">targetsSize</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span> <span class="s">&quot;Event is missing message attribute.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-        <span class="k">return</span> <span class="n">bpr</span><span class="p">.</span><span class="n">statusCode</span><span class="p">;</span>
-    <span class="p">}</span>
     <span class="n">UA_LocalizedText</span> <span class="n">eventMessage</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;An event has been generated.&quot;</span><span class="p">);</span>
-    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">eventMessage</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
-    <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">bpr</span><span class="p">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">targetId</span><span class="p">.</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
-
-    <span class="n">UA_BrowsePathResult_deleteMembers</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bpr</span><span class="p">);</span>
+    <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">outId</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Message&quot;</span><span class="p">),</span>
+                                         <span class="o">&amp;</span><span class="n">eventMessage</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
 
     <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
 <span class="p">}</span>
@@ -295,21 +253,24 @@ The last boolean argument states whether the node should be deleted.</p>
                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">objectContext</span><span class="p">,</span>
                          <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
                          <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span> <span class="s">&quot;Creating event&quot;</span><span class="p">);</span>
+
     <span class="cm">/* set up event */</span>
     <span class="n">UA_NodeId</span> <span class="n">eventNodeId</span><span class="p">;</span>
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">setUpEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">eventNodeId</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
                        <span class="s">&quot;Creating event failed. StatusCode %s&quot;</span><span class="p">,</span> <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
         <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_triggerEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">eventNodeId</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_SERVER</span><span class="p">),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">UA_TRUE</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_triggerEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">eventNodeId</span><span class="p">,</span>
+                                    <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_SERVER</span><span class="p">),</span>
+                                    <span class="nb">NULL</span><span class="p">,</span> <span class="n">UA_TRUE</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span>
         <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
                        <span class="s">&quot;Triggering event failed. StatusCode %s&quot;</span><span class="p">,</span> <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
-        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
-    <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
 <span class="p">}</span>
@@ -332,6 +293,13 @@ generated by the server internally and is a random unique ID which identifies th
                             <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;Generate Event&quot;</span><span class="p">),</span>
                             <span class="n">generateAttr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">generateEventMethodCallback</span><span class="p">,</span>
                             <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>It follows the main server code, making use of the above definitions.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="kt">int</span> <span class="nf">main</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
