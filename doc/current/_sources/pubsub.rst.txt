@@ -51,6 +51,14 @@ Take a look on the PubSub Tutorials for mor details about the API usage.::
                 |    +-----------------+
                 +----> UA_DataSetField |  UA_PublishedDataSet_addDataSetField
                      +-----------------+
+PubSub Information Model Representation
+-----------
+The complete PubSub configuration is available inside the information model.
+The entry point is the node 'PublishSubscribe, located under the Server node.
+The standard defines for PubSub no new Service set. The configuration can optionally
+done over methods inside the information model. The information model representation
+of the current PubSub configuration is generated automatically. This feature
+can enabled/disable by changing the UA_ENABLE_PUBSUB_INFORMATIONMODEL option.
 
 Connections
 -----------
@@ -247,7 +255,7 @@ contained in the WriterGroup.
        UA_String name;
        UA_Boolean enabled;
        UA_UInt16 writerGroupId;
-       UA_Double publishingInterval;
+       UA_Duration publishingInterval;
        UA_Double keepAliveTime;
        UA_Byte priority;
        UA_MessageSecurityMode securityMode;
@@ -275,6 +283,10 @@ contained in the WriterGroup.
    UA_StatusCode
    UA_Server_getWriterGroupConfig(UA_Server *server, const UA_NodeId writerGroup,
                                   UA_WriterGroupConfig *config);
+   
+   UA_StatusCode
+   UA_Server_updateWriterGroupConfig(UA_Server *server, UA_NodeId writerGroupIdentifier,
+                                     const UA_WriterGroupConfig *config);
    
    UA_StatusCode
    UA_Server_removeWriterGroup(UA_Server *server, const UA_NodeId writerGroup);
