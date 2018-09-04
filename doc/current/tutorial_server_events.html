@@ -215,7 +215,8 @@ so add the type as you would a new <cite>ObjectType</cite>.</p>
 All we need for this is our <cite>EventType</cite>. Once we have our event node, which is saved internally as an <cite>ObjectNode</cite>,
 we can define the attributes the event has the same way we would define the attributes of an object node. It is not
 necessary to define the attributes <cite>EventId</cite>, <cite>ReceiveTime</cite>, <cite>SourceNode</cite> or <cite>EventType</cite> since these are set
-automatically by the server. In this example, we will only be setting <cite>Severity</cite> and <cite>Message</cite>.</p>
+automatically by the server. In this example, we will be setting the fields ‘Message’ and ‘Severity’ in addition
+to <cite>Time</cite> which is needed to make the example UaExpert compliant.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
 <span class="nf">setUpEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outId</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_createEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">eventType</span><span class="p">,</span> <span class="n">outId</span><span class="p">);</span>
@@ -226,6 +227,11 @@ automatically by the server. In this example, we will only be setting <cite>Seve
     <span class="p">}</span>
 
     <span class="cm">/* Set the Event Attributes */</span>
+    <span class="cm">/* Setting the Time is required or else the event will not show up in UAExpert! */</span>
+    <span class="n">UA_DateTime</span> <span class="n">eventTime</span> <span class="o">=</span> <span class="n">UA_DateTime_now</span><span class="p">();</span>
+    <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">outId</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Time&quot;</span><span class="p">),</span>
+                                         <span class="o">&amp;</span><span class="n">eventTime</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
+
     <span class="n">UA_UInt16</span> <span class="n">eventSeverity</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
     <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">outId</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Severity&quot;</span><span class="p">),</span>
                                          <span class="o">&amp;</span><span class="n">eventSeverity</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
@@ -233,6 +239,10 @@ automatically by the server. In this example, we will only be setting <cite>Seve
     <span class="n">UA_LocalizedText</span> <span class="n">eventMessage</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;An event has been generated.&quot;</span><span class="p">);</span>
     <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">outId</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Message&quot;</span><span class="p">),</span>
                                          <span class="o">&amp;</span><span class="n">eventMessage</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+
+    <span class="n">UA_String</span> <span class="n">eventSourceName</span> <span class="o">=</span> <span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;Server&quot;</span><span class="p">);</span>
+    <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">outId</span><span class="p">,</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;SourceName&quot;</span><span class="p">),</span>
+                                         <span class="o">&amp;</span><span class="n">eventSourceName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">]);</span>
 
     <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
 <span class="p">}</span>

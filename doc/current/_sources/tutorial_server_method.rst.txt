@@ -29,8 +29,8 @@ by the SDK, so that we don't have to verify the arguments in the callback.
 .. code-block:: c
 
    
-   #include <signal.h>
    #include "open62541.h"
+   #include <signal.h>
    
    static UA_StatusCode
    helloWorldMethodCallback(UA_Server *server,

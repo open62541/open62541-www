@@ -84,3 +84,7 @@ are ANDed for the overall write mask. Part 3: 5.2.7 Table 2
    #define UA_WRITEMASK_VALUERANK               (0x01<<19)
    #define UA_WRITEMASK_WRITEMASK               (0x01<<20)
    #define UA_WRITEMASK_VALUEFORVARIABLETYPE    (0x01<<21)
+   
+   _UA_END_DECLS
+   
+   #endif /* UA_CONSTANTS_H_ */

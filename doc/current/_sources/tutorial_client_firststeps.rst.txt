@@ -7,7 +7,6 @@ creating a server. Copy the following into a file `myClient.c`:
 .. code-block:: c
 
    
-   #include <stdio.h>
    #include "open62541.h"
    
    int main(void) {

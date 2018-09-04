@@ -16,8 +16,8 @@ VariableTypeNode to the hierarchy of variable types.
 .. code-block:: c
 
    
-   #include <signal.h>
    #include "open62541.h"
+   #include <signal.h>
    
    static UA_NodeId pointTypeId;
    

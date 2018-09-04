@@ -19,8 +19,8 @@ C source-file called ``myServer.c`` with the following content:
 .. code-block:: c
 
    
-   #include <signal.h>
    #include "open62541.h"
+   #include <signal.h>
    
    UA_Boolean running = true;
    static void stopHandler(int sig) {

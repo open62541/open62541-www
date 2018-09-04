@@ -264,8 +264,6 @@ specific to the different users and set by the access control callback:
 - UserAccessLevel
 - UserExecutable
 
-Historizing is currently unsupported
-
 .. code-block:: c
 
    
@@ -380,6 +378,15 @@ Historizing is currently unsupported
                                 UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                                 &UA_TYPES[UA_TYPES_DOUBLE],
                                 &miniumSamplingInterval);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Server_writeHistorizing(UA_Server *server, const UA_NodeId nodeId,
+                             const UA_Boolean historizing) {
+       return __UA_Server_write(server, &nodeId,
+                                UA_ATTRIBUTEID_HISTORIZING,
+                                &UA_TYPES[UA_TYPES_BOOLEAN],
+                                &historizing);
    }
    
    static UA_INLINE UA_StatusCode
@@ -782,6 +789,8 @@ user-defined callback instead of a remote client.
 .. code-block:: c
 
    
+   #ifdef UA_ENABLE_SUBSCRIPTIONS
+   
    typedef void (*UA_Server_DataChangeNotificationCallback)
        (UA_Server *server, UA_UInt32 monitoredItemId, void *monitoredItemContext,
         const UA_NodeId *nodeId, void *nodeContext, UA_UInt32 attributeId,
@@ -821,6 +830,8 @@ user-defined callback instead of a remote client.
    
    UA_StatusCode
    UA_Server_deleteMonitoredItem(UA_Server *server, UA_UInt32 monitoredItemId);
+   
+   #endif
    
 Method Callbacks
 ^^^^^^^^^^^^^^^^
@@ -1189,8 +1200,10 @@ Events
 The method ``UA_Server_createEvent`` creates an event and represents it as node. The node receives a unique `EventId`
 which is automatically added to the node.
 The method returns a `NodeId` to the object node which represents the event through ``outNodeId``. The `NodeId` can
-be used to set the attributes of the event. The generated `NodeId` is always numeric. ``outNodeId`` cannot be 
+be used to set the attributes of the event. The generated `NodeId` is always numeric. ``outNodeId`` cannot be
 ``NULL``.
+
+Note: In order to see an event in UAExpert, the field `Time` must be given a value!
 
 The method ``UA_Server_triggerEvent`` "triggers" an event by adding it to all monitored items of the specified
 origin node and those of all its parents. Any filters specified by the monitored items are automatically applied.
@@ -1199,51 +1212,3 @@ generated automatically and is returned through ``outEventId``.``NULL`` can be p
 needed. ``deleteEventNode`` specifies whether the node representation of the event should be deleted after invoking
 the method. This can be useful if events with the similar attributes are triggered frequently. ``UA_TRUE`` would
 cause the node to be deleted.
-
-.. code-block:: c
-
-   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
-   
-   /* The EventQueueOverflowEventType is defined as abstract, therefore we can not
-    * create an instance of that type directly, but need to create a subtype. The
-    * following is an arbitrary number which shall refer to our internal overflow
-    * type. This is already posted on the OPC Foundation bug tracker under the
-    * following link for clarification:
-    * https://opcfoundation-onlineapplications.org/mantis/view.php?id=4206 */
-   # define UA_NS0ID_SIMPLEOVERFLOWEVENTTYPE 4035
-   
-   /* Creates a node representation of an event
-    *
-    * @param server The server object
-    * @param eventType The type of the event for which a node should be created
-    * @param outNodeId The NodeId of the newly created node for the event
-    * @return The StatusCode of the UA_Server_createEvent method */
-   UA_StatusCode
-   UA_Server_createEvent(UA_Server *server, const UA_NodeId eventType,
-                         UA_NodeId *outNodeId);
-   
-   /* Triggers a node representation of an event by applying EventFilters and
-      adding the event to the appropriate queues.
-    * @param server The server object
-    * @param eventNodeId The NodeId of the node representation of the event which should be triggered
-    * @param outEvent the EventId of the new event
-    * @param deleteEventNode Specifies whether the node representation of the event should be deleted
-    * @return The StatusCode of the UA_Server_triggerEvent method */
-   UA_StatusCode
-   UA_Server_triggerEvent(UA_Server *server, const UA_NodeId eventNodeId, const UA_NodeId originId,
-                          UA_ByteString *outEventId, const UA_Boolean deleteEventNode);
-   
-   #endif /* UA_ENABLE_SUBSCRIPTIONS_EVENTS */
-   
-Utility Functions
------------------
-
-.. code-block:: c
-
-   /* Add a new namespace to the server. Returns the index of the new namespace */
-   UA_UInt16 UA_Server_addNamespace(UA_Server *server, const char* name);
-   
-   /* Get namespace by name from the server. */
-   UA_StatusCode
-   UA_Server_getNamespaceByName(UA_Server *server, const UA_String namespaceUri,
-                                size_t* foundIndex);

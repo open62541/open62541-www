@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>PubSub Connection Plugin API &mdash; open62541 0.4.0-dev documentation</title>
+  <title>&lt;no title&gt; &mdash; open62541 0.4.0-dev documentation</title>
   
 
   
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Publish/Subscribe" href="pubsub.html" />
+    <link rel="next" title="&lt;no title&gt;" href="pubsub.html" />
     <link rel="prev" title="Logging Plugin API" href="plugin_log.html" /> 
 
   
@@ -85,7 +85,7 @@
               
             
             
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -97,15 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_access_control.html">Access Control Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">PubSub Connection Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pubsub.html">Publish/Subscribe</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
 
             
@@ -153,7 +145,7 @@
         
           <li><a href="internal.html">Internals</a> &raquo;</li>
         
-      <li>PubSub Connection Plugin API</li>
+      <li>&lt;no title&gt;</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -172,71 +164,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pubsub-connection-plugin-api">
-<span id="pubsub-connection"></span><h1>PubSub Connection Plugin API<a class="headerlink" href="#pubsub-connection-plugin-api" title="Permalink to this headline">¶</a></h1>
-<p>The PubSub Connection API is the interface between concrete network implementations and the internal pubsub
-code.</p>
-<p>The PubSub specification enables the creation of new connections on runtime. Wording:
-‘Connection’ -&gt; OPC UA standard ‘highlevel’ perspective,
-‘Channel’ -&gt; open62541 implementation ‘lowlevel’ perspective. A channel can be assigned with different
-network implementations like UDP, MQTT, AMQP. The channel provides basis services
-like send, regist, unregist, receive, close.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UA_PUBSUB_CHANNEL_RDY</span><span class="p">,</span>
-    <span class="n">UA_PUBSUB_CHANNEL_PUB</span><span class="p">,</span>
-    <span class="n">UA_PUBSUB_CHANNEL_SUB</span><span class="p">,</span>
-    <span class="n">UA_PUBSUB_CHANNEL_PUB_SUB</span><span class="p">,</span>
-    <span class="n">UA_PUBSUB_CHANNEL_ERROR</span><span class="p">,</span>
-    <span class="n">UA_PUBSUB_CHANNEL_CLOSED</span>
-<span class="p">}</span> <span class="n">UA_PubSubChannelState</span><span class="p">;</span>
-
-<span class="k">struct</span> <span class="n">UA_PubSubChannel</span><span class="p">;</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_PubSubChannel</span> <span class="n">UA_PubSubChannel</span><span class="p">;</span>
-
-<span class="c1">//interface structure between network plugin and internal implementation</span>
-<span class="k">struct</span> <span class="n">UA_PubSubChannel</span><span class="p">{</span>
-    <span class="n">UA_UInt32</span> <span class="n">publisherId</span><span class="p">;</span>                                  <span class="c1">// unique identifier</span>
-    <span class="n">UA_PubSubChannelState</span> <span class="n">state</span><span class="p">;</span>
-    <span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">connectionConfig</span><span class="p">;</span>            <span class="c1">//link to parent connection config</span>
-    <span class="n">UA_Int32</span> <span class="n">sockfd</span><span class="p">;</span>
-    <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>                                           <span class="c1">//implementation specific data</span>
-    <span class="cm">/*@info for handle: each network implementation should provide an structure</span>
-<span class="cm">    * UA_PubSubChannelData[ImplementationName] This structure can be used by the</span>
-<span class="cm">    * network implementation to store network implementation specific data.*/</span>
-
-    <span class="cm">/* Sending out the content of the buf parameter */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">send</span><span class="p">)(</span><span class="n">UA_PubSubChannel</span> <span class="o">*</span><span class="n">channel</span><span class="p">,</span> <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">transportSettings</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
-
-    <span class="cm">/* Register to an specified message source, e.g. multicast group or topic */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">regist</span><span class="p">)(</span><span class="n">UA_PubSubChannel</span> <span class="o">*</span> <span class="n">channel</span><span class="p">,</span> <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">transportSettings</span><span class="p">);</span>
-
-    <span class="cm">/* Remove subscription to an specified message source, e.g. multicast group or topic */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">unregist</span><span class="p">)(</span><span class="n">UA_PubSubChannel</span> <span class="o">*</span> <span class="n">channel</span><span class="p">,</span> <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">transportSettings</span><span class="p">);</span>
-
-    <span class="cm">/* Receive messages. A regist to the message source is needed before. */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">receive</span><span class="p">)(</span><span class="n">UA_PubSubChannel</span> <span class="o">*</span> <span class="n">channel</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="p">,</span>
-                             <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">transportSettings</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">);</span>
-
-    <span class="cm">/* Closing the connection and implicit free of the channel structures. */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">close</span><span class="p">)(</span><span class="n">UA_PubSubChannel</span> <span class="o">*</span><span class="n">channel</span><span class="p">);</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-<p>The UA_PubSubTransportLayer is used for the creation of new connections. Whenever on runtime a new
-connection is request, the internal PubSub implementation call * the ‘createPubSubChannel’ function.
-The ‘transportProfileUri’ contains the standard defined transport profile information
-and is used to identify the type of connections which can be created by the
-TransportLayer. The server config contains a list of UA_PubSubTransportLayer.
-Take a look in the tutorial_pubsub_connection to get informations about the TransportLayer handling.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_PubSubTransportLayer</span><span class="p">{</span>
-    <span class="n">UA_String</span> <span class="n">transportProfileUri</span><span class="p">;</span>
-    <span class="n">UA_PubSubChannel</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">createPubSubChannel</span><span class="p">)(</span><span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">connectionConfig</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_PubSubTransportLayer</span><span class="p">;</span>
-</pre></div>
-</div>
-</div>
-
+  
 
            </div>
            
@@ -245,7 +173,7 @@ Take a look in the tutorial_pubsub_connection to get informations about the Tran
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="pubsub.html" class="btn btn-neutral float-right" title="Publish/Subscribe" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="pubsub.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="plugin_log.html" class="btn btn-neutral" title="Logging Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

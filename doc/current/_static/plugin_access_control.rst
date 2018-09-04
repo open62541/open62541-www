@@ -8,9 +8,6 @@ rights accordingly.
 .. code-block:: c
 
    
-   struct UA_AccessControl;
-   typedef struct UA_AccessControl UA_AccessControl;
-   
    struct UA_AccessControl {
        void *context;
        void (*deleteMembers)(UA_AccessControl *ac);
@@ -19,9 +16,13 @@ rights accordingly.
        size_t userTokenPoliciesSize;
        UA_UserTokenPolicy *userTokenPolicies;
        
-       /* Authenticate a session. The session context is attached to the session and
-        * later passed into the node-based access control callbacks. */
+       /* Authenticate a session. The session context is attached to the session
+        * and later passed into the node-based access control callbacks. The new
+        * session is rejected if a StatusCode other than UA_STATUSCODE_GOOD is
+        * returned. */
        UA_StatusCode (*activateSession)(UA_Server *server, UA_AccessControl *ac,
+                                        const UA_EndpointDescription *endpointDescription,
+                                        const UA_ByteString *secureChannelRemoteCertificate,
                                         const UA_NodeId *sessionId,
                                         const UA_ExtensionObject *userIdentityToken,
                                         void **sessionContext);
@@ -72,3 +73,7 @@ rights accordingly.
                                           const UA_NodeId *sessionId, void *sessionContext,
                                           const UA_DeleteReferencesItem *item);
    };
+   
+   _UA_END_DECLS
+   
+   #endif /* UA_PLUGIN_ACCESS_CONTROL_H_ */

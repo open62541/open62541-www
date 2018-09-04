@@ -388,6 +388,8 @@ the method's execution cannot be returned to the Client and are discarded.
                      UA_CallResponse *response);
    #endif
    
+   #ifdef UA_ENABLE_SUBSCRIPTIONS
+   
 MonitoredItem Service Set
 -------------------------
 Clients define MonitoredItems to subscribe to data and Events. Each
@@ -445,6 +447,12 @@ Subscription.
    void Service_SetMonitoringMode(UA_Server *server, UA_Session *session,
                                   const UA_SetMonitoringModeRequest *request,
                                   UA_SetMonitoringModeResponse *response);
+   
+   #ifdef UA_ENABLE_HISTORIZING
+   void Service_HistoryRead(UA_Server *server, UA_Session *session,
+                            const UA_HistoryReadRequest *request,
+                            UA_HistoryReadResponse *response);
+   #endif
    
 SetTriggering Service
 ^^^^^^^^^^^^^^^^^^^^^
@@ -539,3 +547,5 @@ its Session.
 .. code-block:: c
 
    /* Not Implemented */
+   
+   #endif /* UA_ENABLE_SUBSCRIPTIONS */

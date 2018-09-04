@@ -15,7 +15,6 @@ sure to compare with the type definitions in ``ua_types.h``.
 .. code-block:: c
 
    
-   #include <assert.h>
    #include "open62541.h"
    
    static void

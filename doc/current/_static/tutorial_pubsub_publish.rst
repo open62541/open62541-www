@@ -19,8 +19,8 @@ connection can be found in ``tutorial_pubsub_connection.c``.
 
 .. code-block:: c
 
-   #include <signal.h>
    #include "open62541.h"
+   #include <signal.h>
    UA_NodeId connectionIdent, publishedDataSetIdent, writerGroupIdent;
    
    static void

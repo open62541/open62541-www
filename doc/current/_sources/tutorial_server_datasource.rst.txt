@@ -24,8 +24,8 @@ variable.
 .. code-block:: c
 
    
-   #include <signal.h>
    #include "open62541.h"
+   #include <signal.h>
    
    static void
    updateCurrentTime(UA_Server *server) {

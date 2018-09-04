@@ -51,9 +51,18 @@ Client Lifecycle
    UA_ClientState
    UA_Client_getState(UA_Client *client);
    
+   /* Get the client configuration */
+   UA_ClientConfig *
+   UA_Client_getConfig(UA_Client *client);
+   
    /* Get the client context */
-   void *
-   UA_Client_getContext(UA_Client *client);
+   static UA_INLINE void *
+   UA_Client_getContext(UA_Client *client) {
+       UA_ClientConfig *config = UA_Client_getConfig(client);
+       if(!config)
+           return NULL;
+       return config->clientContext;
+   }
    
    /* Reset a client */
    void
@@ -68,6 +77,9 @@ Connect to a Server
 
 .. code-block:: c
 
+   
+   typedef void (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
+           UA_UInt32 requestId, void *response);
    
    /* Connect to the server
     *
@@ -109,12 +121,10 @@ Connect to a Server
    UA_Client_disconnect_async(UA_Client *client, UA_UInt32 *requestId);
    
    /* Close a connection to the selected server */
-   UA_StatusCode
-   UA_Client_close(UA_Client *client);
-   
-   /* Renew the underlying secure channel */
-   UA_StatusCode
-   UA_Client_manuallyRenewSecureChannel(UA_Client *client);
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_close(UA_Client *client) {
+       return UA_Client_disconnect(client);
+   }
    
 Discovery
 ---------
@@ -329,109 +339,3 @@ that wrap the raw services.
    /*
     * Query Service Set
     * ^^^^^^^^^^^^^^^^^ */
-   static UA_INLINE UA_QueryFirstResponse
-   UA_Client_Service_queryFirst(UA_Client *client,
-                                const UA_QueryFirstRequest request) {
-       UA_QueryFirstResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
-       return response;
-   }
-   
-   static UA_INLINE UA_QueryNextResponse
-   UA_Client_Service_queryNext(UA_Client *client,
-                               const UA_QueryNextRequest request) {
-       UA_QueryNextResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
-       return response;
-   }
-   
-.. _client-async-services:
-
-Asynchronous Services
----------------------
-All OPC UA services are asynchronous in nature. So several service calls can
-be made without waiting for a response first. Responess may come in a
-different ordering.
-
-.. code-block:: c
-
-   
-   /* Listen on the network and process arriving asynchronous responses in the
-    * background. Internal housekeeping and subscription management is done as
-    * well. */
-   
-   /*UA_StatusCode
-   UA_Client_runAsync(UA_Client *client, UA_UInt16 timeout);*/
-   
-   /* Use the type versions of this method. See below. However, the general
-    * mechanism of async service calls is explained here.
-    *
-    * We say that an async service call has been dispatched once this method
-    * returns UA_STATUSCODE_GOOD. If there is an error after an async service has
-    * been dispatched, the callback is called with an "empty" response where the
-    * statusCode has been set accordingly. This is also done if the client is
-    * shutting down and the list of dispatched async services is emptied.
-    *
-    * The statusCode received when the client is shutting down is
-    * UA_STATUSCODE_BADSHUTDOWN.
-    *
-    * The statusCode received when the client don't receive response
-    * after specified config->timeout (in ms) is
-    * UA_STATUSCODE_BADTIMEOUT.
-    *
-    * Instead, you can use __UA_Client_AsyncServiceEx to specify
-    * a custom timeout
-    *
-    * The userdata and requestId arguments can be NULL. */
-   UA_StatusCode
-   __UA_Client_AsyncService(UA_Client *client, const void *request,
-                            const UA_DataType *requestType,
-                            UA_ClientAsyncServiceCallback callback,
-                            const UA_DataType *responseType,
-                            void *userdata, UA_UInt32 *requestId);
-   
-   /* For async connecting
-    * */
-   UA_StatusCode
-   UA_Client_sendAsyncRequest(UA_Client *client, const void *request,
-           const UA_DataType *requestType, UA_ClientAsyncServiceCallback callback,
-   const UA_DataType *responseType, void *userdata, UA_UInt32 *requestId);
-   
-   
-   UA_StatusCode
-   UA_Client_run_iterate(UA_Client *client, UA_UInt16 timeout);
-   
-   /* Use the type versions of this method. See below. However, the general
-    * mechanism of async service calls is explained here.
-    *
-    * We say that an async service call has been dispatched once this method
-    * returns UA_STATUSCODE_GOOD. If there is an error after an async service has
-    * been dispatched, the callback is called with an "empty" response where the
-    * statusCode has been set accordingly. This is also done if the client is
-    * shutting down and the list of dispatched async services is emptied.
-    *
-    * The statusCode received when the client is shutting down is
-    * UA_STATUSCODE_BADSHUTDOWN.
-    *
-    * The statusCode received when the client don't receive response
-    * after specified timeout (in ms) is
-    * UA_STATUSCODE_BADTIMEOUT.
-    *
-    * The timeout can be disabled by setting timeout to 0
-    *
-    * The userdata and requestId arguments can be NULL. */
-   UA_StatusCode
-   __UA_Client_AsyncServiceEx(UA_Client *client, const void *request,
-                              const UA_DataType *requestType,
-                              UA_ClientAsyncServiceCallback callback,
-                              const UA_DataType *responseType,
-                              void *userdata, UA_UInt32 *requestId,
-                              UA_UInt32 timeout);
-   
-   
-.. toctree::
-
-   client_highlevel
-   client_subscriptions
