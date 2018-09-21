@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#client-lifecycle-callback">Client Lifecycle callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#subscription-inactivity-callback">Subscription Inactivity callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inactivity-callback">Inactivity callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#client-configuration-data">Client Configuration Data</a></li>
 </ul>
 </li>
@@ -233,10 +234,16 @@ The usual usage is as follows:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="inactivity-callback">
+<h3>Inactivity callback<a class="headerlink" href="#inactivity-callback" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_InactivityCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="client-configuration-data">
 <h3>Client Configuration Data<a class="headerlink" href="#client-configuration-data" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ClientConfig</span> <span class="p">{</span>
-    <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span>               <span class="cm">/* Sync response timeout in ms */</span>
+    <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span>               <span class="cm">/* ASync + Sync response timeout in ms */</span>
     <span class="n">UA_UInt32</span> <span class="n">secureChannelLifeTime</span><span class="p">;</span> <span class="cm">/* Lifetime in ms (then the channel needs</span>
 <span class="cm">                                        to be renewed) */</span>
     <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
@@ -250,8 +257,29 @@ The usual usage is as follows:</p>
     <span class="cm">/* Callback function */</span>
     <span class="n">UA_ClientStateCallback</span> <span class="n">stateCallback</span><span class="p">;</span>
 <span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
-    <span class="n">UA_SubscriptionInactivityCallback</span> <span class="n">subscriptionInactivityCallback</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>When outStandingPublishRequests is greater than 0,
+the server automatically create publishRequest when
+UA_Client_runAsync is called. If the client don’t receive
+a publishResponse after :</p>
+<blockquote>
+<div>(sub-&gt;publishingInterval * sub-&gt;maxKeepAliveCount) +
+client-&gt;config.timeout)</div></blockquote>
+<p>then, the client call subscriptionInactivityCallback
+The connection can be closed, this in an attempt to
+recreate a healthy connection.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>    <span class="n">UA_SubscriptionInactivityCallback</span> <span class="n">subscriptionInactivityCallback</span><span class="p">;</span>
 <span class="cp">#endif</span>
+</pre></div>
+</div>
+<p>When connectivityCheckInterval is greater than 0,
+every connectivityCheckInterval (in ms), a async read request
+is performed on the server. inactivityCallback is called
+when the client receive no response for this read request
+The connection can be closed, this in an attempt to
+recreate a healthy connection.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>    <span class="n">UA_InactivityCallback</span> <span class="n">inactivityCallback</span><span class="p">;</span>
 
     <span class="kt">void</span> <span class="o">*</span><span class="n">clientContext</span><span class="p">;</span>
 
@@ -260,6 +288,11 @@ The usual usage is as follows:</p>
     <span class="cm">/* 0 = background task disabled                    */</span>
     <span class="n">UA_UInt16</span> <span class="n">outStandingPublishRequests</span><span class="p">;</span>
 <span class="cp">#endif</span>
+</pre></div>
+</div>
+<p>connectivity check interval in ms
+0 = background task disabled</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>    <span class="n">UA_UInt32</span> <span class="n">connectivityCheckInterval</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ClientConfig</span><span class="p">;</span>
 
 
@@ -584,6 +617,13 @@ different ordering.</p>
 <span class="cm"> * The statusCode received when the client is shutting down is</span>
 <span class="cm"> * UA_STATUSCODE_BADSHUTDOWN.</span>
 <span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client don&#39;t receive response</span>
+<span class="cm"> * after specified config-&gt;timeout (in ms) is</span>
+<span class="cm"> * UA_STATUSCODE_BADTIMEOUT.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Instead, you can use __UA_Client_AsyncServiceEx to specify</span>
+<span class="cm"> * a custom timeout</span>
+<span class="cm"> *</span>
 <span class="cm"> * The userdata and requestId arguments can be NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
@@ -591,6 +631,33 @@ different ordering.</p>
                          <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
                          <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span>
                          <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Use the type versions of this method. See below. However, the general</span>
+<span class="cm"> * mechanism of async service calls is explained here.</span>
+<span class="cm"> *</span>
+<span class="cm"> * We say that an async service call has been dispatched once this method</span>
+<span class="cm"> * returns UA_STATUSCODE_GOOD. If there is an error after an async service has</span>
+<span class="cm"> * been dispatched, the callback is called with an &quot;empty&quot; response where the</span>
+<span class="cm"> * statusCode has been set accordingly. This is also done if the client is</span>
+<span class="cm"> * shutting down and the list of dispatched async services is emptied.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client is shutting down is</span>
+<span class="cm"> * UA_STATUSCODE_BADSHUTDOWN.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client don&#39;t receive response</span>
+<span class="cm"> * after specified timeout (in ms) is</span>
+<span class="cm"> * UA_STATUSCODE_BADTIMEOUT.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The timeout can be disabled by setting timeout to 0</span>
+<span class="cm"> *</span>
+<span class="cm"> * The userdata and requestId arguments can be NULL. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_AsyncServiceEx</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span>
+                           <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">,</span>
+                           <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">);</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Client_AsyncService_read</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ReadRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>

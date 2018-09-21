@@ -343,6 +343,13 @@ different ordering.
     * The statusCode received when the client is shutting down is
     * UA_STATUSCODE_BADSHUTDOWN.
     *
+    * The statusCode received when the client don't receive response
+    * after specified config->timeout (in ms) is
+    * UA_STATUSCODE_BADTIMEOUT.
+    *
+    * Instead, you can use __UA_Client_AsyncServiceEx to specify
+    * a custom timeout
+    *
     * The userdata and requestId arguments can be NULL. */
    UA_StatusCode
    __UA_Client_AsyncService(UA_Client *client, const void *request,
@@ -350,6 +357,33 @@ different ordering.
                             UA_ClientAsyncServiceCallback callback,
                             const UA_DataType *responseType,
                             void *userdata, UA_UInt32 *requestId);
+   
+   /* Use the type versions of this method. See below. However, the general
+    * mechanism of async service calls is explained here.
+    *
+    * We say that an async service call has been dispatched once this method
+    * returns UA_STATUSCODE_GOOD. If there is an error after an async service has
+    * been dispatched, the callback is called with an "empty" response where the
+    * statusCode has been set accordingly. This is also done if the client is
+    * shutting down and the list of dispatched async services is emptied.
+    *
+    * The statusCode received when the client is shutting down is
+    * UA_STATUSCODE_BADSHUTDOWN.
+    *
+    * The statusCode received when the client don't receive response
+    * after specified timeout (in ms) is
+    * UA_STATUSCODE_BADTIMEOUT.
+    *
+    * The timeout can be disabled by setting timeout to 0
+    *
+    * The userdata and requestId arguments can be NULL. */
+   UA_StatusCode
+   __UA_Client_AsyncServiceEx(UA_Client *client, const void *request,
+                              const UA_DataType *requestType,
+                              UA_ClientAsyncServiceCallback callback,
+                              const UA_DataType *responseType,
+                              void *userdata, UA_UInt32 *requestId,
+                              UA_UInt32 timeout);
    
    static UA_INLINE UA_StatusCode
    UA_Client_AsyncService_read(UA_Client *client, const UA_ReadRequest *request,
