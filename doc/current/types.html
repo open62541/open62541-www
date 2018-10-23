@@ -121,6 +121,9 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#generic-type-handling">Generic Type Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#array-handling">Array handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#random-number-generator">Random Number Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generated-data-type-definitions">Generated Data Type Definitions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
@@ -683,14 +686,14 @@ open62541 hides this wrapping transparently in the encoding layer. If the
 data type is unknown to the receiver, the variant contains the original
 ExtensionObject in binary or XML encoding.</p>
 <p>Variants may contain a scalar value or an array. For details on the handling
-of arrays, see the section on <span class="xref std std-ref">array-handling</span>. Array variants can have
+of arrays, see the section on <a class="reference internal" href="#array-handling"><span class="std std-ref">Array handling</span></a>. Array variants can have
 an additional dimensionality (matrix, 3-tensor, …) defined in an array of
 dimension lengths. The actual values are kept in an array of dimensions one.
 For users who work with higher-dimensions arrays directly, keep in mind that
 dimensions of higher rank are serialized first (the highest rank dimension
 has stride 1 and elements follow each other directly). Usually it is simplest
 to interact with higher-dimensional arrays via <code class="docutils literal notranslate"><span class="pre">UA_NumericRange</span></code>
-descriptions (see <span class="xref std std-ref">array-handling</span>).</p>
+descriptions (see <a class="reference internal" href="#array-handling"><span class="std std-ref">Array handling</span></a>).</p>
 <p>To differentiate between scalar / array variants, the following definition is
 used. <code class="docutils literal notranslate"><span class="pre">UA_Variant_isScalar</span></code> provides simplified access to these checks.</p>
 <ul class="simple">
@@ -981,8 +984,113 @@ type operations as static inline functions.</p>
 <span class="p">};</span>
 
 <span class="n">UA_Boolean</span> <span class="nf">isDataTypeNumeric</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Builtin data types can be accessed as UA_TYPES[UA_TYPES_XXX], where XXX is
+the name of the data type. If only the NodeId of a type is known, use the
+following method to retrieve the data type description.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Returns the data type description for the type&#39;s identifier or NULL if no</span>
+<span class="cm"> * matching data type was found. */</span>
+<span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span>
+<span class="nf">UA_findDataType</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeId</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The following functions are used for generic handling of data types.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allocates and initializes a variable of type dataType</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param type The datatype description</span>
+<span class="cm"> * @return Returns the memory location of the variable or NULL if no</span>
+<span class="cm"> *         memory could be allocated */</span>
+<span class="kt">void</span> <span class="o">*</span> <span class="nf">UA_new</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* The following is used to exclude type names in the definition of UA_DataType</span>
+<span class="cm">/* Initializes a variable to default values</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param p The memory location of the variable</span>
+<span class="cm"> * @param type The datatype description */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
+<span class="nf">UA_init</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">type</span><span class="o">-&gt;</span><span class="n">memSize</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Copies the content of two variables. If copying fails (e.g. because no memory</span>
+<span class="cm"> * was available for an array), then dst is emptied and initialized to prevent</span>
+<span class="cm"> * memory leaks.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param src The memory location of the source variable</span>
+<span class="cm"> * @param dst The memory location of the destination variable</span>
+<span class="cm"> * @param type The datatype description</span>
+<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_copy</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">src</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+
+<span class="cm">/* Deletes the dynamically allocated content of a variable (e.g. resets all</span>
+<span class="cm"> * arrays to undefined arrays). Afterwards, the variable can be safely deleted</span>
+<span class="cm"> * without causing memory leaks. But the variable is not initialized and may</span>
+<span class="cm"> * contain old data that is not memory-relevant.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param p The memory location of the variable</span>
+<span class="cm"> * @param type The datatype description of the variable */</span>
+<span class="kt">void</span> <span class="nf">UA_deleteMembers</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+
+<span class="cm">/* Frees a variable and all of its content.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param p The memory location of the variable</span>
+<span class="cm"> * @param type The datatype description of the variable */</span>
+<span class="kt">void</span> <span class="nf">UA_delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="array-handling">
+<span id="id9"></span><h2>Array handling<a class="headerlink" href="#array-handling" title="Permalink to this headline">¶</a></h2>
+<p>In OPC UA, arrays can have a length of zero or more with the usual meaning.
+In addition, arrays can be undefined. Then, they don’t even have a length. In
+the binary encoding, this is indicated by an array of length -1.</p>
+<p>In open62541 however, we use <code class="docutils literal notranslate"><span class="pre">size_t</span></code> for array lengths. An undefined array
+has length 0 and the data pointer is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>. An array of length 0 also has
+length 0 but a data pointer <code class="docutils literal notranslate"><span class="pre">UA_EMPTY_ARRAY_SENTINEL</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allocates and initializes an array of variables of a specific type</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param size The requested array length</span>
+<span class="cm"> * @param type The datatype description</span>
+<span class="cm"> * @return Returns the memory location of the variable or NULL if no memory</span>
+<span class="cm">           could be allocated */</span>
+<span class="kt">void</span> <span class="o">*</span> <span class="nf">UA_Array_new</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+
+<span class="cm">/* Allocates and copies an array</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param src The memory location of the source array</span>
+<span class="cm"> * @param size The size of the array</span>
+<span class="cm"> * @param dst The location of the pointer to the new array</span>
+<span class="cm"> * @param type The datatype of the array members</span>
+<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or UA_STATUSCODE_BADOUTOFMEMORY */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Array_copy</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">src</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">dst</span><span class="p">,</span>
+              <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+
+<span class="cm">/* Deletes an array.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param p The memory location of the array</span>
+<span class="cm"> * @param size The size of the array</span>
+<span class="cm"> * @param type The datatype of the array members */</span>
+<span class="kt">void</span> <span class="nf">UA_Array_delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">type</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="random-number-generator">
+<h2>Random Number Generator<a class="headerlink" href="#random-number-generator" title="Permalink to this headline">¶</a></h2>
+<p>If UA_ENABLE_MULTITHREADING is defined, then the seed is stored in thread
+local storage. The seed is initialized for every thread in the
+server/client.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">UA_random_seed</span><span class="p">(</span><span class="n">UA_UInt64</span> <span class="n">seed</span><span class="p">);</span>
+<span class="n">UA_UInt32</span> <span class="nf">UA_UInt32_random</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span> <span class="cm">/* no cryptographic entropy */</span>
+<span class="n">UA_Guid</span> <span class="nf">UA_Guid_random</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>     <span class="cm">/* no cryptographic entropy */</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="generated-data-type-definitions">
+<span id="generated-types"></span><h2>Generated Data Type Definitions<a class="headerlink" href="#generated-data-type-definitions" title="Permalink to this headline">¶</a></h2>
+<p>The following data types were auto-generated from a definition in XML format.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The following is used to exclude type names in the definition of UA_DataType</span>
 <span class="cm"> * structures if the feature is disabled. */</span>
 </pre></div>
 </div>

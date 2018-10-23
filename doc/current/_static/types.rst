@@ -854,5 +854,126 @@ type operations as static inline functions.
    
    UA_Boolean isDataTypeNumeric(const UA_DataType *type);
    
+Builtin data types can be accessed as UA_TYPES[UA_TYPES_XXX], where XXX is
+the name of the data type. If only the NodeId of a type is known, use the
+following method to retrieve the data type description.
+
+.. code-block:: c
+
+   
+   /* Returns the data type description for the type's identifier or NULL if no
+    * matching data type was found. */
+   const UA_DataType *
+   UA_findDataType(const UA_NodeId *typeId);
+   
+The following functions are used for generic handling of data types.
+
+.. code-block:: c
+
+   
+   /* Allocates and initializes a variable of type dataType
+    *
+    * @param type The datatype description
+    * @return Returns the memory location of the variable or NULL if no
+    *         memory could be allocated */
+   void * UA_new(const UA_DataType *type);
+   
+   /* Initializes a variable to default values
+    *
+    * @param p The memory location of the variable
+    * @param type The datatype description */
+   static UA_INLINE void
+   UA_init(void *p, const UA_DataType *type) {
+       memset(p, 0, type->memSize);
+   }
+   
+   /* Copies the content of two variables. If copying fails (e.g. because no memory
+    * was available for an array), then dst is emptied and initialized to prevent
+    * memory leaks.
+    *
+    * @param src The memory location of the source variable
+    * @param dst The memory location of the destination variable
+    * @param type The datatype description
+    * @return Indicates whether the operation succeeded or returns an error code */
+   UA_StatusCode
+   UA_copy(const void *src, void *dst, const UA_DataType *type);
+   
+   /* Deletes the dynamically allocated content of a variable (e.g. resets all
+    * arrays to undefined arrays). Afterwards, the variable can be safely deleted
+    * without causing memory leaks. But the variable is not initialized and may
+    * contain old data that is not memory-relevant.
+    *
+    * @param p The memory location of the variable
+    * @param type The datatype description of the variable */
+   void UA_deleteMembers(void *p, const UA_DataType *type);
+   
+   /* Frees a variable and all of its content.
+    *
+    * @param p The memory location of the variable
+    * @param type The datatype description of the variable */
+   void UA_delete(void *p, const UA_DataType *type);
+   
+.. _array-handling:
+
+Array handling
+--------------
+In OPC UA, arrays can have a length of zero or more with the usual meaning.
+In addition, arrays can be undefined. Then, they don't even have a length. In
+the binary encoding, this is indicated by an array of length -1.
+
+In open62541 however, we use ``size_t`` for array lengths. An undefined array
+has length 0 and the data pointer is ``NULL``. An array of length 0 also has
+length 0 but a data pointer ``UA_EMPTY_ARRAY_SENTINEL``.
+
+.. code-block:: c
+
+   /* Allocates and initializes an array of variables of a specific type
+    *
+    * @param size The requested array length
+    * @param type The datatype description
+    * @return Returns the memory location of the variable or NULL if no memory
+              could be allocated */
+   void * UA_Array_new(size_t size, const UA_DataType *type);
+   
+   /* Allocates and copies an array
+    *
+    * @param src The memory location of the source array
+    * @param size The size of the array
+    * @param dst The location of the pointer to the new array
+    * @param type The datatype of the array members
+    * @return Returns UA_STATUSCODE_GOOD or UA_STATUSCODE_BADOUTOFMEMORY */
+   UA_StatusCode
+   UA_Array_copy(const void *src, size_t size, void **dst,
+                 const UA_DataType *type);
+   
+   /* Deletes an array.
+    *
+    * @param p The memory location of the array
+    * @param size The size of the array
+    * @param type The datatype of the array members */
+   void UA_Array_delete(void *p, size_t size, const UA_DataType *type);
+   
+Random Number Generator
+-----------------------
+If UA_ENABLE_MULTITHREADING is defined, then the seed is stored in thread
+local storage. The seed is initialized for every thread in the
+server/client.
+
+.. code-block:: c
+
+   void UA_random_seed(UA_UInt64 seed);
+   UA_UInt32 UA_UInt32_random(void); /* no cryptographic entropy */
+   UA_Guid UA_Guid_random(void);     /* no cryptographic entropy */
+   
+.. _generated-types:
+
+Generated Data Type Definitions
+-------------------------------
+
+The following data types were auto-generated from a definition in XML format.
+
+.. code-block:: c
+
+   
    /* The following is used to exclude type names in the definition of UA_DataType
     * structures if the feature is disabled. */
