@@ -852,7 +852,11 @@ type operations as static inline functions.
        UA_DataTypeMember *members;
    };
    
-   UA_Boolean isDataTypeNumeric(const UA_DataType *type);
+   /* Test if the data type is a numeric builtin data type. This includes Boolean,
+    * integers and floating point numbers. Not included are DateTime and
+    * StatusCode. */
+   UA_Boolean
+   UA_DataType_isNumeric(const UA_DataType *type);
    
 Builtin data types can be accessed as UA_TYPES[UA_TYPES_XXX], where XXX is
 the name of the data type. If only the NodeId of a type is known, use the
