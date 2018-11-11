@@ -44,7 +44,7 @@ networking plugins with a clear interface to the main open62541 library.
                                          * simplifies the design. */
        UA_DateTime openingDate;         /* The date the connection was created */
        void *handle;                    /* A pointer to internal data */
-       UA_ByteString incompleteMessage; /* A half-received message (TCP is a
+       UA_ByteString incompleteMessage; /* A half-received chunk (TCP is a
                                          * streaming protocol) is stored here */
    
        /* Get a buffer for sending */
@@ -86,6 +86,9 @@ networking plugins with a clear interface to the main open62541 library.
        /* To be called only from within the server (and not the network layer).
         * Frees up the connection's memory. */
        void (*free)(UA_Connection *connection);
+   
+       /* A message has not been processed yet */
+       UA_Boolean pendingMessage;
    };
    
    /* Cleans up half-received messages, and so on. Called from connection->free. */
