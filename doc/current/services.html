@@ -143,13 +143,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#call-service">Call Service</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#monitoreditem-service-set">MonitoredItem Service Set</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#createmonitoreditems-service">CreateMonitoredItems Service</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#deletemonitoreditems-service">DeleteMonitoredItems Service</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#modifymonitoreditems-service">ModifyMonitoredItems Service</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#setmonitoringmode-service">SetMonitoringMode Service</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
@@ -540,7 +533,11 @@ or to write ranges of elements of the composite.</p>
 <p>Used to read historical values or Events of one or more Nodes. Servers may
 make historical values available to Clients using this Service, although the
 historical values themselves are not visible in the AddressSpace.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Not Implemented */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_HISTORIZING</span>
+<span class="kt">void</span> <span class="nf">Service_HistoryRead</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_HistoryReadRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                         <span class="n">UA_HistoryReadResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </div>
@@ -569,61 +566,6 @@ the method’s execution cannot be returned to the Client and are discarded.</p>
                   <span class="k">const</span> <span class="n">UA_CallRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                   <span class="n">UA_CallResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 <span class="cp">#endif</span>
-
-<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="monitoreditem-service-set">
-<h2>MonitoredItem Service Set<a class="headerlink" href="#monitoreditem-service-set" title="Permalink to this headline">¶</a></h2>
-<p>Clients define MonitoredItems to subscribe to data and Events. Each
-MonitoredItem identifies the item to be monitored and the Subscription to use
-to send Notifications. The item to be monitored may be any Node Attribute.</p>
-<div class="section" id="createmonitoreditems-service">
-<h3>CreateMonitoredItems Service<a class="headerlink" href="#createmonitoreditems-service" title="Permalink to this headline">¶</a></h3>
-<p>Used to create and add one or more MonitoredItems to a Subscription. A
-MonitoredItem is deleted automatically by the Server when the Subscription is
-deleted. Deleting a MonitoredItem causes its entire set of triggered item
-links to be deleted, but has no effect on the MonitoredItems referenced by
-the triggered items.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">Service_CreateMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_CreateMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                                  <span class="n">UA_CreateMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="deletemonitoreditems-service">
-<h3>DeleteMonitoredItems Service<a class="headerlink" href="#deletemonitoreditems-service" title="Permalink to this headline">¶</a></h3>
-<p>Used to remove one or more MonitoredItems of a Subscription. When a
-MonitoredItem is deleted, its triggered item links are also deleted.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">Service_DeleteMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_DeleteMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                                  <span class="n">UA_DeleteMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="modifymonitoreditems-service">
-<h3>ModifyMonitoredItems Service<a class="headerlink" href="#modifymonitoreditems-service" title="Permalink to this headline">¶</a></h3>
-<p>Used to modify MonitoredItems of a Subscription. Changes to the MonitoredItem
-settings shall be applied immediately by the Server. They take effect as soon
-as practical but not later than twice the new revisedSamplingInterval.</p>
-<p>Illegal request values for parameters that can be revised do not generate
-errors. Instead the server will choose default values and indicate them in
-the corresponding revised parameter.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">Service_ModifyMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_ModifyMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                                  <span class="n">UA_ModifyMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="setmonitoringmode-service">
-<h3>SetMonitoringMode Service<a class="headerlink" href="#setmonitoringmode-service" title="Permalink to this headline">¶</a></h3>
-<p>Used to set the monitoring mode for one or more MonitoredItems of a
-Subscription.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">Service_SetMonitoringMode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">UA_SetMonitoringModeRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                               <span class="n">UA_SetMonitoringModeResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

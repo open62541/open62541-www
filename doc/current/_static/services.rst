@@ -354,7 +354,11 @@ historical values themselves are not visible in the AddressSpace.
 
 .. code-block:: c
 
-   /* Not Implemented */
+   #ifdef UA_ENABLE_HISTORIZING
+   void Service_HistoryRead(UA_Server *server, UA_Session *session,
+                            const UA_HistoryReadRequest *request,
+                            UA_HistoryReadResponse *response);
+   #endif
    
 HistoryUpdate Service
 ^^^^^^^^^^^^^^^^^^^^^
@@ -387,63 +391,3 @@ the method's execution cannot be returned to the Client and are discarded.
                      const UA_CallRequest *request,
                      UA_CallResponse *response);
    #endif
-   
-   #ifdef UA_ENABLE_SUBSCRIPTIONS
-   
-MonitoredItem Service Set
--------------------------
-Clients define MonitoredItems to subscribe to data and Events. Each
-MonitoredItem identifies the item to be monitored and the Subscription to use
-to send Notifications. The item to be monitored may be any Node Attribute.
-
-CreateMonitoredItems Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Used to create and add one or more MonitoredItems to a Subscription. A
-MonitoredItem is deleted automatically by the Server when the Subscription is
-deleted. Deleting a MonitoredItem causes its entire set of triggered item
-links to be deleted, but has no effect on the MonitoredItems referenced by
-the triggered items.
-
-.. code-block:: c
-
-   void Service_CreateMonitoredItems(UA_Server *server, UA_Session *session,
-                                     const UA_CreateMonitoredItemsRequest *request,
-                                     UA_CreateMonitoredItemsResponse *response);
-   
-DeleteMonitoredItems Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Used to remove one or more MonitoredItems of a Subscription. When a
-MonitoredItem is deleted, its triggered item links are also deleted.
-
-.. code-block:: c
-
-   void Service_DeleteMonitoredItems(UA_Server *server, UA_Session *session,
-                                     const UA_DeleteMonitoredItemsRequest *request,
-                                     UA_DeleteMonitoredItemsResponse *response);
-   
-ModifyMonitoredItems Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Used to modify MonitoredItems of a Subscription. Changes to the MonitoredItem
-settings shall be applied immediately by the Server. They take effect as soon
-as practical but not later than twice the new revisedSamplingInterval.
-
-Illegal request values for parameters that can be revised do not generate
-errors. Instead the server will choose default values and indicate them in
-the corresponding revised parameter.
-
-.. code-block:: c
-
-   void Service_ModifyMonitoredItems(UA_Server *server, UA_Session *session,
-                                     const UA_ModifyMonitoredItemsRequest *request,
-                                     UA_ModifyMonitoredItemsResponse *response);
-   
-SetMonitoringMode Service
-^^^^^^^^^^^^^^^^^^^^^^^^^
-Used to set the monitoring mode for one or more MonitoredItems of a
-Subscription.
-
-.. code-block:: c
-
-   void Service_SetMonitoringMode(UA_Server *server, UA_Session *session,
-                                  const UA_SetMonitoringModeRequest *request,
-                                  UA_SetMonitoringModeResponse *response);
