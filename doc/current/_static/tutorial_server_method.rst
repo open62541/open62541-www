@@ -29,7 +29,10 @@ by the SDK, so that we don't have to verify the arguments in the callback.
 .. code-block:: c
 
    
-   #include "open62541.h"
+   #include <ua_server.h>
+   #include <ua_config_default.h>
+   #include <ua_log_stdout.h>
+   
    #include <signal.h>
    
    static UA_StatusCode

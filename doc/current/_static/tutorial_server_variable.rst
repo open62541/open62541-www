@@ -12,8 +12,12 @@ read only. See below for making the variable writable.
 .. code-block:: c
 
    
-   #include "open62541.h"
+   #include <ua_server.h>
+   #include <ua_config_default.h>
+   #include <ua_log_stdout.h>
+   
    #include <signal.h>
+   
    
    static void
    addVariable(UA_Server *server) {

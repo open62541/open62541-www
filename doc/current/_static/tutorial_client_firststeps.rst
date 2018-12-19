@@ -7,7 +7,9 @@ creating a server. Copy the following into a file `myClient.c`:
 .. code-block:: c
 
    
-   #include "open62541.h"
+   #include <ua_client_highlevel.h>
+   #include <ua_config_default.h>
+   #include <ua_log_stdout.h>
    
    int main(void) {
        UA_Client *client = UA_Client_new(UA_ClientConfig_default);

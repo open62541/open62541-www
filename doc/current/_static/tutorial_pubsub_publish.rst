@@ -22,9 +22,12 @@ the system preconfiguration and connection can be found in
 .. code-block:: c
 
    
-   #include "open62541.h"
+   #include <ua_server.h>
+   #include <ua_config_default.h>
+   #include <ua_log_stdout.h>
+   #include <ua_network_pubsub_udp.h>
+   
    #include <signal.h>
-   #include <stdio.h>
    
    UA_NodeId connectionIdent, publishedDataSetIdent, writerGroupIdent;
    
