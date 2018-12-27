@@ -97,7 +97,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#repeated-callbacks">Repeated Callbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reading-and-writing-node-attributes">Reading and Writing Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#browsing">Browsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
@@ -393,14 +393,32 @@ handling</span></a>.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="repeated-callbacks">
-<h2>Repeated Callbacks<a class="headerlink" href="#repeated-callbacks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="timed-callbacks">
+<h2>Timed Callbacks<a class="headerlink" href="#timed-callbacks" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ServerCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="cm">/* Add a callback for execution at a specified time. If the indicated time lies</span>
+<span class="cm"> * in the past, then the callback is executed at the next iteration of the</span>
+<span class="cm"> * server&#39;s main loop.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param callback The callback that shall be added.</span>
+<span class="cm"> * @param data Data that is forwarded to the callback.</span>
+<span class="cm"> * @param date The timestamp for the execution time.</span>
+<span class="cm"> * @param callbackId Set to the identifier of the repeated callback . This can</span>
+<span class="cm"> *        be used to cancel the callback later on. If the pointer is null, the</span>
+<span class="cm"> *        identifier is not set.</span>
+<span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code</span>
+<span class="cm"> *         otherwise. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addTimedCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="n">date</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
 
 <span class="cm">/* Add a callback for cyclic repetition to the server.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
 <span class="cm"> * @param callback The callback that shall be added.</span>
+<span class="cm"> * @param data Data that is forwarded to the callback.</span>
 <span class="cm"> * @param interval_ms The callback shall be repeatedly executed with the given</span>
 <span class="cm"> *        interval (in ms). The interval must be positive. The first execution</span>
 <span class="cm"> *        occurs at now() + interval at the latest.</span>
@@ -417,14 +435,15 @@ handling</span></a>.</p>
 <span class="nf">UA_Server_changeRepeatedCallbackInterval</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">,</span>
                                          <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">);</span>
 
-<span class="cm">/* Remove a repeated callback.</span>
+<span class="cm">/* Remove a repeated callback. Does nothing if the callback is not found.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
-<span class="cm"> * @param callbackId The id of the callback that shall be removed.</span>
-<span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned.</span>
-<span class="cm"> *         An error code otherwise. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_removeRepeatedCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
+<span class="cm"> * @param callbackId The id of the callback */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Server_removeCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
+
+<span class="cp">#define UA_Server_removeRepeatedCallback(server, callbackId) \</span>
+<span class="cp">    UA_Server_removeCallback(server, callbackId);</span>
 </pre></div>
 </div>
 </div>
