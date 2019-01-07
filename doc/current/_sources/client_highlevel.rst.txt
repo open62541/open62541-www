@@ -193,6 +193,45 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_BOOLEAN]);
    }
    
+Historical Access
+^^^^^^^^^^^^^^^^^
+The following functions can be used to read a single node historically.
+Use the regular service to read several nodes at once.
+
+.. code-block:: c
+
+   #ifdef UA_ENABLE_HISTORIZING
+   typedef UA_Boolean
+   (*UA_HistoricalIteratorCallback)(UA_Client *client,
+                                    const UA_NodeId *nodeId,
+                                    UA_Boolean moreDataAvailable,
+                                    const UA_ExtensionObject *data, void *callbackContext);
+   
+   #ifdef UA_ENABLE_EXPERIMENTAL_HISTORIZING
+   UA_StatusCode
+   UA_Client_HistoryRead_events(UA_Client *client, const UA_NodeId *nodeId,
+                                   const UA_HistoricalIteratorCallback callback,
+                                   UA_DateTime startTime, UA_DateTime endTime,
+                                   UA_String indexRange, const UA_EventFilter filter, UA_UInt32 numValuesPerNode,
+                                   UA_TimestampsToReturn timestampsToReturn, void *callbackContext);
+   #endif // UA_ENABLE_EXPERIMENTAL_HISTORIZING
+   
+   UA_StatusCode
+   UA_Client_HistoryRead_raw(UA_Client *client, const UA_NodeId *nodeId,
+                                const UA_HistoricalIteratorCallback callback,
+                                UA_DateTime startTime, UA_DateTime endTime,
+                                UA_String indexRange, UA_Boolean returnBounds, UA_UInt32 numValuesPerNode,
+                                UA_TimestampsToReturn timestampsToReturn, void *callbackContext);
+   
+   #ifdef UA_ENABLE_EXPERIMENTAL_HISTORIZING
+   UA_StatusCode
+   UA_Client_HistoryRead_modified(UA_Client *client, const UA_NodeId *nodeId,
+                                     const UA_HistoricalIteratorCallback callback,
+                                     UA_DateTime startTime, UA_DateTime endTime,
+                                     UA_String indexRange, UA_Boolean returnBounds, UA_UInt32 numValuesPerNode,
+                                     UA_TimestampsToReturn timestampsToReturn, void *callbackContext);
+   #endif // UA_ENABLE_EXPERIMENTAL_HISTORIZING
+   #endif // UA_ENABLE_HISTORIZING
 Write Attributes
 ^^^^^^^^^^^^^^^^
 
