@@ -368,7 +368,10 @@ or Event. Valid actions are Insert, Replace or Delete.
 
 .. code-block:: c
 
-   /* Not Implemented */
+   void
+   Service_HistoryUpdate(UA_Server *server, UA_Session *session,
+                         const UA_HistoryUpdateRequest *request,
+                         UA_HistoryUpdateResponse *response);
    
 .. _method-services:
 

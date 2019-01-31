@@ -1232,3 +1232,62 @@ generated automatically and is returned through ``outEventId``.``NULL`` can be p
 needed. ``deleteEventNode`` specifies whether the node representation of the event should be deleted after invoking
 the method. This can be useful if events with the similar attributes are triggered frequently. ``UA_TRUE`` would
 cause the node to be deleted.
+
+.. code-block:: c
+
+   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+   
+   /* The EventQueueOverflowEventType is defined as abstract, therefore we can not
+    * create an instance of that type directly, but need to create a subtype. The
+    * following is an arbitrary number which shall refer to our internal overflow
+    * type. This is already posted on the OPC Foundation bug tracker under the
+    * following link for clarification:
+    * https://opcfoundation-onlineapplications.org/mantis/view.php?id=4206 */
+   # define UA_NS0ID_SIMPLEOVERFLOWEVENTTYPE 4035
+   
+   /* Creates a node representation of an event
+    *
+    * @param server The server object
+    * @param eventType The type of the event for which a node should be created
+    * @param outNodeId The NodeId of the newly created node for the event
+    * @return The StatusCode of the UA_Server_createEvent method */
+   UA_StatusCode
+   UA_Server_createEvent(UA_Server *server, const UA_NodeId eventType,
+                         UA_NodeId *outNodeId);
+   
+   /* Triggers a node representation of an event by applying EventFilters and
+      adding the event to the appropriate queues.
+    * @param server The server object
+    * @param eventNodeId The NodeId of the node representation of the event which should be triggered
+    * @param outEvent the EventId of the new event
+    * @param deleteEventNode Specifies whether the node representation of the event should be deleted
+    * @return The StatusCode of the UA_Server_triggerEvent method */
+   UA_StatusCode
+   UA_Server_triggerEvent(UA_Server *server, const UA_NodeId eventNodeId, const UA_NodeId originId,
+                          UA_ByteString *outEventId, const UA_Boolean deleteEventNode);
+   
+   #endif /* UA_ENABLE_SUBSCRIPTIONS_EVENTS */
+   
+   UA_StatusCode
+   UA_Server_updateCertificate(UA_Server *server,
+                               const UA_ByteString *oldCertificate,
+                               const UA_ByteString *newCertificate,
+                               const UA_ByteString *newPrivateKey,
+                               UA_Boolean closeSessions,
+                               UA_Boolean closeSecureChannels);
+   
+Utility Functions
+-----------------
+
+.. code-block:: c
+
+   /* Add a new namespace to the server. Returns the index of the new namespace */
+   UA_UInt16 UA_Server_addNamespace(UA_Server *server, const char* name);
+   
+   UA_ServerConfig*
+   UA_Server_getConfig(UA_Server *server);
+   
+   /* Get namespace by name from the server. */
+   UA_StatusCode
+   UA_Server_getNamespaceByName(UA_Server *server, const UA_String namespaceUri,
+                                size_t* foundIndex);

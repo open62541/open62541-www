@@ -206,30 +206,66 @@ The usual usage is as follows:</p>
 <span class="p">}</span> <span class="n">UA_ClientState</span><span class="p">;</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span>               <span class="cm">/* ASync + Sync response timeout in ms */</span>
+    <span class="cm">/* Basic client configuration */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">clientContext</span><span class="p">;</span> <span class="cm">/* User-defined data attached to the client */</span>
+    <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>   <span class="cm">/* Logger used by the client */</span>
+    <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span>  <span class="cm">/* Response timeout in ms */</span>
+    <span class="n">UA_ApplicationDescription</span> <span class="n">clientDescription</span><span class="p">;</span>
+
+    <span class="cm">/* Basic connection configuration */</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">userIdentityToken</span><span class="p">;</span> <span class="cm">/* Configured User-Identity Token */</span>
+    <span class="n">UA_MessageSecurityMode</span> <span class="n">securityMode</span><span class="p">;</span>  <span class="cm">/* None, Sign, SignAndEncrypt. The</span>
+<span class="cm">                                           * default is invalid. This indicates</span>
+<span class="cm">                                           * the client to select any matching</span>
+<span class="cm">                                           * endpoint. */</span>
+    <span class="n">UA_String</span> <span class="n">securityPolicyUri</span><span class="p">;</span> <span class="cm">/* SecurityPolicy for the SecureChannel. An</span>
+<span class="cm">                                  * empty string indicates the client to select</span>
+<span class="cm">                                  * any matching SecurityPolicy. */</span>
+
+    <span class="cm">/* Advanced connection configuration</span>
+<span class="cm">     *</span>
+<span class="cm">     * If either endpoint or userTokenPolicy has been set (at least one non-zero</span>
+<span class="cm">     * byte in either structure), then the selected Endpoint and UserTokenPolicy</span>
+<span class="cm">     * overwrite the settings in the basic connection configuration. The</span>
+<span class="cm">     * userTokenPolicy array in the EndpointDescription is ignored. The selected</span>
+<span class="cm">     * userTokenPolicy is set in the dedicated configuration field.</span>
+<span class="cm">     *</span>
+<span class="cm">     * If the advanced configuration is not set, the client will write to it the</span>
+<span class="cm">     * selected Endpoint and UserTokenPolicy during GetEndpoints.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The information in the advanced configuration is used during reconnect</span>
+<span class="cm">     * when the SecureChannel was broken. */</span>
+    <span class="n">UA_EndpointDescription</span> <span class="n">endpoint</span><span class="p">;</span>
+    <span class="n">UA_UserTokenPolicy</span> <span class="n">userTokenPolicy</span><span class="p">;</span>
+
+    <span class="cm">/* Advanced client configuration */</span>
+
     <span class="n">UA_UInt32</span> <span class="n">secureChannelLifeTime</span><span class="p">;</span> <span class="cm">/* Lifetime in ms (then the channel needs</span>
 <span class="cm">                                        to be renewed) */</span>
-    <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">requestedSessionTimeout</span><span class="p">;</span> <span class="cm">/* Session timeout in ms */</span>
     <span class="n">UA_ConnectionConfig</span> <span class="n">localConnectionConfig</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">connectivityCheckInterval</span><span class="p">;</span>     <span class="cm">/* Connectivity check interval in ms.</span>
+<span class="cm">                                              * 0 = background task disabled */</span>
+    <span class="k">const</span> <span class="n">UA_DataTypeArray</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span> <span class="cm">/* Custom DataTypes. Attention!</span>
+<span class="cm">                                              * Custom datatypes are not cleaned</span>
+<span class="cm">                                              * up together with the</span>
+<span class="cm">                                              * configuration. So it is possible</span>
+<span class="cm">                                              * to allocate them on ROM. */</span>
+
+    <span class="cm">/* Available SecurityPolicies */</span>
+    <span class="kt">size_t</span> <span class="n">securityPoliciesSize</span><span class="p">;</span>
+    <span class="n">UA_SecurityPolicy</span> <span class="o">*</span><span class="n">securityPolicies</span><span class="p">;</span>
+
+    <span class="cm">/* Certificate Verification Plugin */</span>
+    <span class="n">UA_CertificateVerification</span> <span class="n">certificateVerification</span><span class="p">;</span>
 
     <span class="cm">/* Callbacks for async connection handshakes */</span>
     <span class="n">UA_ConnectClientConnection</span> <span class="n">connectionFunc</span><span class="p">;</span>
     <span class="n">UA_ConnectClientConnection</span> <span class="n">initConnectionFunc</span><span class="p">;</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pollConnectionFunc</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
 
-    <span class="cm">/* Custom DataTypes. Attention! Custom datatypes are not cleaned up together</span>
-<span class="cm">     * with the configuration. So it is possible to allocate them on ROM. */</span>
-    <span class="k">const</span> <span class="n">UA_DataTypeArray</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
-
     <span class="cm">/* Callback for state changes */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">stateCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientState</span> <span class="n">clientState</span><span class="p">);</span>
-
-   <span class="cm">/* Connectivity check interval in ms.</span>
-<span class="cm">    * 0 = background task disabled */</span>
-    <span class="n">UA_UInt32</span> <span class="n">connectivityCheckInterval</span><span class="p">;</span>
-
-    <span class="cm">/* session timeout in ms */</span>
-    <span class="n">UA_UInt32</span> <span class="n">requestedSessionTimeout</span><span class="p">;</span>
 
     <span class="cm">/* When connectivityCheckInterval is greater than 0, every</span>
 <span class="cm">     * connectivityCheckInterval (in ms), a async read request is performed on</span>
@@ -237,8 +273,6 @@ The usual usage is as follows:</p>
 <span class="cm">     * response for this read request The connection can be closed, this in an</span>
 <span class="cm">     * attempt to recreate a healthy connection. */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">inactivityCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
-
-    <span class="kt">void</span> <span class="o">*</span><span class="n">clientContext</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -246,27 +280,7 @@ The usual usage is as follows:</p>
 <h2>Client Lifecycle<a class="headerlink" href="#client-lifecycle" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Create a new client */</span>
 <span class="n">UA_Client</span> <span class="o">*</span>
-<span class="nf">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig</span> <span class="n">config</span><span class="p">);</span>
-
-<span class="cm">/* Creates a new secure client with the required configuration, certificate</span>
-<span class="cm"> * privatekey, trustlist and revocation list.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param  config                   new secure configuration for client</span>
-<span class="cm"> * @param  certificate              client certificate</span>
-<span class="cm"> * @param  privateKey               client&#39;s private key</span>
-<span class="cm"> * @param  remoteCertificate        server certificate form the endpoints</span>
-<span class="cm"> * @param  trustList                list of trustable certificate</span>
-<span class="cm"> * @param  trustListSize            count of trustList</span>
-<span class="cm"> * @param  revocationList           list of revoked digital certificate</span>
-<span class="cm"> * @param  revocationListSize       count of revocationList</span>
-<span class="cm"> * @param  securityPolicyFunction   securityPolicy function</span>
-<span class="cm"> * @return Returns a client configuration for secure channel */</span>
-<span class="n">UA_Client</span> <span class="o">*</span>
-<span class="nf">UA_Client_secure_new</span><span class="p">(</span><span class="n">UA_ClientConfig</span> <span class="n">config</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="n">certificate</span><span class="p">,</span>
-                     <span class="n">UA_ByteString</span> <span class="n">privateKey</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">remoteCertificate</span><span class="p">,</span>
-                     <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">trustList</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">trustListSize</span><span class="p">,</span>
-                     <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">revocationList</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">revocationListSize</span><span class="p">,</span>
-                     <span class="n">UA_SecurityPolicy_Func</span> <span class="n">securityPolicyFunction</span><span class="p">);</span>
+<span class="nf">UA_Client_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
 <span class="cm">/* Get the client connection status */</span>
 <span class="n">UA_ClientState</span>
@@ -279,9 +293,7 @@ The usual usage is as follows:</p>
 <span class="cm">/* Get the client context */</span>
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span> <span class="o">*</span>
 <span class="nf">UA_Client_getContext</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_ClientConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
-    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">config</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">UA_ClientConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span> <span class="cm">/* Cannot fail */</span>
     <span class="k">return</span> <span class="n">config</span><span class="o">-&gt;</span><span class="n">clientContext</span><span class="p">;</span>
 <span class="p">}</span>
 
@@ -309,9 +321,9 @@ The usual usage is as follows:</p>
 <span class="nf">UA_Client_connect</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_connect_async</span> <span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
-                         <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
-                         <span class="kt">void</span> <span class="o">*</span><span class="n">connected</span><span class="p">);</span>
+<span class="nf">UA_Client_connect_async</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
+                        <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">connected</span><span class="p">);</span>
 
 <span class="cm">/* Connect to the server without creating a session</span>
 <span class="cm"> *</span>

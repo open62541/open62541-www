@@ -113,6 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#node-addition-and-deletion">Node Addition and Deletion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -1538,6 +1539,63 @@ generated automatically and is returned through <code class="docutils literal no
 needed. <code class="docutils literal notranslate"><span class="pre">deleteEventNode</span></code> specifies whether the node representation of the event should be deleted after invoking
 the method. This can be useful if events with the similar attributes are triggered frequently. <code class="docutils literal notranslate"><span class="pre">UA_TRUE</span></code> would
 cause the node to be deleted.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
+
+<span class="cm">/* The EventQueueOverflowEventType is defined as abstract, therefore we can not</span>
+<span class="cm"> * create an instance of that type directly, but need to create a subtype. The</span>
+<span class="cm"> * following is an arbitrary number which shall refer to our internal overflow</span>
+<span class="cm"> * type. This is already posted on the OPC Foundation bug tracker under the</span>
+<span class="cm"> * following link for clarification:</span>
+<span class="cm"> * https://opcfoundation-onlineapplications.org/mantis/view.php?id=4206 */</span>
+<span class="cp"># define UA_NS0ID_SIMPLEOVERFLOWEVENTTYPE 4035</span>
+
+<span class="cm">/* Creates a node representation of an event</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param eventType The type of the event for which a node should be created</span>
+<span class="cm"> * @param outNodeId The NodeId of the newly created node for the event</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_createEvent method */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_createEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">eventType</span><span class="p">,</span>
+                      <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNodeId</span><span class="p">);</span>
+
+<span class="cm">/* Triggers a node representation of an event by applying EventFilters and</span>
+<span class="cm">   adding the event to the appropriate queues.</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param eventNodeId The NodeId of the node representation of the event which should be triggered</span>
+<span class="cm"> * @param outEvent the EventId of the new event</span>
+<span class="cm"> * @param deleteEventNode Specifies whether the node representation of the event should be deleted</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_triggerEvent method */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_triggerEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">eventNodeId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">originId</span><span class="p">,</span>
+                       <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">outEventId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="n">deleteEventNode</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_SUBSCRIPTIONS_EVENTS */</span><span class="cp"></span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_updateCertificate</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">oldCertificate</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">newCertificate</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">newPrivateKey</span><span class="p">,</span>
+                            <span class="n">UA_Boolean</span> <span class="n">closeSessions</span><span class="p">,</span>
+                            <span class="n">UA_Boolean</span> <span class="n">closeSecureChannels</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
+<span class="n">UA_UInt16</span> <span class="nf">UA_Server_addNamespace</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
+
+<span class="n">UA_ServerConfig</span><span class="o">*</span>
+<span class="nf">UA_Server_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="cm">/* Get namespace by name from the server. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getNamespaceByName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="n">namespaceUri</span><span class="p">,</span>
+                             <span class="kt">size_t</span><span class="o">*</span> <span class="n">foundIndex</span><span class="p">);</span>
+</pre></div>
+</div>
 </div>
 </div>
 
