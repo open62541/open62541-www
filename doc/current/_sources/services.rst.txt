@@ -358,7 +358,6 @@ historical values themselves are not visible in the AddressSpace.
    void Service_HistoryRead(UA_Server *server, UA_Session *session,
                             const UA_HistoryReadRequest *request,
                             UA_HistoryReadResponse *response);
-   #endif
    
 HistoryUpdate Service
 ^^^^^^^^^^^^^^^^^^^^^
@@ -372,6 +371,7 @@ or Event. Valid actions are Insert, Replace or Delete.
    Service_HistoryUpdate(UA_Server *server, UA_Session *session,
                          const UA_HistoryUpdateRequest *request,
                          UA_HistoryUpdateResponse *response);
+   #endif
    
 .. _method-services:
 
