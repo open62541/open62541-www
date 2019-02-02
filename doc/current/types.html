@@ -965,22 +965,58 @@ type operations as static inline functions.</p>
     <span class="n">UA_Boolean</span> <span class="nl">isArray</span>       <span class="p">:</span> <span class="mi">1</span><span class="p">;</span> <span class="cm">/* The member is an array */</span>
 <span class="p">}</span> <span class="n">UA_DataTypeMember</span><span class="p">;</span>
 
+<span class="cm">/* The DataType &quot;kind&quot; is an internal type classification. It is used to</span>
+<span class="cm"> * dispatch handling to the correct routines. */</span>
+<span class="cp">#define UA_DATATYPEKINDS 31</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_DATATYPEKIND_BOOLEAN</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_SBYTE</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_BYTE</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_INT16</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_UINT16</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_INT32</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_UINT32</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_INT64</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_UINT64</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_FLOAT</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_DOUBLE</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_STRING</span> <span class="o">=</span> <span class="mi">11</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_DATETIME</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_GUID</span> <span class="o">=</span> <span class="mi">13</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_BYTESTRING</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_XMLELEMENT</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_NODEID</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_EXPANDEDNODEID</span> <span class="o">=</span> <span class="mi">17</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_STATUSCODE</span> <span class="o">=</span> <span class="mi">18</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_QUALIFIEDNAME</span> <span class="o">=</span> <span class="mi">19</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_LOCALIZEDTEXT</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_EXTENSIONOBJECT</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_DATAVALUE</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_VARIANT</span> <span class="o">=</span> <span class="mi">23</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_DIAGNOSTICINFO</span> <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_DECIMAL</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_ENUM</span> <span class="o">=</span> <span class="mi">26</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_STRUCTURE</span> <span class="o">=</span> <span class="mi">27</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_OPTSTRUCT</span> <span class="o">=</span> <span class="mi">28</span><span class="p">,</span> <span class="cm">/* struct with optional fields */</span>
+    <span class="n">UA_DATATYPEKIND_UNION</span> <span class="o">=</span> <span class="mi">29</span><span class="p">,</span>
+    <span class="n">UA_DATATYPEKIND_BITFIELDCLUSTER</span> <span class="o">=</span> <span class="mi">30</span> <span class="cm">/* bitfields + padding */</span>
+<span class="p">}</span> <span class="n">UA_DataTypeKind</span><span class="p">;</span>
+
 <span class="k">struct</span> <span class="n">UA_DataType</span> <span class="p">{</span>
 <span class="cp">#ifdef UA_ENABLE_TYPENAMES</span>
     <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">typeName</span><span class="p">;</span>
 <span class="cp">#endif</span>
-    <span class="n">UA_NodeId</span>  <span class="n">typeId</span><span class="p">;</span>           <span class="cm">/* The nodeid of the type */</span>
-    <span class="n">UA_UInt16</span>  <span class="n">memSize</span><span class="p">;</span>          <span class="cm">/* Size of the struct in memory */</span>
-    <span class="n">UA_UInt16</span>  <span class="n">typeIndex</span><span class="p">;</span>        <span class="cm">/* Index of the type in the datatypetable */</span>
-    <span class="n">UA_Byte</span>    <span class="n">membersSize</span><span class="p">;</span>      <span class="cm">/* How many members does the type have? */</span>
-    <span class="n">UA_Boolean</span> <span class="nl">builtin</span>      <span class="p">:</span> <span class="mi">1</span><span class="p">;</span> <span class="cm">/* The type is &quot;builtin&quot; and has dedicated de-</span>
-<span class="cm">                                    and encoding functions */</span>
-    <span class="n">UA_Boolean</span> <span class="nl">pointerFree</span>  <span class="p">:</span> <span class="mi">1</span><span class="p">;</span> <span class="cm">/* The type (and its members) contains no</span>
-<span class="cm">                                    pointers that need to be freed */</span>
-    <span class="n">UA_Boolean</span> <span class="nl">overlayable</span>  <span class="p">:</span> <span class="mi">1</span><span class="p">;</span> <span class="cm">/* The type has the identical memory layout in</span>
-<span class="cm">                                    memory and on the binary stream. */</span>
-    <span class="n">UA_UInt16</span>  <span class="n">binaryEncodingId</span><span class="p">;</span> <span class="cm">/* NodeId of datatype when encoded as binary */</span>
-    <span class="c1">//UA_UInt16  xmlEncodingId;  /* NodeId of datatype when encoded as XML */</span>
+    <span class="n">UA_NodeId</span> <span class="n">typeId</span><span class="p">;</span>                <span class="cm">/* The nodeid of the type */</span>
+    <span class="n">UA_UInt16</span> <span class="n">memSize</span><span class="p">;</span>               <span class="cm">/* Size of the struct in memory */</span>
+    <span class="n">UA_UInt16</span> <span class="n">typeIndex</span><span class="p">;</span>             <span class="cm">/* Index of the type in the datatypetable */</span>
+    <span class="n">UA_UInt32</span> <span class="nl">typeKind</span>         <span class="p">:</span> <span class="mi">6</span><span class="p">;</span>  <span class="cm">/* Dispatch index for the handling routines */</span>
+    <span class="n">UA_UInt32</span> <span class="nl">pointerFree</span>      <span class="p">:</span> <span class="mi">1</span><span class="p">;</span>  <span class="cm">/* The type (and its members) contains no</span>
+<span class="cm">                                      * pointers that need to be freed */</span>
+    <span class="n">UA_UInt32</span> <span class="nl">overlayable</span>      <span class="p">:</span> <span class="mi">1</span><span class="p">;</span>  <span class="cm">/* The type has the identical memory layout</span>
+<span class="cm">                                      * in memory and on the binary stream. */</span>
+    <span class="n">UA_UInt32</span> <span class="nl">membersSize</span>      <span class="p">:</span> <span class="mi">8</span><span class="p">;</span>  <span class="cm">/* How many members does the type have? */</span>
+    <span class="n">UA_UInt32</span> <span class="nl">binaryEncodingId</span> <span class="p">:</span> <span class="mi">16</span><span class="p">;</span> <span class="cm">/* NodeId of datatype when encoded as binary */</span>
+    <span class="c1">//UA_UInt16  xmlEncodingId;      /* NodeId of datatype when encoded as XML */</span>
     <span class="n">UA_DataTypeMember</span> <span class="o">*</span><span class="n">members</span><span class="p">;</span>
 <span class="p">};</span>
 
