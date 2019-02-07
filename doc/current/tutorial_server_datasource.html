@@ -1,8 +1,8 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
@@ -26,8 +26,6 @@
 
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Working with Variable Types" href="tutorial_server_variabletype.html" />
     <link rel="prev" title="Adding Variables to a Server" href="tutorial_server_variable.html" /> 
 
@@ -93,7 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_firststeps.html">Building a Simple Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding Variables to a Server</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Connecting a Variable with a Physical Process</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Connecting a Variable with a Physical Process</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#updating-variables-manually">Updating variables manually</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variable-value-callback">Variable Value Callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variable-data-sources">Variable Data Sources</a></li>
@@ -169,7 +167,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/tutorial_server_datasource.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_server_datasource.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -190,22 +188,22 @@ near the physical process and clients consuming the data at runtime. In the
 previous tutorial, we saw how to add variables to an OPC UA information
 model. This tutorial shows how to connect a variable to runtime information,
 for example from measurements of a physical process. For simplicity, we take
-the system clock as the underlying “process”.</p>
+the system clock as the underlying &#8220;process&#8221;.</p>
 <p>The following code snippets are each concerned with a different way of
 updating variable values at runtime. Taken together, the code snippets define
 a compilable source file.</p>
 <div class="section" id="updating-variables-manually">
 <h2>Updating variables manually<a class="headerlink" href="#updating-variables-manually" title="Permalink to this headline">¶</a></h2>
 <p>As a starting point, assume that a variable for a value of type
-<a class="reference internal" href="types.html#datetime"><span class="std std-ref">DateTime</span></a> has been created in the server with the identifier
-“ns=1,s=current-time”. Assuming that our applications gets triggered when a
+<a class="reference internal" href="types.html#datetime"><em>DateTime</em></a> has been created in the server with the identifier
+&#8220;ns=1,s=current-time&#8221;. Assuming that our applications gets triggered when a
 new value arrives from the underlying process, we can just write into the
 variable.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;ua_server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_config_default.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_log_stdout.h&gt;</span><span class="cp"></span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;ua_server.h&gt;</span>
+<span class="cp">#include &lt;ua_config_default.h&gt;</span>
+<span class="cp">#include &lt;ua_log_stdout.h&gt;</span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include &lt;signal.h&gt;</span>
 
 <span class="k">static</span> <span class="kt">void</span>
 <span class="nf">updateCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
@@ -245,7 +243,7 @@ value in a tight loop would take up a lot of resources. Value callbacks allow
 to synchronize a variable value with an external representation. They attach
 callbacks to the variable that are executed before every read and after every
 write operation.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">beforeReadTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
@@ -280,7 +278,7 @@ So-called data sources go one step further. The server redirects every read
 and write request to a callback function. Upon reading, the callback provides
 copy of the current value. Internally, the data source needs to implement its
 own memory management.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
 <span class="nf">readCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
@@ -326,7 +324,7 @@ own memory management.</p>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
     <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
@@ -398,11 +396,11 @@ own memory management.</p>
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
               VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
+              LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
               HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
+              SOURCELINK_SUFFIX: ''
           };
       </script>
         <script type="text/javascript" src="_static/jquery.js"></script>

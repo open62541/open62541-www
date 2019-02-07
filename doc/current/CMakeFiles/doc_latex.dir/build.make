@@ -83,7 +83,7 @@ doc/CMakeFiles/doc_latex: doc_src/plugin_pubsub_connection.rst
 doc/CMakeFiles/doc_latex: doc_src/pubsub.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_server_events.rst
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building LaTeX sources for documentation with Sphinx"
-	cd /home/travis/build/open62541/open62541/build/doc && /home/travis/.local/bin/sphinx-build -b latex /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc_latex
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/sphinx-build -b latex /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc_latex
 
 doc_src/types.rst: ../tools/c2rst.py
 doc_src/types.rst: ../include/ua_types.h
