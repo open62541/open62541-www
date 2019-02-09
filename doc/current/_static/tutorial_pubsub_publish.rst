@@ -175,7 +175,7 @@ It follows the main server code, making use of the above definitions.
            (UA_PubSubTransportLayer *) UA_calloc(2, sizeof(UA_PubSubTransportLayer));
        if(!config->pubsubTransportLayers) {
            UA_ServerConfig_delete(config);
-           return -1;
+           return EXIT_FAILURE;
        }
        config->pubsubTransportLayers[0] = UA_PubSubTransportLayerUDPMP();
        config->pubsubTransportLayersSize++;

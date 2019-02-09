@@ -23,6 +23,7 @@ context pointer.
    #include <ua_client_subscriptions.h>
    
    #include <signal.h>
+   #include <stdlib.h>
    
    static void
    dataChangeNotificationCallback(UA_Server *server, UA_UInt32 monitoredItemId,
@@ -66,5 +67,5 @@ It follows the main server code, making use of the above definitions.
        UA_StatusCode retval = UA_Server_run(server, &running);
        UA_Server_delete(server);
        UA_ServerConfig_delete(config);
-       return (int)retval;
+       return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
    }

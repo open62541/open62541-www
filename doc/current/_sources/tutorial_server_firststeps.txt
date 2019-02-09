@@ -24,6 +24,7 @@ C source-file called ``myServer.c`` with the following content:
    #include <ua_log_stdout.h>
    
    #include <signal.h>
+   #include <stdlib.h>
    
    UA_Boolean running = true;
    static void stopHandler(int sig) {
@@ -41,7 +42,7 @@ C source-file called ``myServer.c`` with the following content:
        UA_StatusCode retval = UA_Server_run(server, &running);
        UA_Server_delete(server);
        UA_ServerConfig_delete(config);
-       return (int)retval;
+       return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
    }
    
 This is all that is needed for a simple OPC UA server. With the GCC compiler,
