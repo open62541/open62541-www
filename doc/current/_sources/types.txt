@@ -748,18 +748,18 @@ A data value with an associated status code and timestamps.
 .. code-block:: c
 
    typedef struct {
+       UA_Variant    value;
+       UA_DateTime   sourceTimestamp;
+       UA_DateTime   serverTimestamp;
+       UA_UInt16     sourcePicoseconds;
+       UA_UInt16     serverPicoseconds;
+       UA_StatusCode status;
        UA_Boolean    hasValue             : 1;
        UA_Boolean    hasStatus            : 1;
        UA_Boolean    hasSourceTimestamp   : 1;
        UA_Boolean    hasServerTimestamp   : 1;
        UA_Boolean    hasSourcePicoseconds : 1;
        UA_Boolean    hasServerPicoseconds : 1;
-       UA_Variant    value;
-       UA_StatusCode status;
-       UA_DateTime   sourceTimestamp;
-       UA_UInt16     sourcePicoseconds;
-       UA_DateTime   serverTimestamp;
-       UA_UInt16     serverPicoseconds;
    } UA_DataValue;
    
 DiagnosticInfo
