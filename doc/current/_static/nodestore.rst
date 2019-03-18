@@ -58,7 +58,8 @@ correctness of casting from ``UA_Node`` to a specific node type.
        UA_NodeReferenceKind *references;           \
                                                    \
        /* Members specific to open62541 */         \
-       void *context;
+       void *context;                              \
+       UA_Boolean constructed; /* Constructors were called */
    
    typedef struct {
        UA_NODE_BASEATTRIBUTES
