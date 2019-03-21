@@ -15,9 +15,9 @@ sure to compare with the type definitions in ``ua_types.h``.
 .. code-block:: c
 
    
-   #include <ua_server.h>
-   #include <ua_config_default.h>
-   #include <ua_log_stdout.h>
+   #include <open62541/plugin/log_stdout.h>
+   #include <open62541/server.h>
+   #include <open62541/server_config_default.h>
    
    #include <stdlib.h>
    

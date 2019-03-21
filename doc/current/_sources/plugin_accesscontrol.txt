@@ -15,7 +15,7 @@ rights accordingly.
        /* Supported login mechanisms. The server endpoints are created from here. */
        size_t userTokenPoliciesSize;
        UA_UserTokenPolicy *userTokenPolicies;
-       
+   
        /* Authenticate a session. The session context is attached to the session
         * and later passed into the node-based access control callbacks. The new
         * session is rejected if a StatusCode other than UA_STATUSCODE_GOOD is

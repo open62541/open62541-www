@@ -66,7 +66,7 @@ doc/CMakeFiles/doc: doc_src/client_config.rst
 doc/CMakeFiles/doc: doc_src/plugin_log.rst
 doc/CMakeFiles/doc: doc_src/plugin_network.rst
 doc/CMakeFiles/doc: doc_src/services.rst
-doc/CMakeFiles/doc: doc_src/plugin_access_control.rst
+doc/CMakeFiles/doc: doc_src/plugin_accesscontrol.rst
 doc/CMakeFiles/doc: doc_src/nodestore.rst
 doc/CMakeFiles/doc: doc_src/tutorials.rst
 doc/CMakeFiles/doc: doc_src/tutorial_datatypes.rst
@@ -86,79 +86,79 @@ doc/CMakeFiles/doc: doc_src/tutorial_server_events.rst
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/sphinx-build -b html /home/travis/build/open62541/open62541/build/doc_src /home/travis/build/open62541/open62541/build/doc
 
 doc_src/types.rst: ../tools/c2rst.py
-doc_src/types.rst: ../include/ua_types.h
+doc_src/types.rst: ../include/open62541/types.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating ../doc_src/types.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_types.h /home/travis/build/open62541/open62541/build/doc_src/types.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/types.h /home/travis/build/open62541/open62541/build/doc_src/types.rst
 
 doc_src/constants.rst: ../tools/c2rst.py
-doc_src/constants.rst: ../include/ua_constants.h
+doc_src/constants.rst: ../include/open62541/constants.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating ../doc_src/constants.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_constants.h /home/travis/build/open62541/open62541/build/doc_src/constants.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/constants.h /home/travis/build/open62541/open62541/build/doc_src/constants.rst
 
 doc_src/types_generated.rst: ../tools/c2rst.py
-doc_src/types_generated.rst: src_generated/ua_types_generated.h
+doc_src/types_generated.rst: src_generated/open62541/types_generated.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Generating ../doc_src/types_generated.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/build/src_generated/ua_types_generated.h /home/travis/build/open62541/open62541/build/doc_src/types_generated.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/build/src_generated/open62541/types_generated.h /home/travis/build/open62541/open62541/build/doc_src/types_generated.rst
 
 doc_src/statuscodes.rst: ../tools/c2rst.py
-doc_src/statuscodes.rst: src_generated/ua_statuscodes.h
+doc_src/statuscodes.rst: src_generated/open62541/statuscodes.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating ../doc_src/statuscodes.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/build/src_generated/ua_statuscodes.h /home/travis/build/open62541/open62541/build/doc_src/statuscodes.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/build/src_generated/open62541/statuscodes.h /home/travis/build/open62541/open62541/build/doc_src/statuscodes.rst
 
 doc_src/server.rst: ../tools/c2rst.py
-doc_src/server.rst: ../include/ua_server.h
+doc_src/server.rst: ../include/open62541/server.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating ../doc_src/server.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_server.h /home/travis/build/open62541/open62541/build/doc_src/server.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/server.h /home/travis/build/open62541/open62541/build/doc_src/server.rst
 
 doc_src/server_config.rst: ../tools/c2rst.py
-doc_src/server_config.rst: ../include/ua_server_config.h
+doc_src/server_config.rst: ../include/open62541/server_config.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating ../doc_src/server_config.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_server_config.h /home/travis/build/open62541/open62541/build/doc_src/server_config.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/server_config.h /home/travis/build/open62541/open62541/build/doc_src/server_config.rst
 
 doc_src/client.rst: ../tools/c2rst.py
-doc_src/client.rst: ../include/ua_client.h
+doc_src/client.rst: ../include/open62541/client.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating ../doc_src/client.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_client.h /home/travis/build/open62541/open62541/build/doc_src/client.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/client.h /home/travis/build/open62541/open62541/build/doc_src/client.rst
 
 doc_src/client_subscriptions.rst: ../tools/c2rst.py
-doc_src/client_subscriptions.rst: ../include/ua_client_subscriptions.h
+doc_src/client_subscriptions.rst: ../include/open62541/client_subscriptions.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Generating ../doc_src/client_subscriptions.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_client_subscriptions.h /home/travis/build/open62541/open62541/build/doc_src/client_subscriptions.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/client_subscriptions.h /home/travis/build/open62541/open62541/build/doc_src/client_subscriptions.rst
 
 doc_src/client_highlevel.rst: ../tools/c2rst.py
-doc_src/client_highlevel.rst: ../include/ua_client_highlevel.h
+doc_src/client_highlevel.rst: ../include/open62541/client_highlevel.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating ../doc_src/client_highlevel.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_client_highlevel.h /home/travis/build/open62541/open62541/build/doc_src/client_highlevel.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/client_highlevel.h /home/travis/build/open62541/open62541/build/doc_src/client_highlevel.rst
 
 doc_src/client_config.rst: ../tools/c2rst.py
-doc_src/client_config.rst: ../include/ua_client_config.h
+doc_src/client_config.rst: ../include/open62541/client_config.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Generating ../doc_src/client_config.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_client_config.h /home/travis/build/open62541/open62541/build/doc_src/client_config.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/client_config.h /home/travis/build/open62541/open62541/build/doc_src/client_config.rst
 
 doc_src/plugin_log.rst: ../tools/c2rst.py
-doc_src/plugin_log.rst: ../include/ua_plugin_log.h
+doc_src/plugin_log.rst: ../include/open62541/plugin/log.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Generating ../doc_src/plugin_log.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_log.h /home/travis/build/open62541/open62541/build/doc_src/plugin_log.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/plugin/log.h /home/travis/build/open62541/open62541/build/doc_src/plugin_log.rst
 
 doc_src/plugin_network.rst: ../tools/c2rst.py
-doc_src/plugin_network.rst: ../include/ua_plugin_network.h
+doc_src/plugin_network.rst: ../include/open62541/plugin/network.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Generating ../doc_src/plugin_network.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_network.h /home/travis/build/open62541/open62541/build/doc_src/plugin_network.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/plugin/network.h /home/travis/build/open62541/open62541/build/doc_src/plugin_network.rst
 
 doc_src/services.rst: ../tools/c2rst.py
 doc_src/services.rst: ../src/server/ua_services.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Generating ../doc_src/services.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/src/server/ua_services.h /home/travis/build/open62541/open62541/build/doc_src/services.rst
 
-doc_src/plugin_access_control.rst: ../tools/c2rst.py
-doc_src/plugin_access_control.rst: ../include/ua_plugin_access_control.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Generating ../doc_src/plugin_access_control.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_access_control.h /home/travis/build/open62541/open62541/build/doc_src/plugin_access_control.rst
+doc_src/plugin_accesscontrol.rst: ../tools/c2rst.py
+doc_src/plugin_accesscontrol.rst: ../include/open62541/plugin/accesscontrol.h
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Generating ../doc_src/plugin_accesscontrol.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/plugin/accesscontrol.h /home/travis/build/open62541/open62541/build/doc_src/plugin_accesscontrol.rst
 
 doc_src/nodestore.rst: ../tools/c2rst.py
-doc_src/nodestore.rst: ../include/ua_plugin_nodestore.h
+doc_src/nodestore.rst: ../include/open62541/plugin/nodestore.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Generating ../doc_src/nodestore.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_nodestore.h /home/travis/build/open62541/open62541/build/doc_src/nodestore.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/plugin/nodestore.h /home/travis/build/open62541/open62541/build/doc_src/nodestore.rst
 
 doc_src/tutorial_datatypes.rst: ../tools/c2rst.py
 doc_src/tutorial_datatypes.rst: ../examples/tutorial_datatypes.c
@@ -211,14 +211,14 @@ doc_src/tutorial_pubsub_publish.rst: ../examples/pubsub/tutorial_pubsub_publish.
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/pubsub/tutorial_pubsub_publish.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_pubsub_publish.rst
 
 doc_src/plugin_pubsub_connection.rst: ../tools/c2rst.py
-doc_src/plugin_pubsub_connection.rst: ../include/ua_plugin_pubsub.h
+doc_src/plugin_pubsub_connection.rst: ../include/open62541/plugin/pubsub.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating ../doc_src/plugin_pubsub_connection.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_plugin_pubsub.h /home/travis/build/open62541/open62541/build/doc_src/plugin_pubsub_connection.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/plugin/pubsub.h /home/travis/build/open62541/open62541/build/doc_src/plugin_pubsub_connection.rst
 
 doc_src/pubsub.rst: ../tools/c2rst.py
-doc_src/pubsub.rst: ../include/ua_server_pubsub.h
+doc_src/pubsub.rst: ../include/open62541/server_pubsub.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating ../doc_src/pubsub.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/ua_server_pubsub.h /home/travis/build/open62541/open62541/build/doc_src/pubsub.rst
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/server_pubsub.h /home/travis/build/open62541/open62541/build/doc_src/pubsub.rst
 
 doc_src/tutorial_server_events.rst: ../tools/c2rst.py
 doc_src/tutorial_server_events.rst: ../examples/tutorial_server_events.c
@@ -239,7 +239,7 @@ doc: doc_src/client_config.rst
 doc: doc_src/plugin_log.rst
 doc: doc_src/plugin_network.rst
 doc: doc_src/services.rst
-doc: doc_src/plugin_access_control.rst
+doc: doc_src/plugin_accesscontrol.rst
 doc: doc_src/nodestore.rst
 doc: doc_src/tutorial_datatypes.rst
 doc: doc_src/tutorial_client_firststeps.rst

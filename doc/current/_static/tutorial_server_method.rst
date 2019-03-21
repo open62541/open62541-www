@@ -29,9 +29,10 @@ by the SDK, so that we don't have to verify the arguments in the callback.
 .. code-block:: c
 
    
-   #include <ua_server.h>
-   #include <ua_config_default.h>
-   #include <ua_log_stdout.h>
+   #include <open62541/client_config_default.h>
+   #include <open62541/plugin/log_stdout.h>
+   #include <open62541/server.h>
+   #include <open62541/server_config_default.h>
    
    #include <signal.h>
    #include <stdlib.h>

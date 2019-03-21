@@ -691,7 +691,7 @@ be set to a null-pointer.
         * `value->value.storageType` to `UA_VARIANT_DATA_NODELETE` to prevent the
         * memory being cleaned up. Don't forget to also set `value->hasValue` to
         * true to indicate the presence of a value.
-        * 
+        *
         * @param server The server executing the callback
         * @param sessionId The identifier of the session
         * @param sessionContext Additional data attached to the session in the
@@ -718,7 +718,7 @@ be set to a null-pointer.
    
        /* Write into a data source. This method pointer can be NULL if the
         * operation is unsupported.
-        * 
+        *
         * @param server The server executing the callback
         * @param sessionId The identifier of the session
         * @param sessionContext Additional data attached to the session in the
