@@ -24,7 +24,7 @@ Server Lifecycle
     *        Otherwise, the server shuts down.
     * @return Returns the statuscode of the UA_Server_run_shutdown method */
    UA_StatusCode
-   UA_Server_run(UA_Server *server, volatile UA_Boolean *running);
+   UA_Server_run(UA_Server *server, const volatile UA_Boolean *running);
    
    /* The prologue part of UA_Server_run (no need to use if you call
     * UA_Server_run) */

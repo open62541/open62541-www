@@ -70,7 +70,7 @@ Connect to a Server
    UA_StatusCode
    UA_Client_connect_async(UA_Client *client, const char *endpointUrl,
                            UA_ClientAsyncServiceCallback callback,
-                           void *connected);
+                           void *userdata);
    
    /* Connect to the server without creating a session
     *
