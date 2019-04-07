@@ -200,6 +200,7 @@ Use the regular service to read several nodes at once.
 
 .. code-block:: c
 
+   
    #ifdef UA_ENABLE_HISTORIZING
    typedef UA_Boolean
    (*UA_HistoricalIteratorCallback)(UA_Client *client,
@@ -254,6 +255,7 @@ Use the regular service to read several nodes at once.
                                      UA_DateTime endTimestamp);
    
    #endif // UA_ENABLE_HISTORIZING
+   
 Write Attributes
 ^^^^^^^^^^^^^^^^
 
@@ -262,6 +264,7 @@ time. Use the regular write service to write several attributes at once.
 
 .. code-block:: c
 
+   
    /* Don't call this function, use the typed versions */
    UA_StatusCode
    __UA_Client_writeAttribute(UA_Client *client, const UA_NodeId *nodeId,
@@ -438,3 +441,207 @@ time. Use the regular write service to write several attributes at once.
    
 Method Calling
 ^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   
+   #ifdef UA_ENABLE_METHODCALLS
+   UA_StatusCode
+   UA_Client_call(UA_Client *client, const UA_NodeId objectId,
+                  const UA_NodeId methodId, size_t inputSize, const UA_Variant *input,
+                  size_t *outputSize, UA_Variant **output);
+   #endif
+   
+Node Management
+^^^^^^^^^^^^^^^
+See the section on :ref:`server-side node management <addnodes>`.
+
+.. code-block:: c
+
+   
+   UA_StatusCode
+   UA_Client_addReference(UA_Client *client, const UA_NodeId sourceNodeId,
+                          const UA_NodeId referenceTypeId, UA_Boolean isForward,
+                          const UA_String targetServerUri,
+                          const UA_ExpandedNodeId targetNodeId,
+                          UA_NodeClass targetNodeClass);
+   
+   UA_StatusCode
+   UA_Client_deleteReference(UA_Client *client, const UA_NodeId sourceNodeId,
+                             const UA_NodeId referenceTypeId, UA_Boolean isForward,
+                             const UA_ExpandedNodeId targetNodeId,
+                             UA_Boolean deleteBidirectional);
+   
+   UA_StatusCode
+   UA_Client_deleteNode(UA_Client *client, const UA_NodeId nodeId,
+                        UA_Boolean deleteTargetReferences);
+   
+   /* Protect against redundant definitions for server/client */
+   #ifndef UA_DEFAULT_ATTRIBUTES_DEFINED
+   #define UA_DEFAULT_ATTRIBUTES_DEFINED
+   /* The default for variables is "BaseDataType" for the datatype, -2 for the
+    * valuerank and a read-accesslevel. */
+   extern const UA_VariableAttributes UA_VariableAttributes_default;
+   extern const UA_VariableTypeAttributes UA_VariableTypeAttributes_default;
+   /* Methods are executable by default */
+   extern const UA_MethodAttributes UA_MethodAttributes_default;
+   /* The remaining attribute definitions are currently all zeroed out */
+   extern const UA_ObjectAttributes UA_ObjectAttributes_default;
+   extern const UA_ObjectTypeAttributes UA_ObjectTypeAttributes_default;
+   extern const UA_ReferenceTypeAttributes UA_ReferenceTypeAttributes_default;
+   extern const UA_DataTypeAttributes UA_DataTypeAttributes_default;
+   extern const UA_ViewAttributes UA_ViewAttributes_default;
+   #endif
+   
+   /* Don't call this function, use the typed versions */
+   UA_StatusCode
+   __UA_Client_addNode(UA_Client *client, const UA_NodeClass nodeClass,
+                       const UA_NodeId requestedNewNodeId,
+                       const UA_NodeId parentNodeId,
+                       const UA_NodeId referenceTypeId,
+                       const UA_QualifiedName browseName,
+                       const UA_NodeId typeDefinition, const UA_NodeAttributes *attr,
+                       const UA_DataType *attributeType, UA_NodeId *outNewNodeId);
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addVariableNode(UA_Client *client, const UA_NodeId requestedNewNodeId,
+                             const UA_NodeId parentNodeId,
+                             const UA_NodeId referenceTypeId,
+                             const UA_QualifiedName browseName,
+                             const UA_NodeId typeDefinition,
+                             const UA_VariableAttributes attr,
+                             UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_VARIABLE, requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  typeDefinition, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_VARIABLEATTRIBUTES],
+                                  outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addVariableTypeNode(UA_Client *client,
+                                 const UA_NodeId requestedNewNodeId,
+                                 const UA_NodeId parentNodeId,
+                                 const UA_NodeId referenceTypeId,
+                                 const UA_QualifiedName browseName,
+                                 const UA_VariableTypeAttributes attr,
+                                 UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_VARIABLETYPE,
+                                  requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_VARIABLETYPEATTRIBUTES],
+                                  outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addObjectNode(UA_Client *client, const UA_NodeId requestedNewNodeId,
+                           const UA_NodeId parentNodeId,
+                           const UA_NodeId referenceTypeId,
+                           const UA_QualifiedName browseName,
+                           const UA_NodeId typeDefinition,
+                           const UA_ObjectAttributes attr, UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_OBJECT, requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  typeDefinition, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_OBJECTATTRIBUTES], outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addObjectTypeNode(UA_Client *client, const UA_NodeId requestedNewNodeId,
+                               const UA_NodeId parentNodeId,
+                               const UA_NodeId referenceTypeId,
+                               const UA_QualifiedName browseName,
+                               const UA_ObjectTypeAttributes attr,
+                               UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_OBJECTTYPE, requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_OBJECTTYPEATTRIBUTES],
+                                  outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addViewNode(UA_Client *client, const UA_NodeId requestedNewNodeId,
+                         const UA_NodeId parentNodeId,
+                         const UA_NodeId referenceTypeId,
+                         const UA_QualifiedName browseName,
+                         const UA_ViewAttributes attr,
+                         UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_VIEW, requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_VIEWATTRIBUTES], outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addReferenceTypeNode(UA_Client *client,
+                                  const UA_NodeId requestedNewNodeId,
+                                  const UA_NodeId parentNodeId,
+                                  const UA_NodeId referenceTypeId,
+                                  const UA_QualifiedName browseName,
+                                  const UA_ReferenceTypeAttributes attr,
+                                  UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_REFERENCETYPE,
+                                  requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_REFERENCETYPEATTRIBUTES],
+                                  outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addDataTypeNode(UA_Client *client, const UA_NodeId requestedNewNodeId,
+                             const UA_NodeId parentNodeId,
+                             const UA_NodeId referenceTypeId,
+                             const UA_QualifiedName browseName,
+                             const UA_DataTypeAttributes attr,
+                             UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_DATATYPE, requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_DATATYPEATTRIBUTES],
+                                  outNewNodeId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_addMethodNode(UA_Client *client, const UA_NodeId requestedNewNodeId,
+                           const UA_NodeId parentNodeId,
+                           const UA_NodeId referenceTypeId,
+                           const UA_QualifiedName browseName,
+                           const UA_MethodAttributes attr,
+                           UA_NodeId *outNewNodeId) {
+       return __UA_Client_addNode(client, UA_NODECLASS_METHOD, requestedNewNodeId,
+                                  parentNodeId, referenceTypeId, browseName,
+                                  UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
+                                  &UA_TYPES[UA_TYPES_METHODATTRIBUTES], outNewNodeId);
+   }
+   
+Misc Highlevel Functionality
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   
+   /* Get the namespace-index of a namespace-URI
+    *
+    * @param client The UA_Client struct for this connection
+    * @param namespaceUri The interested namespace URI
+    * @param namespaceIndex The namespace index of the URI. The value is unchanged
+    *        in case of an error
+    * @return Indicates whether the operation succeeded or returns an error code */
+   UA_StatusCode
+   UA_Client_NamespaceGetIndex(UA_Client *client, UA_String *namespaceUri,
+                               UA_UInt16 *namespaceIndex);
+   
+   #ifndef HAVE_NODEITER_CALLBACK
+   #define HAVE_NODEITER_CALLBACK
+   /* Iterate over all nodes referenced by parentNodeId by calling the callback
+      function for each child node */
+   typedef UA_StatusCode (*UA_NodeIteratorCallback)(UA_NodeId childId, UA_Boolean isInverse,
+                                                    UA_NodeId referenceTypeId, void *handle);
+   #endif
+   
+   UA_StatusCode
+   UA_Client_forEachChildNodeCall(UA_Client *client, UA_NodeId parentNodeId,
+                                  UA_NodeIteratorCallback callback, void *handle);

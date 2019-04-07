@@ -113,6 +113,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#methodnode">MethodNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objecttypenode">ObjectTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodestore-plugin-api">Nodestore Plugin API</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
@@ -198,7 +203,7 @@ Reference are triples of the form <tt class="docutils literal"><span class="pre"
 <span class="pre">target-nodeid)</span></tt>. An example reference between nodes is a
 <tt class="docutils literal"><span class="pre">hasTypeDefinition</span></tt> reference between a Variable and its VariableType. Some
 ReferenceTypes are <em>hierarchic</em> and must not form <em>directed loops</em>. See the
-section on <em class="xref std std-ref">ReferenceTypes</em> for more details on
+section on <a class="reference internal" href="#referencetypenode"><em>ReferenceTypes</em></a> for more details on
 possible references and their semantics.</p>
 <p><strong>Warning!!</strong> The structures defined in this section are only relevant for
 the developers of custom Nodestores. The interaction with the information
@@ -259,8 +264,8 @@ attributes.</p>
 <h3>Data Type<a class="headerlink" href="#data-type" title="Permalink to this headline">¶</a></h3>
 <p>The (scalar) data type of the variable is constrained to be of a specific
 type or one of its children in the type hierarchy. The data type is given as
-a NodeId pointing to a <em class="xref std std-ref">datatypenode</em> in the type hierarchy. See the
-Section <em class="xref std std-ref">datatypenode</em> for more details.</p>
+a NodeId pointing to a <a class="reference internal" href="#datatypenode"><em>DataTypeNode</em></a> in the type hierarchy. See the
+Section <a class="reference internal" href="#datatypenode"><em>DataTypeNode</em></a> for more details.</p>
 <p>If the data type attribute points to <tt class="docutils literal"><span class="pre">UInt32</span></tt>, then the value attribute
 must be of that exact type since <tt class="docutils literal"><span class="pre">UInt32</span></tt> does not have children in the
 type hierarchy. If the data type attribute points <tt class="docutils literal"><span class="pre">Number</span></tt>, then the type
@@ -383,11 +388,265 @@ providing context</em> is part of a Call request message.</p>
 <div class="section" id="objectnode">
 <h2>ObjectNode<a class="headerlink" href="#objectnode" title="Permalink to this headline">¶</a></h2>
 <p>Objects are used to represent systems, system components, real-world objects
-and software objects. Objects are instances of an <em class="xref std std-ref">object
-type</em> and may contain variables, methods and further
+and software objects. Objects are instances of an <a class="reference internal" href="#objecttypenode"><em>object
+type</em></a> and may contain variables, methods and further
 objects.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_NODE_BASEATTRIBUTES</span>
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
+    <span class="n">UA_EVENT_ATTRIBUTES</span>
+<span class="cp">#endif</span>
+    <span class="n">UA_Byte</span> <span class="n">eventNotifier</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ObjectNode</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="objecttypenode">
+<span id="id4"></span><h2>ObjectTypeNode<a class="headerlink" href="#objecttypenode" title="Permalink to this headline">¶</a></h2>
+<p>ObjectTypes provide definitions for Objects. Abstract objects cannot be
+instantiated. See <a class="reference internal" href="server.html#node-lifecycle"><em>Node Lifecycle: Constructors, Destructors and Node Contexts</em></a> for the use of constructor and
+destructor callbacks.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
+
+    <span class="cm">/* Members specific to open62541 */</span>
+    <span class="n">UA_NodeTypeLifecycle</span> <span class="n">lifecycle</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ObjectTypeNode</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="referencetypenode">
+<span id="id5"></span><h2>ReferenceTypeNode<a class="headerlink" href="#referencetypenode" title="Permalink to this headline">¶</a></h2>
+<p>Each reference between two nodes is typed with a ReferenceType that gives
+meaning to the relation. The OPC UA standard defines a set of ReferenceTypes
+as a mandatory part of OPC UA information models.</p>
+<ul class="simple">
+<li>Abstract ReferenceTypes cannot be used in actual references and are only
+used to structure the ReferenceTypes hierarchy</li>
+<li>Symmetric references have the same meaning from the perspective of the
+source and target node</li>
+</ul>
+<p>The figure below shows the hierarchy of the standard ReferenceTypes (arrows
+indicate a <tt class="docutils literal"><span class="pre">hasSubType</span></tt> relation). Refer to Part 3 of the OPC UA
+specification for the full semantics of each ReferenceType.</p>
+<p class="graphviz">
+<img src="_images/graphviz-dc4d4766bd63c7d129b83e27da433a02bbcc7a61.png" alt="digraph tree {
+
+node [height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
+
+references [label=&quot;References\n(Abstract, Symmetric)&quot;]
+hierarchical_references [label=&quot;HierarchicalReferences\n(Abstract)&quot;]
+references -&gt; hierarchical_references
+
+nonhierarchical_references [label=&quot;NonHierarchicalReferences\n(Abstract, Symmetric)&quot;]
+references -&gt; nonhierarchical_references
+
+haschild [label=&quot;HasChild\n(Abstract)&quot;]
+hierarchical_references -&gt; haschild
+
+aggregates [label=&quot;Aggregates\n(Abstract)&quot;]
+haschild -&gt; aggregates
+
+organizes [label=&quot;Organizes&quot;]
+hierarchical_references -&gt; organizes
+
+hascomponent [label=&quot;HasComponent&quot;]
+aggregates -&gt; hascomponent
+
+hasorderedcomponent [label=&quot;HasOrderedComponent&quot;]
+hascomponent -&gt; hasorderedcomponent
+
+hasproperty [label=&quot;HasProperty&quot;]
+aggregates -&gt; hasproperty
+
+hassubtype [label=&quot;HasSubtype&quot;]
+haschild -&gt; hassubtype
+
+hasmodellingrule [label=&quot;HasModellingRule&quot;]
+nonhierarchical_references -&gt; hasmodellingrule
+
+hastypedefinition [label=&quot;HasTypeDefinition&quot;]
+nonhierarchical_references -&gt; hastypedefinition
+
+hasencoding [label=&quot;HasEncoding&quot;]
+nonhierarchical_references -&gt; hasencoding
+
+hasdescription [label=&quot;HasDescription&quot;]
+nonhierarchical_references -&gt; hasdescription
+
+haseventsource [label=&quot;HasEventSource&quot;]
+hierarchical_references -&gt; haseventsource
+
+hasnotifier [label=&quot;HasNotifier&quot;]
+hierarchical_references -&gt; hasnotifier
+
+generatesevent [label=&quot;GeneratesEvent&quot;]
+nonhierarchical_references -&gt; generatesevent
+
+alwaysgeneratesevent [label=&quot;AlwaysGeneratesEvent&quot;]
+generatesevent -&gt; alwaysgeneratesevent
+
+{rank=same hierarchical_references nonhierarchical_references}
+{rank=same generatesevent haseventsource hasmodellingrule
+           hasencoding hassubtype}
+{rank=same alwaysgeneratesevent hasproperty}
+
+}" />
+</p>
+<p>The ReferenceType hierarchy can be extended with user-defined ReferenceTypes.
+Many Companion Specifications for OPC UA define new ReferenceTypes to be used
+in their domain of interest.</p>
+<p>For the following example of custom ReferenceTypes, we attempt to model the
+structure of a technical system. For this, we introduce two custom
+ReferenceTypes. First, the hierarchical <tt class="docutils literal"><span class="pre">contains</span></tt> ReferenceType indicates
+that a system (represented by an OPC UA object) contains a component (or
+subsystem). This gives rise to a tree-structure of containment relations. For
+example, the motor (object) is contained in the car and the crankshaft is
+contained in the motor. Second, the symmetric <tt class="docutils literal"><span class="pre">connectedTo</span></tt> ReferenceType
+indicates that two components are connected. For example, the motor&#8217;s
+crankshaft is connected to the gear box. Connections are independent of the
+containment hierarchy and can induce a general graph-structure. Further
+subtypes of <tt class="docutils literal"><span class="pre">connectedTo</span></tt> could be used to differentiate between physical,
+electrical and information related connections. A client can then learn the
+layout of a (physical) system represented in an OPC UA information model
+based on a common understanding of just two custom reference types.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">symmetric</span><span class="p">;</span>
+    <span class="n">UA_LocalizedText</span> <span class="n">inverseName</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ReferenceTypeNode</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datatypenode">
+<span id="id6"></span><h2>DataTypeNode<a class="headerlink" href="#datatypenode" title="Permalink to this headline">¶</a></h2>
+<p>DataTypes represent simple and structured data types. DataTypes may contain
+arrays. But they always describe the structure of a single instance. In
+open62541, DataTypeNodes in the information model hierarchy are matched to
+<tt class="docutils literal"><span class="pre">UA_DataType</span></tt> type descriptions for <a class="reference internal" href="types.html#generic-types"><em>Generic Type Handling</em></a> via their NodeId.</p>
+<p>Abstract DataTypes (e.g. <tt class="docutils literal"><span class="pre">Number</span></tt>) cannot be the type of actual values.
+They are used to constrain values to possible child DataTypes (e.g.
+<tt class="docutils literal"><span class="pre">UInt32</span></tt>).</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DataTypeNode</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="viewnode">
+<h2>ViewNode<a class="headerlink" href="#viewnode" title="Permalink to this headline">¶</a></h2>
+<p>Each View defines a subset of the Nodes in the AddressSpace. Views can be
+used when browsing an information model to focus on a subset of nodes and
+references only. ViewNodes can be created and be interacted with. But their
+use in the <a class="reference internal" href="services.html#view-services"><em>Browse</em></a> service is currently unsupported in
+open62541.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_Byte</span> <span class="n">eventNotifier</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">containsNoLoops</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ViewNode</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="nodestore-plugin-api">
+<h2>Nodestore Plugin API<a class="headerlink" href="#nodestore-plugin-api" title="Permalink to this headline">¶</a></h2>
+<p>The following definitions are used for implementing custom node storage
+backends. <strong>Most users will want to use the default nodestore and don&#8217;t need
+to work with the nodestore API</strong>.</p>
+<p>Outside of custom nodestore implementations, users should not manually edit
+nodes. Please use the OPC UA services for that. Otherwise, all consistency
+checks are omitted. This can crash the application eventually.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Nodestore context and lifecycle */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteNodestore</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">);</span>
+
+    <span class="cm">/* For non-multithreaded access, some nodestores allow that nodes are edited</span>
+<span class="cm">     * without a copy/replace. This is not possible when the node is only an</span>
+<span class="cm">     * intermediate representation and stored e.g. in a database backend. */</span>
+    <span class="n">UA_Boolean</span> <span class="n">inPlaceEditAllowed</span><span class="p">;</span>
+
+    <span class="cm">/* The following definitions are used to create empty nodes of the different</span>
+<span class="cm">     * node types. The memory is managed by the nodestore. Therefore, the node</span>
+<span class="cm">     * has to be removed via a special deleteNode function. (If the new node is</span>
+<span class="cm">     * not added to the nodestore.) */</span>
+    <span class="n">UA_Node</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">newNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+    <span class="cm">/* ``Get`` returns a pointer to an immutable node. ``Release`` indicates</span>
+<span class="cm">     * that the pointer is no longer accessed afterwards. */</span>
+
+    <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">getNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">releaseNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+    <span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
+<span class="cm">     * deleteNode function or inserted / replaced into the nodestore). */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_Node</span> <span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
+
+    <span class="cm">/* Inserts a new node into the nodestore. If the NodeId is zero, then a</span>
+<span class="cm">     * fresh numeric NodeId is assigned. If insertion fails, the node is</span>
+<span class="cm">     * deleted. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">insertNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span>
+                                <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">addedNodeId</span><span class="p">);</span>
+
+    <span class="cm">/* To replace a node, get an editable copy of the node, edit and replace</span>
+<span class="cm">     * with this function. If the node was already replaced since the copy was</span>
+<span class="cm">     * made, UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not</span>
+<span class="cm">     * found, UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases,</span>
+<span class="cm">     * the editable node is deleted. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">replaceNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+    <span class="cm">/* Removes a node from the nodestore. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+
+    <span class="cm">/* Execute a callback for every node in the nodestore. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nodestoreContext</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">visitorContext</span><span class="p">,</span>
+                    <span class="n">UA_NodestoreVisitor</span> <span class="n">visitor</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_Nodestore</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The following methods specialize internally for the different node classes
+(distinguished by the nodeClass member)</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
+<span class="cm"> * and so on). The attributes are copied. Note that the attributes structs do</span>
+<span class="cm"> * not contain NodeId, NodeClass and BrowseName. The NodeClass of the node needs</span>
+<span class="cm"> * to be correctly set before calling this method. UA_Node_deleteMembers is</span>
+<span class="cm"> * called on the node when an error occurs internally. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_setAttributes</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attributes</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">);</span>
+
+<span class="cm">/* Reset the destination node and copy the content of the source */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_copy</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">src</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="cm">/* Allocate new node and copy the values from src */</span>
+<span class="n">UA_Node</span> <span class="o">*</span>
+<span class="nf">UA_Node_copy_alloc</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">src</span><span class="p">);</span>
+
+<span class="cm">/* Add a single reference to the node */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+<span class="cm">/* Delete a single reference from the node */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Node_deleteReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DeleteReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+
+<span class="cm">/* Delete all references of the node */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_deleteReferences</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+<span class="cm">/* Remove all malloc&#39;ed members of the node */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_deleteMembers</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

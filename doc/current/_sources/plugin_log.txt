@@ -110,7 +110,3 @@ logger.
        va_end(args);
    #endif
    }
-   
-   _UA_END_DECLS
-   
-   #endif /* UA_PLUGIN_LOG_H_ */

@@ -394,3 +394,159 @@ the method's execution cannot be returned to the Client and are discarded.
                      const UA_CallRequest *request,
                      UA_CallResponse *response);
    #endif
+   
+   #ifdef UA_ENABLE_SUBSCRIPTIONS
+   
+MonitoredItem Service Set
+-------------------------
+Clients define MonitoredItems to subscribe to data and Events. Each
+MonitoredItem identifies the item to be monitored and the Subscription to use
+to send Notifications. The item to be monitored may be any Node Attribute.
+
+CreateMonitoredItems Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to create and add one or more MonitoredItems to a Subscription. A
+MonitoredItem is deleted automatically by the Server when the Subscription is
+deleted. Deleting a MonitoredItem causes its entire set of triggered item
+links to be deleted, but has no effect on the MonitoredItems referenced by
+the triggered items.
+
+.. code-block:: c
+
+   void Service_CreateMonitoredItems(UA_Server *server, UA_Session *session,
+                                     const UA_CreateMonitoredItemsRequest *request,
+                                     UA_CreateMonitoredItemsResponse *response);
+   
+DeleteMonitoredItems Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to remove one or more MonitoredItems of a Subscription. When a
+MonitoredItem is deleted, its triggered item links are also deleted.
+
+.. code-block:: c
+
+   void Service_DeleteMonitoredItems(UA_Server *server, UA_Session *session,
+                                     const UA_DeleteMonitoredItemsRequest *request,
+                                     UA_DeleteMonitoredItemsResponse *response);
+   
+ModifyMonitoredItems Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to modify MonitoredItems of a Subscription. Changes to the MonitoredItem
+settings shall be applied immediately by the Server. They take effect as soon
+as practical but not later than twice the new revisedSamplingInterval.
+
+Illegal request values for parameters that can be revised do not generate
+errors. Instead the server will choose default values and indicate them in
+the corresponding revised parameter.
+
+.. code-block:: c
+
+   void Service_ModifyMonitoredItems(UA_Server *server, UA_Session *session,
+                                     const UA_ModifyMonitoredItemsRequest *request,
+                                     UA_ModifyMonitoredItemsResponse *response);
+   
+SetMonitoringMode Service
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to set the monitoring mode for one or more MonitoredItems of a
+Subscription.
+
+.. code-block:: c
+
+   void Service_SetMonitoringMode(UA_Server *server, UA_Session *session,
+                                  const UA_SetMonitoringModeRequest *request,
+                                  UA_SetMonitoringModeResponse *response);
+   
+SetTriggering Service
+^^^^^^^^^^^^^^^^^^^^^
+Used to create and delete triggering links for a triggering item.
+
+.. code-block:: c
+
+   /* Not Implemented */
+   
+Subscription Service Set
+------------------------
+Subscriptions are used to report Notifications to the Client.
+
+CreateSubscription Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to create a Subscription. Subscriptions monitor a set of MonitoredItems
+for Notifications and return them to the Client in response to Publish
+requests.
+
+.. code-block:: c
+
+   void Service_CreateSubscription(UA_Server *server, UA_Session *session,
+                                   const UA_CreateSubscriptionRequest *request,
+                                   UA_CreateSubscriptionResponse *response);
+   
+ModifySubscription Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to modify a Subscription.
+
+.. code-block:: c
+
+   void Service_ModifySubscription(UA_Server *server, UA_Session *session,
+                                   const UA_ModifySubscriptionRequest *request,
+                                   UA_ModifySubscriptionResponse *response);
+   
+SetPublishingMode Service
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to enable sending of Notifications on one or more Subscriptions.
+
+.. code-block:: c
+
+   void Service_SetPublishingMode(UA_Server *server, UA_Session *session,
+                                  const UA_SetPublishingModeRequest *request,
+                                  UA_SetPublishingModeResponse *response);
+   
+Publish Service
+^^^^^^^^^^^^^^^
+Used for two purposes. First, it is used to acknowledge the receipt of
+NotificationMessages for one or more Subscriptions. Second, it is used to
+request the Server to return a NotificationMessage or a keep-alive
+Message.
+
+Note that the service signature is an exception and does not contain a
+pointer to a PublishResponse. That is because the service queues up publish
+requests internally and sends responses asynchronously based on timeouts.
+
+.. code-block:: c
+
+   void Service_Publish(UA_Server *server, UA_Session *session,
+                        const UA_PublishRequest *request, UA_UInt32 requestId);
+   
+Republish Service
+^^^^^^^^^^^^^^^^^
+Requests the Subscription to republish a NotificationMessage from its
+retransmission queue.
+
+.. code-block:: c
+
+   void Service_Republish(UA_Server *server, UA_Session *session,
+                          const UA_RepublishRequest *request,
+                          UA_RepublishResponse *response);
+   
+DeleteSubscriptions Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Invoked to delete one or more Subscriptions that belong to the Client's
+Session.
+
+.. code-block:: c
+
+   void Service_DeleteSubscriptions(UA_Server *server, UA_Session *session,
+                                    const UA_DeleteSubscriptionsRequest *request,
+                                    UA_DeleteSubscriptionsResponse *response);
+   
+TransferSubscription Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Used to transfer a Subscription and its MonitoredItems from one Session to
+another. For example, a Client may need to reopen a Session and then transfer
+its Subscriptions to that Session. It may also be used by one Client to take
+over a Subscription from another Client by transferring the Subscription to
+its Session.
+
+.. code-block:: c
+
+   /* Not Implemented */
+   
+   #endif /* UA_ENABLE_SUBSCRIPTIONS */

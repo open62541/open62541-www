@@ -338,3 +338,171 @@ that wrap the raw services.
    /*
     * Query Service Set
     * ^^^^^^^^^^^^^^^^^ */
+   #ifdef UA_ENABLE_QUERY
+   
+   static UA_INLINE UA_QueryFirstResponse
+   UA_Client_Service_queryFirst(UA_Client *client,
+                                const UA_QueryFirstRequest request) {
+       UA_QueryFirstResponse response;
+       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
+                           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
+       return response;
+   }
+   
+   static UA_INLINE UA_QueryNextResponse
+   UA_Client_Service_queryNext(UA_Client *client,
+                               const UA_QueryNextRequest request) {
+       UA_QueryNextResponse response;
+       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
+                           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
+       return response;
+   }
+   
+   #endif
+   
+.. _client-async-services:
+
+Asynchronous Services
+---------------------
+All OPC UA services are asynchronous in nature. So several service calls can
+be made without waiting for a response first. Responess may come in a
+different ordering.
+
+.. code-block:: c
+
+   
+   /* Use the type versions of this method. See below. However, the general
+    * mechanism of async service calls is explained here.
+    *
+    * We say that an async service call has been dispatched once this method
+    * returns UA_STATUSCODE_GOOD. If there is an error after an async service has
+    * been dispatched, the callback is called with an "empty" response where the
+    * statusCode has been set accordingly. This is also done if the client is
+    * shutting down and the list of dispatched async services is emptied.
+    *
+    * The statusCode received when the client is shutting down is
+    * UA_STATUSCODE_BADSHUTDOWN.
+    *
+    * The statusCode received when the client don't receive response
+    * after specified config->timeout (in ms) is
+    * UA_STATUSCODE_BADTIMEOUT.
+    *
+    * Instead, you can use __UA_Client_AsyncServiceEx to specify
+    * a custom timeout
+    *
+    * The userdata and requestId arguments can be NULL. */
+   UA_StatusCode
+   __UA_Client_AsyncService(UA_Client *client, const void *request,
+                            const UA_DataType *requestType,
+                            UA_ClientAsyncServiceCallback callback,
+                            const UA_DataType *responseType,
+                            void *userdata, UA_UInt32 *requestId);
+   
+   UA_StatusCode
+   UA_Client_sendAsyncRequest(UA_Client *client, const void *request,
+           const UA_DataType *requestType, UA_ClientAsyncServiceCallback callback,
+           const UA_DataType *responseType, void *userdata, UA_UInt32 *requestId);
+   
+   /* Listen on the network and process arriving asynchronous responses in the
+    * background. Internal housekeeping, renewal of SecureChannels and subscription
+    * management is done as well. */
+   UA_StatusCode
+   UA_Client_run_iterate(UA_Client *client, UA_UInt16 timeout);
+   
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_runAsync(UA_Client *client, UA_UInt16 timeout) {
+       return UA_Client_run_iterate(client, timeout);
+   }
+   
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_manuallyRenewSecureChannel(UA_Client *client) {
+       return UA_Client_run_iterate(client, 0);
+   }
+   
+   /* Use the type versions of this method. See below. However, the general
+    * mechanism of async service calls is explained here.
+    *
+    * We say that an async service call has been dispatched once this method
+    * returns UA_STATUSCODE_GOOD. If there is an error after an async service has
+    * been dispatched, the callback is called with an "empty" response where the
+    * statusCode has been set accordingly. This is also done if the client is
+    * shutting down and the list of dispatched async services is emptied.
+    *
+    * The statusCode received when the client is shutting down is
+    * UA_STATUSCODE_BADSHUTDOWN.
+    *
+    * The statusCode received when the client don't receive response
+    * after specified timeout (in ms) is
+    * UA_STATUSCODE_BADTIMEOUT.
+    *
+    * The timeout can be disabled by setting timeout to 0
+    *
+    * The userdata and requestId arguments can be NULL. */
+   UA_StatusCode
+   __UA_Client_AsyncServiceEx(UA_Client *client, const void *request,
+                              const UA_DataType *requestType,
+                              UA_ClientAsyncServiceCallback callback,
+                              const UA_DataType *responseType,
+                              void *userdata, UA_UInt32 *requestId,
+                              UA_UInt32 timeout);
+   
+Timed Callbacks
+---------------
+Repeated callbacks can be attached to a client and will be executed in the
+defined interval.
+
+.. code-block:: c
+
+   
+   typedef void (*UA_ClientCallback)(UA_Client *client, void *data);
+   
+   /* Add a callback for execution at a specified time. If the indicated time lies
+    * in the past, then the callback is executed at the next iteration of the
+    * server's main loop.
+    *
+    * @param client The client object.
+    * @param callback The callback that shall be added.
+    * @param data Data that is forwarded to the callback.
+    * @param date The timestamp for the execution time.
+    * @param callbackId Set to the identifier of the repeated callback . This can
+    *        be used to cancel the callback later on. If the pointer is null, the
+    *        identifier is not set.
+    * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
+    *         otherwise. */
+   UA_StatusCode
+   UA_Client_addTimedCallback(UA_Client *client, UA_ClientCallback callback,
+                              void *data, UA_DateTime date, UA_UInt64 *callbackId);
+   
+   /* Add a callback for cyclic repetition to the client.
+    *
+    * @param client The client object.
+    * @param callback The callback that shall be added.
+    * @param data Data that is forwarded to the callback.
+    * @param interval_ms The callback shall be repeatedly executed with the given
+    *        interval (in ms). The interval must be positive. The first execution
+    *        occurs at now() + interval at the latest.
+    * @param callbackId Set to the identifier of the repeated callback . This can
+    *        be used to cancel the callback later on. If the pointer is null, the
+    *        identifier is not set.
+    * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
+    *         otherwise. */
+   UA_StatusCode
+   UA_Client_addRepeatedCallback(UA_Client *client, UA_ClientCallback callback,
+                                 void *data, UA_Double interval_ms,
+                                 UA_UInt64 *callbackId);
+   
+   UA_StatusCode
+   UA_Client_changeRepeatedCallbackInterval(UA_Client *client,
+                                            UA_UInt64 callbackId,
+                                            UA_Double interval_ms);
+   
+   void
+   UA_Client_removeCallback(UA_Client *client, UA_UInt64 callbackId);
+   
+   #define UA_Client_removeRepeatedCallback(client, callbackId) \
+       UA_Client_removeCallback(client, callbackId)
+   
+.. toctree::
+
+   client_highlevel
+   client_subscriptions

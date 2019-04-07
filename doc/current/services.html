@@ -43,7 +43,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="next" title="Information Modelling" href="nodestore.html" />
-    <link rel="prev" title="Data Types" href="types.html" /> 
+    <link rel="prev" title="Boolean" href="types_generated.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -151,6 +151,24 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#method-service-set">Method Service Set</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#call-service">Call Service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoreditem-service-set">MonitoredItem Service Set</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#createmonitoreditems-service">CreateMonitoredItems Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deletemonitoreditems-service">DeleteMonitoredItems Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modifymonitoreditems-service">ModifyMonitoredItems Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setmonitoringmode-service">SetMonitoringMode Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#settriggering-service">SetTriggering Service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#subscription-service-set">Subscription Service Set</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#createsubscription-service">CreateSubscription Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modifysubscription-service">ModifySubscription Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setpublishingmode-service">SetPublishingMode Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#publish-service">Publish Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#republish-service">Republish Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deletesubscriptions-service">DeleteSubscriptions Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transfersubscription-service">TransferSubscription Service</a></li>
 </ul>
 </li>
 </ul>
@@ -579,6 +597,148 @@ the method&#8217;s execution cannot be returned to the Client and are discarded.
                   <span class="k">const</span> <span class="n">UA_CallRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                   <span class="n">UA_CallResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 <span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="monitoreditem-service-set">
+<h2>MonitoredItem Service Set<a class="headerlink" href="#monitoreditem-service-set" title="Permalink to this headline">¶</a></h2>
+<p>Clients define MonitoredItems to subscribe to data and Events. Each
+MonitoredItem identifies the item to be monitored and the Subscription to use
+to send Notifications. The item to be monitored may be any Node Attribute.</p>
+<div class="section" id="createmonitoreditems-service">
+<h3>CreateMonitoredItems Service<a class="headerlink" href="#createmonitoreditems-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to create and add one or more MonitoredItems to a Subscription. A
+MonitoredItem is deleted automatically by the Server when the Subscription is
+deleted. Deleting a MonitoredItem causes its entire set of triggered item
+links to be deleted, but has no effect on the MonitoredItems referenced by
+the triggered items.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_CreateMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_CreateMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                  <span class="n">UA_CreateMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deletemonitoreditems-service">
+<h3>DeleteMonitoredItems Service<a class="headerlink" href="#deletemonitoreditems-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to remove one or more MonitoredItems of a Subscription. When a
+MonitoredItem is deleted, its triggered item links are also deleted.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_DeleteMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_DeleteMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                  <span class="n">UA_DeleteMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="modifymonitoreditems-service">
+<h3>ModifyMonitoredItems Service<a class="headerlink" href="#modifymonitoreditems-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to modify MonitoredItems of a Subscription. Changes to the MonitoredItem
+settings shall be applied immediately by the Server. They take effect as soon
+as practical but not later than twice the new revisedSamplingInterval.</p>
+<p>Illegal request values for parameters that can be revised do not generate
+errors. Instead the server will choose default values and indicate them in
+the corresponding revised parameter.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_ModifyMonitoredItems</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_ModifyMonitoredItemsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                  <span class="n">UA_ModifyMonitoredItemsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setmonitoringmode-service">
+<h3>SetMonitoringMode Service<a class="headerlink" href="#setmonitoringmode-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to set the monitoring mode for one or more MonitoredItems of a
+Subscription.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_SetMonitoringMode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_SetMonitoringModeRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                               <span class="n">UA_SetMonitoringModeResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="settriggering-service">
+<h3>SetTriggering Service<a class="headerlink" href="#settriggering-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to create and delete triggering links for a triggering item.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Not Implemented */</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="subscription-service-set">
+<h2>Subscription Service Set<a class="headerlink" href="#subscription-service-set" title="Permalink to this headline">¶</a></h2>
+<p>Subscriptions are used to report Notifications to the Client.</p>
+<div class="section" id="createsubscription-service">
+<h3>CreateSubscription Service<a class="headerlink" href="#createsubscription-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to create a Subscription. Subscriptions monitor a set of MonitoredItems
+for Notifications and return them to the Client in response to Publish
+requests.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_CreateSubscription</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">UA_CreateSubscriptionRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                <span class="n">UA_CreateSubscriptionResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="modifysubscription-service">
+<h3>ModifySubscription Service<a class="headerlink" href="#modifysubscription-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to modify a Subscription.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_ModifySubscription</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">UA_ModifySubscriptionRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                <span class="n">UA_ModifySubscriptionResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setpublishingmode-service">
+<h3>SetPublishingMode Service<a class="headerlink" href="#setpublishingmode-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to enable sending of Notifications on one or more Subscriptions.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_SetPublishingMode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_SetPublishingModeRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                               <span class="n">UA_SetPublishingModeResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="publish-service">
+<h3>Publish Service<a class="headerlink" href="#publish-service" title="Permalink to this headline">¶</a></h3>
+<p>Used for two purposes. First, it is used to acknowledge the receipt of
+NotificationMessages for one or more Subscriptions. Second, it is used to
+request the Server to return a NotificationMessage or a keep-alive
+Message.</p>
+<p>Note that the service signature is an exception and does not contain a
+pointer to a PublishResponse. That is because the service queues up publish
+requests internally and sends responses asynchronously based on timeouts.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_Publish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_PublishRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="republish-service">
+<h3>Republish Service<a class="headerlink" href="#republish-service" title="Permalink to this headline">¶</a></h3>
+<p>Requests the Subscription to republish a NotificationMessage from its
+retransmission queue.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_Republish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_RepublishRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                       <span class="n">UA_RepublishResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deletesubscriptions-service">
+<h3>DeleteSubscriptions Service<a class="headerlink" href="#deletesubscriptions-service" title="Permalink to this headline">¶</a></h3>
+<p>Invoked to delete one or more Subscriptions that belong to the Client&#8217;s
+Session.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_DeleteSubscriptions</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_DeleteSubscriptionsRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                                 <span class="n">UA_DeleteSubscriptionsResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="transfersubscription-service">
+<h3>TransferSubscription Service<a class="headerlink" href="#transfersubscription-service" title="Permalink to this headline">¶</a></h3>
+<p>Used to transfer a Subscription and its MonitoredItems from one Session to
+another. For example, a Client may need to reopen a Session and then transfer
+its Subscriptions to that Session. It may also be used by one Client to take
+over a Subscription from another Client by transferring the Subscription to
+its Session.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Not Implemented */</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_SUBSCRIPTIONS */</span><span class="cp"></span>
 </pre></div>
 </div>
 </div>
@@ -596,7 +756,7 @@ the method&#8217;s execution cannot be returned to the Client and are discarded.
         <a href="nodestore.html" class="btn btn-neutral float-right" title="Information Modelling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="types.html" class="btn btn-neutral float-left" title="Data Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="types_generated.html" class="btn btn-neutral float-left" title="Boolean" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

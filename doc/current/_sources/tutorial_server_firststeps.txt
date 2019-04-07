@@ -40,8 +40,10 @@ C source-file called ``myServer.c`` with the following content:
        UA_Server *server = UA_Server_new(config);
    
        UA_StatusCode retval = UA_Server_run(server, &running);
+   
        UA_Server_delete(server);
        UA_ServerConfig_delete(config);
+   
        return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
    }
    
@@ -87,6 +89,7 @@ add a single TCP network layer that is listerning on port 4840.
 
 Server Lifecycle
 ^^^^^^^^^^^^^^^^
+
 The code in this example shows the three parts for server lifecycle
 management: Creating a server, running the server, and deleting the server.
 Creating and deleting a server is trivial once the configuration is set up.
@@ -100,7 +103,7 @@ method ``stopHandler`` that catches the signal (interrupt) the program
 receives when the operating systems tries to close it. This happens for
 example when you press ctrl-c in a terminal program. The signal handler then
 sets the variable ``running`` to false and the server shuts down once it
-takes back control. [#f1]_
+takes back control.
 
 In order to integrated OPC UA in a single-threaded application with its own
 mainloop (for example provided by a GUI toolkit), one can alternatively drive

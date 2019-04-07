@@ -42,7 +42,7 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="next" title="Standard-Defined Constants" href="constants.html" />
+    <link rel="next" title="Highlevel Client Functionality" href="client_highlevel.html" />
     <link rel="prev" title="Server" href="server.html" /> 
 </head>
 
@@ -110,6 +110,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#connect-to-a-server">Connect to a Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#asynchronous-services">Asynchronous Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
@@ -188,7 +195,7 @@ abstractions</em></a>.</p>
 event-driven main-loop. So the client will not perform any actions
 automatically in the background. This is especially relevant for
 subscriptions. The user will have to periodically call
-<cite>UA_Client_Subscriptions_manuallySendPublishRequest</cite>. See also <em class="xref std std-ref">here</em>.</p>
+<cite>UA_Client_Subscriptions_manuallySendPublishRequest</cite>. See also <a class="reference internal" href="client_subscriptions.html#client-subscriptions"><em>here</em></a>.</p>
 <div class="section" id="client-configuration">
 <span id="client-config"></span><h2>Client Configuration<a class="headerlink" href="#client-configuration" title="Permalink to this headline">¶</a></h2>
 <p>The client configuration is used for setting connection parameters and
@@ -282,6 +289,20 @@ The usual usage is as follows:</p>
 <span class="cm">     * response for this read request The connection can be closed, this in an</span>
 <span class="cm">     * attempt to recreate a healthy connection. */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">inactivityCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+    <span class="cm">/* Number of PublishResponse queued up in the server */</span>
+    <span class="n">UA_UInt16</span> <span class="n">outStandingPublishRequests</span><span class="p">;</span>
+
+    <span class="cm">/* If the client does not receive a PublishResponse after the defined delay</span>
+<span class="cm">     * of ``(sub-&gt;publishingInterval * sub-&gt;maxKeepAliveCount) +</span>
+<span class="cm">     * client-&gt;config.timeout)``, then subscriptionInactivityCallback is called</span>
+<span class="cm">     * for the subscription.. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">subscriptionInactivityCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                           <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span>
+                                           <span class="kt">void</span> <span class="o">*</span><span class="n">subContext</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span> <span class="n">UA_ClientConfig</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -594,7 +615,179 @@ that wrap the raw services.</p>
 <span class="cm">/*</span>
 <span class="cm"> * Query Service Set</span>
 <span class="cm"> * ^^^^^^^^^^^^^^^^^ */</span>
+<span class="cp">#ifdef UA_ENABLE_QUERY</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_QueryFirstResponse</span>
+<span class="nf">UA_Client_Service_queryFirst</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">UA_QueryFirstRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_QueryFirstResponse</span> <span class="n">response</span><span class="p">;</span>
+    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTREQUEST</span><span class="p">],</span>
+                        <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
+    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_QueryNextResponse</span>
+<span class="nf">UA_Client_Service_queryNext</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_QueryNextRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_QueryNextResponse</span> <span class="n">response</span><span class="p">;</span>
+    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTREQUEST</span><span class="p">],</span>
+                        <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
+    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">#endif</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="asynchronous-services">
+<span id="client-async-services"></span><h2>Asynchronous Services<a class="headerlink" href="#asynchronous-services" title="Permalink to this headline">¶</a></h2>
+<p>All OPC UA services are asynchronous in nature. So several service calls can
+be made without waiting for a response first. Responess may come in a
+different ordering.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Use the type versions of this method. See below. However, the general</span>
+<span class="cm"> * mechanism of async service calls is explained here.</span>
+<span class="cm"> *</span>
+<span class="cm"> * We say that an async service call has been dispatched once this method</span>
+<span class="cm"> * returns UA_STATUSCODE_GOOD. If there is an error after an async service has</span>
+<span class="cm"> * been dispatched, the callback is called with an &quot;empty&quot; response where the</span>
+<span class="cm"> * statusCode has been set accordingly. This is also done if the client is</span>
+<span class="cm"> * shutting down and the list of dispatched async services is emptied.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client is shutting down is</span>
+<span class="cm"> * UA_STATUSCODE_BADSHUTDOWN.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client don&#39;t receive response</span>
+<span class="cm"> * after specified config-&gt;timeout (in ms) is</span>
+<span class="cm"> * UA_STATUSCODE_BADTIMEOUT.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Instead, you can use __UA_Client_AsyncServiceEx to specify</span>
+<span class="cm"> * a custom timeout</span>
+<span class="cm"> *</span>
+<span class="cm"> * The userdata and requestId arguments can be NULL. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span>
+                         <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span>
+                         <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_sendAsyncRequest</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+        <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span> <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+        <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Listen on the network and process arriving asynchronous responses in the</span>
+<span class="cm"> * background. Internal housekeeping, renewal of SecureChannels and subscription</span>
+<span class="cm"> * management is done as well. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_run_iterate</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">);</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_runAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Client_run_iterate</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">timeout</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_manuallyRenewSecureChannel</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Client_run_iterate</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Use the type versions of this method. See below. However, the general</span>
+<span class="cm"> * mechanism of async service calls is explained here.</span>
+<span class="cm"> *</span>
+<span class="cm"> * We say that an async service call has been dispatched once this method</span>
+<span class="cm"> * returns UA_STATUSCODE_GOOD. If there is an error after an async service has</span>
+<span class="cm"> * been dispatched, the callback is called with an &quot;empty&quot; response where the</span>
+<span class="cm"> * statusCode has been set accordingly. This is also done if the client is</span>
+<span class="cm"> * shutting down and the list of dispatched async services is emptied.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client is shutting down is</span>
+<span class="cm"> * UA_STATUSCODE_BADSHUTDOWN.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The statusCode received when the client don&#39;t receive response</span>
+<span class="cm"> * after specified timeout (in ms) is</span>
+<span class="cm"> * UA_STATUSCODE_BADTIMEOUT.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The timeout can be disabled by setting timeout to 0</span>
+<span class="cm"> *</span>
+<span class="cm"> * The userdata and requestId arguments can be NULL. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_AsyncServiceEx</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span>
+                           <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">responseType</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">,</span>
+                           <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="timed-callbacks">
+<h2>Timed Callbacks<a class="headerlink" href="#timed-callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Repeated callbacks can be attached to a client and will be executed in the
+defined interval.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ClientCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="cm">/* Add a callback for execution at a specified time. If the indicated time lies</span>
+<span class="cm"> * in the past, then the callback is executed at the next iteration of the</span>
+<span class="cm"> * server&#39;s main loop.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param client The client object.</span>
+<span class="cm"> * @param callback The callback that shall be added.</span>
+<span class="cm"> * @param data Data that is forwarded to the callback.</span>
+<span class="cm"> * @param date The timestamp for the execution time.</span>
+<span class="cm"> * @param callbackId Set to the identifier of the repeated callback . This can</span>
+<span class="cm"> *        be used to cancel the callback later on. If the pointer is null, the</span>
+<span class="cm"> *        identifier is not set.</span>
+<span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code</span>
+<span class="cm"> *         otherwise. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addTimedCallback</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientCallback</span> <span class="n">callback</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="n">date</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+<span class="cm">/* Add a callback for cyclic repetition to the client.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param client The client object.</span>
+<span class="cm"> * @param callback The callback that shall be added.</span>
+<span class="cm"> * @param data Data that is forwarded to the callback.</span>
+<span class="cm"> * @param interval_ms The callback shall be repeatedly executed with the given</span>
+<span class="cm"> *        interval (in ms). The interval must be positive. The first execution</span>
+<span class="cm"> *        occurs at now() + interval at the latest.</span>
+<span class="cm"> * @param callbackId Set to the identifier of the repeated callback . This can</span>
+<span class="cm"> *        be used to cancel the callback later on. If the pointer is null, the</span>
+<span class="cm"> *        identifier is not set.</span>
+<span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code</span>
+<span class="cm"> *         otherwise. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addRepeatedCallback</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientCallback</span> <span class="n">callback</span><span class="p">,</span>
+                              <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">,</span>
+                              <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_changeRepeatedCallbackInterval</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                         <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">,</span>
+                                         <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_Client_removeCallback</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
+
+<span class="cp">#define UA_Client_removeRepeatedCallback(client, callbackId) \</span>
+<span class="cp">    UA_Client_removeCallback(client, callbackId)</span>
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#read-attributes">Read Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#historical-access">Historical Access</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#write-attributes">Write Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#method-calling">Method Calling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#node-management">Node Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
+</ul>
 </div>
 </div>
 </div>
@@ -607,7 +800,7 @@ that wrap the raw services.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="constants.html" class="btn btn-neutral float-right" title="Standard-Defined Constants" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="client_highlevel.html" class="btn btn-neutral float-right" title="Highlevel Client Functionality" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="server.html" class="btn btn-neutral float-left" title="Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

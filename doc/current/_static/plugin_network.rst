@@ -180,7 +180,3 @@ messages.
    typedef UA_Connection
    (*UA_ConnectClientConnection)(UA_ConnectionConfig config, UA_String endpointUrl,
                                  UA_UInt32 timeout, UA_Logger *logger);
-   
-   _UA_END_DECLS
-   
-   #endif /* UA_PLUGIN_NETWORK_H_ */

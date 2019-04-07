@@ -101,7 +101,3 @@ well (but less common).
    #define UA_VALUERANK_ONE_DIMENSION             1
    #define UA_VALUERANK_TWO_DIMENSIONS            2
    #define UA_VALUERANK_THREE_DIMENSIONS          3
-   
-   _UA_END_DECLS
-   
-   #endif /* UA_CONSTANTS_H_ */

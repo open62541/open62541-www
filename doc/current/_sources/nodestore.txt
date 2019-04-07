@@ -241,3 +241,285 @@ objects.
    
    typedef struct {
        UA_NODE_BASEATTRIBUTES
+   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+       UA_EVENT_ATTRIBUTES
+   #endif
+       UA_Byte eventNotifier;
+   } UA_ObjectNode;
+   
+.. _objecttypenode:
+
+ObjectTypeNode
+--------------
+
+ObjectTypes provide definitions for Objects. Abstract objects cannot be
+instantiated. See :ref:`node-lifecycle` for the use of constructor and
+destructor callbacks.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_NODE_BASEATTRIBUTES
+       UA_Boolean isAbstract;
+   
+       /* Members specific to open62541 */
+       UA_NodeTypeLifecycle lifecycle;
+   } UA_ObjectTypeNode;
+   
+.. _referencetypenode:
+
+ReferenceTypeNode
+-----------------
+
+Each reference between two nodes is typed with a ReferenceType that gives
+meaning to the relation. The OPC UA standard defines a set of ReferenceTypes
+as a mandatory part of OPC UA information models.
+
+- Abstract ReferenceTypes cannot be used in actual references and are only
+  used to structure the ReferenceTypes hierarchy
+- Symmetric references have the same meaning from the perspective of the
+  source and target node
+
+The figure below shows the hierarchy of the standard ReferenceTypes (arrows
+indicate a ``hasSubType`` relation). Refer to Part 3 of the OPC UA
+specification for the full semantics of each ReferenceType.
+
+.. graphviz::
+
+   digraph tree {
+
+   node [height=0, shape=box, fillcolor="#E5E5E5", concentrate=true]
+
+   references [label="References\n(Abstract, Symmetric)"]
+   hierarchical_references [label="HierarchicalReferences\n(Abstract)"]
+   references -> hierarchical_references
+
+   nonhierarchical_references [label="NonHierarchicalReferences\n(Abstract, Symmetric)"]
+   references -> nonhierarchical_references
+
+   haschild [label="HasChild\n(Abstract)"]
+   hierarchical_references -> haschild
+
+   aggregates [label="Aggregates\n(Abstract)"]
+   haschild -> aggregates
+
+   organizes [label="Organizes"]
+   hierarchical_references -> organizes
+
+   hascomponent [label="HasComponent"]
+   aggregates -> hascomponent
+
+   hasorderedcomponent [label="HasOrderedComponent"]
+   hascomponent -> hasorderedcomponent
+
+   hasproperty [label="HasProperty"]
+   aggregates -> hasproperty
+
+   hassubtype [label="HasSubtype"]
+   haschild -> hassubtype
+
+   hasmodellingrule [label="HasModellingRule"]
+   nonhierarchical_references -> hasmodellingrule
+
+   hastypedefinition [label="HasTypeDefinition"]
+   nonhierarchical_references -> hastypedefinition
+
+   hasencoding [label="HasEncoding"]
+   nonhierarchical_references -> hasencoding
+
+   hasdescription [label="HasDescription"]
+   nonhierarchical_references -> hasdescription
+
+   haseventsource [label="HasEventSource"]
+   hierarchical_references -> haseventsource
+
+   hasnotifier [label="HasNotifier"]
+   hierarchical_references -> hasnotifier
+
+   generatesevent [label="GeneratesEvent"]
+   nonhierarchical_references -> generatesevent
+
+   alwaysgeneratesevent [label="AlwaysGeneratesEvent"]
+   generatesevent -> alwaysgeneratesevent
+
+   {rank=same hierarchical_references nonhierarchical_references}
+   {rank=same generatesevent haseventsource hasmodellingrule
+              hasencoding hassubtype}
+   {rank=same alwaysgeneratesevent hasproperty}
+
+   }
+
+The ReferenceType hierarchy can be extended with user-defined ReferenceTypes.
+Many Companion Specifications for OPC UA define new ReferenceTypes to be used
+in their domain of interest.
+
+For the following example of custom ReferenceTypes, we attempt to model the
+structure of a technical system. For this, we introduce two custom
+ReferenceTypes. First, the hierarchical ``contains`` ReferenceType indicates
+that a system (represented by an OPC UA object) contains a component (or
+subsystem). This gives rise to a tree-structure of containment relations. For
+example, the motor (object) is contained in the car and the crankshaft is
+contained in the motor. Second, the symmetric ``connectedTo`` ReferenceType
+indicates that two components are connected. For example, the motor's
+crankshaft is connected to the gear box. Connections are independent of the
+containment hierarchy and can induce a general graph-structure. Further
+subtypes of ``connectedTo`` could be used to differentiate between physical,
+electrical and information related connections. A client can then learn the
+layout of a (physical) system represented in an OPC UA information model
+based on a common understanding of just two custom reference types.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_NODE_BASEATTRIBUTES
+       UA_Boolean isAbstract;
+       UA_Boolean symmetric;
+       UA_LocalizedText inverseName;
+   } UA_ReferenceTypeNode;
+   
+.. _datatypenode:
+
+DataTypeNode
+------------
+
+DataTypes represent simple and structured data types. DataTypes may contain
+arrays. But they always describe the structure of a single instance. In
+open62541, DataTypeNodes in the information model hierarchy are matched to
+``UA_DataType`` type descriptions for :ref:`generic-types` via their NodeId.
+
+Abstract DataTypes (e.g. ``Number``) cannot be the type of actual values.
+They are used to constrain values to possible child DataTypes (e.g.
+``UInt32``).
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_NODE_BASEATTRIBUTES
+       UA_Boolean isAbstract;
+   } UA_DataTypeNode;
+   
+ViewNode
+--------
+
+Each View defines a subset of the Nodes in the AddressSpace. Views can be
+used when browsing an information model to focus on a subset of nodes and
+references only. ViewNodes can be created and be interacted with. But their
+use in the :ref:`Browse<view-services>` service is currently unsupported in
+open62541.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_NODE_BASEATTRIBUTES
+       UA_Byte eventNotifier;
+       UA_Boolean containsNoLoops;
+   } UA_ViewNode;
+   
+Nodestore Plugin API
+--------------------
+The following definitions are used for implementing custom node storage
+backends. **Most users will want to use the default nodestore and don't need
+to work with the nodestore API**.
+
+Outside of custom nodestore implementations, users should not manually edit
+nodes. Please use the OPC UA services for that. Otherwise, all consistency
+checks are omitted. This can crash the application eventually.
+
+.. code-block:: c
+
+   
+   typedef void (*UA_NodestoreVisitor)(void *visitorContext, const UA_Node *node);
+   
+   typedef struct {
+       /* Nodestore context and lifecycle */
+       void *context;
+       void (*deleteNodestore)(void *nodestoreContext);
+   
+       /* For non-multithreaded access, some nodestores allow that nodes are edited
+        * without a copy/replace. This is not possible when the node is only an
+        * intermediate representation and stored e.g. in a database backend. */
+       UA_Boolean inPlaceEditAllowed;
+   
+       /* The following definitions are used to create empty nodes of the different
+        * node types. The memory is managed by the nodestore. Therefore, the node
+        * has to be removed via a special deleteNode function. (If the new node is
+        * not added to the nodestore.) */
+       UA_Node * (*newNode)(void *nodestoreContext, UA_NodeClass nodeClass);
+   
+       void (*deleteNode)(void *nodestoreContext, UA_Node *node);
+   
+       /* ``Get`` returns a pointer to an immutable node. ``Release`` indicates
+        * that the pointer is no longer accessed afterwards. */
+   
+       const UA_Node * (*getNode)(void *nodestoreContext, const UA_NodeId *nodeId);
+   
+       void (*releaseNode)(void *nodestoreContext, const UA_Node *node);
+   
+       /* Returns an editable copy of a node (needs to be deleted with the
+        * deleteNode function or inserted / replaced into the nodestore). */
+       UA_StatusCode (*getNodeCopy)(void *nodestoreContext, const UA_NodeId *nodeId,
+                                    UA_Node **outNode);
+   
+       /* Inserts a new node into the nodestore. If the NodeId is zero, then a
+        * fresh numeric NodeId is assigned. If insertion fails, the node is
+        * deleted. */
+       UA_StatusCode (*insertNode)(void *nodestoreContext, UA_Node *node,
+                                   UA_NodeId *addedNodeId);
+   
+       /* To replace a node, get an editable copy of the node, edit and replace
+        * with this function. If the node was already replaced since the copy was
+        * made, UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not
+        * found, UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases,
+        * the editable node is deleted. */
+       UA_StatusCode (*replaceNode)(void *nodestoreContext, UA_Node *node);
+   
+       /* Removes a node from the nodestore. */
+       UA_StatusCode (*removeNode)(void *nodestoreContext, const UA_NodeId *nodeId);
+   
+       /* Execute a callback for every node in the nodestore. */
+       void (*iterate)(void *nodestoreContext, void* visitorContext,
+                       UA_NodestoreVisitor visitor);
+   } UA_Nodestore;
+   
+The following methods specialize internally for the different node classes
+(distinguished by the nodeClass member)
+
+.. code-block:: c
+
+   
+   /* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,
+    * and so on). The attributes are copied. Note that the attributes structs do
+    * not contain NodeId, NodeClass and BrowseName. The NodeClass of the node needs
+    * to be correctly set before calling this method. UA_Node_deleteMembers is
+    * called on the node when an error occurs internally. */
+   UA_StatusCode
+   UA_Node_setAttributes(UA_Node *node, const void *attributes,
+                         const UA_DataType *attributeType);
+   
+   /* Reset the destination node and copy the content of the source */
+   UA_StatusCode
+   UA_Node_copy(const UA_Node *src, UA_Node *dst);
+   
+   /* Allocate new node and copy the values from src */
+   UA_Node *
+   UA_Node_copy_alloc(const UA_Node *src);
+   
+   /* Add a single reference to the node */
+   UA_StatusCode
+   UA_Node_addReference(UA_Node *node, const UA_AddReferencesItem *item);
+   
+   /* Delete a single reference from the node */
+   UA_StatusCode
+   UA_Node_deleteReference(UA_Node *node, const UA_DeleteReferencesItem *item);
+   
+   /* Delete all references of the node */
+   void
+   UA_Node_deleteReferences(UA_Node *node);
+   
+   /* Remove all malloc'ed members of the node */
+   void
+   UA_Node_deleteMembers(UA_Node *node);
