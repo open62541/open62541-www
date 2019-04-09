@@ -255,7 +255,7 @@ with the OPC UA standard.
    /* The content filter is not valid. */
    #define UA_STATUSCODE_BADCONTENTFILTERINVALID 0x80480000
    
-   /* An unregognized operator was provided in a filter. */
+   /* An unrecognized operator was provided in a filter. */
    #define UA_STATUSCODE_BADFILTEROPERATORINVALID 0x80C10000
    
    /* A valid operator was provided */
@@ -279,7 +279,7 @@ with the OPC UA standard.
    /* The operation could not be processed because all continuation points have been allocated. */
    #define UA_STATUSCODE_BADNOCONTINUATIONPOINTS 0x804B0000
    
-   /* The operation could not be processed because all continuation points have been allocated. */
+   /* The reference type id does not refer to a valid reference type node. */
    #define UA_STATUSCODE_BADREFERENCETYPEIDINVALID 0x804C0000
    
    /* The browse direction is not valid. */
@@ -444,7 +444,7 @@ with the OPC UA standard.
    /* The executable attribute does not allow the execution of the method. */
    #define UA_STATUSCODE_BADNOTEXECUTABLE 0x81110000
    
-   /* The server has reached its  maximum number of subscriptions. */
+   /* The server has reached its maximum number of subscriptions. */
    #define UA_STATUSCODE_BADTOOMANYSUBSCRIPTIONS 0x80770000
    
    /* The server has reached the maximum number of queued publish requests. */
@@ -639,7 +639,7 @@ with the OPC UA standard.
    /* The aggregate configuration is not valid for specified node. */
    #define UA_STATUSCODE_BADAGGREGATECONFIGURATIONREJECTED 0x80DA0000
    
-   /* The request pecifies fields which are not valid for the EventType or cannot be saved by the historian. */
+   /* The request specifies fields which are not valid for the EventType or cannot be saved by the historian. */
    #define UA_STATUSCODE_GOODDATAIGNORED 0x00D90000
    
    /* The request was rejected by the server because it did not meet the criteria set by the server. */
