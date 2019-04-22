@@ -119,6 +119,8 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
@@ -332,14 +334,16 @@ which already contains the decoding code for UADP messages.</p>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
-    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+
     <span class="cm">/* Details about the connection configuration and handling are located in</span>
 <span class="cm">     * the pubsub connection tutorial */</span>
     <span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayers</span> <span class="o">=</span>
         <span class="p">(</span><span class="n">UA_PubSubTransportLayer</span> <span class="o">*</span><span class="p">)</span> <span class="n">UA_calloc</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">UA_PubSubTransportLayer</span><span class="p">));</span>
     <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayers</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">UA_ServerConfig_delete</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+        <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
         <span class="k">return</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">UA_PubSubTransportLayerUDPMP</span><span class="p">();</span>

@@ -13,8 +13,12 @@ Server Lifecycle
 .. code-block:: c
 
    
-   UA_Server * UA_Server_new(const UA_ServerConfig *config);
+   UA_Server * UA_Server_new(void);
+   
    void UA_Server_delete(UA_Server *server);
+   
+   UA_ServerConfig *
+   UA_Server_getConfig(UA_Server *server);
    
    /* Runs the main loop of the server. In each iteration, this calls into the
     * networklayers to see if messages have arrived.
@@ -1283,9 +1287,6 @@ Utility Functions
 
    /* Add a new namespace to the server. Returns the index of the new namespace */
    UA_UInt16 UA_Server_addNamespace(UA_Server *server, const char* name);
-   
-   UA_ServerConfig*
-   UA_Server_getConfig(UA_Server *server);
    
    /* Get namespace by name from the server. */
    UA_StatusCode

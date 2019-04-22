@@ -167,14 +167,16 @@ It follows the main server code, making use of the above definitions.
        signal(SIGINT, stopHandler);
        signal(SIGTERM, stopHandler);
    
-       UA_StatusCode retval = UA_STATUSCODE_GOOD;
-       UA_ServerConfig *config = UA_ServerConfig_new_default();
+       UA_Server *server = UA_Server_new();
+       UA_ServerConfig *config = UA_Server_getConfig(server);
+       UA_ServerConfig_setDefault(config);
+   
        /* Details about the connection configuration and handling are located in
         * the pubsub connection tutorial */
        config->pubsubTransportLayers =
            (UA_PubSubTransportLayer *) UA_calloc(2, sizeof(UA_PubSubTransportLayer));
        if(!config->pubsubTransportLayers) {
-           UA_ServerConfig_delete(config);
+           UA_Server_delete(server);
            return EXIT_FAILURE;
        }
        config->pubsubTransportLayers[0] = UA_PubSubTransportLayerUDPMP();

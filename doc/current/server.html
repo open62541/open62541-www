@@ -103,6 +103,8 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
@@ -248,10 +250,7 @@ The usual usage is as follows:</p>
 with custom data types are provided in
 <tt class="docutils literal"><span class="pre">/examples/custom_datatype/</span></tt>.</p>
 </div>
-<div class="highlight-c"><div class="highlight"><pre>    <span class="cm">/* Nodestore */</span>
-    <span class="n">UA_Nodestore</span> <span class="n">nodestore</span><span class="p">;</span>
-
-    <span class="cm">/* Networking */</span>
+<div class="highlight-c"><div class="highlight"><pre>    <span class="cm">/* Networking */</span>
     <span class="kt">size_t</span> <span class="n">networkLayersSize</span><span class="p">;</span>
     <span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">networkLayers</span><span class="p">;</span>
     <span class="n">UA_String</span> <span class="n">customHostname</span><span class="p">;</span>
@@ -393,13 +392,25 @@ handling</em></a>.</p>
     <span class="n">UA_Boolean</span> <span class="n">deleteAtTimeDataCapability</span><span class="p">;</span>
 <span class="cp">#endif</span>
 <span class="p">};</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_ServerConfig_clean</span><span class="p">(</span><span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Set a custom hostname in server configuration */</span>
+<span class="kt">void</span>
+<span class="nf">UA_ServerConfig_setCustomHostname</span><span class="p">(</span><span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_String</span> <span class="n">customHostname</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="server-lifecycle">
 <span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
 <span class="kt">void</span> <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="n">UA_ServerConfig</span> <span class="o">*</span>
+<span class="nf">UA_Server_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* Runs the main loop of the server. In each iteration, this calls into the</span>
 <span class="cm"> * networklayers to see if messages have arrived.</span>
@@ -1622,9 +1633,6 @@ cause the node to be deleted.</p>
 <h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
 <span class="n">UA_UInt16</span> <span class="nf">UA_Server_addNamespace</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
-
-<span class="n">UA_ServerConfig</span><span class="o">*</span>
-<span class="nf">UA_Server_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* Get namespace by name from the server. */</span>
 <span class="n">UA_StatusCode</span>
