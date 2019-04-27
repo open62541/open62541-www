@@ -10,7 +10,7 @@ their use. See the section on :ref:`types` for the full definitions.
 Basic Data Handling
 ^^^^^^^^^^^^^^^^^^^
 This section shows the basic interaction patterns for data types. Make
-sure to compare with the type definitions in ``ua_types.h``.
+sure to compare with the type definitions in ``types.h``.
 
 .. code-block:: c
 
