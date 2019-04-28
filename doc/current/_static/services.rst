@@ -64,7 +64,7 @@ FindServersOnNetwork Service
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Returns the Servers known to a Discovery Server. Unlike FindServer,
 this Service is only implemented by Discovery Servers. It additionally
-Returns servery which may have been detected trough Multicast
+returns servers which may have been detected through Multicast.
 
 .. code-block:: c
 
