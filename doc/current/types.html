@@ -531,7 +531,7 @@ specific code.</p>
 <span class="p">}</span> <span class="n">UA_String</span><span class="p">;</span>
 
 <span class="cm">/* Copies the content on the heap. Returns a null-string when alloc fails */</span>
-<span class="n">UA_String</span> <span class="nf">UA_String_fromChars</span><span class="p">(</span><span class="kt">char</span> <span class="k">const</span> <span class="n">src</span><span class="p">[]);</span>
+<span class="n">UA_String</span> <span class="nf">UA_String_fromChars</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">src</span><span class="p">);</span>
 
 <span class="n">UA_Boolean</span> <span class="nf">UA_String_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">s1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">s2</span><span class="p">);</span>
 
@@ -543,8 +543,10 @@ specific code.</p>
 of the char-array.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_String</span>
 <span class="nf">UA_STRING</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">chars</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_String</span> <span class="n">str</span><span class="p">;</span> <span class="n">str</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-    <span class="n">str</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Byte</span><span class="o">*</span><span class="p">)</span><span class="n">chars</span><span class="p">;</span> <span class="k">return</span> <span class="n">str</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">s</span><span class="p">;</span> <span class="n">s</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">s</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">chars</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+    <span class="n">s</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span> <span class="n">s</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Byte</span><span class="o">*</span><span class="p">)</span><span class="n">chars</span><span class="p">;</span> <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="cp">#define UA_STRING_ALLOC(CHARS) UA_String_fromChars(CHARS)</span>
@@ -650,8 +652,10 @@ which represents the number of 100 nanosecond intervals since January 1, 1601
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ByteString</span>
 <span class="nf">UA_BYTESTRING</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">chars</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_ByteString</span> <span class="n">str</span><span class="p">;</span> <span class="n">str</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-    <span class="n">str</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Byte</span><span class="o">*</span><span class="p">)</span><span class="n">chars</span><span class="p">;</span> <span class="k">return</span> <span class="n">str</span><span class="p">;</span>
+    <span class="n">UA_ByteString</span> <span class="n">bs</span><span class="p">;</span> <span class="n">bs</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">bs</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">chars</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bs</span><span class="p">;</span>
+    <span class="n">bs</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span> <span class="n">bs</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_Byte</span><span class="o">*</span><span class="p">)</span><span class="n">chars</span><span class="p">;</span> <span class="k">return</span> <span class="n">bs</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ByteString</span>
