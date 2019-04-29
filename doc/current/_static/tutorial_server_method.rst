@@ -168,7 +168,7 @@ It follows the main server code, making use of the above definitions.
 .. code-block:: c
 
    
-   UA_Boolean running = true;
+   static volatile UA_Boolean running = true;
    static void stopHandler(int sign) {
        UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "received ctrl-c");
        running = false;
