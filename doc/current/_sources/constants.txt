@@ -101,3 +101,27 @@ well (but less common).
    #define UA_VALUERANK_ONE_DIMENSION             1
    #define UA_VALUERANK_TWO_DIMENSIONS            2
    #define UA_VALUERANK_THREE_DIMENSIONS          3
+   
+General Configuration Constants
+===============================
+
+This section defines constants that are used for the configuration of both
+clients and servers.
+
+Rule Handling
+-------------
+
+The RuleHanding settings define how error cases that result from rules in the
+OPC UA specification shall be handled. The rule handling can be softened,
+e.g. to workaround misbehaving implementations or to mitigate the impact of
+additional rules that are introduced in later versions of the OPC UA
+specification.
+
+.. code-block:: c
+
+   typedef enum {
+       UA_RULEHANDLING_DEFAULT = 0,
+       UA_RULEHANDLING_ABORT,  /* Abort the operation and return an error code */
+       UA_RULEHANDLING_WARN,   /* Print a message in the logs and continue */
+       UA_RULEHANDLING_ACCEPT, /* Continue and disregard the broken rule */
+   } UA_RuleHandling;
