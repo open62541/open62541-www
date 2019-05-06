@@ -7,7 +7,7 @@ The OPC UA protocol defines 25 builtin data types and three ways of combining
 them into higher-order types: arrays, structures and unions. In open62541,
 only the builtin data types are defined manually. All other data types are
 generated from standard XML definitions. Their exact definitions can be
-looked up at https://opcfoundation.org/UA/schemas/Opc.Ua.Types.bsd.xml.
+looked up at https://opcfoundation.org/UA/schemas/Opc.Ua.Types.bsd.
 
 For users that are new to open62541, take a look at the :ref:`tutorial for
 working with data types<types-tutorial>` before diving into the
