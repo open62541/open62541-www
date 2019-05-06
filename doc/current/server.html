@@ -224,6 +224,28 @@ The usual usage is as follows:</p>
     <span class="n">UA_Duration</span> <span class="n">max</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DurationRange</span><span class="p">;</span>
 
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+
+     <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
+<span class="cm">      * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
+<span class="cm">      * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
+<span class="cm">      * bigger than 10 seconds, because cleanup is only triggered approximately</span>
+<span class="cm">      * every 10 seconds. The server will still be removed depending on the</span>
+<span class="cm">      * state of the semaphore file. */</span>
+     <span class="n">UA_UInt32</span> <span class="n">cleanupTimeout</span><span class="p">;</span>
+
+     <span class="cm">/* Enable mDNS announce and response to queries */</span>
+     <span class="kt">bool</span> <span class="n">mdnsEnable</span><span class="p">;</span>
+
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
+     <span class="n">UA_MdnsDiscoveryConfiguration</span> <span class="n">mdns</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="p">}</span> <span class="n">UA_ServerConfig_Discovery</span><span class="p">;</span>
+
+<span class="cp">#endif</span>
+
 <span class="k">struct</span> <span class="n">UA_ServerConfig</span> <span class="p">{</span>
     <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* only if multithreading is enabled */</span>
     <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
@@ -236,13 +258,6 @@ The usual usage is as follows:</p>
     <span class="cm">/* Rule Handling */</span>
     <span class="n">UA_RuleHandling</span> <span class="n">verifyRequestTimestamp</span><span class="p">;</span> <span class="cm">/* Verify that the server sends a</span>
 <span class="cm">                                             * timestamp in the request header */</span>
-
-    <span class="cm">/* MDNS Discovery */</span>
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
-    <span class="n">UA_String</span> <span class="n">mdnsServerName</span><span class="p">;</span>
-    <span class="kt">size_t</span> <span class="n">serverCapabilitiesSize</span><span class="p">;</span>
-    <span class="n">UA_String</span> <span class="o">*</span><span class="n">serverCapabilities</span><span class="p">;</span>
-<span class="cp">#endif</span>
 
     <span class="cm">/* Custom DataTypes. Attention! Custom datatypes are not cleaned up together</span>
 <span class="cm">     * with the configuration. So it is possible to allocate them on ROM. */</span>
@@ -345,13 +360,7 @@ handling</em></a>.</p>
 
     <span class="cm">/* Discovery */</span>
 <span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
-    <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
-<span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
-<span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
-<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
-<span class="cm">     * every 10 seconds. The server will still be removed depending on the</span>
-<span class="cm">     * state of the semaphore file. */</span>
-    <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
+     <span class="n">UA_ServerConfig_Discovery</span> <span class="n">discovery</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
 <span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
