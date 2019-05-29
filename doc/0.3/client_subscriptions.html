@@ -269,8 +269,8 @@ may be recieved during a synchronous service call or in
 indicates to the server not to monitor changes of the attribute, but to
 forward Event notifications from that node.</p>
 <p>During the creation of a MonitoredItem, the server may return changed
-adjusted parameters. Use <code class="docutils literal notranslate"><span class="pre">UA_Client_MonitoredItem_getParameters</span></code> to get the
-current parameters.</p>
+adjusted parameters. Check the returned <code class="docutils literal notranslate"><span class="pre">UA_CreateMonitoredItemsResponse</span></code>
+to get the current parameters.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Provides default values for a new monitored item. */</span>
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_MonitoredItemCreateRequest</span>
 <span class="nf">UA_MonitoredItemCreateRequest_default</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">)</span> <span class="p">{</span>
@@ -284,8 +284,11 @@ current parameters.</p>
     <span class="n">request</span><span class="p">.</span><span class="n">requestedParameters</span><span class="p">.</span><span class="n">queueSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">return</span> <span class="n">request</span><span class="p">;</span>
 <span class="p">}</span>
-
-<span class="cm">/* Callback for the deletion of a MonitoredItem */</span>
+</pre></div>
+</div>
+<p>The clientHandle parameter can’t be set by the user, any value will be replaced
+by the client before sending the request to the server.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Callback for the deletion of a MonitoredItem */</span>
 <span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Client_DeleteMonitoredItemCallback</span><span class="p">)</span>
     <span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">subContext</span><span class="p">,</span>
      <span class="n">UA_UInt32</span> <span class="n">monId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">monContext</span><span class="p">);</span>
@@ -333,21 +336,16 @@ current parameters.</p>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Client_MonitoredItems_deleteSingle</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">subscriptionId</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">monitoredItemId</span><span class="p">);</span>
+
+<span class="cm">/* The clientHandle parameter will be filled automatically */</span>
+<span class="n">UA_ModifyMonitoredItemsResponse</span>
+<span class="nf">UA_Client_MonitoredItems_modify</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">UA_ModifyMonitoredItemsRequest</span> <span class="n">request</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The following service calls go directly to the server. The MonitoredItem settings are
 not stored in the client.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ModifyMonitoredItemsResponse</span>
-<span class="nf">UA_Client_MonitoredItems_modify</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
-                                <span class="k">const</span> <span class="n">UA_ModifyMonitoredItemsRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_ModifyMonitoredItemsResponse</span> <span class="n">response</span><span class="p">;</span>
-    <span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span>
-                        <span class="o">&amp;</span><span class="n">request</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_MODIFYMONITOREDITEMSREQUEST</span><span class="p">],</span>
-                        <span class="o">&amp;</span><span class="n">response</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_MODIFYMONITOREDITEMSRESPONSE</span><span class="p">]);</span>
-    <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_SetMonitoringModeResponse</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_SetMonitoringModeResponse</span>
 <span class="nf">UA_Client_MonitoredItems_setMonitoringMode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
                                            <span class="k">const</span> <span class="n">UA_SetMonitoringModeRequest</span> <span class="n">request</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_SetMonitoringModeResponse</span> <span class="n">response</span><span class="p">;</span>
