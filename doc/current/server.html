@@ -129,7 +129,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html#general-configuration-constants">General Configuration Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -825,9 +825,20 @@ specific to the different users and set by the access control callback:</p>
 </div>
 <div class="section" id="browsing">
 <h2>Browsing<a class="headerlink" href="#browsing" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_BrowseResult</span>
-<span class="nf">UA_Server_browse</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxrefs</span><span class="p">,</span>
-                 <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">descr</span><span class="p">);</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Browse the references of a particular node. See the definition of</span>
+<span class="cm"> * BrowseDescription structure for details. */</span>
+<span class="n">UA_BrowseResult</span>
+<span class="nf">UA_Server_browse</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxReferences</span><span class="p">,</span>
+                 <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">bd</span><span class="p">);</span>
+
+<span class="cm">/* Nonstandard version of the browse service that recurses into child nodes.</span>
+<span class="cm"> * Possible loops (that can occur for non-hierarchical references) are handled</span>
+<span class="cm"> * by adding every target node at most once to the result array. The returned</span>
+<span class="cm"> * ReferenceDescription refers has the `ReferenceTypeId` and `IsForward` fields</span>
+<span class="cm"> * set according to the last reference in the (recursive) chain. */</span>
+<span class="n">UA_BrowseResult</span>
+<span class="nf">UA_Server_browseRecursive</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxReferences</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">bd</span><span class="p">);</span>
 
 <span class="n">UA_BrowseResult</span>
 <span class="nf">UA_Server_browseNext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">releaseContinuationPoint</span><span class="p">,</span>
