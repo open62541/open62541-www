@@ -123,6 +123,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#datasetfields">DataSetFields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writergroup">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetwriter">DataSetWriter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
 </ul>
 </li>
 </ul>
@@ -404,8 +406,8 @@ handling process.</p>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_DataSetFieldType</span> <span class="n">dataSetFieldType</span><span class="p">;</span>
     <span class="k">union</span> <span class="p">{</span>
+        <span class="cm">/* events need other config later */</span>
         <span class="n">UA_DataSetVariableConfig</span> <span class="n">variable</span><span class="p">;</span>
-        <span class="c1">//events need other config later</span>
     <span class="p">}</span> <span class="n">field</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetFieldConfig</span><span class="p">;</span>
 
@@ -529,6 +531,100 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_removeDataSetWriter</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dsw</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datasetreader">
+<h2>DataSetReader<a class="headerlink" href="#datasetreader" title="Permalink to this headline">¶</a></h2>
+<p>DataSetReader can receive NetworkMessages with the DataSet
+of interest sent by the Publisher. DataSetReaders represent
+the configuration necessary to receive and process DataSetMessages
+on the Subscriber side</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Parameters for PubSubSecurity */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Int32</span> <span class="n">securityMode</span><span class="p">;</span>          <span class="cm">/* placeholder datatype &#39;MessageSecurityMode&#39; */</span>
+    <span class="n">UA_String</span> <span class="n">securityGroupId</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">keyServersSize</span><span class="p">;</span>
+    <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">keyServers</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PubSubSecurityParameters</span><span class="p">;</span>
+
+<span class="cm">/* Parameters for PubSub DataSetReader Configuration */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">publisherId</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">writerGroupId</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">dataSetWriterId</span><span class="p">;</span>
+    <span class="n">UA_DataSetMetaDataType</span> <span class="n">dataSetMetaData</span><span class="p">;</span>
+    <span class="n">UA_DataSetFieldContentMask</span> <span class="n">dataSetFieldContentMask</span><span class="p">;</span>
+    <span class="n">UA_Double</span> <span class="n">messageReceiveTimeout</span><span class="p">;</span>
+    <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
+    <span class="n">UA_UadpDataSetReaderMessageDataType</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="n">UA_TargetVariablesDataType</span> <span class="n">subscribedDataSetTarget</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
+
+<span class="cm">/* Update configuration to the dataSetReader */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_updateConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                   <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get configuration of the dataSetReader */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                 <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Return Status Code after creating TargetVariables in Subscriber AddressSpace</span>
+<span class="cm"> * TargetVariables define a list of variable mappings between received DataSet fields</span>
+<span class="cm"> * and the TargetVariables in the Subscriber AddressSpace */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_createTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                             <span class="n">UA_TargetVariablesDataType</span><span class="o">*</span> <span class="n">targetVariables</span><span class="p">);</span>
+
+<span class="cm">/* To Do:Implementation of SubscribedDataSetMirrorType</span>
+<span class="cm"> * UA_StatusCode</span>
+<span class="cm"> * A_PubSubDataSetReader_createDataSetMirror(UA_Server *server, UA_NodeId dataSetReaderIdentifier,</span>
+<span class="cm"> * UA_SubscribedDataSetMirrorDataType* mirror) */</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="readergroup">
+<h2>ReaderGroup<a class="headerlink" href="#readergroup" title="Permalink to this headline">¶</a></h2>
+<p>All ReaderGroups are created within a PubSubConnection and automatically
+deleted if the connection is removed.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* ReaderGroup configuration */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
+
+<span class="cm">/* Add DataSetReader to the ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">dataSetReaderConfig</span><span class="p">,</span>
+                                      <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Remove DataSetReader from ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* To Do: Update Configuration of ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_ReaderGroup_updateConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get configuraiton of ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_ReaderGroup_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                               <span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Add ReaderGroup to the created connection */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">connectionIdentifier</span><span class="p">,</span>
+                                   <span class="k">const</span> <span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">readerGroupConfig</span><span class="p">,</span>
+                                   <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Remove ReaderGroup from connection */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">groupIdentifier</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span><span class="cp"></span>
 </pre></div>
