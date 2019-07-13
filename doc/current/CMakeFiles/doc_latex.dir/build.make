@@ -237,58 +237,6 @@ doc_src/tutorial_pubsub_publish.rst: ../examples/pubsub/tutorial_pubsub_publish.
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Generating ../doc_src/tutorial_pubsub_publish.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/examples/pubsub/tutorial_pubsub_publish.c /home/travis/build/open62541/open62541/build/doc_src/tutorial_pubsub_publish.rst
 
-doc_src/building.rst: ../doc/building.rst
-doc_src/building.rst: ../doc/index.rst
-doc_src/building.rst: ../doc/installing.rst
-doc_src/building.rst: ../doc/internal.rst
-doc_src/building.rst: ../doc/nodeset_compiler.rst
-doc_src/building.rst: ../doc/nodeset_compiler_pump.png
-doc_src/building.rst: ../doc/open62541.png
-doc_src/building.rst: ../doc/open62541_html.png
-doc_src/building.rst: ../doc/protocol.rst
-doc_src/building.rst: ../doc/toc.rst
-doc_src/building.rst: ../doc/tutorials.rst
-doc_src/building.rst: ../doc/ua-wireshark-pubsub.png
-doc_src/building.rst: ../doc/ua-wireshark.png
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Generating ../doc_src/building.rst, ../doc_src/index.rst, ../doc_src/installing.rst, ../doc_src/internal.rst, ../doc_src/nodeset_compiler.rst, ../doc_src/nodeset_compiler_pump.png, ../doc_src/open62541.png, ../doc_src/open62541_html.png, ../doc_src/protocol.rst, ../doc_src/toc.rst, ../doc_src/tutorials.rst, ../doc_src/ua-wireshark-pubsub.png, ../doc_src/ua-wireshark.png"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/local/cmake-3.9.2/bin/cmake -E copy /home/travis/build/open62541/open62541/doc/building.rst /home/travis/build/open62541/open62541/doc/index.rst /home/travis/build/open62541/open62541/doc/installing.rst /home/travis/build/open62541/open62541/doc/internal.rst /home/travis/build/open62541/open62541/doc/nodeset_compiler.rst /home/travis/build/open62541/open62541/doc/nodeset_compiler_pump.png /home/travis/build/open62541/open62541/doc/open62541.png /home/travis/build/open62541/open62541/doc/open62541_html.png /home/travis/build/open62541/open62541/doc/protocol.rst /home/travis/build/open62541/open62541/doc/toc.rst /home/travis/build/open62541/open62541/doc/tutorials.rst /home/travis/build/open62541/open62541/doc/ua-wireshark-pubsub.png /home/travis/build/open62541/open62541/doc/ua-wireshark.png /home/travis/build/open62541/open62541/build/doc_src
-
-doc_src/index.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/index.rst
-
-doc_src/installing.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/installing.rst
-
-doc_src/internal.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/internal.rst
-
-doc_src/nodeset_compiler.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/nodeset_compiler.rst
-
-doc_src/nodeset_compiler_pump.png: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/nodeset_compiler_pump.png
-
-doc_src/open62541.png: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/open62541.png
-
-doc_src/open62541_html.png: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/open62541_html.png
-
-doc_src/protocol.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/protocol.rst
-
-doc_src/toc.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/toc.rst
-
-doc_src/tutorials.rst: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/tutorials.rst
-
-doc_src/ua-wireshark-pubsub.png: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/ua-wireshark-pubsub.png
-
-doc_src/ua-wireshark.png: doc_src/building.rst
-	@$(CMAKE_COMMAND) -E touch_nocreate doc_src/ua-wireshark.png
-
 doc_latex: doc/CMakeFiles/doc_latex
 doc_latex: doc_src/types.rst
 doc_latex: doc_src/constants.rst
@@ -318,19 +266,6 @@ doc_latex: doc_src/tutorial_server_object.rst
 doc_latex: doc_src/tutorial_server_method.rst
 doc_latex: doc_src/tutorial_client_firststeps.rst
 doc_latex: doc_src/tutorial_pubsub_publish.rst
-doc_latex: doc_src/building.rst
-doc_latex: doc_src/index.rst
-doc_latex: doc_src/installing.rst
-doc_latex: doc_src/internal.rst
-doc_latex: doc_src/nodeset_compiler.rst
-doc_latex: doc_src/nodeset_compiler_pump.png
-doc_latex: doc_src/open62541.png
-doc_latex: doc_src/open62541_html.png
-doc_latex: doc_src/protocol.rst
-doc_latex: doc_src/toc.rst
-doc_latex: doc_src/tutorials.rst
-doc_latex: doc_src/ua-wireshark-pubsub.png
-doc_latex: doc_src/ua-wireshark.png
 doc_latex: doc/CMakeFiles/doc_latex.dir/build.make
 
 .PHONY : doc_latex

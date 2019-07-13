@@ -28,19 +28,6 @@ file(REMOVE_RECURSE
   "../doc_src/tutorial_server_method.rst"
   "../doc_src/tutorial_client_firststeps.rst"
   "../doc_src/tutorial_pubsub_publish.rst"
-  "../doc_src/building.rst"
-  "../doc_src/index.rst"
-  "../doc_src/installing.rst"
-  "../doc_src/internal.rst"
-  "../doc_src/nodeset_compiler.rst"
-  "../doc_src/nodeset_compiler_pump.png"
-  "../doc_src/open62541.png"
-  "../doc_src/open62541_html.png"
-  "../doc_src/protocol.rst"
-  "../doc_src/toc.rst"
-  "../doc_src/tutorials.rst"
-  "../doc_src/ua-wireshark-pubsub.png"
-  "../doc_src/ua-wireshark.png"
 )
 
 # Per-language clean rules from dependency scanning.
