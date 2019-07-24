@@ -114,13 +114,5 @@ It follows the main server code, making use of the above definitions.
    
        UA_Server *server = UA_Server_new();
        UA_ServerConfig_setDefault(UA_Server_getConfig(server));
-   
-       addVariable(server);
-       writeVariable(server);
-       writeWrongVariable(server);
-   
-       UA_StatusCode retval = UA_Server_run(server, &running);
-   
-       UA_Server_delete(server);
-       return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
-   }
+       UA_ServerConfig* config = UA_Server_getConfig(server);
+       config->verifyRequestTimestamp = UA_RULEHANDLING_ACCEPT;
