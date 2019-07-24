@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Working with Objects and Object Types &mdash; open62541 0.4.0-dev documentation</title>
+  <title>Working with Objects and Object Types &mdash; open62541 1.0.0-dev documentation</title>
   
 
   
@@ -17,34 +17,43 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.0-dev',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Adding Methods to Objects" href="tutorial_server_method.html" />
     <link rel="prev" title="Working with Variable Types" href="tutorial_server_variabletype.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -61,7 +70,7 @@
             
             
               <div class="version">
-                0.4
+                1.0
               </div>
             
           
@@ -95,12 +104,13 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding Variables to a Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_datasource.html">Connecting a Variable with a Physical Process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Working with Objects and Object Types</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Working with Objects and Object Types</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#using-objects-to-structure-information-models">Using objects to structure information models</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#object-types-type-hierarchies-and-instantiation">Object types, type hierarchies and instantiation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
@@ -110,9 +120,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -168,7 +181,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/tutorial_server_object.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_server_object.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -192,7 +205,8 @@ representation of pumps in a SCADA visualisation that shall be resuable for
 all pumps.</p>
 <p>Following the object-oriented programming paradigm, every pump is represented
 by an object with the following layout:</p>
-<img src="_images/graphviz-4957def2854b8c87a289891210c8f6eae96d00c0.png" alt="digraph tree {
+<p class="graphviz">
+<img src="_images/graphviz-714793eeca0379dc9e061e3b6dc3b393b886f85f.png" alt="digraph tree {
 
 fixedsize=true;
 node [width=2, height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
@@ -224,14 +238,15 @@ point_4 -&gt; point_5 [arrowhead=none]
 point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
 
 }" />
+</p>
 <p>The following code manually defines a pump and its member variables. We omit
 setting constraints on the variable values as this is not the focus of this
 tutorial and was already covered.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;ua_server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_config_default.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_log_stdout.h&gt;</span><span class="cp"></span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;open62541/plugin/log_stdout.h&gt;</span>
+<span class="cp">#include &lt;open62541/server.h&gt;</span>
+<span class="cp">#include &lt;open62541/server_config_default.h&gt;</span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include &lt;signal.h&gt;</span>
 
 <span class="k">static</span> <span class="kt">void</span>
 <span class="nf">manuallyDefinePump</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
@@ -288,11 +303,12 @@ tutorial and was already covered.</p>
 <p>Building up each object manually requires us to write a lot of code.
 Furthermore, there is no way for clients to detect that an object represents
 a pump. (We might use naming conventions or similar to detect pumps. But
-that’s not exactly a clean solution.) Furthermore, we might have more devices
+that&#8217;s not exactly a clean solution.) Furthermore, we might have more devices
 than just pumps. And we require all devices to share some common structure.
 The solution is to define ObjectTypes in a hierarchy with inheritance
 relations.</p>
-<img src="_images/graphviz-5eaf25a30c42d86e57969c260aef0821cb66270b.png" alt="digraph tree {
+<p class="graphviz">
+<img src="_images/graphviz-733622409627ce1d70875bad91e3ac0fe3c2e732.png" alt="digraph tree {
 
 fixedsize=true;
 node [width=2, height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
@@ -330,10 +346,11 @@ point_4 -&gt; point_5 [arrowhead=none]
 point_5 -&gt; node_5 [label=&quot;hasComponent&quot;]
 
 }" />
+</p>
 <p>Children that are marked mandatory are automatically instantiated together
 with the parent object. This is indicated by a <cite>hasModellingRule</cite> reference
 to an object that representes the <cite>mandatory</cite> modelling rule.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* predefined identifier for later use */</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* predefined identifier for later use */</span>
 <span class="n">UA_NodeId</span> <span class="n">pumpTypeId</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="n">UA_NODEIDTYPE_NUMERIC</span><span class="p">,</span> <span class="p">{</span><span class="mi">1001</span><span class="p">}};</span>
 
 <span class="k">static</span> <span class="kt">void</span>
@@ -402,9 +419,9 @@ to an object that representes the <cite>mandatory</cite> modelling rule.</p>
 <p>Now we add the derived ObjectType for the pump that inherits from the device
 object type. The resulting object contains all mandatory child variables.
 These are simply copied over from the object type. The object has a reference
-of type <code class="docutils literal notranslate"><span class="pre">hasTypeDefinition</span></code> to the object type, so that clients can detect
+of type <tt class="docutils literal"><span class="pre">hasTypeDefinition</span></tt> to the object type, so that clients can detect
 the type-instance relation at runtime.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addPumpObjectInstance</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_ObjectAttributes</span> <span class="n">oAttr</span> <span class="o">=</span> <span class="n">UA_ObjectAttributes_default</span><span class="p">;</span>
     <span class="n">oAttr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">);</span>
@@ -423,7 +440,7 @@ especially useful when an object is instantiated at runtime (with the
 AddNodes service) and the integration with an underlying process canot be
 manually defined. In the following constructor example, we simply set the
 pump status to on.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
 <span class="nf">pumpTypeConstructor</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeContext</span><span class="p">,</span>
@@ -472,7 +489,7 @@ pump status to on.</p>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="k">volatile</span> <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
     <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
@@ -482,8 +499,8 @@ pump status to on.</p>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
-    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
 
     <span class="n">manuallyDefinePump</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">defineObjectTypes</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
@@ -494,9 +511,9 @@ pump status to on.</p>
     <span class="n">addPumpObjectInstance</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s">&quot;pump5&quot;</span><span class="p">);</span>
 
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+
     <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-    <span class="n">UA_ServerConfig_delete</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
-    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">?</span> <span class="n">EXIT_SUCCESS</span> <span class="o">:</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -514,7 +531,7 @@ pump status to on.</p>
         <a href="tutorial_server_method.html" class="btn btn-neutral float-right" title="Adding Methods to Objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_server_variabletype.html" class="btn btn-neutral" title="Working with Variable Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial_server_variabletype.html" class="btn btn-neutral float-left" title="Working with Variable Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -540,35 +557,16 @@ pump status to on.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Logging Plugin API &mdash; open62541 0.4.0-dev documentation</title>
+  <title>Logging Plugin API &mdash; open62541 1.0.0-dev documentation</title>
   
 
   
@@ -17,34 +17,43 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.0-dev',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="plugin_pubsub_connection.html" />
-    <link rel="prev" title="Access Control Plugin API" href="plugin_access_control.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="next" title="PubSub Connection Plugin API" href="plugin_pubsub_connection.html" />
+    <link rel="prev" title="Access Control Plugin API" href="plugin_accesscontrol.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -61,7 +70,7 @@
             
             
               <div class="version">
-                0.4
+                1.0
               </div>
             
           
@@ -94,15 +103,20 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_access_control.html">Access Control Plugin API</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">Access Control Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Logging Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_pubsub_connection.html">PubSub Connection Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pubsub.html">Publish/Subscribe</a></li>
 </ul>
 </li>
 </ul>
@@ -158,7 +172,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/plugin_log.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/plugin_log.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -174,13 +188,13 @@
   <div class="section" id="logging-plugin-api">
 <h1>Logging Plugin API<a class="headerlink" href="#logging-plugin-api" title="Permalink to this headline">¶</a></h1>
 <p>Servers and clients define a logger in their configuration. The logger is a
-plugin. A default plugin that logs to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> is provided as an example.
+plugin. A default plugin that logs to <tt class="docutils literal"><span class="pre">stdout</span></tt> is provided as an example.
 The logger plugin is stateful and can point to custom data. So it is possible
 to keep open file handlers in the logger context.</p>
 <p>Every log-message consists of a log-level, a log-category and a string
 message content. The timestamp of the log-message is created within the
 logger.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
     <span class="n">UA_LOGLEVEL_TRACE</span><span class="p">,</span>
     <span class="n">UA_LOGLEVEL_DEBUG</span><span class="p">,</span>
     <span class="n">UA_LOGLEVEL_INFO</span><span class="p">,</span>
@@ -277,10 +291,6 @@ logger.</p>
     <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
 <span class="cp">#endif</span>
 <span class="p">}</span>
-
-<span class="n">_UA_END_DECLS</span>
-
-<span class="cp">#endif </span><span class="cm">/* UA_PLUGIN_LOG_H_ */</span><span class="cp"></span>
 </pre></div>
 </div>
 </div>
@@ -293,10 +303,10 @@ logger.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plugin_pubsub_connection.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plugin_pubsub_connection.html" class="btn btn-neutral float-right" title="PubSub Connection Plugin API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plugin_access_control.html" class="btn btn-neutral" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plugin_accesscontrol.html" class="btn btn-neutral float-left" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -322,35 +332,16 @@ logger.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

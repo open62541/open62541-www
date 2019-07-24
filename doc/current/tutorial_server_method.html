@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Adding Methods to Objects &mdash; open62541 0.4.0-dev documentation</title>
+  <title>Adding Methods to Objects &mdash; open62541 1.0.0-dev documentation</title>
   
 
   
@@ -17,34 +17,43 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.0-dev',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Generating events" href="tutorial_server_events.html" />
+    <link rel="next" title="Observing Attributes with Local MonitoredItems" href="tutorial_server_monitoreditems.html" />
     <link rel="prev" title="Working with Objects and Object Types" href="tutorial_server_object.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -61,7 +70,7 @@
             
             
               <div class="version">
-                0.4
+                1.0
               </div>
             
           
@@ -96,11 +105,12 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_datasource.html">Connecting a Variable with a Physical Process</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding Methods to Objects</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Adding Methods to Objects</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#example-hello-world-method">Example: Hello World Method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#increase-array-values-method">Increase Array Values Method</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
@@ -110,9 +120,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -168,7 +181,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/tutorial_server_method.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_server_method.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -192,23 +205,25 @@ explicitly stated when a method is called.</p>
 <p>The method callback takes as input a custom data pointer attached to the
 method node, the identifier of the object from which the method is called,
 and two arrays for the input and output arguments. The input and output
-arguments are all of type <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>. Each variant may in turn contain a
+arguments are all of type <a class="reference internal" href="types.html#variant"><em>Variant</em></a>. Each variant may in turn contain a
 (multi-dimensional) array or scalar of any data type.</p>
 <p>Constraints for the method arguments are defined in terms of data type, value
 rank and array dimension (similar to variable definitions). The argument
 definitions are stored in child VariableNodes of the MethodNode with the
-respective BrowseNames <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">&quot;InputArguments&quot;)</span></code> and <code class="docutils literal notranslate"><span class="pre">(0,</span>
-<span class="pre">&quot;OutputArguments&quot;)</span></code>.</p>
+respective BrowseNames <tt class="docutils literal"><span class="pre">(0,</span> <span class="pre">&quot;InputArguments&quot;)</span></tt> and <tt class="docutils literal"><span class="pre">(0,</span>
+<span class="pre">&quot;OutputArguments&quot;)</span></tt>.</p>
 <div class="section" id="example-hello-world-method">
 <h2>Example: Hello World Method<a class="headerlink" href="#example-hello-world-method" title="Permalink to this headline">¶</a></h2>
-<p>The method takes a string scalar and returns a string scalar with “Hello ”
+<p>The method takes a string scalar and returns a string scalar with &#8220;Hello &#8221;
 prepended. The type and length of the input arguments is checked internally
-by the SDK, so that we don’t have to verify the arguments in the callback.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;ua_server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_config_default.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_log_stdout.h&gt;</span><span class="cp"></span>
+by the SDK, so that we don&#8217;t have to verify the arguments in the callback.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;open62541/client_config_default.h&gt;</span>
+<span class="cp">#include &lt;open62541/plugin/log_stdout.h&gt;</span>
+<span class="cp">#include &lt;open62541/server.h&gt;</span>
+<span class="cp">#include &lt;open62541/server_config_default.h&gt;</span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include &lt;signal.h&gt;</span>
+<span class="cp">#include &lt;stdlib.h&gt;</span>
 
 <span class="k">static</span> <span class="n">UA_StatusCode</span>
 <span class="nf">helloWorldMethodCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
@@ -265,7 +280,7 @@ by the SDK, so that we don’t have to verify the arguments in the callback.</p>
 <h2>Increase Array Values Method<a class="headerlink" href="#increase-array-values-method" title="Permalink to this headline">¶</a></h2>
 <p>The method takes an array of 5 integers and a scalar as input. It returns a
 copy of the array with every entry increased by the scalar.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
 <span class="nf">IncInt32ArrayMethodCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">methodContext</span><span class="p">,</span>
@@ -336,7 +351,7 @@ copy of the array with every entry increased by the scalar.</p>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="k">volatile</span> <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
     <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
@@ -346,16 +361,16 @@ copy of the array with every entry increased by the scalar.</p>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
-    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
 
     <span class="n">addHellWorldMethod</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">addIncInt32ArrayMethod</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+
     <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-    <span class="n">UA_ServerConfig_delete</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
-    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">?</span> <span class="n">EXIT_SUCCESS</span> <span class="o">:</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -370,10 +385,10 @@ copy of the array with every entry increased by the scalar.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tutorial_server_events.html" class="btn btn-neutral float-right" title="Generating events" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tutorial_server_monitoreditems.html" class="btn btn-neutral float-right" title="Observing Attributes with Local MonitoredItems" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_server_object.html" class="btn btn-neutral" title="Working with Objects and Object Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial_server_object.html" class="btn btn-neutral float-left" title="Working with Objects and Object Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -399,35 +414,16 @@ copy of the array with every entry increased by the scalar.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

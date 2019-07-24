@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Building a Simple Client &mdash; open62541 0.4.0-dev documentation</title>
+  <title>Building a Simple Client &mdash; open62541 1.0.0-dev documentation</title>
   
 
   
@@ -17,34 +17,43 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.0-dev',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Working with Publish/Subscribe" href="tutorial_pubsub_publish.html" />
     <link rel="prev" title="Generating events" href="tutorial_server_events.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -61,7 +70,7 @@
             
             
               <div class="version">
-                0.4
+                1.0
               </div>
             
           
@@ -97,8 +106,9 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a Simple Client</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Building a Simple Client</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#further-tasks">Further tasks</a></li>
 </ul>
 </li>
@@ -109,9 +119,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -167,7 +180,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/tutorial_client_firststeps.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_client_firststeps.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -185,12 +198,15 @@
 <p>You should already have a basic server from the previous tutorials. open62541
 provides both a server- and clientside API, so creating a client is as easy as
 creating a server. Copy the following into a file <cite>myClient.c</cite>:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;ua_client_highlevel.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_config_default.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_log_stdout.h&gt;</span><span class="cp"></span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;open62541/client_config_default.h&gt;</span>
+<span class="cp">#include &lt;open62541/client_highlevel.h&gt;</span>
+<span class="cp">#include &lt;open62541/plugin/log_stdout.h&gt;</span>
+
+<span class="cp">#include &lt;stdlib.h&gt;</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">(</span><span class="n">UA_ClientConfig_default</span><span class="p">);</span>
+    <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span> <span class="o">=</span> <span class="n">UA_Client_new</span><span class="p">();</span>
+    <span class="n">UA_ClientConfig_setDefault</span><span class="p">(</span><span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">));</span>
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="s">&quot;opc.tcp://localhost:4840&quot;</span><span class="p">);</span>
     <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
         <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
@@ -217,29 +233,29 @@ creating a server. Copy the following into a file <cite>myClient.c</cite>:</p>
     <span class="cm">/* Clean up */</span>
     <span class="n">UA_Variant_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">);</span>
     <span class="n">UA_Client_delete</span><span class="p">(</span><span class="n">client</span><span class="p">);</span> <span class="cm">/* Disconnects the client internally */</span>
-    <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">EXIT_SUCCESS</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <p>Compilation is similar to the server example.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myClient.c -o myClient
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>gcc -std<span class="o">=</span>c99 open62541.c myClient.c -o myClient
 </pre></div>
 </div>
 <p>In a MinGW environment, the Winsock library must be added.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myClient.c -lws2_32 -o myClient.exe
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>gcc -std<span class="o">=</span>c99 open62541.c myClient.c -lws2_32 -o myClient.exe
 </pre></div>
 </div>
 <div class="section" id="further-tasks">
 <h2>Further tasks<a class="headerlink" href="#further-tasks" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Try to connect to some other OPC UA server by changing
-<code class="docutils literal notranslate"><span class="pre">opc.tcp://localhost:4840</span></code> to an appropriate address (remember that the
+<tt class="docutils literal"><span class="pre">opc.tcp://localhost:4840</span></tt> to an appropriate address (remember that the
 queried node is contained in any OPC UA server).</li>
-<li>Try to set the value of the variable node (ns=1,i=”the.answer”) containing
-an <code class="docutils literal notranslate"><span class="pre">Int32</span></code> from the example server (which is built in
-<a class="reference internal" href="tutorial_server_firststeps.html"><span class="doc">Building a Simple Server</span></a>) using “UA_Client_write” function. The
+<li>Try to set the value of the variable node (ns=1,i=&#8221;the.answer&#8221;) containing
+an <tt class="docutils literal"><span class="pre">Int32</span></tt> from the example server (which is built in
+<a class="reference internal" href="tutorial_server_firststeps.html"><em>Building a Simple Server</em></a>) using &#8220;UA_Client_write&#8221; function. The
 example server needs some more modifications, i.e., changing request types.
-The answer can be found in “examples/exampleClient.c”.</li>
+The answer can be found in &#8220;examples/client.c&#8221;.</li>
 </ul>
 </div>
 </div>
@@ -255,7 +271,7 @@ The answer can be found in “examples/exampleClient.c”.</li>
         <a href="tutorial_pubsub_publish.html" class="btn btn-neutral float-right" title="Working with Publish/Subscribe" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_server_events.html" class="btn btn-neutral" title="Generating events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial_server_events.html" class="btn btn-neutral float-left" title="Generating events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -281,35 +297,16 @@ The answer can be found in “examples/exampleClient.c”.</li>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Connecting a Variable with a Physical Process &mdash; open62541 0.4.0-dev documentation</title>
+  <title>Connecting a Variable with a Physical Process &mdash; open62541 1.0.0-dev documentation</title>
   
 
   
@@ -17,34 +17,43 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.0-dev',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Working with Variable Types" href="tutorial_server_variabletype.html" />
     <link rel="prev" title="Adding Variables to a Server" href="tutorial_server_variable.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -61,7 +70,7 @@
             
             
               <div class="version">
-                0.4
+                1.0
               </div>
             
           
@@ -93,7 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_firststeps.html">Building a Simple Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding Variables to a Server</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Connecting a Variable with a Physical Process</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Connecting a Variable with a Physical Process</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#updating-variables-manually">Updating variables manually</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variable-value-callback">Variable Value Callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variable-data-sources">Variable Data Sources</a></li>
@@ -102,6 +111,7 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
@@ -111,9 +121,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -169,7 +182,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/tutorial_server_datasource.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_server_datasource.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -190,29 +203,30 @@ near the physical process and clients consuming the data at runtime. In the
 previous tutorial, we saw how to add variables to an OPC UA information
 model. This tutorial shows how to connect a variable to runtime information,
 for example from measurements of a physical process. For simplicity, we take
-the system clock as the underlying “process”.</p>
+the system clock as the underlying &#8220;process&#8221;.</p>
 <p>The following code snippets are each concerned with a different way of
 updating variable values at runtime. Taken together, the code snippets define
 a compilable source file.</p>
 <div class="section" id="updating-variables-manually">
 <h2>Updating variables manually<a class="headerlink" href="#updating-variables-manually" title="Permalink to this headline">¶</a></h2>
 <p>As a starting point, assume that a variable for a value of type
-<a class="reference internal" href="types.html#datetime"><span class="std std-ref">DateTime</span></a> has been created in the server with the identifier
-“ns=1,s=current-time”. Assuming that our applications gets triggered when a
+<a class="reference internal" href="types.html#datetime"><em>DateTime</em></a> has been created in the server with the identifier
+&#8220;ns=1,s=current-time&#8221;. Assuming that our applications gets triggered when a
 new value arrives from the underlying process, we can just write into the
 variable.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;ua_server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_config_default.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_log_stdout.h&gt;</span><span class="cp"></span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;open62541/plugin/log_stdout.h&gt;</span>
+<span class="cp">#include &lt;open62541/server.h&gt;</span>
+<span class="cp">#include &lt;open62541/server_config_default.h&gt;</span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include &lt;signal.h&gt;</span>
+<span class="cp">#include &lt;stdlib.h&gt;</span>
 
 <span class="k">static</span> <span class="kt">void</span>
 <span class="nf">updateCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_DateTime</span> <span class="n">now</span> <span class="o">=</span> <span class="n">UA_DateTime_now</span><span class="p">();</span>
     <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
     <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">now</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
-    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time-value-callback&quot;</span><span class="p">);</span>
     <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">currentNodeId</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
 <span class="p">}</span>
 
@@ -220,12 +234,12 @@ variable.</p>
 <span class="nf">addCurrentTimeVariable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_DateTime</span> <span class="n">now</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
     <span class="n">UA_VariableAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;Current time&quot;</span><span class="p">);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;Current time - value callback&quot;</span><span class="p">);</span>
     <span class="n">attr</span><span class="p">.</span><span class="n">accessLevel</span> <span class="o">=</span> <span class="n">UA_ACCESSLEVELMASK_READ</span> <span class="o">|</span> <span class="n">UA_ACCESSLEVELMASK_WRITE</span><span class="p">;</span>
     <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">now</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
 
-    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time&quot;</span><span class="p">);</span>
-    <span class="n">UA_QualifiedName</span> <span class="n">currentName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time-value-callback&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">currentName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time-value-callback&quot;</span><span class="p">);</span>
     <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
     <span class="n">UA_NodeId</span> <span class="n">parentReferenceNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
     <span class="n">UA_NodeId</span> <span class="n">variableTypeNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">);</span>
@@ -245,16 +259,12 @@ value in a tight loop would take up a lot of resources. Value callbacks allow
 to synchronize a variable value with an external representation. They attach
 callbacks to the variable that are executed before every read and after every
 write operation.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">beforeReadTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_DateTime</span> <span class="n">now</span> <span class="o">=</span> <span class="n">UA_DateTime_now</span><span class="p">();</span>
-    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
-    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">now</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
-    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time&quot;</span><span class="p">);</span>
-    <span class="n">UA_Server_writeValue</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">currentNodeId</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+    <span class="n">updateCurrentTime</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">static</span> <span class="kt">void</span>
@@ -268,7 +278,7 @@ write operation.</p>
 
 <span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addValueCallbackToCurrentTimeVariable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time-value-callback&quot;</span><span class="p">);</span>
     <span class="n">UA_ValueCallback</span> <span class="n">callback</span> <span class="p">;</span>
     <span class="n">callback</span><span class="p">.</span><span class="n">onRead</span> <span class="o">=</span> <span class="n">beforeReadTime</span><span class="p">;</span>
     <span class="n">callback</span><span class="p">.</span><span class="n">onWrite</span> <span class="o">=</span> <span class="n">afterWriteTime</span><span class="p">;</span>
@@ -284,7 +294,7 @@ So-called data sources go one step further. The server redirects every read
 and write request to a callback function. Upon reading, the callback provides
 copy of the current value. Internally, the data source needs to implement its
 own memory management.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
 <span class="nf">readCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
@@ -330,7 +340,7 @@ own memory management.</p>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="k">volatile</span> <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
     <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
@@ -340,17 +350,17 @@ own memory management.</p>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
-    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
 
     <span class="n">addCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">addValueCallbackToCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">addCurrentTimeDataSourceVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+
     <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-    <span class="n">UA_ServerConfig_delete</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
-    <span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">?</span> <span class="n">EXIT_SUCCESS</span> <span class="o">:</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -368,7 +378,7 @@ own memory management.</p>
         <a href="tutorial_server_variabletype.html" class="btn btn-neutral float-right" title="Working with Variable Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_server_variable.html" class="btn btn-neutral" title="Adding Variables to a Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial_server_variable.html" class="btn btn-neutral float-left" title="Adding Variables to a Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -394,35 +404,16 @@ own memory management.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

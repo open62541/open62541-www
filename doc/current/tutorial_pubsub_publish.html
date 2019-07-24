@@ -1,14 +1,14 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<!--[if IE 8]><html class="no-js lt-ie9" lang="" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Working with Publish/Subscribe &mdash; open62541 0.4.0-dev documentation</title>
+  <title>Working with Publish/Subscribe &mdash; open62541 1.0.0-dev documentation</title>
   
 
   
@@ -17,34 +17,43 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.0-dev',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Protocol" href="protocol.html" />
     <link rel="prev" title="Building a Simple Client" href="tutorial_client_firststeps.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -61,7 +70,7 @@
             
             
               <div class="version">
-                0.4
+                1.0
               </div>
             
           
@@ -97,9 +106,10 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Working with Publish/Subscribe</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Working with Publish/Subscribe</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#publishing-fields">Publishing Fields</a></li>
 </ul>
 </li>
@@ -109,9 +119,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -167,7 +180,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/tutorial_pubsub_publish.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial_pubsub_publish.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -184,7 +197,7 @@
 <span id="pubsub-tutorial"></span><h1>Working with Publish/Subscribe<a class="headerlink" href="#working-with-publish-subscribe" title="Permalink to this headline">¶</a></h1>
 <p>Work in progress: This Tutorial will be continuously extended during the next
 PubSub batches. More details about the PubSub extension and corresponding
-open62541 API are located here: <span class="xref std std-ref">pubsub</span>.</p>
+open62541 API are located here: <a class="reference internal" href="pubsub.html#pubsub"><em>Publish/Subscribe</em></a>.</p>
 <div class="section" id="publishing-fields">
 <h2>Publishing Fields<a class="headerlink" href="#publishing-fields" title="Permalink to this headline">¶</a></h2>
 <p>The PubSub publish example demonstrate the simplest way to publish
@@ -193,13 +206,14 @@ encoding.</p>
 <p><strong>Connection handling</strong></p>
 <p>PubSubConnections can be created and deleted on runtime. More details about
 the system preconfiguration and connection can be found in
-<code class="docutils literal notranslate"><span class="pre">tutorial_pubsub_connection.c</span></code>.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;ua_server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_config_default.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_log_stdout.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;ua_network_pubsub_udp.h&gt;</span><span class="cp"></span>
+<tt class="docutils literal"><span class="pre">tutorial_pubsub_connection.c</span></tt>.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;open62541/plugin/log_stdout.h&gt;</span>
+<span class="cp">#include &lt;open62541/plugin/pubsub_ethernet.h&gt;</span>
+<span class="cp">#include &lt;open62541/plugin/pubsub_udp.h&gt;</span>
+<span class="cp">#include &lt;open62541/server.h&gt;</span>
+<span class="cp">#include &lt;open62541/server_config_default.h&gt;</span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include &lt;signal.h&gt;</span>
 
 <span class="n">UA_NodeId</span> <span class="n">connectionIdent</span><span class="p">,</span> <span class="n">publishedDataSetIdent</span><span class="p">,</span> <span class="n">writerGroupIdent</span><span class="p">;</span>
 
@@ -225,7 +239,7 @@ the system preconfiguration and connection can be found in
 can exist alone. The PDS contains the collection of the published fields. All
 other PubSub elements are directly or indirectly linked with the PDS or
 connection.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addPublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="cm">/* The PublishedDataSetConfig contains all necessary public</span>
 <span class="cm">    * informations for the creation of a new PublishedDataSet */</span>
@@ -241,7 +255,7 @@ connection.</p>
 <p><strong>DataSetField handling</strong></p>
 <p>The DataSetField (DSF) is part of the PDS and describes exactly one published
 field.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addDataSetField</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="cm">/* Add a field to the previous created PublishedDataSet */</span>
     <span class="n">UA_NodeId</span> <span class="n">dataSetFieldIdent</span><span class="p">;</span>
@@ -261,7 +275,7 @@ field.</p>
 <p><strong>WriterGroup handling</strong></p>
 <p>The WriterGroup (WG) is part of the connection and contains the primary
 configuration parameters for the message creation.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="cm">/* Now we create a new WriterGroupConfig and add the group to the existing</span>
 <span class="cm">     * PubSubConnection. */</span>
@@ -284,7 +298,7 @@ configuration parameters for the message creation.</p>
 <p>A DataSetWriter (DSW) is the glue between the WG and the PDS. The DSW is
 linked to exactly one PDS and contains additional informations for the
 message generation.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span> <span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
 <span class="nf">addDataSetWriter</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
     <span class="cm">/* We need now a DataSetWriter within the WriterGroup. This means we must</span>
 <span class="cm">     * create a new DataSetWriterConfig and add call the addWriterGroup function. */</span>
@@ -299,7 +313,7 @@ message generation.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>That’s it! You’re now publishing the selected fields. Open a packet
+<p>That&#8217;s it! You&#8217;re now publishing the selected fields. Open a packet
 inspection tool of trust e.g. wireshark and take a look on the outgoing
 packages. The following graphic figures out the packages created by this
 tutorial.</p>
@@ -310,7 +324,7 @@ tutorial.</p>
 the the datagrams, take a look on the ua_network_pubsub_networkmessage.c
 which already contains the decoding code for UADP messages.</p>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sign</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
     <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
@@ -321,15 +335,17 @@ which already contains the decoding code for UADP messages.</p>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
     <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
 
-    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
-    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_new_default</span><span class="p">();</span>
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+
     <span class="cm">/* Details about the connection configuration and handling are located in</span>
 <span class="cm">     * the pubsub connection tutorial */</span>
     <span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayers</span> <span class="o">=</span>
         <span class="p">(</span><span class="n">UA_PubSubTransportLayer</span> <span class="o">*</span><span class="p">)</span> <span class="n">UA_calloc</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">UA_PubSubTransportLayer</span><span class="p">));</span>
     <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayers</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">UA_ServerConfig_delete</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">UA_PubSubTransportLayerUDPMP</span><span class="p">();</span>
     <span class="n">config</span><span class="o">-&gt;</span><span class="n">pubsubTransportLayersSize</span><span class="o">++</span><span class="p">;</span>
@@ -349,7 +365,7 @@ which already contains the decoding code for UADP messages.</p>
         <a href="protocol.html" class="btn btn-neutral float-right" title="Protocol" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial_client_firststeps.html" class="btn btn-neutral" title="Building a Simple Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial_client_firststeps.html" class="btn btn-neutral float-left" title="Building a Simple Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -375,35 +391,16 @@ which already contains the decoding code for UADP messages.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript">
-          var DOCUMENTATION_OPTIONS = {
-              URL_ROOT:'./',
-              VERSION:'0.4.0-dev',
-              LANGUAGE:'en',
-              COLLAPSE_INDEX:false,
-              FILE_SUFFIX:'.html',
-              HAS_SOURCE:  true,
-              SOURCELINK_SUFFIX: '.txt'
-          };
-      </script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
