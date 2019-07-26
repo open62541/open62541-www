@@ -15,6 +15,11 @@ Server Lifecycle
    
    UA_Server * UA_Server_new(void);
    
+   /* Makes a (shallow) copy of the config into the server object.
+    * The config content is cleared together with the server. */
+   UA_Server *
+   UA_Server_newWithConfig(const UA_ServerConfig *config);
+   
    void UA_Server_delete(UA_Server *server);
    
    UA_ServerConfig *
