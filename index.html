@@ -271,13 +271,15 @@ sudo apt-get install open62541-dev
 		        <a class="btn btn-lg btn-success" id="linux-32">Linux <br/><small>32 bit</small></a>
 		        <a class="btn btn-lg btn-success" id="linux-64">Linux <br/><small>64 bit</small></a>
 		        <a class="btn btn-lg btn-success" id="rpi">Raspberry Pi <br/><small>(Raspbian OS)</small></a>
+		        <a class="btn btn-lg btn-success" id="deb">Ubuntu/Debian Lib <br/><small>(amd64 .deb)</small></a>
+		        <a class="btn btn-lg btn-success" id="deb-dev">Ubuntu/Debian Dev <br/><small>(amd64 .deb)</small></a>
 		    </p>
 		    <p style="font-size: 16px">Nightly single-file distributions and MSVS Windows binaries can be found <a href="https://ci.appveyor.com/project/open62541/open62541/build/artifacts">here</a>.
             </p>
 		    <p style="font-size: 18px">Single-file distribution and full source code:</p>
 		    <p class="ssd-buttons">
-		        <a class="btn btn-lg btn-success" id="ssd_c">open62541.c</a>
-		        <a class="btn btn-lg btn-success" id="ssd_h">open62541.h</a>
+		        <!--a class="btn btn-lg btn-success" id="ssd_c">open62541.c</a>
+		        <a class="btn btn-lg btn-success" id="ssd_h">open62541.h</a-->
 		        <a class="btn btn-lg btn-success" id="zip">.zip</a>
 		        <a class="btn btn-lg btn-success" id="targz">.tar.gz</a>
 		    </p>
@@ -371,14 +373,27 @@ sudo apt-get install open62541-dev
 		        var release = json[0];
 		        $(".release-buttons").hide();
 		        $(".ssd-buttons").hide();
-		        if (typeof release.assets[0] !== 'undefined'){
-				    $("#linux-32").attr("href", release.assets[0].browser_download_url);
-				    $("#linux-64").attr("href", release.assets[1].browser_download_url);
-				    $("#windows-32").attr("href", release.assets[3].browser_download_url);
-				    $("#windows-64").attr("href", release.assets[4].browser_download_url);
-				    $("#rpi").attr("href", release.assets[2].browser_download_url);
-				    $("#ssd_c").attr("href", release.assets[5].browser_download_url);
-				    $("#ssd_h").attr("href", release.assets[6].browser_download_url);
+		        if (typeof release.assets[0] !== undefined){
+		            var idx = 0;
+		            while (release.assets[idx] !== undefined) {
+		                var url = release.assets[idx].browser_download_url;
+		                if (url.includes("open62541-dev") && url.endsWith(".deb"))
+                            $("#deb-dev").attr("href", url);
+		                if (url.includes("open62541_") && url.endsWith(".deb"))
+                            $("#deb").attr("href", url);
+		                else if (url.endsWith("-linux32.tar.gz"))
+                            $("#linux-32").attr("href", url);
+		                else if (url.endsWith("-linux64.tar.gz"))
+                            $("#linux-64").attr("href", url);
+                        else if (url.endsWith("-win32.zip"))
+                            $("#windows-32").attr("href", url);
+		                else if (url.endsWith("-win64.zip"))
+                            $("#windows-64").attr("href", url);
+                        else if (url.endsWith("-raspberrypi.tar.gz"))
+                            $("#rpi").attr("href", url);
+                        idx=idx+1;
+                    }
+
 				    $("#zip").attr("href", release.zipball_url);
 				    $("#targz").attr("href", release.tarball_url);
 		            var stableVersion = "<a href=\""+release.html_url+"\">" + release.name + "</a> " +
