@@ -405,10 +405,18 @@ A NodeId that allows the namespace URI to be specified instead of an index.
        UA_UInt32 serverIndex;
    } UA_ExpandedNodeId;
    
-   UA_Boolean UA_ExpandedNodeId_equal(const UA_ExpandedNodeId *n1,
-                                                const UA_ExpandedNodeId *n2);
-   
    extern const UA_ExpandedNodeId UA_EXPANDEDNODEID_NULL;
+   
+   UA_Order
+   UA_ExpandedNodeId_order(const UA_ExpandedNodeId *n1, const UA_ExpandedNodeId *n2);
+   
+   static UA_INLINE UA_Boolean
+   UA_ExpandedNodeId_equal(const UA_ExpandedNodeId *n1, const UA_ExpandedNodeId *n2) {
+       return (UA_ExpandedNodeId_order(n1, n2) == UA_ORDER_EQ);
+   }
+   
+   /* Returns a non-cryptographic hash for the NodeId */
+   UA_UInt32 UA_ExpandedNodeId_hash(const UA_ExpandedNodeId *n);
    
 The following functions are shorthand for creating ExpandedNodeIds.
 

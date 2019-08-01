@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Server &mdash; open62541 1.0.0-rc1 documentation</title>
+  <title>Server &mdash; open62541 1.0.0-rc2 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.0-rc1',
+              VERSION:'1.0.0-rc2',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -256,6 +256,10 @@ The usual usage is as follows:</p>
     <span class="n">UA_ApplicationDescription</span> <span class="n">applicationDescription</span><span class="p">;</span>
     <span class="n">UA_ByteString</span> <span class="n">serverCertificate</span><span class="p">;</span>
 
+    <span class="n">UA_Double</span> <span class="n">shutdownDelay</span><span class="p">;</span> <span class="cm">/* Delay in ms from the shutdown signal (ctrl-c)</span>
+<span class="cm">                                until the actual shutdown. Clients need to be</span>
+<span class="cm">                                able to get a notification ahead of time. */</span>
+
     <span class="cm">/* Rule Handling */</span>
     <span class="n">UA_RuleHandling</span> <span class="n">verifyRequestTimestamp</span><span class="p">;</span> <span class="cm">/* Verify that the server sends a</span>
 <span class="cm">                                             * timestamp in the request header */</span>
@@ -421,6 +425,11 @@ handling</em></a>.</p>
 <div class="section" id="server-lifecycle">
 <span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="cm">/* Makes a (shallow) copy of the config into the server object.</span>
+<span class="cm"> * The config content is cleared together with the server. */</span>
+<span class="n">UA_Server</span> <span class="o">*</span>
+<span class="nf">UA_Server_newWithConfig</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="kt">void</span> <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
@@ -832,18 +841,16 @@ specific to the different users and set by the access control callback:</p>
 <span class="nf">UA_Server_browse</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxReferences</span><span class="p">,</span>
                  <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">bd</span><span class="p">);</span>
 
-<span class="cm">/* Nonstandard version of the browse service that recurses into child nodes.</span>
-<span class="cm"> * Possible loops (that can occur for non-hierarchical references) are handled</span>
-<span class="cm"> * by adding every target node at most once to the result array. The returned</span>
-<span class="cm"> * ReferenceDescription refers has the `ReferenceTypeId` and `IsForward` fields</span>
-<span class="cm"> * set according to the last reference in the (recursive) chain. */</span>
-<span class="n">UA_BrowseResult</span>
-<span class="nf">UA_Server_browseRecursive</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxReferences</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">bd</span><span class="p">);</span>
-
 <span class="n">UA_BrowseResult</span>
 <span class="nf">UA_Server_browseNext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">releaseContinuationPoint</span><span class="p">,</span>
                      <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">continuationPoint</span><span class="p">);</span>
+
+<span class="cm">/* Nonstandard version of the browse service that recurses into child nodes.</span>
+<span class="cm"> * Possible loops (that can occur for non-hierarchical references) are handled</span>
+<span class="cm"> * by adding every target node at most once to the results array. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_browseRecursive</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">bd</span><span class="p">,</span>
+                          <span class="kt">size_t</span> <span class="o">*</span><span class="n">resultsSize</span><span class="p">,</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">results</span><span class="p">);</span>
 
 <span class="n">UA_BrowsePathResult</span>
 <span class="nf">UA_Server_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
