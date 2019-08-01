@@ -225,6 +225,35 @@ read only. See below for making the variable writable.</p>
                               <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">myIntegerName</span><span class="p">,</span>
                               <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">),</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addMatrixVariable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_VariableAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;Double Matrix&quot;</span><span class="p">);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">accessLevel</span> <span class="o">=</span> <span class="n">UA_ACCESSLEVELMASK_READ</span> <span class="o">|</span> <span class="n">UA_ACCESSLEVELMASK_WRITE</span><span class="p">;</span>
+
+    <span class="cm">/* Set the variable value constraints */</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="n">UA_VALUERANK_TWO_DIMENSIONS</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">arrayDims</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">};</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">arrayDims</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+    <span class="cm">/* Set the value. The array dimensions need to be the same for the value. */</span>
+    <span class="n">UA_Double</span> <span class="n">zero</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">};</span>
+    <span class="n">UA_Variant_setArray</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">]);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">arrayDims</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+
+    <span class="n">UA_NodeId</span> <span class="n">myIntegerNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;double.matrix&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">myIntegerName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;double matrix&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentReferenceNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
+    <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">myIntegerNodeId</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                              <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">myIntegerName</span><span class="p">,</span>
+                              <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">),</span>
+                              <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>Now we change the value with the write service. This uses the same service
