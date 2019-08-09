@@ -445,7 +445,7 @@ Browsing
     * by adding every target node at most once to the results array. */
    UA_StatusCode
    UA_Server_browseRecursive(UA_Server *server, const UA_BrowseDescription *bd,
-                             size_t *resultsSize, UA_ExpandedNodeId *results);
+                             size_t *resultsSize, UA_ExpandedNodeId **results);
    
    UA_BrowsePathResult
    UA_Server_translateBrowsePathToNodeIds(UA_Server *server,
