@@ -35,7 +35,8 @@ the node type. Possible attributes are as follows:
        UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL = 19,
        UA_ATTRIBUTEID_HISTORIZING             = 20,
        UA_ATTRIBUTEID_EXECUTABLE              = 21,
-       UA_ATTRIBUTEID_USEREXECUTABLE          = 22
+       UA_ATTRIBUTEID_USEREXECUTABLE          = 22,
+       UA_ATTRIBUTEID_DATATYPEDEFINITION      = 23
    } UA_AttributeId;
    
 Access Level Masks

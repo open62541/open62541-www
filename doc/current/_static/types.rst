@@ -832,7 +832,7 @@ type operations as static inline functions.
 
    
    typedef struct {
-   #ifdef UA_ENABLE_TYPENAMES
+   #ifdef UA_ENABLE_TYPEDESCRIPTION
        const char *memberName;
    #endif
        UA_UInt16 memberTypeIndex;    /* Index of the member in the array of data
@@ -888,7 +888,7 @@ type operations as static inline functions.
    } UA_DataTypeKind;
    
    struct UA_DataType {
-   #ifdef UA_ENABLE_TYPENAMES
+   #ifdef UA_ENABLE_TYPEDESCRIPTION
        const char *typeName;
    #endif
        UA_NodeId typeId;                /* The nodeid of the type */
@@ -1038,7 +1038,7 @@ The following data types were auto-generated from a definition in XML format.
    
    /* The following is used to exclude type names in the definition of UA_DataType
     * structures if the feature is disabled. */
-   #ifdef UA_ENABLE_TYPENAMES
+   #ifdef UA_ENABLE_TYPEDESCRIPTION
    # define UA_TYPENAME(name) name,
    #else
    # define UA_TYPENAME(name)
