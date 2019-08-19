@@ -1016,7 +1016,7 @@ length 0 but a data pointer ``UA_EMPTY_ARRAY_SENTINEL``.
    
 Random Number Generator
 -----------------------
-If UA_ENABLE_MULTITHREADING is defined, then the seed is stored in thread
+If UA_MULTITHREADING is defined, then the seed is stored in thread
 local storage. The seed is initialized for every thread in the
 server/client.
 

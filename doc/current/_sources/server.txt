@@ -136,106 +136,106 @@ has full rights.
     * @param timestamps Which timestamps to return for the attribute.
     * @return Returns a DataValue that contains either an error code, or a variant
     *         with the attribute value and the timestamps. */
-   UA_DataValue
+   UA_DataValue UA_THREADSAFE
    UA_Server_read(UA_Server *server, const UA_ReadValueId *item,
                   UA_TimestampsToReturn timestamps);
    
    /* Don't use this function. There are typed versions for every supported
     * attribute. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Server_read(UA_Server *server, const UA_NodeId *nodeId,
                     UA_AttributeId attributeId, void *v);
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readNodeId(UA_Server *server, const UA_NodeId nodeId,
                         UA_NodeId *outNodeId) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readNodeClass(UA_Server *server, const UA_NodeId nodeId,
                            UA_NodeClass *outNodeClass) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_NODECLASS,
                                outNodeClass);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readBrowseName(UA_Server *server, const UA_NodeId nodeId,
                             UA_QualifiedName *outBrowseName) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                outBrowseName);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readDisplayName(UA_Server *server, const UA_NodeId nodeId,
                              UA_LocalizedText *outDisplayName) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                outDisplayName);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readDescription(UA_Server *server, const UA_NodeId nodeId,
                              UA_LocalizedText *outDescription) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                outDescription);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readWriteMask(UA_Server *server, const UA_NodeId nodeId,
                            UA_UInt32 *outWriteMask) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                outWriteMask);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readIsAbstract(UA_Server *server, const UA_NodeId nodeId,
                             UA_Boolean *outIsAbstract) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                outIsAbstract);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readSymmetric(UA_Server *server, const UA_NodeId nodeId,
                            UA_Boolean *outSymmetric) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                                outSymmetric);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readInverseName(UA_Server *server, const UA_NodeId nodeId,
                              UA_LocalizedText *outInverseName) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                outInverseName);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readContainsNoLoop(UA_Server *server, const UA_NodeId nodeId,
                                 UA_Boolean *outContainsNoLoops) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                                outContainsNoLoops);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readEventNotifier(UA_Server *server, const UA_NodeId nodeId,
                                UA_Byte *outEventNotifier) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                outEventNotifier);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readValue(UA_Server *server, const UA_NodeId nodeId,
                        UA_Variant *outValue) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_VALUE, outValue);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readDataType(UA_Server *server, const UA_NodeId nodeId,
                           UA_NodeId *outDataType) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_DATATYPE,
                                outDataType);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readValueRank(UA_Server *server, const UA_NodeId nodeId,
                            UA_Int32 *outValueRank) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_VALUERANK,
@@ -243,21 +243,21 @@ has full rights.
    }
    
    /* Returns a variant with an int32 array */
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readArrayDimensions(UA_Server *server, const UA_NodeId nodeId,
                                  UA_Variant *outArrayDimensions) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS,
                                outArrayDimensions);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readAccessLevel(UA_Server *server, const UA_NodeId nodeId,
                              UA_Byte *outAccessLevel) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                outAccessLevel);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readMinimumSamplingInterval(UA_Server *server, const UA_NodeId nodeId,
                                          UA_Double *outMinimumSamplingInterval) {
        return __UA_Server_read(server, &nodeId,
@@ -265,14 +265,14 @@ has full rights.
                                outMinimumSamplingInterval);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readHistorizing(UA_Server *server, const UA_NodeId nodeId,
                              UA_Boolean *outHistorizing) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_HISTORIZING,
                                outHistorizing);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_readExecutable(UA_Server *server, const UA_NodeId nodeId,
                             UA_Boolean *outExecutable) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_EXECUTABLE,
@@ -306,101 +306,101 @@ specific to the different users and set by the access control callback:
     *              See the section on NumericRange for the format used for array
     *              ranges.
     * @return Returns a status code. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_write(UA_Server *server, const UA_WriteValue *value);
    
    /* Don't use this function. There are typed versions with no additional
     * overhead. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Server_write(UA_Server *server, const UA_NodeId *nodeId,
                      const UA_AttributeId attributeId,
                      const UA_DataType *attr_type, const void *attr);
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeBrowseName(UA_Server *server, const UA_NodeId nodeId,
                              const UA_QualifiedName browseName) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], &browseName);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeDisplayName(UA_Server *server, const UA_NodeId nodeId,
                               const UA_LocalizedText displayName) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &displayName);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeDescription(UA_Server *server, const UA_NodeId nodeId,
                               const UA_LocalizedText description) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &description);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeWriteMask(UA_Server *server, const UA_NodeId nodeId,
                             const UA_UInt32 writeMask) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                 &UA_TYPES[UA_TYPES_UINT32], &writeMask);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeIsAbstract(UA_Server *server, const UA_NodeId nodeId,
                              const UA_Boolean isAbstract) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeInverseName(UA_Server *server, const UA_NodeId nodeId,
                               const UA_LocalizedText inverseName) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeEventNotifier(UA_Server *server, const UA_NodeId nodeId,
                                 const UA_Byte eventNotifier) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                 &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeValue(UA_Server *server, const UA_NodeId nodeId,
                         const UA_Variant value) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], &value);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeDataType(UA_Server *server, const UA_NodeId nodeId,
                            const UA_NodeId dataType) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 &UA_TYPES[UA_TYPES_NODEID], &dataType);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeValueRank(UA_Server *server, const UA_NodeId nodeId,
                             const UA_Int32 valueRank) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_VALUERANK,
                                 &UA_TYPES[UA_TYPES_INT32], &valueRank);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeArrayDimensions(UA_Server *server, const UA_NodeId nodeId,
                                   const UA_Variant arrayDimensions) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS,
                                 &UA_TYPES[UA_TYPES_VARIANT], &arrayDimensions);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeAccessLevel(UA_Server *server, const UA_NodeId nodeId,
                               const UA_Byte accessLevel) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                 &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeMinimumSamplingInterval(UA_Server *server, const UA_NodeId nodeId,
                                           const UA_Double miniumSamplingInterval) {
        return __UA_Server_write(server, &nodeId,
@@ -409,7 +409,7 @@ specific to the different users and set by the access control callback:
                                 &miniumSamplingInterval);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeHistorizing(UA_Server *server, const UA_NodeId nodeId,
                              const UA_Boolean historizing) {
        return __UA_Server_write(server, &nodeId,
@@ -418,7 +418,7 @@ specific to the different users and set by the access control callback:
                                 &historizing);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_writeExecutable(UA_Server *server, const UA_NodeId nodeId,
                              const UA_Boolean executable) {
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_EXECUTABLE,
@@ -447,7 +447,7 @@ Browsing
    UA_Server_browseRecursive(UA_Server *server, const UA_BrowseDescription *bd,
                              size_t *resultsSize, UA_ExpandedNodeId **results);
    
-   UA_BrowsePathResult
+   UA_BrowsePathResult UA_THREADSAFE
    UA_Server_translateBrowsePathToNodeIds(UA_Server *server,
                                           const UA_BrowsePath *browsePath);
    
@@ -762,7 +762,7 @@ be set to a null-pointer.
                               const UA_DataValue *value);
    } UA_DataSource;
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setVariableNode_dataSource(UA_Server *server, const UA_NodeId nodeId,
                                         const UA_DataSource dataSource);
    
@@ -893,7 +893,7 @@ adding methods over the network is really wanted. See the Section
                         UA_Variant *output);
    
    #ifdef UA_ENABLE_METHODCALLS
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setMethodNode_callback(UA_Server *server,
                                     const UA_NodeId methodNodeId,
                                     UA_MethodCallback methodCallback);
@@ -943,7 +943,7 @@ convenience functions are provided to simplify the interaction with objects.
                                 UA_Variant *value);
    
    #ifdef UA_ENABLE_METHODCALLS
-   UA_CallMethodResult
+   UA_CallMethodResult UA_THREADSAFE
    UA_Server_call(UA_Server *server, const UA_CallMethodRequest *request);
    #endif
    
@@ -992,7 +992,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
    #endif
    
    /* Don't use this function. There are typed versions as inline functions. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Server_addNode(UA_Server *server, const UA_NodeClass nodeClass,
                        const UA_NodeId *requestedNewNodeId,
                        const UA_NodeId *parentNodeId,
@@ -1003,7 +1003,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                        const UA_DataType *attributeType,
                        void *nodeContext, UA_NodeId *outNewNodeId);
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addVariableNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                              const UA_NodeId parentNodeId,
                              const UA_NodeId referenceTypeId,
@@ -1018,7 +1018,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addVariableTypeNode(UA_Server *server,
                                  const UA_NodeId requestedNewNodeId,
                                  const UA_NodeId parentNodeId,
@@ -1035,7 +1035,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addObjectNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                            const UA_NodeId parentNodeId,
                            const UA_NodeId referenceTypeId,
@@ -1050,7 +1050,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addObjectTypeNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                                const UA_NodeId parentNodeId,
                                const UA_NodeId referenceTypeId,
@@ -1064,7 +1064,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addViewNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                          const UA_NodeId parentNodeId,
                          const UA_NodeId referenceTypeId,
@@ -1078,7 +1078,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addReferenceTypeNode(UA_Server *server,
                                   const UA_NodeId requestedNewNodeId,
                                   const UA_NodeId parentNodeId,
@@ -1094,7 +1094,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addDataTypeNode(UA_Server *server,
                              const UA_NodeId requestedNewNodeId,
                              const UA_NodeId parentNodeId,
@@ -1109,7 +1109,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                   nodeContext, outNewNodeId);
    }
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addDataSourceVariableNode(UA_Server *server,
                                        const UA_NodeId requestedNewNodeId,
                                        const UA_NodeId parentNodeId,
@@ -1122,7 +1122,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
    
    #ifdef UA_ENABLE_METHODCALLS
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addMethodNodeEx(UA_Server *server, const UA_NodeId requestedNewNodeId,
                              const UA_NodeId parentNodeId,
                              const UA_NodeId referenceTypeId,
@@ -1136,7 +1136,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                              UA_NodeId *outputArgumentsOutNewNodeId,
                              void *nodeContext, UA_NodeId *outNewNodeId);
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Server_addMethodNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                            const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
                            const UA_QualifiedName browseName, const UA_MethodAttributes attr,
@@ -1189,7 +1189,7 @@ applicable.
 
 .. code-block:: c
 
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addNode_begin(UA_Server *server, const UA_NodeClass nodeClass,
                            const UA_NodeId requestedNewNodeId,
                            const UA_NodeId parentNodeId,
@@ -1199,12 +1199,12 @@ applicable.
                            const void *attr, const UA_DataType *attributeType,
                            void *nodeContext, UA_NodeId *outNewNodeId);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addNode_finish(UA_Server *server, const UA_NodeId nodeId);
    
    #ifdef UA_ENABLE_METHODCALLS
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addMethodNode_finish(UA_Server *server, const UA_NodeId nodeId,
                             UA_MethodCallback method,
                             size_t inputArgumentsSize, const UA_Argument* inputArguments,
@@ -1213,7 +1213,7 @@ applicable.
    #endif
    
    /* Deletes a node and optionally all references leading to the node. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_deleteNode(UA_Server *server, const UA_NodeId nodeId,
                         UA_Boolean deleteReferences);
    
@@ -1222,12 +1222,12 @@ Reference Management
 
 .. code-block:: c
 
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addReference(UA_Server *server, const UA_NodeId sourceId,
                           const UA_NodeId refTypeId,
                           const UA_ExpandedNodeId targetId, UA_Boolean isForward);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_deleteReference(UA_Server *server, const UA_NodeId sourceNodeId,
                              const UA_NodeId referenceTypeId, UA_Boolean isForward,
                              const UA_ExpandedNodeId targetNodeId,
