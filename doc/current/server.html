@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Server &mdash; open62541 1.0.0-rc3-60-g2ef7baf4 documentation</title>
+  <title>Server &mdash; open62541 1.0.0-rc3-61-g4b0b7f81 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.0-rc3-60-g2ef7baf4',
+              VERSION:'1.0.0-rc3-61-g4b0b7f81',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -1047,7 +1047,50 @@ pointer of the new node is also initially set to <tt class="docutils literal"><s
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
+
+    <span class="cm">/* Can be NULL. Called during recursive node instantiation. While mandatory</span>
+<span class="cm">     * child nodes are automatically created if not already present, optional child</span>
+<span class="cm">     * nodes are not. This callback can be used to define whether an optional child</span>
+<span class="cm">     * node should be created.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param server The server executing the callback</span>
+<span class="cm">     * @param sessionId The identifier of the session</span>
+<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
+<span class="cm">     *        access control layer</span>
+<span class="cm">     * @param sourceNodeId Source node from the type definition. If the new node</span>
+<span class="cm">     *        shall be created, it will be a copy of this node.</span>
+<span class="cm">     * @param targetParentNodeId Parent of the potential new child node</span>
+<span class="cm">     * @param referenceTypeId Identifies the reference type which that the parent</span>
+<span class="cm">     *        node has to the new node.</span>
+<span class="cm">     * @return Return UA_TRUE if the child node shall be instantiatet,</span>
+<span class="cm">     *         UA_FALSE otherwise. */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">createOptionalChild</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                      <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sourceNodeId</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">);</span>
+
+    <span class="cm">/* Can be NULL. Called when a node is to be copied during recursive</span>
+<span class="cm">     * node instantiation. Allows definition of the NodeId for the new node.</span>
+<span class="cm">     * If the callback is set to NULL or the resulting NodeId is UA_NODEID_NULL,</span>
+<span class="cm">     * then a random NodeId will be generated.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param server The server executing the callback</span>
+<span class="cm">     * @param sessionId The identifier of the session</span>
+<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
+<span class="cm">     *        access control layer</span>
+<span class="cm">     * @param sourceNodeId Source node of the copy operation</span>
+<span class="cm">     * @param targetParentNodeId Parent node of the new node</span>
+<span class="cm">     * @param referenceTypeId Identifies the reference type which that the parent</span>
+<span class="cm">     *        node has to the new node. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">generateChildNodeId</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sourceNodeId</span><span class="p">,</span>
+                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
+                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
+                                         <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetNodeId</span><span class="p">);</span>
+    <span class="p">}</span> <span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
