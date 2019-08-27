@@ -186,7 +186,7 @@ Used to add one or more Nodes into the AddressSpace hierarchy.
 
 .. code-block:: c
 
-   UA_THREADSAFE void Service_AddNodes(UA_Server *server, UA_Session *session,
+   void Service_AddNodes(UA_Server *server, UA_Session *session,
                          const UA_AddNodesRequest *request,
                          UA_AddNodesResponse *response);
    
@@ -196,7 +196,7 @@ Used to add one or more References to one or more Nodes.
 
 .. code-block:: c
 
-   UA_THREADSAFE void Service_AddReferences(UA_Server *server, UA_Session *session,
+   void Service_AddReferences(UA_Server *server, UA_Session *session,
                               const UA_AddReferencesRequest *request,
                               UA_AddReferencesResponse *response);
    
@@ -206,7 +206,7 @@ Used to delete one or more Nodes from the AddressSpace.
 
 .. code-block:: c
 
-   UA_THREADSAFE void Service_DeleteNodes(UA_Server *server, UA_Session *session,
+   void Service_DeleteNodes(UA_Server *server, UA_Session *session,
                             const UA_DeleteNodesRequest *request,
                             UA_DeleteNodesResponse *response);
    
@@ -216,7 +216,7 @@ Used to delete one or more References of a Node.
 
 .. code-block:: c
 
-   UA_THREADSAFE void Service_DeleteReferences(UA_Server *server, UA_Session *session,
+   void Service_DeleteReferences(UA_Server *server, UA_Session *session,
                                  const UA_DeleteReferencesRequest *request,
                                  UA_DeleteReferencesResponse *response);
    
@@ -327,8 +327,8 @@ or to read ranges of elements of the composite.
 
 .. code-block:: c
 
-   UA_THREADSAFE void Service_Read(UA_Server *server, UA_Session *session,
-                                   const UA_ReadRequest *request, UA_ReadResponse *response);
+   void Service_Read(UA_Server *server, UA_Session *session,
+                     const UA_ReadRequest *request, UA_ReadResponse *response);
    
 Write Service
 ^^^^^^^^^^^^^
@@ -339,8 +339,8 @@ or to write ranges of elements of the composite.
 
 .. code-block:: c
 
-   UA_THREADSAFE void Service_Write(UA_Server *server, UA_Session *session,
-                                    const UA_WriteRequest *request, UA_WriteResponse *response);
+   void Service_Write(UA_Server *server, UA_Session *session,
+                      const UA_WriteRequest *request, UA_WriteResponse *response);
    
 HistoryRead Service
 ^^^^^^^^^^^^^^^^^^^
@@ -386,9 +386,9 @@ the method's execution cannot be returned to the Client and are discarded.
 .. code-block:: c
 
    #ifdef UA_ENABLE_METHODCALLS
-   UA_THREADSAFE void Service_Call(UA_Server *server, UA_Session *session,
-                                   const UA_CallRequest *request,
-                                   UA_CallResponse *response);
+   void Service_Call(UA_Server *server, UA_Session *session,
+                     const UA_CallRequest *request,
+                     UA_CallResponse *response);
    #endif
    
    #ifdef UA_ENABLE_SUBSCRIPTIONS
