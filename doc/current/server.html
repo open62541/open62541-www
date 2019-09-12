@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Server &mdash; open62541 1.1.0-dev-32-g6ad780da documentation</title>
+  <title>Server &mdash; open62541 1.1.0-dev-34-g926840fc documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-32-g6ad780da',
+              VERSION:'1.1.0-dev-34-g926840fc',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -125,6 +125,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#async-methods">Async Methods</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -247,6 +248,9 @@ The usual usage is as follows:</p>
 
 <span class="cp">#endif</span>
 
+<span class="k">typedef</span> <span class="nf">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_Server_AsyncOperationNotifyCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
 <span class="k">struct</span> <span class="n">UA_ServerConfig</span> <span class="p">{</span>
     <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* only if multithreading is enabled */</span>
     <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
@@ -312,6 +316,21 @@ handling</em></a>.</p>
 <p class="last">See the section for <a class="reference internal" href="plugin_accesscontrol.html#access-control"><em>access-control
 handling</em></a>.</p>
 </div>
+<div class="highlight-c"><div class="highlight"><pre>    <span class="cm">/* Async Operations */</span>
+<span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
+    <span class="n">UA_Double</span> <span class="n">asyncOperationTimeout</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
+    <span class="kt">size_t</span> <span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span> <span class="cm">/* 0 =&gt; unlimited */</span>
+    <span class="n">UA_Double</span> <span class="n">asyncCallRequestTimeout</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
+    <span class="cm">/* Notify workers when an async operation was enqueued */</span>
+    <span class="n">UA_Server_AsyncOperationNotifyCallback</span> <span class="n">asyncOperationNotifyCallback</span><span class="p">;</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section for :ref:<a href="#id3"><span class="problematic" id="id4">`</span></a>async</p>
+</div>
+<p>operations&lt;async-operations&gt;`.</p>
 <div class="highlight-c"><div class="highlight"><pre>    <span class="cm">/* Certificate Verification */</span>
     <span class="n">UA_CertificateVerification</span> <span class="n">certificateVerification</span><span class="p">;</span>
 
@@ -423,7 +442,7 @@ handling</em></a>.</p>
 </div>
 </div>
 <div class="section" id="server-lifecycle">
-<span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
+<span id="id5"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
 <span class="cm">/* Makes a (shallow) copy of the config into the server object.</span>
@@ -1202,7 +1221,7 @@ be set to a null-pointer.</p>
 </div>
 </div>
 <div class="section" id="value-callback">
-<span id="id4"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
+<span id="id6"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
 <p>Value Callbacks can be attached to variable and variable type nodes. If
 not <tt class="docutils literal"><span class="pre">NULL</span></tt>, they are called before reading and after writing respectively.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
@@ -1249,7 +1268,7 @@ not <tt class="docutils literal"><span class="pre">NULL</span></tt>, they are ca
 </div>
 </div>
 <div class="section" id="local-monitoreditems">
-<span id="id5"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this headline">¶</a></h3>
+<span id="id7"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this headline">¶</a></h3>
 <p>MonitoredItems are used with the Subscription mechanism of OPC UA to
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
@@ -1649,7 +1668,7 @@ applicable.</p>
 </div>
 </div>
 <div class="section" id="events">
-<span id="id6"></span><h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
 <p>The method <tt class="docutils literal"><span class="pre">UA_Server_createEvent</span></tt> creates an event and represents it as node. The node receives a unique <cite>EventId</cite>
 which is automatically added to the node.
 The method returns a <cite>NodeId</cite> to the object node which represents the event through <tt class="docutils literal"><span class="pre">outNodeId</span></tt>. The <cite>NodeId</cite> can
@@ -1732,6 +1751,73 @@ cause the node to be deleted.</p>
                                                             <span class="n">UA_DateTime</span> <span class="n">endTimestamp</span><span class="p">,</span>
                                                             <span class="kt">bool</span> <span class="n">isDeleteModified</span><span class="p">);</span>
 <span class="cp">#endif </span><span class="c1">// UA_ENABLE_HISTORIZING</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="async-methods">
+<span id="id9"></span><h2>Async Methods<a class="headerlink" href="#async-methods" title="Permalink to this headline">¶</a></h2>
+<p>Sample on working with async method calls
+Check client_method_async and tutorial_server_method_async for working samples.</p>
+<p>Minimal Server:</p>
+<ul class="simple">
+<li>Create a method node</li>
+<li>mark as async: <tt class="docutils literal"><span class="pre">UA_Server_MethodNodeAsync</span></tt></li>
+<li>set callback to be notified: <tt class="docutils literal"><span class="pre">config-&gt;asyncOperationNotifyCallback</span> <span class="pre">=</span> <span class="pre">...</span></tt></li>
+<li>fetch MethodCall: <tt class="docutils literal"><span class="pre">UA_Server_GetNextAsyncMethod</span></tt></li>
+<li>execute Method: e.g. UA_Server_call(UA_Server*, UA_CallMethodRequest*)</li>
+<li>pass back the result: <tt class="docutils literal"><span class="pre">UA_Server_SetAsyncMethodResult</span></tt></li>
+<li>free memory used: free UA_CallMethodResult</li>
+</ul>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
+
+<span class="cm">/* Set the async flag in a method node */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setMethodNodeAsync</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">id</span><span class="p">,</span>
+                             <span class="n">UA_Boolean</span> <span class="n">isAsync</span><span class="p">);</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_ASYNCOPERATIONTYPE_INVALID</span><span class="p">,</span> <span class="cm">/* 0, the default */</span>
+    <span class="n">UA_ASYNCOPERATIONTYPE_CALL</span>
+    <span class="cm">/* UA_ASYNCOPERATIONTYPE_READ, */</span>
+    <span class="cm">/* UA_ASYNCOPERATIONTYPE_WRITE, */</span>
+<span class="p">}</span> <span class="n">UA_AsyncOperationType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">union</span> <span class="p">{</span>
+    <span class="n">UA_CallMethodRequest</span> <span class="n">callMethodRequest</span><span class="p">;</span>
+    <span class="cm">/* UA_ReadValueId readValueId; */</span>
+    <span class="cm">/* UA_WriteValue writeValue; */</span>
+<span class="p">}</span> <span class="n">UA_AsyncOperationRequest</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">union</span> <span class="p">{</span>
+    <span class="n">UA_CallMethodResult</span> <span class="n">callMethodResult</span><span class="p">;</span>
+    <span class="cm">/* UA_DataValue readResult; */</span>
+    <span class="cm">/* UA_StatusCode writeResult; */</span>
+<span class="p">}</span> <span class="n">UA_AsyncOperationResponse</span><span class="p">;</span>
+
+<span class="cm">/* Get and remove next Method Call Request</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param type The type of the async operation</span>
+<span class="cm"> * @param request Receives pointer to the operation</span>
+<span class="cm"> * @param context Receives the pointer to the operation context</span>
+<span class="cm"> * @return UA_FALSE if queue is empty, UA_TRUE else</span>
+<span class="cm"> * Note: Timeout is doubled for requests which already got fetched by worker via UA_Server_getAsyncOperation */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Server_getAsyncOperation</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AsyncOperationType</span> <span class="o">*</span><span class="n">type</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_AsyncOperationRequest</span> <span class="o">**</span><span class="n">request</span><span class="p">,</span>
+                            <span class="kt">void</span> <span class="o">**</span><span class="n">context</span><span class="p">);</span>
+
+<span class="cm">/* Worker submits Method Call Response</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param response Pointer to the operation result</span>
+<span class="cm"> * @param context Pointer to the operation context */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Server_setAsyncOperationResult</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_AsyncOperationResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span>
+                                  <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* !UA_MULTITHREADING &gt;= 100 */</span><span class="cp"></span>
 </pre></div>
 </div>
 </div>
