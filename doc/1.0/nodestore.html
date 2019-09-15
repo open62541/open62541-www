@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 1.0.0-rc5-57-gd5953673 documentation</title>
+  <title>Information Modelling &mdash; open62541 1.0.0-rc5-59-gef93d2d8 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.0-rc5-57-gd5953673',
+              VERSION:'1.0.0-rc5-59-gef93d2d8',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -221,12 +221,24 @@ an integer <a class="reference internal" href="constants.html#attribute-id"><em>
 <p>Internally, open62541 uses <tt class="docutils literal"><span class="pre">UA_Node</span></tt> in places where the exact node type is
 not known or not important. The <tt class="docutils literal"><span class="pre">nodeClass</span></tt> attribute is used to ensure the
 correctness of casting from <tt class="docutils literal"><span class="pre">UA_Node</span></tt> to a specific node type.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* List of reference targets with the same reference type and direction */</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Ordered tree structure for fast member check */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="p">{</span>
+    <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">zipfields</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">targetHash</span><span class="p">;</span> <span class="cm">/* Hash of the target nodeid */</span>
+    <span class="n">UA_ExpandedNodeId</span> <span class="n">target</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ReferenceTarget</span><span class="p">;</span>
+
+<span class="n">ZIP_HEAD</span><span class="p">(</span><span class="n">UA_ReferenceTargetHead</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTargetHead</span> <span class="n">UA_ReferenceTargetHead</span><span class="p">;</span>
+<span class="n">ZIP_PROTTYPE</span><span class="p">(</span><span class="n">UA_ReferenceTargetHead</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">)</span>
+
+<span class="cm">/* List of reference targets with the same reference type and direction */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">;</span>
-    <span class="kt">size_t</span> <span class="n">targetIdsSize</span><span class="p">;</span>
-    <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">targetIds</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">refTargetsSize</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTarget</span> <span class="o">*</span><span class="n">refTargets</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTargetHead</span> <span class="n">refTargetsTree</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_NodeReferenceKind</span><span class="p">;</span>
 
 <span class="cp">#define UA_NODE_BASEATTRIBUTES                  \</span>
