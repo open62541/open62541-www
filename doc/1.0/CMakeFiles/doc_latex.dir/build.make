@@ -82,6 +82,7 @@ doc/CMakeFiles/doc_latex: doc_src/tutorial_server_method.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_client_firststeps.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorial_pubsub_publish.rst
 doc/CMakeFiles/doc_latex: doc_src/building.rst
+doc/CMakeFiles/doc_latex: doc_src/building_arch.rst
 doc/CMakeFiles/doc_latex: doc_src/index.rst
 doc/CMakeFiles/doc_latex: doc_src/installing.rst
 doc/CMakeFiles/doc_latex: doc_src/internal.rst
