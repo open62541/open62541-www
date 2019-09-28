@@ -514,8 +514,8 @@ by the NodeClass attribute.
    /* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,
     * and so on). The attributes are copied. Note that the attributes structs do
     * not contain NodeId, NodeClass and BrowseName. The NodeClass of the node needs
-    * to be correctly set before calling this method. UA_Node_deleteMembers is
-    * called on the node when an error occurs internally. */
+    * to be correctly set before calling this method. UA_Node_clear is called on
+    * the node when an error occurs internally. */
    UA_StatusCode
    UA_Node_setAttributes(UA_Node *node, const void *attributes,
                          const UA_DataType *attributeType);
@@ -540,6 +540,6 @@ by the NodeClass attribute.
    void
    UA_Node_deleteReferences(UA_Node *node);
    
-   /* Remove all malloc'ed members of the node */
+   /* Remove all malloc'ed members of the node and reset */
    void
-   UA_Node_deleteMembers(UA_Node *node);
+   UA_Node_clear(UA_Node *node);
