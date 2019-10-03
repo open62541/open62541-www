@@ -182,7 +182,7 @@ functions to add new fields.
    } UA_PublishedDataSetConfig;
    
    void
-   UA_PublishedDataSetConfig_deleteMembers(UA_PublishedDataSetConfig *pdsConfig);
+   UA_PublishedDataSetConfig_clear(UA_PublishedDataSetConfig *pdsConfig);
    
    typedef struct {
        UA_StatusCode addResult;
@@ -243,7 +243,7 @@ handling process.
    } UA_DataSetFieldConfig;
    
    void
-   UA_DataSetFieldConfig_deleteMembers(UA_DataSetFieldConfig *dataSetFieldConfig);
+   UA_DataSetFieldConfig_clear(UA_DataSetFieldConfig *dataSetFieldConfig);
    
    typedef struct {
        UA_StatusCode result;
@@ -342,7 +342,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    } UA_WriterGroupConfig;
    
    void
-   UA_WriterGroupConfig_deleteMembers(UA_WriterGroupConfig *writerGroupConfig);
+   UA_WriterGroupConfig_clear(UA_WriterGroupConfig *writerGroupConfig);
    
    /* Add a new WriterGroup to an existing Connection */
    UA_StatusCode
@@ -402,7 +402,7 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
    } UA_DataSetWriterConfig;
    
    void
-   UA_DataSetWriterConfig_deleteMembers(UA_DataSetWriterConfig *pdsConfig);
+   UA_DataSetWriterConfig_clear(UA_DataSetWriterConfig *pdsConfig);
    
    /* Add a new DataSetWriter to a existing WriterGroup. The DataSetWriter must be
     * coupled with a PublishedDataSet on creation.

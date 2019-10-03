@@ -10,7 +10,7 @@ rights accordingly.
    
    struct UA_AccessControl {
        void *context;
-       void (*deleteMembers)(UA_AccessControl *ac);
+       void (*clear)(UA_AccessControl *ac);
    
        /* Supported login mechanisms. The server endpoints are created from here. */
        size_t userTokenPoliciesSize;

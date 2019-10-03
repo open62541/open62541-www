@@ -90,7 +90,7 @@ networking plugins with a clear interface to the main open62541 library.
    
    /* Cleans up half-received messages, and so on. Called from connection->free. */
    void
-   UA_Connection_deleteMembers(UA_Connection *connection);
+   UA_Connection_clear(UA_Connection *connection);
    
 Server Network Layer
 --------------------
@@ -162,7 +162,7 @@ until a message is received or the duration times out.
        void (*stop)(UA_ServerNetworkLayer *nl, UA_Server *server);
    
        /* Deletes the network layer context. Call only after stopping. */
-       void (*deleteMembers)(UA_ServerNetworkLayer *nl);
+       void (*clear)(UA_ServerNetworkLayer *nl);
    };
    
 Client Network Layer
