@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 1.1.0-dev-136-gb3b8a465 documentation</title>
+  <title>Information Modelling &mdash; open62541 1.1.0-dev-146-ge97abd59 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-136-gb3b8a465',
+              VERSION:'1.1.0-dev-146-ge97abd59',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -569,62 +569,52 @@ to work with the nodestore API</strong>.</p>
 <p>Outside of custom nodestore implementations, users should not manually edit
 nodes. Please use the OPC UA services for that. Otherwise, all consistency
 checks are omitted. This can crash the application eventually.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* For non-multithreaded access, some nodestores allow that nodes are edited</span>
-<span class="cm"> * without a copy/replace. This is not possible when the node is only an</span>
-<span class="cm"> * intermediate representation and stored e.g. in a database backend. */</span>
-<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="n">inPlaceEditAllowed</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* Nodestore context and lifecycle */</span>
-<span class="n">UA_StatusCode</span> <span class="nf">UA_Nodestore_new</span><span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="n">nsCtx</span><span class="p">);</span>
-<span class="kt">void</span> <span class="nf">UA_Nodestore_delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>The following definitions are used to create empty nodes of the different
-node types. The memory is managed by the nodestore. Therefore, the node has
-to be removed via a special deleteNode function. (If the new node is not
-added to the nodestore.)</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Node</span> <span class="o">*</span>
-<span class="nf">UA_Nodestore_newNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Nodestore context and lifecycle */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">);</span>
 
-<span class="kt">void</span>
-<span class="nf">UA_Nodestore_deleteNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>pointer is no longer accessed afterwards.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span>
-<span class="nf">UA_Nodestore_getNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+    <span class="cm">/* The following definitions are used to create empty nodes of the different</span>
+<span class="cm">     * node types. The memory is managed by the nodestore. Therefore, the node</span>
+<span class="cm">     * has to be removed via a special deleteNode function. (If the new node is</span>
+<span class="cm">     * not added to the nodestore.) */</span>
+    <span class="n">UA_Node</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">newNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">);</span>
 
-<span class="kt">void</span>
-<span class="nf">UA_Nodestore_releaseNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
-<span class="cm"> * deleteNode function or inserted / replaced into the nodestore). */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_getNodeCopy</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                         <span class="n">UA_Node</span> <span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
+    <span class="cm">/* ``Get`` returns a pointer to an immutable node. ``Release`` indicates</span>
+<span class="cm">     * that the pointer is no longer accessed afterwards. */</span>
+    <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">getNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
 
-<span class="cm">/* Inserts a new node into the nodestore. If the NodeId is zero, then a fresh</span>
-<span class="cm"> * numeric NodeId is assigned. If insertion fails, the node is deleted. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_insertNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">addedNodeId</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">releaseNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* To replace a node, get an editable copy of the node, edit and replace with</span>
-<span class="cm"> * this function. If the node was already replaced since the copy was made,</span>
-<span class="cm"> * UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not found,</span>
-<span class="cm"> * UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases, the editable</span>
-<span class="cm"> * node is deleted. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_replaceNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+    <span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
+<span class="cm">     * deleteNode function or inserted / replaced into the nodestore). */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_Node</span> <span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
 
-<span class="cm">/* Removes a node from the nodestore. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_removeNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+    <span class="cm">/* Inserts a new node into the nodestore. If the NodeId is zero, then a</span>
+<span class="cm">     * fresh numeric NodeId is assigned. If insertion fails, the node is</span>
+<span class="cm">     * deleted. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">insertNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span>
+                                <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">addedNodeId</span><span class="p">);</span>
 
-<span class="cm">/* Execute a callback for every node in the nodestore. */</span>
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
-<span class="kt">void</span>
-<span class="nf">UA_Nodestore_iterate</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodestoreVisitor</span> <span class="n">visitor</span><span class="p">,</span>
-                     <span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
+    <span class="cm">/* To replace a node, get an editable copy of the node, edit and replace</span>
+<span class="cm">     * with this function. If the node was already replaced since the copy was</span>
+<span class="cm">     * made, UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not</span>
+<span class="cm">     * found, UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases,</span>
+<span class="cm">     * the editable node is deleted. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">replaceNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+    <span class="cm">/* Removes a node from the nodestore. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+
+    <span class="cm">/* Execute a callback for every node in the nodestore. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodestoreVisitor</span> <span class="n">visitor</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_Nodestore</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
