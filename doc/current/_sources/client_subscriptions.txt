@@ -58,12 +58,32 @@ may be recieved during a synchronous service call or in
                                   UA_Client_StatusChangeNotificationCallback statusChangeCallback,
                                   UA_Client_DeleteSubscriptionCallback deleteCallback);
    
+   UA_StatusCode
+   UA_Client_Subscriptions_create_async(
+       UA_Client *client, const UA_CreateSubscriptionRequest request,
+       void *subscriptionContext,
+       UA_Client_StatusChangeNotificationCallback statusChangeCallback,
+       UA_Client_DeleteSubscriptionCallback deleteCallback,
+       UA_ClientAsyncServiceCallback callback, void *userdata, UA_UInt32 *requestId);
+   
    UA_ModifySubscriptionResponse
    UA_Client_Subscriptions_modify(UA_Client *client, const UA_ModifySubscriptionRequest request);
+   
+   UA_StatusCode
+   UA_Client_Subscriptions_modify_async(UA_Client *client,
+                                        const UA_ModifySubscriptionRequest request,
+                                        UA_ClientAsyncServiceCallback callback,
+                                        void *userdata, UA_UInt32 *requestId);
    
    UA_DeleteSubscriptionsResponse
    UA_Client_Subscriptions_delete(UA_Client *client,
                                   const UA_DeleteSubscriptionsRequest request);
+   
+   UA_StatusCode
+   UA_Client_Subscriptions_delete_async(UA_Client *client,
+                                        const UA_DeleteSubscriptionsRequest request,
+                                        UA_ClientAsyncServiceCallback callback,
+                                        void *userdata, UA_UInt32 *requestId);
    
    /* Delete a single subscription */
    UA_StatusCode
@@ -137,6 +157,13 @@ by the client before sending the request to the server.
                UA_Client_DataChangeNotificationCallback *callbacks,
                UA_Client_DeleteMonitoredItemCallback *deleteCallbacks);
    
+   UA_StatusCode
+   UA_Client_MonitoredItems_createDataChanges_async(
+       UA_Client *client, const UA_CreateMonitoredItemsRequest request, void **contexts,
+       UA_Client_DataChangeNotificationCallback *callbacks,
+       UA_Client_DeleteMonitoredItemCallback *deleteCallbacks,
+       UA_ClientAsyncServiceCallback createCallback, void *userdata, UA_UInt32 *requestId);
+   
    UA_MonitoredItemCreateResult
    UA_Client_MonitoredItems_createDataChange(UA_Client *client, UA_UInt32 subscriptionId,
              UA_TimestampsToReturn timestampsToReturn, const UA_MonitoredItemCreateRequest item,
@@ -150,6 +177,14 @@ by the client before sending the request to the server.
                UA_Client_EventNotificationCallback *callback,
                UA_Client_DeleteMonitoredItemCallback *deleteCallback);
    
+   /* Monitor the EventNotifier attribute only */
+   UA_StatusCode
+   UA_Client_MonitoredItems_createEvents_async(
+       UA_Client *client, const UA_CreateMonitoredItemsRequest request, void **contexts,
+       UA_Client_EventNotificationCallback *callbacks,
+       UA_Client_DeleteMonitoredItemCallback *deleteCallbacks,
+       UA_ClientAsyncServiceCallback createCallback, void *userdata, UA_UInt32 *requestId);
+   
    UA_MonitoredItemCreateResult
    UA_Client_MonitoredItems_createEvent(UA_Client *client, UA_UInt32 subscriptionId,
              UA_TimestampsToReturn timestampsToReturn, const UA_MonitoredItemCreateRequest item,
@@ -160,7 +195,14 @@ by the client before sending the request to the server.
    UA_Client_MonitoredItems_delete(UA_Client *client, const UA_DeleteMonitoredItemsRequest);
    
    UA_StatusCode
-   UA_Client_MonitoredItems_deleteSingle(UA_Client *client, UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId);
+   UA_Client_MonitoredItems_delete_async(UA_Client *client,
+                                         const UA_DeleteMonitoredItemsRequest request,
+                                         UA_ClientAsyncServiceCallback callback,
+                                         void *userdata, UA_UInt32 *requestId);
+   
+   UA_StatusCode
+   UA_Client_MonitoredItems_deleteSingle(UA_Client *client, UA_UInt32 subscriptionId,
+                                         UA_UInt32 monitoredItemId);
    
    /* The clientHandle parameter will be filled automatically */
    UA_ModifyMonitoredItemsResponse
@@ -191,6 +233,35 @@ not stored in the client.
                            &request, &UA_TYPES[UA_TYPES_SETTRIGGERINGREQUEST],
                            &response, &UA_TYPES[UA_TYPES_SETTRIGGERINGRESPONSE]);
        return response;
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_MonitoredItems_modify_async(UA_Client *client,
+                                         const UA_ModifyMonitoredItemsRequest request,
+                                         UA_ClientAsyncServiceCallback callback,
+                                         void *userdata, UA_UInt32 *requestId) {
+       return __UA_Client_AsyncService(
+           client, &request, &UA_TYPES[UA_TYPES_MODIFYMONITOREDITEMSREQUEST], callback,
+           &UA_TYPES[UA_TYPES_MODIFYMONITOREDITEMSRESPONSE], userdata, requestId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_MonitoredItems_setMonitoringMode_async(
+       UA_Client *client, const UA_SetMonitoringModeRequest request,
+       UA_ClientAsyncServiceCallback callback, void *userdata, UA_UInt32 *requestId) {
+       return __UA_Client_AsyncService(
+           client, &request, &UA_TYPES[UA_TYPES_SETMONITORINGMODEREQUEST], callback,
+           &UA_TYPES[UA_TYPES_SETMONITORINGMODERESPONSE], userdata, requestId);
+   }
+   
+   static UA_INLINE UA_StatusCode
+   UA_Client_MonitoredItems_setTriggering_async(UA_Client *client,
+                                                const UA_SetTriggeringRequest request,
+                                                UA_ClientAsyncServiceCallback callback,
+                                                void *userdata, UA_UInt32 *requestId) {
+       return __UA_Client_AsyncService(
+           client, &request, &UA_TYPES[UA_TYPES_SETTRIGGERINGREQUEST], callback,
+           &UA_TYPES[UA_TYPES_SETTRIGGERINGRESPONSE], userdata, requestId);
    }
    
    #endif
