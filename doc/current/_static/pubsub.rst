@@ -201,6 +201,11 @@ functions to add new fields.
    UA_Server_getPublishedDataSetConfig(UA_Server *server, const UA_NodeId pds,
                                        UA_PublishedDataSetConfig *config);
    
+   /* Returns a deep copy of the DataSetMetaData for an specific PDS */
+   UA_StatusCode
+   UA_Server_getPublishedDataSetMetaData(UA_Server *server, const UA_NodeId pds,
+                                         UA_DataSetMetaDataType *metaData);
+   
    /* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes
     * all contained and linked PDS Fields. Connected WriterGroups will be also
     * removed. */
