@@ -391,9 +391,9 @@ the method's execution cannot be returned to the Client and are discarded.
                      UA_CallResponse *response);
    
    # if UA_MULTITHREADING >= 100
-   void Service_CallAsync(UA_Server *server, UA_Session *session, UA_SecureChannel* channel,
-                          UA_UInt32 requestId, const UA_CallRequest *request,
-                          UA_CallResponse *response);
+   void Service_CallAsync(UA_Server *server, UA_Session *session, UA_UInt32 requestId,
+                          const UA_CallRequest *request, UA_CallResponse *response,
+                          UA_Boolean *finished);
    #endif
    #endif
    

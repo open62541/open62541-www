@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Server &mdash; open62541 1.1.0-dev-201-g3b170d01 documentation</title>
+  <title>Server &mdash; open62541 1.1.0-dev-206-g88dbcb6d documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-201-g3b170d01',
+              VERSION:'1.1.0-dev-206-g88dbcb6d',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -125,7 +125,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#async-methods">Async Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#async-operations">Async Operations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -320,7 +320,7 @@ handling</em></a>.</p>
 <span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
     <span class="n">UA_Double</span> <span class="n">asyncOperationTimeout</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
     <span class="kt">size_t</span> <span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span> <span class="cm">/* 0 =&gt; unlimited */</span>
-    <span class="n">UA_Double</span> <span class="n">asyncCallRequestTimeout</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
+    <span class="n">UA_Double</span> <span class="n">asyncCallRequestTimeout</span> <span class="n">UA_DEPRECATED</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
     <span class="cm">/* Notify workers when an async operation was enqueued */</span>
     <span class="n">UA_Server_AsyncOperationNotifyCallback</span> <span class="n">asyncOperationNotifyCallback</span><span class="p">;</span>
 <span class="cp">#endif</span>
@@ -1762,20 +1762,18 @@ cause the node to be deleted.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="async-methods">
-<span id="id9"></span><h2>Async Methods<a class="headerlink" href="#async-methods" title="Permalink to this headline">¶</a></h2>
-<p>Sample on working with async method calls
-Check client_method_async and tutorial_server_method_async for working samples.</p>
-<p>Minimal Server:</p>
-<ul class="simple">
-<li>Create a method node</li>
-<li>mark as async: <tt class="docutils literal"><span class="pre">UA_Server_MethodNodeAsync</span></tt></li>
-<li>set callback to be notified: <tt class="docutils literal"><span class="pre">config-&gt;asyncOperationNotifyCallback</span> <span class="pre">=</span> <span class="pre">...</span></tt></li>
-<li>fetch MethodCall: <tt class="docutils literal"><span class="pre">UA_Server_GetNextAsyncMethod</span></tt></li>
-<li>execute Method: e.g. UA_Server_call(UA_Server*, UA_CallMethodRequest*)</li>
-<li>pass back the result: <tt class="docutils literal"><span class="pre">UA_Server_SetAsyncMethodResult</span></tt></li>
-<li>free memory used: free UA_CallMethodResult</li>
-</ul>
+<div class="section" id="async-operations">
+<span id="id9"></span><h2>Async Operations<a class="headerlink" href="#async-operations" title="Permalink to this headline">¶</a></h2>
+<p>Some operations (such as reading out a sensor that needs to warm up) can take
+quite some time. In order not to block the server during such an operation, it
+can be &#8220;outsourced&#8221; to a worker thread.</p>
+<p>Take the example of a CallRequest. It is split into the individual method call
+operations. If the method is marked as async, then the operation is put into a
+queue where it is be retrieved by a worker. The worker returns the result when
+ready. See the examples in <tt class="docutils literal"><span class="pre">/examples/tutorial_server_method_async.c</span></tt> for
+the usage.</p>
+<p>Note that the operation can time out (see the asyncOperationTimeout setting in
+the server config) also when it has been retrieved by the worker.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
 
 <span class="cm">/* Set the async flag in a method node */</span>
@@ -1802,20 +1800,27 @@ Check client_method_async and tutorial_server_method_async for working samples.<
     <span class="cm">/* UA_StatusCode writeResult; */</span>
 <span class="p">}</span> <span class="n">UA_AsyncOperationResponse</span><span class="p">;</span>
 
-<span class="cm">/* Get and remove next Method Call Request</span>
+<span class="cm">/* Get the next async operation without blocking</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object</span>
 <span class="cm"> * @param type The type of the async operation</span>
 <span class="cm"> * @param request Receives pointer to the operation</span>
 <span class="cm"> * @param context Receives the pointer to the operation context</span>
-<span class="cm"> * @return UA_FALSE if queue is empty, UA_TRUE else</span>
-<span class="cm"> * Note: Timeout is doubled for requests which already got fetched by worker via UA_Server_getAsyncOperation */</span>
+<span class="cm"> * @param timeout The timestamp when the operation times out and can</span>
+<span class="cm"> *        no longer be returned to the client. The response has to</span>
+<span class="cm"> *        be set in UA_Server_setAsyncOperationResult in any case.</span>
+<span class="cm"> * @return false if queue is empty, true else */</span>
 <span class="n">UA_Boolean</span>
-<span class="nf">UA_Server_getAsyncOperation</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AsyncOperationType</span> <span class="o">*</span><span class="n">type</span><span class="p">,</span>
-                            <span class="k">const</span> <span class="n">UA_AsyncOperationRequest</span> <span class="o">**</span><span class="n">request</span><span class="p">,</span>
-                            <span class="kt">void</span> <span class="o">**</span><span class="n">context</span><span class="p">);</span>
+<span class="nf">UA_Server_getAsyncOperationNonBlocking</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AsyncOperationType</span> <span class="o">*</span><span class="n">type</span><span class="p">,</span>
+                                       <span class="k">const</span> <span class="n">UA_AsyncOperationRequest</span> <span class="o">**</span><span class="n">request</span><span class="p">,</span>
+                                       <span class="kt">void</span> <span class="o">**</span><span class="n">context</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="o">*</span><span class="n">timeout</span><span class="p">);</span>
 
-<span class="cm">/* Worker submits Method Call Response</span>
+<span class="cm">/* UA_Boolean */</span>
+<span class="cm">/* UA_Server_getAsyncOperationBlocking(UA_Server *server, UA_AsyncOperationType *type, */</span>
+<span class="cm">/*                                     const UA_AsyncOperationRequest **request, */</span>
+<span class="cm">/*                                     void **context, UA_DateTime *timeout); */</span>
+
+<span class="cm">/* Submit an async operation result</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object</span>
 <span class="cm"> * @param response Pointer to the operation result</span>
@@ -1824,6 +1829,13 @@ Check client_method_async and tutorial_server_method_async for working samples.<
 <span class="nf">UA_Server_setAsyncOperationResult</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                                   <span class="k">const</span> <span class="n">UA_AsyncOperationResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span>
                                   <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
+
+<span class="cm">/* Get the next async operation. Attention! This method is deprecated and has</span>
+<span class="cm"> * been replaced by UA_Server_getAsyncOperationNonBlocking! */</span>
+<span class="n">UA_DEPRECATED</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_Server_getAsyncOperation</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AsyncOperationType</span> <span class="o">*</span><span class="n">type</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_AsyncOperationRequest</span> <span class="o">**</span><span class="n">request</span><span class="p">,</span>
+                            <span class="kt">void</span> <span class="o">**</span><span class="n">context</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* !UA_MULTITHREADING &gt;= 100 */</span><span class="cp"></span>
 </pre></div>
