@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Building open62541 &mdash; open62541 1.1.0-dev-257-gb0740845 documentation</title>
+  <title>Building open62541 &mdash; open62541 1.1.0-dev-276-gd6ffbb08 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-257-gb0740845',
+              VERSION:'1.1.0-dev-276-gd6ffbb08',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -102,6 +102,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#building-with-cmake-on-windows">Building with CMake on Windows</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-on-os-x">Building on OS X</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-on-openbsd">Building on OpenBSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cmake-build-options-and-debian-packaging">CMake Build Options and Debian Packaging</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#build-options">Build Options</a><ul>
@@ -304,6 +306,69 @@ cmake ..
 make
 </pre></div>
 </div>
+</div>
+<div class="section" id="building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">
+<h3>Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian<a class="headerlink" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian" title="Permalink to this headline">¶</a></h3>
+<p>Here is an example howto build the library as Debian package inside a Docker container</p>
+<ul class="simple">
+<li>Download and install<ul>
+<li>Docker Engine: <a class="reference external" href="https://docs.docker.com/install/linux/docker-ce/debian/">https://docs.docker.com/install/linux/docker-ce/debian/</a></li>
+<li>docker-deb-builder: <a class="reference external" href="https://github.com/tsaarni/docker-deb-builder.git">https://github.com/tsaarni/docker-deb-builder.git</a></li>
+<li>open62541: <a class="reference external" href="https://github.com/open62541/open62541.git">https://github.com/open62541/open62541.git</a></li>
+</ul>
+</li>
+</ul>
+<p>Install Docker as described at <a class="reference external" href="https://docs.docker.com/install/linux/docker-ce/debian/">https://docs.docker.com/install/linux/docker-ce/debian/</a> .</p>
+<p>Get the docker-deb-builder utility from github and make Docker images for the needed
+Debian and/or Ubuntu relases</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># make and goto local development path (e.g. ~/development)</span>
+mkdir ~/development
+<span class="nb">cd</span> ~/development
+
+<span class="c"># clone docker-deb-builder utility from github and change into builder directory</span>
+git clone https://github.com/tsaarni/docker-deb-builder.git
+<span class="nb">cd </span>docker-deb-builder
+
+<span class="c"># make Docker builder images (e.g. Ubuntu 18.04 and 17.04)</span>
+docker build -t docker-deb-builder:18.04 -f Dockerfile-ubuntu-18.04 .
+docker build -t docker-deb-builder:17.04 -f Dockerfile-ubuntu-17.04 .
+</pre></div>
+</div>
+<p>Make a local copy of the open62541 git repo and checkout a pack branch</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># make a local copy of the open62541 git repo (e.g. in the home directory)</span>
+<span class="c"># and checkout a pack branch (e.g. pack/1.0)</span>
+<span class="nb">cd</span> ~
+git clone https://github.com/open62541/open62541.git
+<span class="nb">cd</span> ~/open62541
+git checkout pack/1.0
+</pre></div>
+</div>
+<p>Now it&#8217;s all set to build Debian/Ubuntu open62541 packages</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="c"># goto local developmet path</span>
+<span class="nb">cd</span> ~/development
+
+<span class="c"># make a local output directory for the builder where the packages can be placed after build</span>
+mkdir output
+
+<span class="c"># build Debian/Ubuntu packages inside Docker container (e.g. Ubuntu-18.04)</span>
+./build -i docker-deb-builder:18.04 -o output ~/open62541
+</pre></div>
+</div>
+<p>After a successfull build the Debian/Ubuntu packages can be found at <tt class="file docutils literal"><span class="pre">~/development/docker-deb-builder/output</span></tt></p>
+</div>
+<div class="section" id="cmake-build-options-and-debian-packaging">
+<h3>CMake Build Options and Debian Packaging<a class="headerlink" href="#cmake-build-options-and-debian-packaging" title="Permalink to this headline">¶</a></h3>
+<p>If the open62541 library will be build as a Debian package using a pack branch (e.g. pack/master or pack/1.0)
+then altering or adding CMake build options should be done inside the <tt class="file docutils literal"><span class="pre">debian/rules</span></tt> file respectively in
+the <tt class="file docutils literal"><span class="pre">debian/rules-template</span></tt> file if working with a development branch (e.g. master or 1.0).</p>
+<p>The section in <tt class="file docutils literal"><span class="pre">debian/rules</span></tt> where the CMake build options are defined is</p>
+<div class="highlight-bash"><div class="highlight"><pre>...
+override_dh_auto_configure:
+    dh_auto_configure -- -DBUILD_SHARED_LIBS<span class="o">=</span>ON -DCMAKE_BUILD_TYPE<span class="o">=</span>RelWithDebInfo -DUA_NAMESPACE_ZERO<span class="o">=</span>FULL -DUA_ENABLE_AMALGAMATION<span class="o">=</span>OFF -DUA_PACK_DEBIAN<span class="o">=</span>ON
+...
+</pre></div>
+</div>
+<p>This CMake build options will be passed as command line variables to CMake during Debian packaging.</p>
 </div>
 </div>
 <div class="section" id="build-options">
