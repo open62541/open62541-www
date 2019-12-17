@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Server &mdash; open62541 1.1.0-dev-279-gc76d5c46 documentation</title>
+  <title>Server &mdash; open62541 1.1.0-dev-280-gff87c287 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-279-gc76d5c46',
+              VERSION:'1.1.0-dev-280-gff87c287',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -1730,15 +1730,81 @@ cause the node to be deleted.</p>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_SUBSCRIPTIONS_EVENTS */</span><span class="cp"></span>
 
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_updateCertificate</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                            <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">oldCertificate</span><span class="p">,</span>
-                            <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">newCertificate</span><span class="p">,</span>
-                            <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">newPrivateKey</span><span class="p">,</span>
-                            <span class="n">UA_Boolean</span> <span class="n">closeSessions</span><span class="p">,</span>
-                            <span class="n">UA_Boolean</span> <span class="n">closeSecureChannels</span><span class="p">);</span>
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="n">UA_TwoStateVariableCallbackType</span> <span class="p">{</span>
+  <span class="n">UA_ENTERING_ENABLEDSTATE</span><span class="p">,</span>
+  <span class="n">UA_ENTERING_ACKEDSTATE</span><span class="p">,</span>
+  <span class="n">UA_ENTERING_CONFIRMEDSTATE</span><span class="p">,</span>
+  <span class="n">UA_ENTERING_ACTIVESTATE</span>
+<span class="p">}</span> <span class="n">UA_TwoStateVariableCallbackType</span><span class="p">;</span>
 </pre></div>
 </div>
+<p>callback prototype to set user specific callbacks</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_TwoStateVariableChangeCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">condition</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>create condition instance. The function checks first whether the passed conditionType
+is a subType of ConditionType. Then checks whether the condition source has HasEventSource
+reference to its parent. If not, a HasEventSource reference will be created between condition
+source and server object. To expose the condition in address space, a hierarchical ReferenceType
+should be passed to create the reference to condition source. Otherwise, UA_NODEID_NULL should be
+passed to make the condition not exposed.
+&#64;param server The server object
+&#64;param conditionId The NodeId of the requested Condition Object. UA_NODEID_NULL for random Id with NS Idx = 0.
+&#64;param conditionType The NodeId of the node representation of the ConditionType
+&#64;param conditionName The name of the condition to be created
+&#64;param conditionSource The NodeId of the Condition Source (Parent of the Condition)
+&#64;param hierarchialReferenceType The NodeId of Hierarchical ReferenceType between Condition and its source
+&#64;param outConditionId The NodeId of the created Condition
+&#64;return The StatusCode of the UA_Server_createCondition method</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_createCondition</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionType</span><span class="p">,</span>
+                          <span class="n">UA_QualifiedName</span> <span class="n">conditionName</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">hierarchialReferenceType</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>set the value of condition field.
+&#64;param server The server object
+&#64;param condition The NodeId of the node representation of the Condition Instance
+&#64;param value Variant Value to be written to the Field
+&#64;param fieldName Name of the Field in which the value should be written
+&#64;return The StatusCode of the UA_Server_setConditionField method*/</p>
+<p>set the value of property of condition field.
+&#64;param server The server object
+&#64;param condition The NodeId of the node representation of the Condition Instance
+&#64;param value Variant Value to be written to the Field
+&#64;param variableFieldName Name of the Field which has a property
+&#64;param variablePropertyName Name of the Field Property in which the value should be written
+&#64;return The StatusCode of the UA_Server_setConditionVariableFieldProperty*/</p>
+<p>triggers an event only for an enabled condition. The condition list is updated then with the
+last generated EventId.
+&#64;param server The server object
+&#64;param condition The NodeId of the node representation of the Condition Instance
+&#64;param conditionSource The NodeId of the node representation of the Condition Source
+&#64;param outEventId last generated EventId
+&#64;return The StatusCode of the UA_Server_triggerConditionEvent method*/</p>
+<p>add an optional condition field using its name. (TODO Adding optional methods
+is not implemented yet)
+&#64;param server The server object
+&#64;param condition The NodeId of the node representation of the Condition Instance
+&#64;param conditionType The NodeId of the node representation of the Condition Type
+from which the optional field comes
+&#64;param fieldName Name of the optional field
+&#64;param outOptionalVariable The NodeId of the created field (Variable Node)
+&#64;return The StatusCode of the UA_Server_addConditionOptionalField method*/</p>
+<p>Function used to set a user specific callback to TwoStateVariable Fields of
+a condition. The callbacks will be called before triggering the events when
+transition to true State of EnabledState/Id, AckedState/Id, ConfirmedState/Id
+and ActiveState/Id occurs.
+&#64;param server The server object
+&#64;param condition The NodeId of the node representation of the Condition Instance
+&#64;param conditionSource The NodeId of the node representation of the Condition Source
+&#64;param removeBranch (Not Implemented yet)
+&#64;param callback User specific callback function
+&#64;param callbackType Callback function type, indicates where it should be called
+&#64;return The StatusCode of the UA_Server_setConditionTwoStateVariableCallback method*/</p>
 </div>
 <div class="section" id="utility-functions">
 <h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>

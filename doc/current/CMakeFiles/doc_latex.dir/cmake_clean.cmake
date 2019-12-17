@@ -23,6 +23,7 @@ file(REMOVE_RECURSE
   "../doc_src/tutorial_server_variabletype.rst"
   "../doc_src/tutorial_server_datasource.rst"
   "../doc_src/tutorial_server_events.rst"
+  "../doc_src/tutorial_server_alarms_conditions.rst"
   "../doc_src/tutorial_server_monitoreditems.rst"
   "../doc_src/tutorial_server_object.rst"
   "../doc_src/tutorial_server_method.rst"
