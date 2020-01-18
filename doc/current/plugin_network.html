@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Networking Plugin API &mdash; open62541 1.1.0-dev-311-g24011388 documentation</title>
+  <title>Networking Plugin API &mdash; open62541 1.1.0-dev-329-g4b1886c0 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-311-g24011388',
+              VERSION:'1.1.0-dev-329-g4b1886c0',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -216,12 +216,10 @@ networking plugins with a clear interface to the main open62541 library.</p>
 <span class="cm">                               * is not done */</span>
     <span class="n">UA_CONNECTION_ESTABLISHED</span> <span class="cm">/* The socket is open and the connection</span>
 <span class="cm">                               * configured */</span>
-
 <span class="p">}</span> <span class="n">UA_ConnectionState</span><span class="p">;</span>
 
 <span class="k">struct</span> <span class="n">UA_Connection</span> <span class="p">{</span>
     <span class="n">UA_ConnectionState</span> <span class="n">state</span><span class="p">;</span>
-    <span class="n">UA_ConnectionConfig</span> <span class="n">config</span><span class="p">;</span>
     <span class="n">UA_SecureChannel</span> <span class="o">*</span><span class="n">channel</span><span class="p">;</span>     <span class="cm">/* The securechannel that is attached to</span>
 <span class="cm">                                    * this connection */</span>
     <span class="n">UA_SOCKET</span> <span class="n">sockfd</span><span class="p">;</span>              <span class="cm">/* Most connectivity solutions run on</span>
@@ -229,8 +227,6 @@ networking plugins with a clear interface to the main open62541 library.</p>
 <span class="cm">                                    * simplifies the design. */</span>
     <span class="n">UA_DateTime</span> <span class="n">openingDate</span><span class="p">;</span>       <span class="cm">/* The date the connection was created */</span>
     <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>                  <span class="cm">/* A pointer to internal data */</span>
-    <span class="n">UA_ByteString</span> <span class="n">incompleteChunk</span><span class="p">;</span> <span class="cm">/* A half-received chunk (TCP is a</span>
-<span class="cm">                                    * streaming protocol) is stored here */</span>
     <span class="n">UA_UInt64</span> <span class="n">connectCallbackID</span><span class="p">;</span>   <span class="cm">/* Callback Id, for the connect-loop */</span>
     <span class="cm">/* Get a buffer for sending */</span>
     <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">getSendBuffer</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">length</span><span class="p">,</span>
@@ -250,8 +246,13 @@ networking plugins with a clear interface to the main open62541 library.</p>
     <span class="cm">/* Receive a message from the remote connection</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param connection The connection</span>
-<span class="cm">     * @param response The response string. It is allocated by the connection</span>
-<span class="cm">     *        and needs to be freed with connection-&gt;releaseBuffer</span>
+
+<span class="cm">     * @param response The response string. If this is empty, it will be</span>
+<span class="cm">     *        allocated by the connection and needs to be freed with</span>
+<span class="cm">     *        connection-&gt;releaseBuffer. If the response string is non-empty, it</span>
+<span class="cm">     *        will be used as the receive buffer. If bytes are received, the</span>
+<span class="cm">     *        length of the buffer is adjusted to match the length of the</span>
+<span class="cm">     *        received bytes.</span>
 <span class="cm">     * @param timeout Timeout of the recv operation in milliseconds</span>
 <span class="cm">     * @return Returns UA_STATUSCODE_BADCOMMUNICATIONERROR if the recv operation</span>
 <span class="cm">     *         can be repeated, UA_STATUSCODE_GOOD if it succeeded and</span>
@@ -272,10 +273,6 @@ networking plugins with a clear interface to the main open62541 library.</p>
 <span class="cm">     * Frees up the connection&#39;s memory. */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">);</span>
 <span class="p">};</span>
-
-<span class="cm">/* Cleans up half-received messages, and so on. Called from connection-&gt;free. */</span>
-<span class="kt">void</span>
-<span class="nf">UA_Connection_clear</span><span class="p">(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
