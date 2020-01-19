@@ -26,6 +26,11 @@ part of the response.
    typedef void (*UA_Service)(UA_Server*, UA_Session*,
                               const void *request, void *response);
    
+   /* Services in the Session Service Set have a different signature */
+   typedef void (*UA_SessionService)(UA_Server*, UA_SecureChannel *,
+                                     UA_Session*, const void *request,
+                                     void *response);
+   
 Discovery Service Set
 ---------------------
 This Service Set defines Services used to discover the Endpoints implemented
@@ -136,6 +141,7 @@ associate an incoming request with a Session.
 .. code-block:: c
 
    void Service_CreateSession(UA_Server *server, UA_SecureChannel *channel,
+                              UA_Session *session,
                               const UA_CreateSessionRequest *request,
                               UA_CreateSessionResponse *response);
    
@@ -160,7 +166,8 @@ Used to terminate a Session.
 
 .. code-block:: c
 
-   void Service_CloseSession(UA_Server *server, UA_Session *session,
+   void Service_CloseSession(UA_Server *server, UA_SecureChannel *channel,
+                             UA_Session *session,
                              const UA_CloseSessionRequest *request,
                              UA_CloseSessionResponse *response);
    
