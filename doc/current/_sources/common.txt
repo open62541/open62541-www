@@ -103,8 +103,8 @@ well (but less common).
    #define UA_VALUERANK_TWO_DIMENSIONS            2
    #define UA_VALUERANK_THREE_DIMENSIONS          3
    
-Internal Constants
-==================
+Internal Definitions
+====================
 
 Rule Handling
 -------------
@@ -137,3 +137,45 @@ The Order enum is used to establish an absolute ordering between elements.
        UA_ORDER_EQ = 0,
        UA_ORDER_MORE = 1
    } UA_Order;
+   
+Statistic counters
+------------------
+
+The stack manage statistic counter for the following layers:
+- Network
+- Secure channel
+- Session
+
+The session layer counters are matching the counters of the
+ServerDiagnosticsSummaryDataType that are defined in the OPC UA Part 5
+specification. Counter of the other layers are not specified by OPC UA but
+are harmonized with the session layer counters if possible.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       size_t currentConnectionCount;
+       size_t cumulatedConnectionCount;
+       size_t rejectedConnectionCount;
+       size_t connectionTimeoutCount;
+       size_t connectionAbortCount;
+   } UA_NetworkStatistics;
+   
+   typedef struct {
+       size_t currentChannelCount;
+       size_t cumulatedChannelCount;
+       size_t rejectedChannelCount;
+       size_t channelTimeoutCount; /* only used by servers */
+       size_t channelAbortCount;
+       size_t channelPurgeCount;   /* only used by servers */
+   } UA_SecureChannelStatistics;
+   
+   typedef struct {
+       size_t currentSessionCount;
+       size_t cumulatedSessionCount;
+       size_t securityRejectedSessionCount; /* only used by servers */
+       size_t rejectedSessionCount;
+       size_t sessionTimeoutCount;          /* only used by servers */
+       size_t sessionAbortCount;            /* only used by servers */
+   } UA_SessionStatistics;

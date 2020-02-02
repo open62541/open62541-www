@@ -127,6 +127,9 @@ until a message is received or the duration times out.
    struct UA_ServerNetworkLayer {
        void *handle; /* Internal data */
    
+       /* Points to external memory, i.e. handled by server or client */
+       UA_NetworkStatistics *statistics;
+   
        UA_String discoveryUrl;
    
        UA_ConnectionConfig localConnectionConfig;

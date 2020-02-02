@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Standard-Defined Constants &mdash; open62541 1.1.0-dev-368-g8cecdb5c documentation</title>
+  <title>Standard-Defined Constants &mdash; open62541 1.1.0-dev-381-g8978c80f documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-368-g8cecdb5c',
+              VERSION:'1.1.0-dev-381-g8978c80f',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -114,9 +114,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#valueranks">ValueRanks</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#internal-constants">Internal Constants</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="#internal-definitions">Internal Definitions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#rule-handling">Rule Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#order">Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistic-counters">Statistic counters</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -172,7 +173,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/constants.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/common.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -280,8 +281,8 @@ well (but less common).</p>
 </div>
 </div>
 </div>
-<div class="section" id="internal-constants">
-<h1>Internal Constants<a class="headerlink" href="#internal-constants" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="internal-definitions">
+<h1>Internal Definitions<a class="headerlink" href="#internal-definitions" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="rule-handling">
 <h2>Rule Handling<a class="headerlink" href="#rule-handling" title="Permalink to this headline">¶</a></h2>
 <p>The RuleHanding settings define how error cases that result from rules in the
@@ -306,6 +307,44 @@ specification.</p>
     <span class="n">UA_ORDER_EQ</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">UA_ORDER_MORE</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="p">}</span> <span class="n">UA_Order</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="statistic-counters">
+<h2>Statistic counters<a class="headerlink" href="#statistic-counters" title="Permalink to this headline">¶</a></h2>
+<p>The stack manage statistic counter for the following layers:
+- Network
+- Secure channel
+- Session</p>
+<p>The session layer counters are matching the counters of the
+ServerDiagnosticsSummaryDataType that are defined in the OPC UA Part 5
+specification. Counter of the other layers are not specified by OPC UA but
+are harmonized with the session layer counters if possible.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">currentConnectionCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">cumulatedConnectionCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">rejectedConnectionCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">connectionTimeoutCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">connectionAbortCount</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_NetworkStatistics</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">currentChannelCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">cumulatedChannelCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">rejectedChannelCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">channelTimeoutCount</span><span class="p">;</span> <span class="cm">/* only used by servers */</span>
+    <span class="kt">size_t</span> <span class="n">channelAbortCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">channelPurgeCount</span><span class="p">;</span>   <span class="cm">/* only used by servers */</span>
+<span class="p">}</span> <span class="n">UA_SecureChannelStatistics</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">currentSessionCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">cumulatedSessionCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">securityRejectedSessionCount</span><span class="p">;</span> <span class="cm">/* only used by servers */</span>
+    <span class="kt">size_t</span> <span class="n">rejectedSessionCount</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">sessionTimeoutCount</span><span class="p">;</span>          <span class="cm">/* only used by servers */</span>
+    <span class="kt">size_t</span> <span class="n">sessionAbortCount</span><span class="p">;</span>            <span class="cm">/* only used by servers */</span>
+<span class="p">}</span> <span class="n">UA_SessionStatistics</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>

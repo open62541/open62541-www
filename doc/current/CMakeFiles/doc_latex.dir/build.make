@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/travis/build/open62541/open62541/build
 include doc/CMakeFiles/doc_latex.dir/progress.make
 
 doc/CMakeFiles/doc_latex: doc_src/types.rst
-doc/CMakeFiles/doc_latex: doc_src/constants.rst
+doc/CMakeFiles/doc_latex: doc_src/common.rst
 doc/CMakeFiles/doc_latex: doc_src/statuscodes.rst
 doc/CMakeFiles/doc_latex: doc_src/types_generated.rst
 doc/CMakeFiles/doc_latex: doc_src/server_config.rst
@@ -104,10 +104,10 @@ doc_src/types.rst: ../include/open62541/types.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating ../doc_src/types.rst"
 	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/types.h /home/travis/build/open62541/open62541/build/doc_src/types.rst
 
-doc_src/constants.rst: ../tools/c2rst.py
-doc_src/constants.rst: ../include/open62541/constants.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating ../doc_src/constants.rst"
-	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/constants.h /home/travis/build/open62541/open62541/build/doc_src/constants.rst
+doc_src/common.rst: ../tools/c2rst.py
+doc_src/common.rst: ../include/open62541/common.h
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/travis/build/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating ../doc_src/common.rst"
+	cd /home/travis/build/open62541/open62541/build/doc && /usr/bin/python2 /home/travis/build/open62541/open62541/tools/c2rst.py /home/travis/build/open62541/open62541/include/open62541/common.h /home/travis/build/open62541/open62541/build/doc_src/common.rst
 
 doc_src/statuscodes.rst: ../tools/c2rst.py
 doc_src/statuscodes.rst: src_generated/open62541/statuscodes.h
@@ -246,7 +246,7 @@ doc_src/tutorial_pubsub_publish.rst: ../examples/pubsub/tutorial_pubsub_publish.
 
 doc_latex: doc/CMakeFiles/doc_latex
 doc_latex: doc_src/types.rst
-doc_latex: doc_src/constants.rst
+doc_latex: doc_src/common.rst
 doc_latex: doc_src/statuscodes.rst
 doc_latex: doc_src/types_generated.rst
 doc_latex: doc_src/server_config.rst
