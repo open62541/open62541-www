@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Types &mdash; open62541 1.1.0-dev-480-geecf9e5c documentation</title>
+  <title>Data Types &mdash; open62541 1.1.0-dev-488-gb14ae29c documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-dev-480-geecf9e5c',
+              VERSION:'1.1.0-dev-488-gb14ae29c',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -642,9 +642,25 @@ seconds.</p>
     <span class="n">UA_Byte</span>   <span class="n">data4</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
 <span class="p">}</span> <span class="n">UA_Guid</span><span class="p">;</span>
 
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_Guid</span> <span class="n">UA_GUID_NULL</span><span class="p">;</span>
+
 <span class="n">UA_Boolean</span> <span class="nf">UA_Guid_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_Guid</span> <span class="o">*</span><span class="n">g1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Guid</span> <span class="o">*</span><span class="n">g2</span><span class="p">);</span>
 
-<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_Guid</span> <span class="n">UA_GUID_NULL</span><span class="p">;</span>
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
+<span class="cm">/* Parse the Guid format defined in Part 6, 5.1.3.</span>
+<span class="cm"> * Format: C496578A-0DFE-4B8F-870A-745238C6AEAE</span>
+<span class="cm"> *         |       |    |    |    |            |</span>
+<span class="cm"> *         0       8    13   18   23           36 */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Guid_parse</span><span class="p">(</span><span class="n">UA_Guid</span> <span class="o">*</span><span class="n">guid</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="n">str</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Guid</span>
+<span class="nf">UA_GUID</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">chars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Guid</span> <span class="n">guid</span><span class="p">;</span>
+    <span class="n">UA_Guid_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">guid</span><span class="p">,</span> <span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chars</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">guid</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </div>
@@ -653,19 +669,12 @@ seconds.</p>
 <p>A sequence of octets.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="n">UA_String</span> <span class="n">UA_ByteString</span><span class="p">;</span>
 
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
-<span class="nf">UA_ByteString_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">string1</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">string2</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="n">UA_String_equal</span><span class="p">((</span><span class="k">const</span> <span class="n">UA_String</span><span class="o">*</span><span class="p">)</span><span class="n">string1</span><span class="p">,</span>
-                           <span class="p">(</span><span class="k">const</span> <span class="n">UA_String</span><span class="o">*</span><span class="p">)</span><span class="n">string2</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="n">UA_BYTESTRING_NULL</span><span class="p">;</span>
 
 <span class="cm">/* Allocates memory of size length for the bytestring.</span>
 <span class="cm"> * The content is not set to zero. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_ByteString_allocBuffer</span><span class="p">(</span><span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">bs</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">length</span><span class="p">);</span>
-
-<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="n">UA_BYTESTRING_NULL</span><span class="p">;</span>
 
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ByteString</span>
 <span class="nf">UA_BYTESTRING</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">chars</span><span class="p">)</span> <span class="p">{</span>
@@ -680,6 +689,20 @@ seconds.</p>
     <span class="n">UA_String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">UA_String_fromChars</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span> <span class="n">UA_ByteString</span> <span class="n">bstr</span><span class="p">;</span>
     <span class="n">bstr</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">str</span><span class="p">.</span><span class="n">length</span><span class="p">;</span> <span class="n">bstr</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">str</span><span class="p">.</span><span class="n">data</span><span class="p">;</span> <span class="k">return</span> <span class="n">bstr</span><span class="p">;</span>
 <span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_ByteString_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">string1</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">string2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_String_equal</span><span class="p">((</span><span class="k">const</span> <span class="n">UA_String</span><span class="o">*</span><span class="p">)</span><span class="n">string1</span><span class="p">,</span>
+                           <span class="p">(</span><span class="k">const</span> <span class="n">UA_String</span><span class="o">*</span><span class="p">)</span><span class="n">string2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Returns a non-cryptographic hash for the String.</span>
+<span class="cm"> * Uses FNV non-cryptographic hash function. See</span>
+<span class="cm"> * https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function */</span>
+<span class="n">UA_UInt32</span>
+<span class="nf">UA_ByteString_hash</span><span class="p">(</span><span class="n">UA_UInt32</span> <span class="n">initialHashValue</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -717,20 +740,27 @@ seconds.</p>
 
 <span class="n">UA_Boolean</span> <span class="nf">UA_NodeId_isNull</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">p</span><span class="p">);</span>
 
-<span class="n">UA_Order</span> <span class="nf">UA_NodeId_order</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">);</span>
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
+<span class="cm">/* Parse the NodeId format defined in Part 6, 5.3.1.10.</span>
+<span class="cm"> * Attention! String and ByteString NodeIds have their</span>
+<span class="cm"> * identifier malloc&#39;ed and need to be cleaned up.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Examples:</span>
+<span class="cm"> *   UA_NODEID(&quot;i=13&quot;)</span>
+<span class="cm"> *   UA_NODEID(&quot;ns=10;i=1&quot;)</span>
+<span class="cm"> *   UA_NODEID(&quot;ns=10;s=Hello:World&quot;)</span>
+<span class="cm"> *   UA_NODEID(&quot;g=09087e75-8e5e-499b-954f-f2a9603db28a&quot;)</span>
+<span class="cm"> *   UA_NODEID(&quot;ns=1;b=b3BlbjYyNTQxIQ==&quot;) */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_NodeId_parse</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">id</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="n">str</span><span class="p">);</span>
 
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
-<span class="nf">UA_NodeId_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">UA_NodeId_order</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span> <span class="o">==</span> <span class="n">UA_ORDER_EQ</span><span class="p">);</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">chars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_NodeId</span> <span class="n">id</span><span class="p">;</span>
+    <span class="n">UA_NodeId_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span> <span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chars</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">id</span><span class="p">;</span>
 <span class="p">}</span>
-
-<span class="cm">/* Returns a non-cryptographic hash for the String.</span>
-<span class="cm"> * Uses FNV non-cryptographic hash function. See</span>
-<span class="cm"> * https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function */</span>
-<span class="n">UA_UInt32</span> <span class="nf">UA_ByteString_hash</span><span class="p">(</span><span class="n">UA_UInt32</span> <span class="n">initialHashValue</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">);</span>
-
-<span class="cm">/* Returns a non-cryptographic hash for the NodeId */</span>
-<span class="n">UA_UInt32</span> <span class="nf">UA_NodeId_hash</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 <p>The following functions are shorthand for creating NodeIds.</p>
@@ -775,6 +805,19 @@ seconds.</p>
     <span class="n">id</span><span class="p">.</span><span class="n">identifierType</span> <span class="o">=</span> <span class="n">UA_NODEIDTYPE_BYTESTRING</span><span class="p">;</span>
     <span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">byteString</span> <span class="o">=</span> <span class="n">UA_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span> <span class="k">return</span> <span class="n">id</span><span class="p">;</span>
 <span class="p">}</span>
+
+<span class="cm">/* Total ordering of NodeId */</span>
+<span class="n">UA_Order</span>
+<span class="nf">UA_NodeId_order</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">);</span>
+
+<span class="cm">/* Check for equality */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_NodeId_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">UA_NodeId_order</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span> <span class="o">==</span> <span class="n">UA_ORDER_EQ</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Returns a non-cryptographic hash for NodeId */</span>
+<span class="n">UA_UInt32</span> <span class="nf">UA_NodeId_hash</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">n</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -789,16 +832,25 @@ seconds.</p>
 
 <span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="n">UA_EXPANDEDNODEID_NULL</span><span class="p">;</span>
 
-<span class="n">UA_Order</span>
-<span class="nf">UA_ExpandedNodeId_order</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">);</span>
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
+<span class="cm">/* Parse the ExpandedNodeId format defined in Part 6, 5.3.1.11:</span>
+<span class="cm"> *</span>
+<span class="cm"> *   svr=&lt;serverindex&gt;;ns=&lt;namespaceindex&gt;;&lt;type&gt;=&lt;value&gt;</span>
+<span class="cm"> *     or</span>
+<span class="cm"> *   svr=&lt;serverindex&gt;;nsu=&lt;uri&gt;;&lt;type&gt;=&lt;value&gt;</span>
+<span class="cm"> *</span>
+<span class="cm"> * The definitions for svr, ns and nsu can be omitted and will be set to zero /</span>
+<span class="cm"> * the empty string.*/</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_ExpandedNodeId_parse</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">id</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="n">str</span><span class="p">);</span>
 
-<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
-<span class="nf">UA_ExpandedNodeId_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">UA_ExpandedNodeId_order</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span> <span class="o">==</span> <span class="n">UA_ORDER_EQ</span><span class="p">);</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">chars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_ExpandedNodeId</span> <span class="n">id</span><span class="p">;</span>
+    <span class="n">UA_ExpandedNodeId_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span> <span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chars</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">id</span><span class="p">;</span>
 <span class="p">}</span>
-
-<span class="cm">/* Returns a non-cryptographic hash for the NodeId */</span>
-<span class="n">UA_UInt32</span> <span class="nf">UA_ExpandedNodeId_hash</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 <p>The following functions are shorthand for creating ExpandedNodeIds.</p>
@@ -837,6 +889,19 @@ seconds.</p>
     <span class="n">UA_ExpandedNodeId</span> <span class="n">id</span><span class="p">;</span> <span class="n">id</span><span class="p">.</span><span class="n">nodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span> <span class="n">chars</span><span class="p">);</span>
     <span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span> <span class="o">=</span> <span class="n">UA_STRING_NULL</span><span class="p">;</span> <span class="k">return</span> <span class="n">id</span><span class="p">;</span>
 <span class="p">}</span>
+
+<span class="cm">/* Total ordering of ExpandedNodeId */</span>
+<span class="n">UA_Order</span>
+<span class="nf">UA_ExpandedNodeId_order</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">);</span>
+
+<span class="cm">/* Check for equality */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_ExpandedNodeId_equal</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n2</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">UA_ExpandedNodeId_order</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span> <span class="o">==</span> <span class="n">UA_ORDER_EQ</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Returns a non-cryptographic hash for ExpandedNodeId */</span>
+<span class="n">UA_UInt32</span> <span class="nf">UA_ExpandedNodeId_hash</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">n</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -911,7 +976,18 @@ with a single element (min==max).</p>
 <span class="p">}</span> <span class="n">UA_NumericRange</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_NumericRange_parseFromString</span><span class="p">(</span><span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">str</span><span class="p">);</span>
+<span class="nf">UA_NumericRange_parse</span><span class="p">(</span><span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="n">str</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_NumericRange</span>
+<span class="nf">UA_NUMERICRANGE</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_NumericRange</span> <span class="n">nr</span><span class="p">;</span> <span class="n">nr</span><span class="p">.</span><span class="n">dimensionsSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">nr</span><span class="p">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">UA_NumericRange_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nr</span><span class="p">,</span> <span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">s</span><span class="p">));</span> <span class="k">return</span> <span class="n">nr</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_NumericRange_parseFromString</span><span class="p">(</span><span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">str</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_NumericRange_parse</span><span class="p">(</span><span class="n">range</span><span class="p">,</span> <span class="o">*</span><span class="n">str</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
