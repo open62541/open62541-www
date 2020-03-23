@@ -424,7 +424,7 @@ open62541.
    } UA_ViewNode;
    
 Nodestore Plugin API
-====================
+--------------------
 
 The following definitions are used for implementing custom node storage
 backends. **Most users will want to use the default nodestore and don't need
@@ -483,16 +483,6 @@ checks are omitted. This can crash the application eventually.
        void (*iterate)(void *nsCtx, UA_NodestoreVisitor visitor,
                        void *visitorCtx);
    } UA_Nodestore;
-   
-Node Handling
-=============
-
-To be used only in the nodestore and internally in the SDK. The following
-methods specialize internally for the different node classes, distinguished
-by the NodeClass attribute.
-
-.. code-block:: c
-
    
    /* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,
     * and so on). The attributes are copied. Note that the attributes structs do

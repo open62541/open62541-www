@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/doc"
   "../doc_src/types.rst"
   "../doc_src/common.rst"
+  "../doc_src/util.rst"
   "../doc_src/statuscodes.rst"
   "../doc_src/types_generated.rst"
   "../doc_src/server_config.rst"
