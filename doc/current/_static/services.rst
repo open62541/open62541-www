@@ -335,7 +335,8 @@ or to read ranges of elements of the composite.
 .. code-block:: c
 
    void Service_Read(UA_Server *server, UA_Session *session,
-                     const UA_ReadRequest *request, UA_ReadResponse *response);
+                     const UA_ReadRequest *request,
+                     UA_ReadResponse *response);
    
 Write Service
 ^^^^^^^^^^^^^
@@ -347,7 +348,8 @@ or to write ranges of elements of the composite.
 .. code-block:: c
 
    void Service_Write(UA_Server *server, UA_Session *session,
-                      const UA_WriteRequest *request, UA_WriteResponse *response);
+                      const UA_WriteRequest *request,
+                      UA_WriteResponse *response);
    
 HistoryRead Service
 ^^^^^^^^^^^^^^^^^^^
