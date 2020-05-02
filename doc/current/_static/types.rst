@@ -956,6 +956,7 @@ type operations as static inline functions.
                                         members from the same namespace or
                                         namespace zero only.*/
        UA_Boolean isArray       : 1; /* The member is an array */
+       UA_Boolean isOptional    : 1; /* The member is an optional field */
    } UA_DataTypeMember;
    
    /* The DataType "kind" is an internal type classification. It is used to
