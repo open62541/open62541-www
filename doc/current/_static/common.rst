@@ -135,6 +135,32 @@ The Order enum is used to establish an absolute ordering between elements.
        UA_ORDER_MORE = 1
    } UA_Order;
    
+Connection State
+----------------
+
+.. code-block:: c
+
+   
+   typedef enum {
+       UA_SECURECHANNELSTATE_CLOSED,
+       UA_SECURECHANNELSTATE_HEL_SENT,
+       UA_SECURECHANNELSTATE_HEL_RECEIVED,
+       UA_SECURECHANNELSTATE_ACK_SENT,
+       UA_SECURECHANNELSTATE_ACK_RECEIVED,
+       UA_SECURECHANNELSTATE_OPN_SENT,
+       UA_SECURECHANNELSTATE_OPEN,
+       UA_SECURECHANNELSTATE_CLOSING
+   } UA_SecureChannelState;
+   
+   typedef enum {
+       UA_SESSIONSTATE_CLOSED,
+       UA_SESSIONSTATE_CREATE_REQUESTED,
+       UA_SESSIONSTATE_CREATED,
+       UA_SESSIONSTATE_ACTIVATE_REQUESTED,
+       UA_SESSIONSTATE_ACTIVATED,
+       UA_SESSIONSTATE_CLOSING
+   } UA_SessionState;
+   
 Statistic counters
 ------------------
 
