@@ -214,8 +214,8 @@ has full rights.
    }
    
    static UA_INLINE UA_THREADSAFE UA_StatusCode
-   UA_Server_readContainsNoLoop(UA_Server *server, const UA_NodeId nodeId,
-                                UA_Boolean *outContainsNoLoops) {
+   UA_Server_readContainsNoLoops(UA_Server *server, const UA_NodeId nodeId,
+                                 UA_Boolean *outContainsNoLoops) {
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                                outContainsNoLoops);
    }
@@ -289,7 +289,7 @@ The following node attributes cannot be changed once a node has been created:
 - NodeClass
 - NodeId
 - Symmetric
-- ContainsNoLoop
+- ContainsNoLoops
 
 The following attributes cannot be written from the server, as they are
 specific to the different users and set by the access control callback:
