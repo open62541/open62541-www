@@ -114,10 +114,6 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
        size_t connectionPropertiesSize;
        UA_KeyValuePair *connectionProperties;
        UA_Variant connectionTransportSettings;
-   
-       /* This flag is 'read only' and is set internally based on the PubSub state. */
-       UA_Boolean configurationFrozen;
-   
    #ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF
        /* ETF related connection configuration - Not in PubSub specfication */
        UA_ETFConfiguration etfConfiguration;
@@ -192,8 +188,6 @@ functions to add new fields.
            UA_PublishedEventConfig event;
            UA_PublishedEventTemplateConfig eventTemplate;
        } config;
-       /* This flag is 'read only' and is set internally based on the PubSub state. */
-       UA_Boolean configurationFrozen;
    } UA_PublishedDataSetConfig;
    
    void
@@ -258,8 +252,6 @@ handling process.
            /* events need other config later */
            UA_DataSetVariableConfig variable;
        } field;
-       /* This flag is 'read only' and is set internally based on the PubSub state. */
-       UA_Boolean configurationFrozen;
    } UA_DataSetFieldConfig;
    
    void
@@ -355,8 +347,6 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
        /* non std. config parameter. maximum count of embedded DataSetMessage in
         * one NetworkMessage */
        UA_UInt16 maxEncapsulatedDataSetMessageCount;
-       /* This flag is 'read only' and is set internally based on the PubSub state. */
-       UA_Boolean configurationFrozen;
        /* non std. field */
        UA_PubSubRTLevel rtLevel;
    } UA_WriterGroupConfig;
@@ -394,9 +384,6 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    UA_StatusCode
    UA_Server_setWriterGroupDisabled(UA_Server *server, const UA_NodeId writerGroup);
    
-.. _dsw:    UA_Boolean configurationFrozen;
-
-
 DataSetWriter
 -------------
 The DataSetWriters are the glue between the WriterGroups and the
@@ -418,8 +405,6 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
        UA_String dataSetName;
        size_t dataSetWriterPropertiesSize;
        UA_KeyValuePair *dataSetWriterProperties;
-       /* This flag is 'read only' and is set internally based on the PubSub state. */
-       UA_Boolean configurationFrozen;
    } UA_DataSetWriterConfig;
    
    void
@@ -473,7 +458,7 @@ on the Subscriber side
        UA_DataSetFieldContentMask dataSetFieldContentMask;
        UA_Double messageReceiveTimeout;
        UA_PubSubSecurityParameters securityParameters;
-       UA_UadpDataSetReaderMessageDataType messageSettings;
+       UA_ExtensionObject messageSettings;
        UA_ExtensionObject transportSettings;
        UA_TargetVariablesDataType subscribedDataSetTarget;
    } UA_DataSetReaderConfig;
@@ -512,6 +497,8 @@ deleted if the connection is removed.
    typedef struct {
        UA_String name;
        UA_PubSubSecurityParameters securityParameters;
+       /* non std. field */
+       UA_PubSubRTLevel rtLevel;
    } UA_ReaderGroupConfig;
    
    /* Add DataSetReader to the ReaderGroup */
@@ -544,5 +531,17 @@ deleted if the connection is removed.
    /* Remove ReaderGroup from connection */
    UA_StatusCode
    UA_Server_removeReaderGroup(UA_Server *server, UA_NodeId groupIdentifier);
+   
+   UA_StatusCode
+   UA_Server_freezeReaderGroupConfiguration(UA_Server *server, const UA_NodeId readerGroupId);
+   
+   UA_StatusCode
+   UA_Server_unfreezeReaderGroupConfiguration(UA_Server *server, const UA_NodeId readerGroupId);
+   
+   UA_StatusCode
+   UA_Server_setReaderGroupOperational(UA_Server *server, const UA_NodeId readerGroupId);
+   
+   UA_StatusCode
+   UA_Server_setReaderGroupDisabled(UA_Server *server, const UA_NodeId readerGroupId);
    
    #endif /* UA_ENABLE_PUBSUB */

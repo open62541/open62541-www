@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.1.0-rc1-20-g02020314 documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.1.0-rc1-31-g791eb959 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-rc1-20-g02020314',
+              VERSION:'1.1.0-rc1-31-g791eb959',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -295,10 +295,6 @@ different transport protocols at runtime.</p>
     <span class="kt">size_t</span> <span class="n">connectionPropertiesSize</span><span class="p">;</span>
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">connectionProperties</span><span class="p">;</span>
     <span class="n">UA_Variant</span> <span class="n">connectionTransportSettings</span><span class="p">;</span>
-
-    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
-    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
-
 <span class="cp">#ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF</span>
     <span class="cm">/* ETF related connection configuration - Not in PubSub specfication */</span>
     <span class="n">UA_ETFConfiguration</span> <span class="n">etfConfiguration</span><span class="p">;</span>
@@ -371,8 +367,6 @@ functions to add new fields.</p>
         <span class="n">UA_PublishedEventConfig</span> <span class="n">event</span><span class="p">;</span>
         <span class="n">UA_PublishedEventTemplateConfig</span> <span class="n">eventTemplate</span><span class="p">;</span>
     <span class="p">}</span> <span class="n">config</span><span class="p">;</span>
-    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
-    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_PublishedDataSetConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -435,8 +429,6 @@ handling process.</p>
         <span class="cm">/* events need other config later */</span>
         <span class="n">UA_DataSetVariableConfig</span> <span class="n">variable</span><span class="p">;</span>
     <span class="p">}</span> <span class="n">field</span><span class="p">;</span>
-    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
-    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetFieldConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -526,8 +518,6 @@ UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
     <span class="cm">/* non std. config parameter. maximum count of embedded DataSetMessage in</span>
 <span class="cm">     * one NetworkMessage */</span>
     <span class="n">UA_UInt16</span> <span class="n">maxEncapsulatedDataSetMessageCount</span><span class="p">;</span>
-    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
-    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
     <span class="cm">/* non std. field */</span>
     <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_WriterGroupConfig</span><span class="p">;</span>
@@ -584,8 +574,6 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
     <span class="n">UA_String</span> <span class="n">dataSetName</span><span class="p">;</span>
     <span class="kt">size_t</span> <span class="n">dataSetWriterPropertiesSize</span><span class="p">;</span>
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">dataSetWriterProperties</span><span class="p">;</span>
-    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
-    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetWriterConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -637,7 +625,7 @@ on the Subscriber side</p>
     <span class="n">UA_DataSetFieldContentMask</span> <span class="n">dataSetFieldContentMask</span><span class="p">;</span>
     <span class="n">UA_Double</span> <span class="n">messageReceiveTimeout</span><span class="p">;</span>
     <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
-    <span class="n">UA_UadpDataSetReaderMessageDataType</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">messageSettings</span><span class="p">;</span>
     <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
     <span class="n">UA_TargetVariablesDataType</span> <span class="n">subscribedDataSetTarget</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
@@ -674,6 +662,8 @@ deleted if the connection is removed.</p>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
     <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
+    <span class="cm">/* non std. field */</span>
+    <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
 
 <span class="cm">/* Add DataSetReader to the ReaderGroup */</span>
@@ -706,6 +696,18 @@ deleted if the connection is removed.</p>
 <span class="cm">/* Remove ReaderGroup from connection */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_removeReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">groupIdentifier</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_freezeReaderGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_unfreezeReaderGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setReaderGroupOperational</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setReaderGroupDisabled</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span><span class="cp"></span>
 </pre></div>
