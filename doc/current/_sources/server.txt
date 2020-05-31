@@ -1506,7 +1506,7 @@ Utility Functions
                                                                bool isDeleteModified);
    #endif // UA_ENABLE_HISTORIZING
    
-.. _async_operations:
+.. _async-operations:
 
 Async Operations
 ----------------

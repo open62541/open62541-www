@@ -117,7 +117,7 @@ Convenience macros for complex types
    #define UA_PRINTF_STRING_DATA(STRING) (int)(STRING).length, (STRING).data
    
 Helper functions for converting data types
-------------------------------------
+------------------------------------------
 
 .. code-block:: c
 
