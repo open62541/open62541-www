@@ -1470,16 +1470,28 @@ and ActiveState/Id occurs.
 
 
 
+Delete a condition from the address space and the internal lists.
 
+@param server The server object
+@param condition The NodeId of the node representation of the Condition Instance
+@param conditionSource The NodeId of the node representation of the Condition Source
+@return UA_STATUSCODE_GOOD on success
 
+.. code-block:: c
 
-
-
-
-
-
-
-
+   UA_StatusCode
+   UA_Server_deleteCondition(UA_Server *server, const UA_NodeId condition, const UA_NodeId conditionSource);
+   
+   #endif//UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
+   
+   UA_StatusCode
+   UA_Server_updateCertificate(UA_Server *server,
+                               const UA_ByteString *oldCertificate,
+                               const UA_ByteString *newCertificate,
+                               const UA_ByteString *newPrivateKey,
+                               UA_Boolean closeSessions,
+                               UA_Boolean closeSecureChannels);
+   
 Utility Functions
 -----------------
 
