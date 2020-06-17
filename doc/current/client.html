@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Client &mdash; open62541 1.1.0-37-g596a998d documentation</title>
+  <title>Client &mdash; open62541 1.1.0-38-g278a0129 documentation</title>
   
 
   
@@ -23,7 +23,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-37-g596a998d',
+              VERSION:'1.1.0-38-g278a0129',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -192,10 +192,13 @@
 convenience, some functionality has been wrapped in <a class="reference internal" href="client_highlevel.html#client-highlevel"><em>high-level
 abstractions</em></a>.</p>
 <p><strong>However</strong>: At this time, the client does not yet contain its own thread or
-event-driven main-loop. So the client will not perform any actions
+event-driven main-loop, meaning that the client will not perform any actions
 automatically in the background. This is especially relevant for
-subscriptions. The user will have to periodically call
-<cite>UA_Client_Subscriptions_manuallySendPublishRequest</cite>. See also <a class="reference internal" href="client_subscriptions.html#client-subscriptions"><em>here</em></a>.</p>
+connection/session management and subscriptions. The user will have to
+periodically call <cite>UA_Client_run_iterate</cite> to ensure that asynchronous events
+are handled, including keeping a secure connection established.
+See more about <a class="reference internal" href="#client-async-services"><em>asynchronicity</em></a> and
+<a class="reference internal" href="client_subscriptions.html#client-subscriptions"><em>subscriptions</em></a>.</p>
 <div class="section" id="client-configuration">
 <span id="client-config"></span><h2>Client Configuration<a class="headerlink" href="#client-configuration" title="Permalink to this headline">¶</a></h2>
 <p>The client configuration is used for setting connection parameters and
@@ -700,8 +703,19 @@ that wrap the raw services.</p>
 <div class="section" id="asynchronous-services">
 <span id="client-async-services"></span><h2>Asynchronous Services<a class="headerlink" href="#asynchronous-services" title="Permalink to this headline">¶</a></h2>
 <p>All OPC UA services are asynchronous in nature. So several service calls can
-be made without waiting for a response first. Responess may come in a
-different ordering.</p>
+be made without waiting for the individual responses. Depending on the
+server&#8217;s priorities responses may come in a different ordering than sent.</p>
+<p>As noted in <a class="reference internal" href="#client"><em>the client overview</em></a> currently no means
+of handling asynchronous events automatically is provided. However, some
+synchronous function calls will trigger handling, but to ensure this
+happens a client should periodically call <cite>UA_Client_run_iterate</cite>
+explicitly.</p>
+<p>Connection and session management are also performed in
+<cite>UA_Client_run_iterate</cite>, so to keep a connection healthy any client need to
+consider how and when it is appropriate to do the call.
+This is especially true for the periodic renewal of a SecureChannel&#8217;s
+SecurityToken which is designed to have a limited lifetime and will
+invalidate the connection if not renewed.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Use the type versions of this method. See below. However, the general</span>
 <span class="cm"> * mechanism of async service calls is explained here.</span>
 <span class="cm"> *</span>

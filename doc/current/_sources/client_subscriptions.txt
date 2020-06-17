@@ -16,7 +16,8 @@ And a Subscription can contain many MonitoredItems.
 The client automatically processes PublishResponses (with a callback) in the
 background and keeps enough PublishRequests in transit. The PublishResponses
 may be recieved during a synchronous service call or in
-``UA_Client_runAsync``.
+``UA_Client_run_iterate``. See more about
+:ref:`asynchronicity<client-async-services>`.
 
 .. code-block:: c
 
