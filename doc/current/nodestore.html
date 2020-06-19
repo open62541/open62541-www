@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 1.1.0-39-g30ac5ddd documentation</title>
+  <title>Information Modelling &mdash; open62541 1.1.0-40-gd52786e6 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-39-g30ac5ddd',
+              VERSION:'1.1.0-40-gd52786e6',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -119,6 +119,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#node-union">Node Union</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#nodestore-plugin-api">Nodestore Plugin API</a></li>
 </ul>
 </li>
@@ -249,23 +250,21 @@ correctness of casting from <tt class="docutils literal"><span class="pre">UA_No
     <span class="n">UA_ReferenceTargetNameTree</span> <span class="n">refTargetsNameTree</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_NodeReferenceKind</span><span class="p">;</span>
 
-<span class="cp">#define UA_NODE_BASEATTRIBUTES                  \</span>
-<span class="cp">    UA_NodeId nodeId;                           \</span>
-<span class="cp">    UA_NodeClass nodeClass;                     \</span>
-<span class="cp">    UA_QualifiedName browseName;                \</span>
-<span class="cp">    UA_LocalizedText displayName;               \</span>
-<span class="cp">    UA_LocalizedText description;               \</span>
-<span class="cp">    UA_UInt32 writeMask;                        \</span>
-<span class="cp">    size_t referencesSize;                      \</span>
-<span class="cp">    UA_NodeReferenceKind *references;           \</span>
-<span class="cp">                                                \</span>
-<span class="cp">    </span><span class="cm">/* Members specific to open62541 */</span><span class="cp">         \</span>
-<span class="cp">    void *context;                              \</span>
-<span class="cp">    UA_Boolean constructed; </span><span class="cm">/* Constructors were called */</span><span class="cp"></span>
-
+<span class="cm">/* Every Node starts with these attributes */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
-<span class="p">}</span> <span class="n">UA_Node</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">;</span>
+    <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">;</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">;</span>
+    <span class="n">UA_LocalizedText</span> <span class="n">displayName</span><span class="p">;</span>
+    <span class="n">UA_LocalizedText</span> <span class="n">description</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">writeMask</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">referencesSize</span><span class="p">;</span>
+    <span class="n">UA_NodeReferenceKind</span> <span class="o">*</span><span class="n">references</span><span class="p">;</span>
+
+    <span class="cm">/* Members specific to open62541 */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">constructed</span><span class="p">;</span> <span class="cm">/* Constructors were called */</span>
+<span class="p">}</span> <span class="n">UA_NodeHead</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -349,7 +348,7 @@ length in this dimension.</li>
 <span class="cp">    } value;</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_NODE_VARIABLEATTRIBUTES</span>
     <span class="n">UA_Byte</span> <span class="n">accessLevel</span><span class="p">;</span>
     <span class="n">UA_Double</span> <span class="n">minimumSamplingInterval</span><span class="p">;</span>
@@ -368,7 +367,7 @@ variable type may provide semantic information. For example, an instance from
 <tt class="docutils literal"><span class="pre">MotorTemperatureVariableType</span></tt> is more meaningful than a float variable
 instantiated from <tt class="docutils literal"><span class="pre">BaseDataVariable</span></tt>.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_NODE_VARIABLEATTRIBUTES</span>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
 
@@ -390,7 +389,7 @@ actual argument values are checked to match the signature of the MethodNode.</p>
 object types). For this, the NodeId of the method <em>and of the object
 providing context</em> is part of a Call request message.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">executable</span><span class="p">;</span>
 
     <span class="cm">/* Members specific to open62541 */</span>
@@ -409,7 +408,7 @@ and software objects. Objects are instances of an <a class="reference internal" 
 type</em></a> and may contain variables, methods and further
 objects.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
 <span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
     <span class="k">struct</span> <span class="n">UA_MonitoredItem</span> <span class="o">*</span><span class="n">monitoredItemQueue</span><span class="p">;</span>
 <span class="cp">#endif</span>
@@ -424,7 +423,7 @@ objects.</p>
 instantiated. See <a class="reference internal" href="server.html#node-lifecycle"><em>Node Lifecycle: Constructors, Destructors and Node Contexts</em></a> for the use of constructor and
 destructor callbacks.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
 
     <span class="cm">/* Members specific to open62541 */</span>
@@ -529,7 +528,7 @@ electrical and information related connections. A client can then learn the
 layout of a (physical) system represented in an OPC UA information model
 based on a common understanding of just two custom reference types.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">symmetric</span><span class="p">;</span>
     <span class="n">UA_LocalizedText</span> <span class="n">inverseName</span><span class="p">;</span>
@@ -547,7 +546,7 @@ open62541, DataTypeNodes in the information model hierarchy are matched to
 They are used to constrain values to possible child DataTypes (e.g.
 <tt class="docutils literal"><span class="pre">UInt32</span></tt>).</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataTypeNode</span><span class="p">;</span>
 </pre></div>
@@ -561,10 +560,28 @@ references only. ViewNodes can be created and be interacted with. But their
 use in the <a class="reference internal" href="services.html#view-services"><em>Browse</em></a> service is currently unsupported in
 open62541.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NODE_BASEATTRIBUTES</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
     <span class="n">UA_Byte</span> <span class="n">eventNotifier</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">containsNoLoops</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ViewNode</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="node-union">
+<h2>Node Union<a class="headerlink" href="#node-union" title="Permalink to this headline">¶</a></h2>
+<p>A union that represents any kind of node. The node head can always be used.
+Check the NodeClass before accessing specific content.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">union</span> <span class="p">{</span>
+    <span class="n">UA_NodeHead</span> <span class="n">head</span><span class="p">;</span>
+    <span class="n">UA_VariableNode</span> <span class="n">variableNode</span><span class="p">;</span>
+    <span class="n">UA_VariableTypeNode</span> <span class="n">variableTypeNode</span><span class="p">;</span>
+    <span class="n">UA_MethodNode</span> <span class="n">methodNode</span><span class="p">;</span>
+    <span class="n">UA_ObjectNode</span> <span class="n">objectNode</span><span class="p">;</span>
+    <span class="n">UA_ObjectTypeNode</span> <span class="n">objectTypeNode</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTypeNode</span> <span class="n">referenceTypeNode</span><span class="p">;</span>
+    <span class="n">UA_DataTypeNode</span> <span class="n">dataTypeNode</span><span class="p">;</span>
+    <span class="n">UA_ViewNode</span> <span class="n">viewNode</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_Node</span><span class="p">;</span>
 </pre></div>
 </div>
 </div>
