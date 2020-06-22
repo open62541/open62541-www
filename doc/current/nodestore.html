@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 1.1.0-45-gd8be4acd documentation</title>
+  <title>Information Modelling &mdash; open62541 1.1.0-48-g2a8c9f62 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-45-gd8be4acd',
+              VERSION:'1.1.0-48-g2a8c9f62',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -105,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Information Modelling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#referencetype-bitfield-representation">ReferenceType Bitfield Representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#base-node-attributes">Base Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#data-type">Data Type</a></li>
@@ -214,6 +215,76 @@ the developers of custom Nodestores. The interaction with the information
 model is possible only via the OPC UA <a class="reference internal" href="services.html#services"><em>Services</em></a>. So the following
 sections are purely informational so that users may have a clear mental
 model of the underlying representation.</p>
+<div class="section" id="referencetype-bitfield-representation">
+<h2>ReferenceType Bitfield Representation<a class="headerlink" href="#referencetype-bitfield-representation" title="Permalink to this headline">¶</a></h2>
+<p>ReferenceTypes have an alternative represention as an index into a bitfield
+for fast comparison. The index is generated when the corresponding
+ReferenceTypeNode is added. By bounding the number of ReferenceTypes that can
+exist in the server, the bitfield can represent a set of an combination of
+ReferenceTypes.</p>
+<p>Every ReferenceTypeNode contains a bitfield with the set of all its subtypes.
+This speeds up the the Browse services substantially.</p>
+<p>The following ReferenceTypes have a fixed index. The NS0 bootstrapping
+creates these ReferenceTypes in-order.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#define UA_REFERENCETYPEINDEX_REFERENCES 0</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASSUBTYPE 1</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_AGGREGATES 2</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HIERARCHICALREFERENCES 3</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_NONHIERARCHICALREFERENCES 4</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASCHILD 5</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_ORGANIZES 6</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASEVENTSOURCE 7</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASMODELLINGRULE 8</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASENCODING 9</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASDESCRIPTION 10</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASTYPEDEFINITION 11</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_GENERATESEVENT 12</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASPROPERTY 13</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASCOMPONENT 14</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASNOTIFIER 15</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASORDEREDCOMPONENT 16</span>
+<span class="cp">#define UA_REFERENCETYPEINDEX_HASINTERFACE 17</span>
+
+<span class="cm">/* The maximum number of ReferrenceTypes. Must be a multiple of 32. */</span>
+<span class="cp">#define UA_REFERENCETYPESET_MAX 128</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span> <span class="n">UA_UInt32</span> <span class="n">bits</span><span class="p">[</span><span class="n">UA_REFERENCETYPESET_MAX</span> <span class="o">/</span> <span class="mi">32</span><span class="p">];</span> <span class="p">}</span> <span class="n">UA_ReferenceTypeSet</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
+<span class="nf">UA_ReferenceTypeSet_init</span><span class="p">(</span><span class="n">UA_ReferenceTypeSet</span> <span class="o">*</span><span class="n">set</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">set</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">UA_ReferenceTypeSet</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
+<span class="nf">UA_ReferenceTypeSet_any</span><span class="p">(</span><span class="n">UA_ReferenceTypeSet</span> <span class="o">*</span><span class="n">set</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">set</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">UA_ReferenceTypeSet</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ReferenceTypeSet</span>
+<span class="nf">UA_REFTYPESET</span><span class="p">(</span><span class="n">UA_Byte</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Byte</span> <span class="n">i</span> <span class="o">=</span> <span class="n">index</span> <span class="o">/</span> <span class="mi">32</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">index</span> <span class="o">%</span> <span class="mi">32</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTypeSet</span> <span class="n">set</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTypeSet_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">set</span><span class="p">);</span>
+    <span class="n">set</span><span class="p">.</span><span class="n">bits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">|=</span> <span class="p">((</span><span class="n">UA_UInt32</span><span class="p">)</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">set</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_ReferenceTypeSet</span>
+<span class="nf">UA_ReferenceTypeSet_union</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ReferenceTypeSet</span> <span class="n">setA</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_ReferenceTypeSet</span> <span class="n">setB</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_ReferenceTypeSet</span> <span class="n">set</span><span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">UA_REFERENCETYPESET_MAX</span> <span class="o">/</span> <span class="mi">32</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="n">set</span><span class="p">.</span><span class="n">bits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">setA</span><span class="p">.</span><span class="n">bits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">|</span> <span class="n">setB</span><span class="p">.</span><span class="n">bits</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+    <span class="k">return</span> <span class="n">set</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_Boolean</span>
+<span class="nf">UA_ReferenceTypeSet_contains</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ReferenceTypeSet</span> <span class="o">*</span><span class="n">set</span><span class="p">,</span> <span class="n">UA_Byte</span> <span class="n">index</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Byte</span> <span class="n">i</span> <span class="o">=</span> <span class="n">index</span> <span class="o">/</span> <span class="mi">32</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">index</span> <span class="o">%</span> <span class="mi">32</span><span class="p">;</span>
+    <span class="k">return</span> <span class="o">!!</span><span class="p">(</span><span class="n">set</span><span class="o">-&gt;</span><span class="n">bits</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(((</span><span class="n">UA_UInt32</span><span class="p">)</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="base-node-attributes">
 <h2>Base Node Attributes<a class="headerlink" href="#base-node-attributes" title="Permalink to this headline">¶</a></h2>
 <p>Nodes contain attributes according to their node type. The base node
@@ -242,7 +313,7 @@ correctness of casting from <tt class="docutils literal"><span class="pre">UA_No
 
 <span class="cm">/* List of reference targets with the same reference type and direction */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">;</span>
+    <span class="n">UA_Byte</span> <span class="n">referenceTypeIndex</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">;</span>
     <span class="kt">size_t</span> <span class="n">refTargetsSize</span><span class="p">;</span>
     <span class="n">UA_ReferenceTarget</span> <span class="o">*</span><span class="n">refTargets</span><span class="p">;</span>
@@ -532,6 +603,10 @@ based on a common understanding of just two custom reference types.</p>
     <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">symmetric</span><span class="p">;</span>
     <span class="n">UA_LocalizedText</span> <span class="n">inverseName</span><span class="p">;</span>
+
+    <span class="cm">/* Members specific to open62541 */</span>
+    <span class="n">UA_Byte</span> <span class="n">referenceTypeIndex</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTypeSet</span> <span class="n">subTypes</span><span class="p">;</span> <span class="cm">/* contains the type itself as well */</span>
 <span class="p">}</span> <span class="n">UA_ReferenceTypeNode</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -635,6 +710,11 @@ checks are omitted. This can crash the application eventually.</p>
     <span class="cm">/* Removes a node from the nodestore. */</span>
     <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
 
+    <span class="cm">/* Maps the ReferenceTypeIndex used for the references to the NodeId of the</span>
+<span class="cm">     * ReferenceType. The returned pointer is stable until the Nodestore is</span>
+<span class="cm">     * deleted. */</span>
+    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">getReferenceTypeId</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Byte</span> <span class="n">refTypeIndex</span><span class="p">);</span>
+
     <span class="cm">/* Execute a callback for every node in the nodestore. */</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodestoreVisitor</span> <span class="n">visitor</span><span class="p">,</span>
                     <span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
@@ -659,12 +739,20 @@ checks are omitted. This can crash the application eventually.</p>
 
 <span class="cm">/* Add a single reference to the node */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">,</span>
+<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="n">UA_Byte</span> <span class="n">refTypeIndex</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">targetNodeId</span><span class="p">,</span>
                      <span class="n">UA_UInt32</span> <span class="n">targetBrowseNameHash</span><span class="p">);</span>
 
 <span class="cm">/* Delete a single reference from the node */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_deleteReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DeleteReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+<span class="nf">UA_Node_deleteReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="n">UA_Byte</span> <span class="n">refTypeIndex</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="o">*</span><span class="n">targetNodeId</span><span class="p">);</span>
+
+<span class="cm">/* Deletes references from the node which are not matching any type in the given</span>
+<span class="cm"> * array. Could be used to e.g. delete all the references, except</span>
+<span class="cm"> * &#39;HASMODELINGRULE&#39; */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_deleteReferencesSubset</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ReferenceTypeSet</span> <span class="o">*</span><span class="n">keepSet</span><span class="p">);</span>
 
 <span class="cm">/* Delete all references of the node */</span>
 <span class="kt">void</span>
