@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Connecting a Variable with a Physical Process &mdash; open62541 1.1.0-64-g2d6915d1 documentation</title>
+  <title>Connecting a Variable with a Physical Process &mdash; open62541 1.1.0-65-g0e520fe2 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-64-g2d6915d1',
+              VERSION:'1.1.0-65-g0e520fe2',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -338,6 +338,19 @@ own memory management.</p>
                                         <span class="n">variableTypeNodeId</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span>
                                         <span class="n">timeDataSource</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">externalValue</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addCurrentTimeExternalDataSource</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_NodeId</span> <span class="n">currentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;current-time-external-source&quot;</span><span class="p">);</span>
+
+    <span class="n">UA_ValueBackend</span> <span class="n">valueBackend</span><span class="p">;</span>
+    <span class="n">valueBackend</span><span class="p">.</span><span class="n">backendType</span> <span class="o">=</span> <span class="n">UA_VALUEBACKENDTYPE_EXTERNAL</span><span class="p">;</span>
+    <span class="n">valueBackend</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">externalValue</span><span class="p">;</span>
+
+    <span class="n">UA_Server_setVariableNode_valueBackend</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">currentNodeId</span><span class="p">,</span> <span class="n">valueBackend</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
@@ -357,6 +370,8 @@ own memory management.</p>
     <span class="n">addCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">addValueCallbackToCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
     <span class="n">addCurrentTimeDataSourceVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+
+    <span class="n">addCurrentTimeExternalDataSource</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
     <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
 

@@ -238,6 +238,8 @@ Consistency between the array dimensions attribute in the variable and its
        size_t arrayDimensionsSize;                                         \
        UA_UInt32 *arrayDimensions;                                         \
                                                                            \
+       UA_ValueBackend valueBackend;                                       \
+                                                                           \
        /* The current value */                                             \
        UA_ValueSource valueSource;                                         \
        union {                                                             \
