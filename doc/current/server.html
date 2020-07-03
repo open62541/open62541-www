@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Server &mdash; open62541 1.1.0-73-gafdccbf3 documentation</title>
+  <title>Server &mdash; open62541 1.1.0-90-g65100728 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-73-gafdccbf3',
+              VERSION:'1.1.0-90-g65100728',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -113,10 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#browsing">Browsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#information-model-callbacks">Information Model Callbacks</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#value-callback">Value Callback</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">Value Callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#local-monitoreditems">Local MonitoredItems</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
 </ul>
@@ -227,38 +224,9 @@ The usual usage is as follows:</p>
     <span class="n">UA_Duration</span> <span class="n">max</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DurationRange</span><span class="p">;</span>
 
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-
-    <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
-<span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
-<span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
-<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
-<span class="cm">     * every 10 seconds. The server will still be removed depending on the</span>
-<span class="cm">     * state of the semaphore file. */</span>
-    <span class="n">UA_UInt32</span> <span class="n">cleanupTimeout</span><span class="p">;</span>
-
-    <span class="cm">/* Enable mDNS announce and response to queries */</span>
-    <span class="kt">bool</span> <span class="n">mdnsEnable</span><span class="p">;</span>
-
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
-    <span class="n">UA_MdnsDiscoveryConfiguration</span> <span class="n">mdns</span><span class="p">;</span>
-    <span class="n">UA_String</span> <span class="n">mdnsInterfaceIP</span><span class="p">;</span>
-<span class="cp"># if !defined(UA_HAS_GETIFADDR)</span>
-    <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">ipAddressList</span><span class="p">;</span>
-    <span class="kt">size_t</span> <span class="n">ipAddressListSize</span><span class="p">;</span>
-<span class="cp"># endif</span>
-<span class="cp">#endif</span>
-
-<span class="p">}</span> <span class="n">UA_ServerConfig_Discovery</span><span class="p">;</span>
-
-<span class="cp">#endif</span>
-
-<span class="k">typedef</span> <span class="nf">void</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_Server_AsyncOperationNotifyCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Server_AsyncOperationNotifyCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="k">struct</span> <span class="n">UA_ServerConfig</span> <span class="p">{</span>
-    <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* only if multithreading is enabled */</span>
     <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
 
     <span class="cm">/* Server Description:</span>
@@ -322,7 +290,7 @@ with custom data types are provided in
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">See the section for <a class="reference internal" href="#node-lifecycle"><em>node lifecycle
+<p class="last">See the section for <a class="reference internal" href="nodestore.html#node-lifecycle"><em>node lifecycle
 handling</em></a>.</p>
 </div>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Access Control */</span>
@@ -338,9 +306,12 @@ handling</em></a>.</p>
 <span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
     <span class="n">UA_Double</span> <span class="n">asyncOperationTimeout</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
     <span class="kt">size_t</span> <span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span> <span class="cm">/* 0 =&gt; unlimited */</span>
-    <span class="n">UA_DEPRECATED</span> <span class="n">UA_Double</span> <span class="n">asyncCallRequestTimeout</span><span class="p">;</span> <span class="cm">/* in ms, 0 =&gt; unlimited */</span>
     <span class="cm">/* Notify workers when an async operation was enqueued */</span>
     <span class="n">UA_Server_AsyncOperationNotifyCallback</span> <span class="n">asyncOperationNotifyCallback</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#if UA_MULTITHREADING &gt;= 200</span>
+    <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* Experimental feature */</span>
 <span class="cp">#endif</span>
 </pre></div>
 </div>
@@ -381,6 +352,29 @@ operations</em></a>.</p>
     <span class="cm">/* Limits for Requests */</span>
     <span class="n">UA_UInt32</span> <span class="n">maxReferencesPerNode</span><span class="p">;</span>
 
+    <span class="cm">/* Discovery */</span>
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+    <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
+<span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
+<span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
+<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
+<span class="cm">     * every 10 seconds. The server will still be removed depending on the</span>
+<span class="cm">     * state of the semaphore file. */</span>
+    <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
+
+<span class="cp"># ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
+    <span class="n">UA_Boolean</span> <span class="n">mdnsEnabled</span><span class="p">;</span>
+    <span class="n">UA_MdnsDiscoveryConfiguration</span> <span class="n">mdnsConfig</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">mdnsInterfaceIP</span><span class="p">;</span>
+<span class="cp">#  if !defined(UA_HAS_GETIFADDR)</span>
+    <span class="kt">size_t</span> <span class="n">mdnsIpAddressListSize</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">mdnsIpAddressList</span><span class="p">;</span>
+<span class="cp">#  endif</span>
+<span class="cp"># endif</span>
+<span class="cp">#endif</span>
+
+    <span class="cm">/* Subscriptions */</span>
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
     <span class="cm">/* Limits for Subscriptions */</span>
     <span class="n">UA_UInt32</span> <span class="n">maxSubscriptions</span><span class="p">;</span>
     <span class="n">UA_UInt32</span> <span class="n">maxSubscriptionsPerSession</span><span class="p">;</span>
@@ -390,9 +384,9 @@ operations</em></a>.</p>
     <span class="n">UA_UInt32</span> <span class="n">maxNotificationsPerPublish</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">enableRetransmissionQueue</span><span class="p">;</span>
     <span class="n">UA_UInt32</span> <span class="n">maxRetransmissionQueueSize</span><span class="p">;</span> <span class="cm">/* 0 -&gt; unlimited size */</span>
-<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
+<span class="cp"># ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
     <span class="n">UA_UInt32</span> <span class="n">maxEventsPerNode</span><span class="p">;</span> <span class="cm">/* 0 -&gt; unlimited size */</span>
-<span class="cp">#endif</span>
+<span class="cp"># endif</span>
 
     <span class="cm">/* Limits for MonitoredItems */</span>
     <span class="n">UA_UInt32</span> <span class="n">maxMonitoredItems</span><span class="p">;</span>
@@ -403,12 +397,6 @@ operations</em></a>.</p>
     <span class="cm">/* Limits for PublishRequests */</span>
     <span class="n">UA_UInt32</span> <span class="n">maxPublishReqPerSession</span><span class="p">;</span>
 
-    <span class="cm">/* Discovery */</span>
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
-    <span class="n">UA_ServerConfig_Discovery</span> <span class="n">discovery</span><span class="p">;</span>
-<span class="cp">#endif</span>
-
-<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
     <span class="cm">/* Register MonitoredItem in Userland</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param server Allows the access to the server object</span>
@@ -456,9 +444,12 @@ operations</em></a>.</p>
 <span class="nf">UA_ServerConfig_clean</span><span class="p">(</span><span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="cm">/* Set a custom hostname in server configuration */</span>
-<span class="kt">void</span>
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
 <span class="nf">UA_ServerConfig_setCustomHostname</span><span class="p">(</span><span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_String</span> <span class="n">customHostname</span><span class="p">);</span>
+                                  <span class="k">const</span> <span class="n">UA_String</span> <span class="n">customHostname</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">customHostname</span><span class="p">);</span>
+    <span class="n">UA_String_copy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">customHostname</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">customHostname</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -973,26 +964,29 @@ sourceTimestamp, serverTimestamp and statusCode.</p>
 <span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_unregister_discovery</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">struct</span> <span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
 
- <span class="cm">/* Adds a periodic callback to register the server with the LDS (local discovery server)</span>
-<span class="cm">  * periodically. The interval between each register call is given as second parameter.</span>
-<span class="cm">  * It should be 10 minutes by default (= 10*60*1000).</span>
+ <span class="cm">/* Adds a periodic callback to register the server with the LDS (local</span>
+<span class="cm">  * discovery server) periodically. The interval between each register call is</span>
+<span class="cm">  * given as second parameter. It should be 10 minutes by default (=</span>
+<span class="cm">  * 10*60*1000).</span>
 <span class="cm">  *</span>
-<span class="cm">  * The delayFirstRegisterMs parameter indicates the delay for the first register call.</span>
-<span class="cm">  * If it is 0, the first register call will be after intervalMs milliseconds,</span>
-<span class="cm">  * otherwise the server&#39;s first register will be after delayFirstRegisterMs.</span>
+<span class="cm">  * The delayFirstRegisterMs parameter indicates the delay for the first</span>
+<span class="cm">  * register call. If it is 0, the first register call will be after intervalMs</span>
+<span class="cm">  * milliseconds, otherwise the server&#39;s first register will be after</span>
+<span class="cm">  * delayFirstRegisterMs.</span>
 <span class="cm">  *</span>
 <span class="cm">  * When you manually unregister the server, you also need to cancel the</span>
 <span class="cm">  * periodic callback, otherwise it will be automatically be registered again.</span>
 <span class="cm">  *</span>
-<span class="cm">  * If you call this method multiple times for the same discoveryServerUrl, the older</span>
-<span class="cm">  * periodic callback will be removed.</span>
+<span class="cm">  * If you call this method multiple times for the same discoveryServerUrl, the</span>
+<span class="cm">  * older periodic callback will be removed.</span>
 <span class="cm">  *</span>
 <span class="cm">  * @param server</span>
-<span class="cm">  * @param client the client which is used to call the RegisterServer.</span>
-<span class="cm">  *         It must not yet be connected and will be connected for every register call</span>
+<span class="cm">  * @param client the client which is used to call the RegisterServer. It must</span>
+<span class="cm">  *         not yet be connected and will be connected for every register call</span>
 <span class="cm">  *         to the given discoveryServerUrl.</span>
-<span class="cm">  * @param discoveryServerUrl where this server should register itself.</span>
-<span class="cm">  *        The string will be copied internally. Therefore you can free it after calling this method.</span>
+<span class="cm">  * @param discoveryServerUrl where this server should register itself. The</span>
+<span class="cm">  *        string will be copied internally. Therefore you can free it after</span>
+<span class="cm">  *        calling this method.</span>
 <span class="cm">  * @param intervalMs</span>
 <span class="cm">  * @param delayFirstRegisterMs</span>
 <span class="cm">  * @param periodicCallbackId */</span>
@@ -1064,112 +1058,9 @@ user-defined code can happen.</p>
 <li>Linking VariableNodes with an external data source</li>
 <li>MethodNode callbacks</li>
 </ul>
-<div class="section" id="node-lifecycle-constructors-destructors-and-node-contexts">
-<span id="node-lifecycle"></span><h3>Node Lifecycle: Constructors, Destructors and Node Contexts<a class="headerlink" href="#node-lifecycle-constructors-destructors-and-node-contexts" title="Permalink to this headline">¶</a></h3>
-<p>To finalize the instantiation of a node, a (user-defined) constructor
-callback is executed. There can be both a global constructor for all nodes
-and node-type constructor specific to the TypeDefinition of the new node
-(attached to an ObjectTypeNode or VariableTypeNode).</p>
-<p>In the hierarchy of ObjectTypes and VariableTypes, only the constructor of
-the (lowest) type defined for the new node is executed. Note that every
-Object and Variable can have only one <tt class="docutils literal"><span class="pre">isTypeOf</span></tt> reference. But type-nodes
-can technically have several <tt class="docutils literal"><span class="pre">hasSubType</span></tt> references to implement multiple
-inheritance. Issues of (multiple) inheritance in the constructor need to be
-solved by the user.</p>
-<p>When a node is destroyed, the node-type destructor is called before the
-global destructor. So the overall node lifecycle is as follows:</p>
-<ol class="arabic simple">
-<li>Global Constructor (set in the server config)</li>
-<li>Node-Type Constructor (for VariableType or ObjectTypes)</li>
-<li>(Usage-period of the Node)</li>
-<li>Node-Type Destructor</li>
-<li>Global Destructor</li>
-</ol>
-<p>The constructor and destructor callbacks can be set to <tt class="docutils literal"><span class="pre">NULL</span></tt> and are not
-used in that case. If the node-type constructor fails, the global destructor
-will be called before removing the node. The destructors are assumed to never
-fail.</p>
-<p>Every node carries a user-context and a constructor-context pointer. The
-user-context is used to attach custom data to a node. But the (user-defined)
-constructors and destructors may replace the user-context pointer if they
-wish to do so. The initial value for the constructor-context is <tt class="docutils literal"><span class="pre">NULL</span></tt>.
-When the <tt class="docutils literal"><span class="pre">AddNodes</span></tt> service is used over the network, the user-context
-pointer of the new node is also initially set to <tt class="docutils literal"><span class="pre">NULL</span></tt>.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* To be set in the server config. */</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
-
-    <span class="cm">/* Can be NULL. The context cannot be replaced since the node is destroyed</span>
-<span class="cm">     * immediately afterwards anyway. */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
-
-    <span class="cm">/* Can be NULL. Called during recursive node instantiation. While mandatory</span>
-<span class="cm">     * child nodes are automatically created if not already present, optional child</span>
-<span class="cm">     * nodes are not. This callback can be used to define whether an optional child</span>
-<span class="cm">     * node should be created.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param sourceNodeId Source node from the type definition. If the new node</span>
-<span class="cm">     *        shall be created, it will be a copy of this node.</span>
-<span class="cm">     * @param targetParentNodeId Parent of the potential new child node</span>
-<span class="cm">     * @param referenceTypeId Identifies the reference type which that the parent</span>
-<span class="cm">     *        node has to the new node.</span>
-<span class="cm">     * @return Return UA_TRUE if the child node shall be instantiatet,</span>
-<span class="cm">     *         UA_FALSE otherwise. */</span>
-    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">createOptionalChild</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                      <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sourceNodeId</span><span class="p">,</span>
-                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
-                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">);</span>
-
-    <span class="cm">/* Can be NULL. Called when a node is to be copied during recursive</span>
-<span class="cm">     * node instantiation. Allows definition of the NodeId for the new node.</span>
-<span class="cm">     * If the callback is set to NULL or the resulting NodeId is UA_NODEID_NUMERIC(X,0)</span>
-<span class="cm">     * an unused nodeid in namespace X will be used. E.g. passing UA_NODEID_NULL will</span>
-<span class="cm">     * result in a NodeId in namespace 0.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param sourceNodeId Source node of the copy operation</span>
-<span class="cm">     * @param targetParentNodeId Parent node of the new node</span>
-<span class="cm">     * @param referenceTypeId Identifies the reference type which that the parent</span>
-<span class="cm">     *        node has to the new node. */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">generateChildNodeId</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sourceNodeId</span><span class="p">,</span>
-                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
-                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
-                                         <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetNodeId</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
-
-<span class="kt">void</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span>
 <span class="nf">UA_Server_setAdminSessionContext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                                  <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
-                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
-
-    <span class="cm">/* Can be NULL. May replace the nodeContext. */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
-                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_NodeTypeLifecycle</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_setNodeTypeLifecycle</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
@@ -1185,7 +1076,6 @@ pointer of the new node is also initially set to <tt class="docutils literal"><s
                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
 </pre></div>
 </div>
-</div>
 <div class="section" id="data-source-callback">
 <span id="datasource"></span><h3>Data Source Callback<a class="headerlink" href="#data-source-callback" title="Permalink to this headline">¶</a></h3>
 <p>The server has a unique way of dealing with the content of variables. Instead
@@ -1195,178 +1085,14 @@ the function will be called and asked to provide a UA_DataValue return value
 that contains the value content and additional timestamps.</p>
 <p>It is expected that the read callback is implemented. The write callback can
 be set to a null-pointer.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Copies the data from the source into the provided value.</span>
-<span class="cm">     *</span>
-<span class="cm">     * !! ZERO-COPY OPERATIONS POSSIBLE !!</span>
-<span class="cm">     * It is not required to return a copy of the actual content data. You can</span>
-<span class="cm">     * return a pointer to memory owned by the user. Memory can be reused</span>
-<span class="cm">     * between read callbacks of a DataSource, as the result is already encoded</span>
-<span class="cm">     * on the network buffer between each read operation.</span>
-<span class="cm">     *</span>
-<span class="cm">     * To use zero-copy reads, set the value of the `value-&gt;value` Variant</span>
-<span class="cm">     * without copying, e.g. with `UA_Variant_setScalar`. Then, also set</span>
-<span class="cm">     * `value-&gt;value.storageType` to `UA_VARIANT_DATA_NODELETE` to prevent the</span>
-<span class="cm">     * memory being cleaned up. Don&#39;t forget to also set `value-&gt;hasValue` to</span>
-<span class="cm">     * true to indicate the presence of a value.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param nodeId The identifier of the node being read from</span>
-<span class="cm">     * @param nodeContext Additional data attached to the node by the user</span>
-<span class="cm">     * @param includeSourceTimeStamp If true, then the datasource is expected to</span>
-<span class="cm">     *        set the source timestamp in the returned value</span>
-<span class="cm">     * @param range If not null, then the datasource shall return only a</span>
-<span class="cm">     *        selection of the (nonscalar) data. Set</span>
-<span class="cm">     *        UA_STATUSCODE_BADINDEXRANGEINVALID in the value if this does not</span>
-<span class="cm">     *        apply</span>
-<span class="cm">     * @param value The (non-null) DataValue that is returned to the client. The</span>
-<span class="cm">     *        data source sets the read data, the result status and optionally a</span>
-<span class="cm">     *        sourcetimestamp.</span>
-<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
-<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done</span>
-<span class="cm">     */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                          <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">includeSourceTimeStamp</span><span class="p">,</span>
-                          <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
-
-    <span class="cm">/* Write into a data source. This method pointer can be NULL if the</span>
-<span class="cm">     * operation is unsupported.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param nodeId The identifier of the node being written to</span>
-<span class="cm">     * @param nodeContext Additional data attached to the node by the user</span>
-<span class="cm">     * @param range If not NULL, then the datasource shall return only a</span>
-<span class="cm">     *        selection of the (nonscalar) data. Set</span>
-<span class="cm">     *        UA_STATUSCODE_BADINDEXRANGEINVALID in the value if this does not</span>
-<span class="cm">     *        apply</span>
-<span class="cm">     * @param value The (non-NULL) DataValue that has been written by the client.</span>
-<span class="cm">     *        The data source contains the written data, the result status and</span>
-<span class="cm">     *        optionally a sourcetimestamp</span>
-<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
-<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done</span>
-<span class="cm">     */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                           <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                           <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_DataSource</span><span class="p">;</span>
-
-<span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_setVariableNode_dataSource</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
                                      <span class="k">const</span> <span class="n">UA_DataSource</span> <span class="n">dataSource</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="value-callback">
-<span id="id4"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
-<p>Value Callbacks can be attached to variable and variable type nodes. If
-not <tt class="docutils literal"><span class="pre">NULL</span></tt>, they are called before reading and after writing respectively.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Called before the value attribute is read. It is possible to write into the</span>
-<span class="cm">     * value attribute during onRead (using the write service). The node is</span>
-<span class="cm">     * re-opened afterwards so that changes are considered in the following read</span>
-<span class="cm">     * operation.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param handle Points to user-provided data for the callback.</span>
-<span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param data Points to the current node value.</span>
-<span class="cm">     * @param range Points to the numeric range the client wants to read from</span>
-<span class="cm">     *        (or NULL). */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onRead</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                   <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
-                   <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
-                   <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
-
-    <span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
-<span class="cm">     * writing so that the new value is visible in the callback.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @sessionId The identifier of the session</span>
-<span class="cm">     * @sessionContext Additional data attached to the session</span>
-<span class="cm">     *                 in the access control layer</span>
-<span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param nodeUserContext Additional data attached to the node by</span>
-<span class="cm">     *        the user.</span>
-<span class="cm">     * @param nodeConstructorContext Additional data attached to the node</span>
-<span class="cm">     *        by the type constructor(s).</span>
-<span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
-<span class="cm">     *        NULL). */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onWrite</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
-                    <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_ValueCallback</span><span class="p">;</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id5">
-<span id="id6"></span><h3>Value Callback<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<p>Value Callbacks can be attached to variable and variable type nodes. If
-not <tt class="docutils literal"><span class="pre">NULL</span></tt>, they are called before reading and after writing respectively.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="cm">/* Called before the value attribute is read. The external value source can be</span>
-<span class="cm">     * be updated and/or locked during this notification call. After this function returns</span>
-<span class="cm">     * to the core, the external value source is readed immediately.</span>
-<span class="cm">    */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">notificationRead</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                                      <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
-                                      <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">);</span>
-
-    <span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
-<span class="cm">     * writing so that the new value is visible in the callback.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @sessionId The identifier of the session</span>
-<span class="cm">     * @sessionContext Additional data attached to the session</span>
-<span class="cm">     *                 in the access control layer</span>
-<span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param nodeUserContext Additional data attached to the node by</span>
-<span class="cm">     *        the user.</span>
-<span class="cm">     * @param nodeConstructorContext Additional data attached to the node</span>
-<span class="cm">     *        by the type constructor(s).</span>
-<span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
-<span class="cm">     *        NULL). */</span>
-    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">userWrite</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                               <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                               <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
-<span class="p">}</span> <span class="n">UA_ExternalValueCallback</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                                         <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
                                         <span class="k">const</span> <span class="n">UA_ValueCallback</span> <span class="n">callback</span><span class="p">);</span>
-
-<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UA_VALUEBACKENDTYPE_NONE</span><span class="p">,</span>
-    <span class="n">UA_VALUEBACKENDTYPE_INTERNAL</span><span class="p">,</span>
-    <span class="n">UA_VALUEBACKENDTYPE_DATA_SOURCE_CALLBACK</span><span class="p">,</span>
-    <span class="n">UA_VALUEBACKENDTYPE_EXTERNAL</span>
-<span class="p">}</span> <span class="n">UA_ValueBackendType</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_ValueBackendType</span> <span class="n">backendType</span><span class="p">;</span>
-    <span class="k">union</span> <span class="p">{</span>
-        <span class="k">struct</span> <span class="p">{</span>
-            <span class="n">UA_DataValue</span> <span class="n">value</span><span class="p">;</span>
-            <span class="n">UA_ValueCallback</span> <span class="n">callback</span><span class="p">;</span>
-        <span class="p">}</span> <span class="n">internal</span><span class="p">;</span>
-        <span class="n">UA_DataSource</span> <span class="n">dataSource</span><span class="p">;</span>
-        <span class="k">struct</span> <span class="p">{</span>
-            <span class="n">UA_DataValue</span> <span class="o">**</span><span class="n">value</span><span class="p">;</span>
-            <span class="n">UA_ExternalValueCallback</span> <span class="n">callback</span><span class="p">;</span>
-        <span class="p">}</span> <span class="n">external</span><span class="p">;</span>
-    <span class="p">}</span> <span class="n">backend</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_ValueBackend</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_setVariableNode_valueBackend</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
@@ -1376,7 +1102,7 @@ not <tt class="docutils literal"><span class="pre">NULL</span></tt>, they are ca
 </div>
 </div>
 <div class="section" id="local-monitoreditems">
-<span id="id7"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this headline">¶</a></h3>
+<span id="id4"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this headline">¶</a></h3>
 <p>MonitoredItems are used with the Subscription mechanism of OPC UA to
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
@@ -1434,15 +1160,7 @@ added over the network. In theory, it is possible to add a callback via
 <tt class="docutils literal"><span class="pre">UA_Server_setMethodNode_callback</span></tt> within the global constructor when
 adding methods over the network is really wanted. See the Section
 <a class="reference internal" href="#object-interaction"><em>Interacting with Objects</em></a> for calling methods on an object.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-                     <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
-                     <span class="kt">void</span> <span class="o">*</span><span class="n">methodContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">,</span>
-                     <span class="kt">void</span> <span class="o">*</span><span class="n">objectContext</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span>
-                     <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span>
-                     <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">);</span>
-
-<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
 <span class="n">UA_StatusCode</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_setMethodNode_callback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                                  <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">methodNodeId</span><span class="p">,</span>
@@ -1506,7 +1224,7 @@ that namespace&#8221;. To find out which NodeId was actually assigned to the new
 node, you may pass a pointer <cite>outNewNodeId</cite>, which will (after a successful
 node insertion) contain the nodeId of the new node. You may also pass a
 <tt class="docutils literal"><span class="pre">NULL</span></tt> pointer if this result is not needed.</p>
-<p>See the Section <a class="reference internal" href="#node-lifecycle"><em>Node Lifecycle: Constructors, Destructors and Node Contexts</em></a> on constructors and on attaching
+<p>See the Section <a class="reference internal" href="nodestore.html#node-lifecycle"><em>Node Lifecycle: Constructors, Destructors and Node Contexts</em></a> on constructors and on attaching
 user-defined data to nodes.</p>
 <p>The methods for node addition and deletion take mostly const arguments that
 are not modified. When creating a node, a deep copy of the node identifier,
@@ -1724,9 +1442,9 @@ Not that this is only allowed for object nodes.</p>
 </ul>
 </dd>
 </dl>
-<p>The special UA_Server_addMethodNode_finish method needs to be used for
-method nodes, since there you need to explicitly specifiy the input
-and output arguments which are added in the finish step (if not yet already there)</p>
+<p>The special UA_Server_addMethodNode_finish method needs to be used for method
+nodes, since there you need to explicitly specifiy the input and output
+arguments which are added in the finish step (if not yet already there) <a href="#id5"><span class="problematic" id="id6">**</span></a>/</p>
 <p><tt class="docutils literal"><span class="pre">VariableAttributes</span></tt> for variables, <tt class="docutils literal"><span class="pre">ObjectAttributes</span></tt> for objects, and
 so on. Missing attributes are taken from the TypeDefinition node if
 applicable.</p>
@@ -1776,20 +1494,24 @@ applicable.</p>
 </div>
 </div>
 <div class="section" id="events">
-<span id="id8"></span><h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
-<p>The method <tt class="docutils literal"><span class="pre">UA_Server_createEvent</span></tt> creates an event and represents it as node. The node receives a unique <cite>EventId</cite>
-which is automatically added to the node.
-The method returns a <cite>NodeId</cite> to the object node which represents the event through <tt class="docutils literal"><span class="pre">outNodeId</span></tt>. The <cite>NodeId</cite> can
-be used to set the attributes of the event. The generated <cite>NodeId</cite> is always numeric. <tt class="docutils literal"><span class="pre">outNodeId</span></tt> cannot be
-<tt class="docutils literal"><span class="pre">NULL</span></tt>.</p>
+<span id="id7"></span><h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<p>The method <tt class="docutils literal"><span class="pre">UA_Server_createEvent</span></tt> creates an event and represents it as
+node. The node receives a unique <cite>EventId</cite> which is automatically added to
+the node. The method returns a <cite>NodeId</cite> to the object node which represents
+the event through <tt class="docutils literal"><span class="pre">outNodeId</span></tt>. The <cite>NodeId</cite> can be used to set the
+attributes of the event. The generated <cite>NodeId</cite> is always numeric.
+<tt class="docutils literal"><span class="pre">outNodeId</span></tt> cannot be <tt class="docutils literal"><span class="pre">NULL</span></tt>.</p>
 <p>Note: In order to see an event in UAExpert, the field <cite>Time</cite> must be given a value!</p>
-<p>The method <tt class="docutils literal"><span class="pre">UA_Server_triggerEvent</span></tt> &#8220;triggers&#8221; an event by adding it to all monitored items of the specified
-origin node and those of all its parents. Any filters specified by the monitored items are automatically applied.
-Using this method deletes the node generated by <tt class="docutils literal"><span class="pre">UA_Server_createEvent</span></tt>. The <cite>EventId</cite> for the new event is
-generated automatically and is returned through <tt class="docutils literal"><span class="pre">outEventId</span></tt>. <tt class="docutils literal"><span class="pre">NULL</span></tt> can be passed if the <cite>EventId</cite> is not
-needed. <tt class="docutils literal"><span class="pre">deleteEventNode</span></tt> specifies whether the node representation of the event should be deleted after invoking
-the method. This can be useful if events with the similar attributes are triggered frequently. <tt class="docutils literal"><span class="pre">UA_TRUE</span></tt> would
-cause the node to be deleted.</p>
+<p>The method <tt class="docutils literal"><span class="pre">UA_Server_triggerEvent</span></tt> &#8220;triggers&#8221; an event by adding it to all
+monitored items of the specified origin node and those of all its parents.
+Any filters specified by the monitored items are automatically applied. Using
+this method deletes the node generated by <tt class="docutils literal"><span class="pre">UA_Server_createEvent</span></tt>. The
+<cite>EventId</cite> for the new event is generated automatically and is returned
+through <tt class="docutils literal"><span class="pre">outEventId</span></tt>. <tt class="docutils literal"><span class="pre">NULL</span></tt> can be passed if the <cite>EventId</cite> is not
+needed. <tt class="docutils literal"><span class="pre">deleteEventNode</span></tt> specifies whether the node representation of the
+event should be deleted after invoking the method. This can be useful if
+events with the similar attributes are triggered frequently. <tt class="docutils literal"><span class="pre">UA_TRUE</span></tt>
+would cause the node to be deleted.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
 
 <span class="cm">/* The EventQueueOverflowEventType is defined as abstract, therefore we can not</span>
@@ -1811,7 +1533,8 @@ cause the node to be deleted.</p>
                       <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNodeId</span><span class="p">);</span>
 
 <span class="cm">/* Triggers a node representation of an event by applying EventFilters and</span>
-<span class="cm">   adding the event to the appropriate queues.</span>
+<span class="cm"> * adding the event to the appropriate queues.</span>
+<span class="cm"> *</span>
 <span class="cm"> * @param server The server object</span>
 <span class="cm"> * @param eventNodeId The NodeId of the node representation of the event which should be triggered</span>
 <span class="cm"> * @param outEvent the EventId of the new event</span>
@@ -1830,86 +1553,125 @@ cause the node to be deleted.</p>
   <span class="n">UA_ENTERING_CONFIRMEDSTATE</span><span class="p">,</span>
   <span class="n">UA_ENTERING_ACTIVESTATE</span>
 <span class="p">}</span> <span class="n">UA_TwoStateVariableCallbackType</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>callback prototype to set user specific callbacks</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
+
+<span class="cm">/* Callback prototype to set user specific callbacks */</span>
+<span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_TwoStateVariableChangeCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">condition</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>create condition instance. The function checks first whether the passed conditionType
-is a subType of ConditionType. Then checks whether the condition source has HasEventSource
-reference to its parent. If not, a HasEventSource reference will be created between condition
-source and server object. To expose the condition in address space, a hierarchical ReferenceType
-should be passed to create the reference to condition source. Otherwise, UA_NODEID_NULL should be
-passed to make the condition not exposed.
-&#64;param server The server object
-&#64;param conditionId The NodeId of the requested Condition Object. When passing UA_NODEID_NUMERIC(X,0)</p>
-<blockquote>
-<div>an unused nodeid in namespace X will be used. E.g. passing UA_NODEID_NULL will
-result in a NodeId in namespace 0.</div></blockquote>
-<p>&#64;param conditionType The NodeId of the node representation of the ConditionType
-&#64;param conditionName The name of the condition to be created
-&#64;param conditionSource The NodeId of the Condition Source (Parent of the Condition)
-&#64;param hierarchialReferenceType The NodeId of Hierarchical ReferenceType between Condition and its source
-&#64;param outConditionId The NodeId of the created Condition
-&#64;return The StatusCode of the UA_Server_createCondition method</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_StatusCode</span>
+
+<span class="cm">/* Create condition instance. The function checks first whether the passed</span>
+<span class="cm"> * conditionType is a subType of ConditionType. Then checks whether the</span>
+<span class="cm"> * condition source has HasEventSource reference to its parent. If not, a</span>
+<span class="cm"> * HasEventSource reference will be created between condition source and server</span>
+<span class="cm"> * object. To expose the condition in address space, a hierarchical</span>
+<span class="cm"> * ReferenceType should be passed to create the reference to condition source.</span>
+<span class="cm"> * Otherwise, UA_NODEID_NULL should be passed to make the condition not exposed.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param conditionId The NodeId of the requested Condition Object. When passing</span>
+<span class="cm"> *                    UA_NODEID_NUMERIC(X,0) an unused nodeid in namespace X</span>
+<span class="cm"> *                    will be used. E.g. passing UA_NODEID_NULL will result in a</span>
+<span class="cm"> *                    NodeId in namespace 0.</span>
+<span class="cm"> * @param conditionType The NodeId of the node representation of the ConditionType</span>
+<span class="cm"> * @param conditionName The name of the condition to be created</span>
+<span class="cm"> * @param conditionSource The NodeId of the Condition Source (Parent of the Condition)</span>
+<span class="cm"> * @param hierarchialReferenceType The NodeId of Hierarchical ReferenceType</span>
+<span class="cm"> *                                 between Condition and its source</span>
+<span class="cm"> * @param outConditionId The NodeId of the created Condition</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_createCondition method */</span>
+<span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_createCondition</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionType</span><span class="p">,</span>
                           <span class="n">UA_QualifiedName</span> <span class="n">conditionName</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">hierarchialReferenceType</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>set the value of condition field.
-&#64;param server The server object
-&#64;param condition The NodeId of the node representation of the Condition Instance
-&#64;param value Variant Value to be written to the Field
-&#64;param fieldName Name of the Field in which the value should be written
-&#64;return The StatusCode of the UA_Server_setConditionField method*/</p>
-<p>set the value of property of condition field.
-&#64;param server The server object
-&#64;param condition The NodeId of the node representation of the Condition Instance
-&#64;param value Variant Value to be written to the Field
-&#64;param variableFieldName Name of the Field which has a property
-&#64;param variablePropertyName Name of the Field Property in which the value should be written
-&#64;return The StatusCode of the UA_Server_setConditionVariableFieldProperty*/</p>
-<p>triggers an event only for an enabled condition. The condition list is updated then with the
-last generated EventId.
-&#64;param server The server object
-&#64;param condition The NodeId of the node representation of the Condition Instance
-&#64;param conditionSource The NodeId of the node representation of the Condition Source
-&#64;param outEventId last generated EventId
-&#64;return The StatusCode of the UA_Server_triggerConditionEvent method*/</p>
-<p>add an optional condition field using its name. (TODO Adding optional methods
-is not implemented yet)
-&#64;param server The server object
-&#64;param condition The NodeId of the node representation of the Condition Instance
-&#64;param conditionType The NodeId of the node representation of the Condition Type
-from which the optional field comes
-&#64;param fieldName Name of the optional field
-&#64;param outOptionalVariable The NodeId of the created field (Variable Node)
-&#64;return The StatusCode of the UA_Server_addConditionOptionalField method*/</p>
-<p>Function used to set a user specific callback to TwoStateVariable Fields of
-a condition. The callbacks will be called before triggering the events when
-transition to true State of EnabledState/Id, AckedState/Id, ConfirmedState/Id
-and ActiveState/Id occurs.
-&#64;param server The server object
-&#64;param condition The NodeId of the node representation of the Condition Instance
-&#64;param conditionSource The NodeId of the node representation of the Condition Source
-&#64;param removeBranch (Not Implemented yet)
-&#64;param callback User specific callback function
-&#64;param callbackType Callback function type, indicates where it should be called
-&#64;return The StatusCode of the UA_Server_setConditionTwoStateVariableCallback method*/</p>
-<p>Delete a condition from the address space and the internal lists.</p>
-<p>&#64;param server The server object
-&#64;param condition The NodeId of the node representation of the Condition Instance
-&#64;param conditionSource The NodeId of the node representation of the Condition Source
-&#64;return UA_STATUSCODE_GOOD on success</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_deleteCondition</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">);</span>
 
-<span class="cp">#endif</span><span class="c1">//UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS</span>
+<span class="cm">/* Set the value of condition field.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param value Variant Value to be written to the Field</span>
+<span class="cm"> * @param fieldName Name of the Field in which the value should be written</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_setConditionField method*/</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setConditionField</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_Variant</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">fieldName</span><span class="p">);</span>
+
+<span class="cm">/* Set the value of property of condition field.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param value Variant Value to be written to the Field</span>
+<span class="cm"> * @param variableFieldName Name of the Field which has a property</span>
+<span class="cm"> * @param variablePropertyName Name of the Field Property in which the value should be written</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_setConditionVariableFieldProperty*/</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_Variant</span><span class="o">*</span> <span class="n">value</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">variableFieldName</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">variablePropertyName</span><span class="p">);</span>
+
+<span class="cm">/* Triggers an event only for an enabled condition. The condition list is</span>
+<span class="cm"> * updated then with the last generated EventId.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param conditionSource The NodeId of the node representation of the Condition Source</span>
+<span class="cm"> * @param outEventId last generated EventId</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_triggerConditionEvent method*/</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_triggerConditionEvent</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">,</span>
+                                <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">outEventId</span><span class="p">);</span>
+
+<span class="cm">/* Add an optional condition field using its name. (TODO Adding optional methods</span>
+<span class="cm"> * is not implemented yet)</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param conditionType The NodeId of the node representation of the Condition Type</span>
+<span class="cm"> * from which the optional field comes</span>
+<span class="cm"> * @param fieldName Name of the optional field</span>
+<span class="cm"> * @param outOptionalVariable The NodeId of the created field (Variable Node)</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_addConditionOptionalField method*/</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addConditionOptionalField</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionType</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">fieldName</span><span class="p">,</span>
+                                    <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outOptionalVariable</span><span class="p">);</span>
+
+<span class="cm">/* Function used to set a user specific callback to TwoStateVariable Fields of a</span>
+<span class="cm"> * condition. The callbacks will be called before triggering the events when</span>
+<span class="cm"> * transition to true State of EnabledState/Id, AckedState/Id, ConfirmedState/Id</span>
+<span class="cm"> * and ActiveState/Id occurs.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param conditionSource The NodeId of the node representation of the Condition Source</span>
+<span class="cm"> * @param removeBranch (Not Implemented yet)</span>
+<span class="cm"> * @param callback User specific callback function</span>
+<span class="cm"> * @param callbackType Callback function type, indicates where it should be called</span>
+<span class="cm"> * @return The StatusCode of the UA_Server_setConditionTwoStateVariableCallback method*/</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setConditionTwoStateVariableCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">,</span>
+                                               <span class="n">UA_Boolean</span> <span class="n">removeBranch</span><span class="p">,</span>
+                                               <span class="n">UA_TwoStateVariableChangeCallback</span> <span class="n">callback</span><span class="p">,</span>
+                                               <span class="n">UA_TwoStateVariableCallbackType</span> <span class="n">callbackType</span><span class="p">);</span>
+
+<span class="cm">/* Delete a condition from the address space and the internal lists.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param conditionSource The NodeId of the node representation of the Condition Source</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_deleteCondition</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">condition</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS */</span><span class="cp"></span>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_updateCertificate</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
@@ -1934,24 +1696,26 @@ and ActiveState/Id occurs.
 <span class="cp">#ifdef UA_ENABLE_HISTORIZING</span>
 <span class="n">UA_Boolean</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_AccessControl_allowHistoryUpdateUpdateData</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                                     <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                                     <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                                                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
                                                      <span class="n">UA_PerformUpdateType</span> <span class="n">performInsertReplace</span><span class="p">,</span>
                                                      <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="n">UA_Boolean</span> <span class="n">UA_THREADSAFE</span>
 <span class="nf">UA_Server_AccessControl_allowHistoryUpdateDeleteRawModified</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
-                                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                                                            <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                                                             <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
                                                             <span class="n">UA_DateTime</span> <span class="n">startTimestamp</span><span class="p">,</span>
                                                             <span class="n">UA_DateTime</span> <span class="n">endTimestamp</span><span class="p">,</span>
                                                             <span class="kt">bool</span> <span class="n">isDeleteModified</span><span class="p">);</span>
-<span class="cp">#endif </span><span class="c1">// UA_ENABLE_HISTORIZING</span>
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_HISTORIZING */</span><span class="cp"></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="async-operations">
-<span id="id9"></span><h2>Async Operations<a class="headerlink" href="#async-operations" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Async Operations<a class="headerlink" href="#async-operations" title="Permalink to this headline">¶</a></h2>
 <p>Some operations (such as reading out a sensor that needs to warm up) can take
 quite some time. In order not to block the server during such an operation, it
 can be &#8220;outsourced&#8221; to a worker thread.</p>

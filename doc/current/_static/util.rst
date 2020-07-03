@@ -1,3 +1,19 @@
+Forward Declarations
+--------------------
+Opaque oointers used by the plugins.
+
+.. code-block:: c
+
+   
+   struct UA_Server;
+   typedef struct UA_Server UA_Server;
+   
+   struct UA_ServerConfig;
+   typedef struct UA_ServerConfig UA_ServerConfig;
+   
+   struct UA_Client;
+   typedef struct UA_Client UA_Client;
+   
 Endpoint URL Parser
 -------------------
 The endpoint URL parser is generally useful for the implementation of network
