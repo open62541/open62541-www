@@ -237,10 +237,19 @@ correctness of casting from ``UA_Node`` to a specific node type.
    
    /* Ordered tree structure for fast member check */
    typedef struct UA_ReferenceTarget {
-       ZIP_ENTRY(UA_ReferenceTarget) idTreeFields;
+       /* Zip-Tree for fast lookup */
+       ZIP_ENTRY(UA_ReferenceTarget) idTreeFields; /* Must be the first member */
        ZIP_ENTRY(UA_ReferenceTarget) nameTreeFields;
        UA_UInt32 targetIdHash;   /* Hash of the target's NodeId */
        UA_UInt32 targetNameHash; /* Hash of the target's BrowseName */
+   
+       /* Emulate the queue.h structure so we don't have to include it in the
+        * public API */
+       struct {
+           struct UA_ReferenceTarget *tqe_next;
+           struct UA_ReferenceTarget **tqe_prev;
+       } queuePointers;
+   
        UA_ExpandedNodeId targetId;
    } UA_ReferenceTarget;
    
@@ -256,8 +265,13 @@ correctness of casting from ``UA_Node`` to a specific node type.
    typedef struct {
        UA_Byte referenceTypeIndex;
        UA_Boolean isInverse;
-       size_t refTargetsSize;
-       UA_ReferenceTarget *refTargets;
+   
+       /* Emulate the queue.h structure so we don't have to include it in the
+        * public API */
+       struct {
+           struct UA_ReferenceTarget *tqh_first;
+           struct UA_ReferenceTarget **tqh_last;
+       } queueHead;
        UA_ReferenceTargetIdTree refTargetsIdTree;
        UA_ReferenceTargetNameTree refTargetsNameTree;
    } UA_NodeReferenceKind;

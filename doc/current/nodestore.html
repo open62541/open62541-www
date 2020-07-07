@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 1.1.0-92-gf4d053a3 documentation</title>
+  <title>Information Modelling &mdash; open62541 1.1.0-96-ga00cc473 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-92-gf4d053a3',
+              VERSION:'1.1.0-96-ga00cc473',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -410,10 +410,19 @@ not known or not important. The <tt class="docutils literal"><span class="pre">n
 correctness of casting from <tt class="docutils literal"><span class="pre">UA_Node</span></tt> to a specific node type.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Ordered tree structure for fast member check */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="p">{</span>
-    <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">idTreeFields</span><span class="p">;</span>
+    <span class="cm">/* Zip-Tree for fast lookup */</span>
+    <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">idTreeFields</span><span class="p">;</span> <span class="cm">/* Must be the first member */</span>
     <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">nameTreeFields</span><span class="p">;</span>
     <span class="n">UA_UInt32</span> <span class="n">targetIdHash</span><span class="p">;</span>   <span class="cm">/* Hash of the target&#39;s NodeId */</span>
     <span class="n">UA_UInt32</span> <span class="n">targetNameHash</span><span class="p">;</span> <span class="cm">/* Hash of the target&#39;s BrowseName */</span>
+
+    <span class="cm">/* Emulate the queue.h structure so we don&#39;t have to include it in the</span>
+<span class="cm">     * public API */</span>
+    <span class="k">struct</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="o">*</span><span class="n">tqe_next</span><span class="p">;</span>
+        <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="o">**</span><span class="n">tqe_prev</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">queuePointers</span><span class="p">;</span>
+
     <span class="n">UA_ExpandedNodeId</span> <span class="n">targetId</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ReferenceTarget</span><span class="p">;</span>
 
@@ -429,8 +438,13 @@ correctness of casting from <tt class="docutils literal"><span class="pre">UA_No
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_Byte</span> <span class="n">referenceTypeIndex</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">;</span>
-    <span class="kt">size_t</span> <span class="n">refTargetsSize</span><span class="p">;</span>
-    <span class="n">UA_ReferenceTarget</span> <span class="o">*</span><span class="n">refTargets</span><span class="p">;</span>
+
+    <span class="cm">/* Emulate the queue.h structure so we don&#39;t have to include it in the</span>
+<span class="cm">     * public API */</span>
+    <span class="k">struct</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="o">*</span><span class="n">tqh_first</span><span class="p">;</span>
+        <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="o">**</span><span class="n">tqh_last</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">queueHead</span><span class="p">;</span>
     <span class="n">UA_ReferenceTargetIdTree</span> <span class="n">refTargetsIdTree</span><span class="p">;</span>
     <span class="n">UA_ReferenceTargetNameTree</span> <span class="n">refTargetsNameTree</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_NodeReferenceKind</span><span class="p">;</span>
