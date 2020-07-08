@@ -1671,4 +1671,5 @@ are structured per OPC UA communication layer.
       UA_SessionStatistics ss;
    } UA_ServerStatistics;
    
-   UA_ServerStatistics UA_Server_getStatistics(UA_Server *server);
+   UA_ServerStatistics
+   UA_Server_getStatistics(UA_Server *server);
