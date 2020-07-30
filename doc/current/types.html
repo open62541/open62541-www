@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Types &mdash; open62541 1.1.0-114-gd9f8d54c documentation</title>
+  <title>Data Types &mdash; open62541 1.1.0-118-g691a7af9 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.0-114-gd9f8d54c',
+              VERSION:'1.1.0-118-g691a7af9',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -1276,9 +1276,6 @@ memory for the data type itself.</li>
 <p>Specializations, such as <tt class="docutils literal"><span class="pre">UA_Int32_new()</span></tt> are derived from the generic
 type operations as static inline functions.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-<span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
-    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">memberName</span><span class="p">;</span>
-<span class="cp">#endif</span>
     <span class="n">UA_UInt16</span> <span class="n">memberTypeIndex</span><span class="p">;</span>    <span class="cm">/* Index of the member in the array of data</span>
 <span class="cm">                                     types */</span>
     <span class="n">UA_Byte</span>   <span class="n">padding</span><span class="p">;</span>            <span class="cm">/* How much padding is there before this</span>
@@ -1293,6 +1290,9 @@ type operations as static inline functions.</p>
 <span class="cm">                                     namespace zero only.*/</span>
     <span class="n">UA_Boolean</span> <span class="n">isArray</span>       <span class="o">:</span> <span class="mi">1</span><span class="p">;</span> <span class="cm">/* The member is an array */</span>
     <span class="n">UA_Boolean</span> <span class="n">isOptional</span>    <span class="o">:</span> <span class="mi">1</span><span class="p">;</span> <span class="cm">/* The member is an optional field */</span>
+<span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
+    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">memberName</span><span class="p">;</span>       <span class="cm">/* Human-readable member name */</span>
+<span class="cp">#endif</span>
 <span class="p">}</span> <span class="n">UA_DataTypeMember</span><span class="p">;</span>
 
 <span class="cm">/* The DataType &quot;kind&quot; is an internal type classification. It is used to</span>
@@ -1333,10 +1333,9 @@ type operations as static inline functions.</p>
 <span class="p">}</span> <span class="n">UA_DataTypeKind</span><span class="p">;</span>
 
 <span class="k">struct</span> <span class="n">UA_DataType</span> <span class="p">{</span>
-<span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
-    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">typeName</span><span class="p">;</span>
-<span class="cp">#endif</span>
     <span class="n">UA_NodeId</span> <span class="n">typeId</span><span class="p">;</span>                <span class="cm">/* The nodeid of the type */</span>
+    <span class="n">UA_NodeId</span> <span class="n">binaryEncodingId</span><span class="p">;</span>      <span class="cm">/* NodeId of datatype when encoded as binary */</span>
+    <span class="c1">//UA_NodeId xmlEncodingId;       /* NodeId of datatype when encoded as XML */</span>
     <span class="n">UA_UInt16</span> <span class="n">memSize</span><span class="p">;</span>               <span class="cm">/* Size of the struct in memory */</span>
     <span class="n">UA_UInt16</span> <span class="n">typeIndex</span><span class="p">;</span>             <span class="cm">/* Index of the type in the datatypetable */</span>
     <span class="n">UA_UInt32</span> <span class="n">typeKind</span>         <span class="o">:</span> <span class="mi">6</span><span class="p">;</span>  <span class="cm">/* Dispatch index for the handling routines */</span>
@@ -1345,9 +1344,13 @@ type operations as static inline functions.</p>
     <span class="n">UA_UInt32</span> <span class="n">overlayable</span>      <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>  <span class="cm">/* The type has the identical memory layout</span>
 <span class="cm">                                      * in memory and on the binary stream. */</span>
     <span class="n">UA_UInt32</span> <span class="n">membersSize</span>      <span class="o">:</span> <span class="mi">8</span><span class="p">;</span>  <span class="cm">/* How many members does the type have? */</span>
-    <span class="n">UA_UInt32</span> <span class="n">binaryEncodingId</span><span class="p">;</span>      <span class="cm">/* NodeId of datatype when encoded as binary */</span>
-    <span class="c1">//UA_UInt16  xmlEncodingId;      /* NodeId of datatype when encoded as XML */</span>
     <span class="n">UA_DataTypeMember</span> <span class="o">*</span><span class="n">members</span><span class="p">;</span>
+
+    <span class="cm">/* The typename is only for debugging. Move last so the members pointers</span>
+<span class="cm">     * stays within the cacheline. */</span>
+<span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
+    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">typeName</span><span class="p">;</span>
+<span class="cp">#endif</span>
 <span class="p">};</span>
 
 <span class="cm">/* Test if the data type is a numeric builtin data type. This includes Boolean,</span>
@@ -1467,7 +1470,7 @@ server/client.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* The following is used to exclude type names in the definition of UA_DataType</span>
 <span class="cm"> * structures if the feature is disabled. */</span>
 <span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
-<span class="cp"># define UA_TYPENAME(name) name,</span>
+<span class="cp"># define UA_TYPENAME(name) , name</span>
 <span class="cp">#else</span>
 <span class="cp"># define UA_TYPENAME(name)</span>
 <span class="cp">#endif</span>
