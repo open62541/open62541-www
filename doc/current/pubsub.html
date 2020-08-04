@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.1.2-132-gabc16165 documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.1.2-134-gd6e77e68 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.2-132-gabc16165',
+              VERSION:'1.1.2-134-gd6e77e68',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -124,6 +124,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id1">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetwriter">DataSetWriter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subscribeddataset">SubscribedDataSet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
 </ul>
 </li>
@@ -200,7 +201,17 @@
 <span id="pubsub"></span><h1>Publish/Subscribe<a class="headerlink" href="#publish-subscribe" title="Permalink to this headline">¶</a></h1>
 <p>Work in progress!
 This part will be a new chapter later.</p>
-<p>TODO: write general PubSub introduction</p>
+<p>In PubSub the participating OPC UA Applications take their roles as Publishers and Subscribers. Publishers are the
+sources of data, while Subscribers consume that data. Communication in PubSub is message-based.
+Publishers send messages to a Message Oriented Middleware, without knowledge of what, if any, Subscribers there may be.
+Similarly, Subscribers express interest in specific types of data, and process messages that contain this data,
+without knowledge of what Publishers there are.</p>
+<p>Message Oriented Middleware is software or hardware infrastructure that supports sending and receiving messages between distributed systems.
+OPC UA PubSub supports two different Message Oriented Middleware variants, namely the broker-less form and broker-based form.
+A broker-less form is where the Message Oriented Middleware is the network infrastructure that is able to route datagram-based messages.
+Subscribers and Publishers use datagram protocols like UDP. In a broker-based form, the core component of the Message Oriented Middleware
+is a message Broker. Subscribers and Publishers use standard messaging protocols like AMQP or MQTT to communicate with the Broker.</p>
+<p>This makes PubSub suitable for applications where location independence and/or scalability are required.</p>
 <p>The Publish/Subscribe (PubSub) extension for OPC UA enables fast and efficient
 1:m communication. The PubSub extension is protocol agnostic and can be used
 with broker based protocols like MQTT and AMQP or brokerless implementations like UDP-Multicasting.</p>
@@ -210,7 +221,7 @@ with broker based protocols like MQTT and AMQP or brokerless implementations lik
 <li>Call the add[element] function and pass in the configuration.</li>
 <li>The add[element] function returns the unique nodeId of the internally created element.</li>
 </ol>
-<p>Take a look on the PubSub Tutorials for mor details about the API usage.:</p>
+<p>Take a look on the PubSub Tutorials for more details about the API usage.:</p>
 <div class="highlight-python"><div class="highlight"><pre>+-----------+
 | UA_Server |
 +-----------+
@@ -226,15 +237,31 @@ with broker based protocols like MQTT and AMQP or brokerless implementations lik
  |        |         +----------------+
  |        |              |
  |        |              |    +------------------+
- |        |              +----&gt; UA_DataSetWriter |  UA_WriterGroup_addDataSetWriter  +-+
- |        |                   +------------------+                                     |
- |        |                                                                            |
- |        |         +----------------+                                                 | r
- |        +---------&gt; UA_ReaderGroup |                                                 | e
- |                  +----------------+                                                 | f
- |                                                                                     |
- |       +---------------------------+                                                 |
- +-------&gt; UA_PubSubPublishedDataSet |  UA_Server_addPublishedDataSet                &lt;-+
+ |        |              +----&gt; UA_DataSetWriter |  UA_WriterGroup_addDataSetWriter     +-+
+ |        |                   +------------------+                                        |
+ |        |                                                                               |
+ |        |         +----------------+                                                    | r
+ |        +---------&gt; UA_ReaderGroup |    UA_PubSubConnection_addReaderGroup              | e
+ |                  +----------------+                                                    | f
+ |                       |                                                                |
+ |                       |    +------------------+                                        |
+ |                       +----&gt; UA_DataSetReader |  UA_ReaderGroup_addDataSetReader       |
+ |                            +------------------+                                        |
+ |                                 |                                                      |
+ |                                 |    +----------------------+                          |
+ |                                 +----&gt; UA_SubscribedDataSet |                          |
+ |                                      +----------------------+                          |
+ |                                           |                                            |
+ |                                           |    +----------------------------+          |
+ |                                           +----&gt; UA_TargetVariablesDataType |          |
+ |                                           |    +----------------------------+          |
+ |                                           |                                            |
+ |                                           |    +------------------------------------+  |
+ |                                           +----&gt; UA_SubscribedDataSetMirrorDataType |  |
+ |                                                +------------------------------------+  |
+ |                                                                                        |
+ |       +---------------------------+                                                    |
+ +-------&gt; UA_PubSubPublishedDataSet |  UA_Server_addPublishedDataSet                   &lt;-+
          +---------------------------+
                |
                |    +-----------------+
@@ -253,6 +280,18 @@ Deltaframe messages creation consumes some additional ressources and can be disa
 Compile the human-readable name of the StatusCodes into the binary. Disabled by default.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_INFORMATIONMODEL</strong></dt>
 <dd>Enable the information model representation of the PubSub configuration. For more details take a look at the following section <cite>PubSub Information Model Representation</cite>. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_CUSTOM_PUBLISH_HANDLING</strong></dt>
+<dd>Enable the OPC UA PubSub support with custom callback implementation for Publisher and Subscriber. The option will provide flexibility to use the user defined callback mechanism for sending
+packets in Publisher and receiving packets in the Subscriber. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_ETH_UADP</strong></dt>
+<dd>Enable the OPC UA Ethernet PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame without IP or UDP headers. This option will include Publish and Subscribe based on
+EtherType B62C. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_ETH_UADP_ETF</strong></dt>
+<dd>Enable ETF feature to allow the user to transmit packets at calculated transmission time with nanosecond precision, in addition to the PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame.
+Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_ETH_UADP_XDP</strong></dt>
+<dd>Enable XDP feature to allow the user to receive packets using the eXpress Data Path (XDP), which bypasses TCP/IP layers and transfers the frames from hardware/netdev to user application thereby reducing the receiving time,
+in addition to the PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame. Disabled by default.</dd>
 </dl>
 </div>
 <div class="section" id="pubsub-information-model-representation">
@@ -616,10 +655,11 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
 </div>
 <div class="section" id="datasetreader">
 <h2>DataSetReader<a class="headerlink" href="#datasetreader" title="Permalink to this headline">¶</a></h2>
-<p>DataSetReader can receive NetworkMessages with the DataSet
+<p>DataSetReader can receive NetworkMessages with the DataSetMessage
 of interest sent by the Publisher. DataSetReaders represent
 the configuration necessary to receive and process DataSetMessages
-on the Subscriber side</p>
+on the Subscriber side. DataSetReader must be linked with a
+SubscribedDataSet and be contained within a ReaderGroup.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Parameters for PubSubSecurity */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_Int32</span> <span class="n">securityMode</span><span class="p">;</span>          <span class="cm">/* placeholder datatype &#39;MessageSecurityMode&#39; */</span>
@@ -652,10 +692,20 @@ on the Subscriber side</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_DataSetReader_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
                                  <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
-
-<span class="cm">/* Return Status Code after creating TargetVariables in Subscriber AddressSpace</span>
-<span class="cm"> * TargetVariables define a list of variable mappings between received DataSet fields</span>
-<span class="cm"> * and the TargetVariables in the Subscriber AddressSpace */</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subscribeddataset">
+<h2>SubscribedDataSet<a class="headerlink" href="#subscribeddataset" title="Permalink to this headline">¶</a></h2>
+<p>SubscribedDataSet describes the processing of the received DataSet. SubscribedDataSet defines which field
+in the DataSet is mapped to which Variable in the OPC UA Application. SubscribedDataSet has two sub-types
+called the TargetVariablesType and SubscribedDataSetMirrorType.
+SubscribedDataSetMirrorType is currently not supported. SubscribedDataSet is set to TargetVariablesType
+and then the list of target Variables are created in the Subscriber AddressSpace.
+TargetVariables are a list of variables that are to be added in the Subscriber AddressSpace.
+It defines a list of Variable mappings between received DataSet fields and added Variables
+in the Subscriber AddressSpace.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Return Status Code after creating TargetVariables in Subscriber AddressSpace */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_DataSetReader_createTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
                                              <span class="n">UA_TargetVariablesDataType</span><span class="o">*</span> <span class="n">targetVariables</span><span class="p">);</span>
@@ -669,8 +719,15 @@ on the Subscriber side</p>
 </div>
 <div class="section" id="readergroup">
 <h2>ReaderGroup<a class="headerlink" href="#readergroup" title="Permalink to this headline">¶</a></h2>
-<p>All ReaderGroups are created within a PubSubConnection and automatically
-deleted if the connection is removed.</p>
+<p>ReaderGroup is used to group a list of DataSetReaders. All ReaderGroups are
+created within a PubSubConnection and automatically deleted if the connection
+is removed. All network message related filters are only available in the DataSetReader.</p>
+<p>The RT-levels go along with different requirements. The below listed levels can be configured
+for a ReaderGroup.
+UA_PUBSUB_RT_NONE &#8211;&gt; No RT applied to this level
+PUBSUB_CONFIG_FASTPATH_FIXED_OFFSETS &#8211;&gt; Extends PubSub RT functionality and implements fast path
+message decoding in the Subscriber. Uses a buffered network message and only decodes the necessary
+offsets stored in an offset buffer.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* ReaderGroup configuration */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
