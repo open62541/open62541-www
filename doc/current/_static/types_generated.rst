@@ -4,7 +4,7 @@ binary encoding, ...).
 
 .. code-block:: c
 
-   #define UA_TYPES_COUNT 187
+   #define UA_TYPES_COUNT 190
    extern const UA_DataType UA_TYPES[UA_TYPES_COUNT];
    
 Boolean
@@ -1067,6 +1067,19 @@ SubscriptionAcknowledgement
    
    #define UA_TYPES_SUBSCRIPTIONACKNOWLEDGEMENT 82
    
+TransferResult
+^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_StatusCode statusCode;
+       size_t availableSequenceNumbersSize;
+       UA_UInt32 *availableSequenceNumbers;
+   } UA_TransferResult;
+   
+   #define UA_TYPES_TRANSFERRESULT 83
+   
 CreateMonitoredItemsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1080,7 +1093,7 @@ CreateMonitoredItemsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_CreateMonitoredItemsResponse;
    
-   #define UA_TYPES_CREATEMONITOREDITEMSRESPONSE 83
+   #define UA_TYPES_CREATEMONITOREDITEMSRESPONSE 84
    
 DeleteReferencesItem
 ^^^^^^^^^^^^^^^^^^^^
@@ -1096,7 +1109,7 @@ A request to delete a node from the server address space.
        UA_Boolean deleteBidirectional;
    } UA_DeleteReferencesItem;
    
-   #define UA_TYPES_DELETEREFERENCESITEM 84
+   #define UA_TYPES_DELETEREFERENCESITEM 85
    
 WriteValue
 ^^^^^^^^^^
@@ -1110,7 +1123,7 @@ WriteValue
        UA_DataValue value;
    } UA_WriteValue;
    
-   #define UA_TYPES_WRITEVALUE 85
+   #define UA_TYPES_WRITEVALUE 86
    
 DataTypeAttributes
 ^^^^^^^^^^^^^^^^^^
@@ -1127,7 +1140,22 @@ The attributes for a data type node.
        UA_Boolean isAbstract;
    } UA_DataTypeAttributes;
    
-   #define UA_TYPES_DATATYPEATTRIBUTES 86
+   #define UA_TYPES_DATATYPEATTRIBUTES 87
+   
+TransferSubscriptionsResponse
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_ResponseHeader responseHeader;
+       size_t resultsSize;
+       UA_TransferResult *results;
+       size_t diagnosticInfosSize;
+       UA_DiagnosticInfo *diagnosticInfos;
+   } UA_TransferSubscriptionsResponse;
+   
+   #define UA_TYPES_TRANSFERSUBSCRIPTIONSRESPONSE 88
    
 AddReferencesResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1143,7 +1171,7 @@ Adds one or more references to the server address space.
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_AddReferencesResponse;
    
-   #define UA_TYPES_ADDREFERENCESRESPONSE 87
+   #define UA_TYPES_ADDREFERENCESRESPONSE 89
    
 DeadbandType
 ^^^^^^^^^^^^
@@ -1158,7 +1186,7 @@ DeadbandType
    } UA_DeadbandType;
    UA_STATIC_ASSERT(sizeof(UA_DeadbandType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_DEADBANDTYPE 88
+   #define UA_TYPES_DEADBANDTYPE 90
    
 DataChangeTrigger
 ^^^^^^^^^^^^^^^^^
@@ -1173,7 +1201,7 @@ DataChangeTrigger
    } UA_DataChangeTrigger;
    UA_STATIC_ASSERT(sizeof(UA_DataChangeTrigger) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_DATACHANGETRIGGER 89
+   #define UA_TYPES_DATACHANGETRIGGER 91
    
 BuildInfo
 ^^^^^^^^^
@@ -1189,7 +1217,7 @@ BuildInfo
        UA_DateTime buildDate;
    } UA_BuildInfo;
    
-   #define UA_TYPES_BUILDINFO 90
+   #define UA_TYPES_BUILDINFO 92
    
 FilterOperand
 ^^^^^^^^^^^^^
@@ -1198,7 +1226,7 @@ FilterOperand
 
    typedef void * UA_FilterOperand;
    
-   #define UA_TYPES_FILTEROPERAND 91
+   #define UA_TYPES_FILTEROPERAND 93
    
 MonitoringParameters
 ^^^^^^^^^^^^^^^^^^^^
@@ -1213,7 +1241,7 @@ MonitoringParameters
        UA_Boolean discardOldest;
    } UA_MonitoringParameters;
    
-   #define UA_TYPES_MONITORINGPARAMETERS 92
+   #define UA_TYPES_MONITORINGPARAMETERS 94
    
 DoubleComplexNumberType
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1225,7 +1253,7 @@ DoubleComplexNumberType
        UA_Double imaginary;
    } UA_DoubleComplexNumberType;
    
-   #define UA_TYPES_DOUBLECOMPLEXNUMBERTYPE 93
+   #define UA_TYPES_DOUBLECOMPLEXNUMBERTYPE 95
    
 DeleteNodesItem
 ^^^^^^^^^^^^^^^
@@ -1238,7 +1266,7 @@ A request to delete a node to the server address space.
        UA_Boolean deleteTargetReferences;
    } UA_DeleteNodesItem;
    
-   #define UA_TYPES_DELETENODESITEM 94
+   #define UA_TYPES_DELETENODESITEM 96
    
 ReadValueId
 ^^^^^^^^^^^
@@ -1252,7 +1280,7 @@ ReadValueId
        UA_QualifiedName dataEncoding;
    } UA_ReadValueId;
    
-   #define UA_TYPES_READVALUEID 95
+   #define UA_TYPES_READVALUEID 97
    
 CallRequest
 ^^^^^^^^^^^
@@ -1265,7 +1293,7 @@ CallRequest
        UA_CallMethodRequest *methodsToCall;
    } UA_CallRequest;
    
-   #define UA_TYPES_CALLREQUEST 96
+   #define UA_TYPES_CALLREQUEST 98
    
 RelativePath
 ^^^^^^^^^^^^
@@ -1278,7 +1306,7 @@ A relative path constructed from reference types and browse names.
        UA_RelativePathElement *elements;
    } UA_RelativePath;
    
-   #define UA_TYPES_RELATIVEPATH 97
+   #define UA_TYPES_RELATIVEPATH 99
    
 DeleteNodesRequest
 ^^^^^^^^^^^^^^^^^^
@@ -1292,7 +1320,7 @@ Delete one or more nodes from the server address space.
        UA_DeleteNodesItem *nodesToDelete;
    } UA_DeleteNodesRequest;
    
-   #define UA_TYPES_DELETENODESREQUEST 98
+   #define UA_TYPES_DELETENODESREQUEST 100
    
 MonitoredItemModifyRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1304,7 +1332,7 @@ MonitoredItemModifyRequest
        UA_MonitoringParameters requestedParameters;
    } UA_MonitoredItemModifyRequest;
    
-   #define UA_TYPES_MONITOREDITEMMODIFYREQUEST 99
+   #define UA_TYPES_MONITOREDITEMMODIFYREQUEST 101
    
 UserTokenType
 ^^^^^^^^^^^^^
@@ -1321,7 +1349,7 @@ The possible user token types.
    } UA_UserTokenType;
    UA_STATIC_ASSERT(sizeof(UA_UserTokenType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_USERTOKENTYPE 100
+   #define UA_TYPES_USERTOKENTYPE 102
    
 AggregateConfiguration
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1336,7 +1364,7 @@ AggregateConfiguration
        UA_Boolean useSlopedExtrapolation;
    } UA_AggregateConfiguration;
    
-   #define UA_TYPES_AGGREGATECONFIGURATION 101
+   #define UA_TYPES_AGGREGATECONFIGURATION 103
    
 LocaleId
 ^^^^^^^^
@@ -1346,7 +1374,7 @@ An identifier for a user locale.
 
    typedef UA_String UA_LocaleId;
    
-   #define UA_TYPES_LOCALEID 102
+   #define UA_TYPES_LOCALEID 104
    
 UnregisterNodesResponse
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1358,7 +1386,7 @@ Unregisters one or more previously registered nodes.
        UA_ResponseHeader responseHeader;
    } UA_UnregisterNodesResponse;
    
-   #define UA_TYPES_UNREGISTERNODESRESPONSE 103
+   #define UA_TYPES_UNREGISTERNODESRESPONSE 105
    
 ContentFilterResult
 ^^^^^^^^^^^^^^^^^^^
@@ -1372,7 +1400,7 @@ ContentFilterResult
        UA_DiagnosticInfo *elementDiagnosticInfos;
    } UA_ContentFilterResult;
    
-   #define UA_TYPES_CONTENTFILTERRESULT 104
+   #define UA_TYPES_CONTENTFILTERRESULT 106
    
 UserTokenPolicy
 ^^^^^^^^^^^^^^^
@@ -1388,7 +1416,7 @@ Describes a user token that can be used with a server.
        UA_String securityPolicyUri;
    } UA_UserTokenPolicy;
    
-   #define UA_TYPES_USERTOKENPOLICY 105
+   #define UA_TYPES_USERTOKENPOLICY 107
    
 DeleteMonitoredItemsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1402,7 +1430,7 @@ DeleteMonitoredItemsRequest
        UA_UInt32 *monitoredItemIds;
    } UA_DeleteMonitoredItemsRequest;
    
-   #define UA_TYPES_DELETEMONITOREDITEMSREQUEST 106
+   #define UA_TYPES_DELETEMONITOREDITEMSREQUEST 108
    
 SetMonitoringModeRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1417,7 +1445,7 @@ SetMonitoringModeRequest
        UA_UInt32 *monitoredItemIds;
    } UA_SetMonitoringModeRequest;
    
-   #define UA_TYPES_SETMONITORINGMODEREQUEST 107
+   #define UA_TYPES_SETMONITORINGMODEREQUEST 109
    
 Duration
 ^^^^^^^^
@@ -1427,7 +1455,7 @@ A period of time measured in milliseconds.
 
    typedef UA_Double UA_Duration;
    
-   #define UA_TYPES_DURATION 108
+   #define UA_TYPES_DURATION 110
    
 ReferenceTypeAttributes
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1446,7 +1474,7 @@ The attributes for a reference type node.
        UA_LocalizedText inverseName;
    } UA_ReferenceTypeAttributes;
    
-   #define UA_TYPES_REFERENCETYPEATTRIBUTES 109
+   #define UA_TYPES_REFERENCETYPEATTRIBUTES 111
    
 GetEndpointsRequest
 ^^^^^^^^^^^^^^^^^^^
@@ -1463,7 +1491,7 @@ Gets the endpoints used by the server.
        UA_String *profileUris;
    } UA_GetEndpointsRequest;
    
-   #define UA_TYPES_GETENDPOINTSREQUEST 110
+   #define UA_TYPES_GETENDPOINTSREQUEST 112
    
 CloseSecureChannelResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1475,7 +1503,7 @@ Closes a secure channel.
        UA_ResponseHeader responseHeader;
    } UA_CloseSecureChannelResponse;
    
-   #define UA_TYPES_CLOSESECURECHANNELRESPONSE 111
+   #define UA_TYPES_CLOSESECURECHANNELRESPONSE 113
    
 ViewDescription
 ^^^^^^^^^^^^^^^
@@ -1489,7 +1517,7 @@ The view to browse.
        UA_UInt32 viewVersion;
    } UA_ViewDescription;
    
-   #define UA_TYPES_VIEWDESCRIPTION 112
+   #define UA_TYPES_VIEWDESCRIPTION 114
    
 SetPublishingModeResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1504,7 +1532,7 @@ SetPublishingModeResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_SetPublishingModeResponse;
    
-   #define UA_TYPES_SETPUBLISHINGMODERESPONSE 113
+   #define UA_TYPES_SETPUBLISHINGMODERESPONSE 115
    
 StatusChangeNotification
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1516,7 +1544,7 @@ StatusChangeNotification
        UA_DiagnosticInfo diagnosticInfo;
    } UA_StatusChangeNotification;
    
-   #define UA_TYPES_STATUSCHANGENOTIFICATION 114
+   #define UA_TYPES_STATUSCHANGENOTIFICATION 116
    
 StructureField
 ^^^^^^^^^^^^^^
@@ -1534,7 +1562,7 @@ StructureField
        UA_Boolean isOptional;
    } UA_StructureField;
    
-   #define UA_TYPES_STRUCTUREFIELD 115
+   #define UA_TYPES_STRUCTUREFIELD 117
    
 NodeAttributesMask
 ^^^^^^^^^^^^^^^^^^
@@ -1582,7 +1610,7 @@ The bits used to specify default attributes for a new node.
    } UA_NodeAttributesMask;
    UA_STATIC_ASSERT(sizeof(UA_NodeAttributesMask) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_NODEATTRIBUTESMASK 116
+   #define UA_TYPES_NODEATTRIBUTESMASK 118
    
 EventFilterResult
 ^^^^^^^^^^^^^^^^^
@@ -1597,7 +1625,7 @@ EventFilterResult
        UA_ContentFilterResult whereClauseResult;
    } UA_EventFilterResult;
    
-   #define UA_TYPES_EVENTFILTERRESULT 117
+   #define UA_TYPES_EVENTFILTERRESULT 119
    
 MonitoredItemCreateRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1610,7 +1638,7 @@ MonitoredItemCreateRequest
        UA_MonitoringParameters requestedParameters;
    } UA_MonitoredItemCreateRequest;
    
-   #define UA_TYPES_MONITOREDITEMCREATEREQUEST 118
+   #define UA_TYPES_MONITOREDITEMCREATEREQUEST 120
    
 ComplexNumberType
 ^^^^^^^^^^^^^^^^^
@@ -1622,7 +1650,7 @@ ComplexNumberType
        UA_Float imaginary;
    } UA_ComplexNumberType;
    
-   #define UA_TYPES_COMPLEXNUMBERTYPE 119
+   #define UA_TYPES_COMPLEXNUMBERTYPE 121
    
 Range
 ^^^^^
@@ -1634,7 +1662,7 @@ Range
        UA_Double high;
    } UA_Range;
    
-   #define UA_TYPES_RANGE 120
+   #define UA_TYPES_RANGE 122
    
 DataChangeNotification
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1648,7 +1676,7 @@ DataChangeNotification
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DataChangeNotification;
    
-   #define UA_TYPES_DATACHANGENOTIFICATION 121
+   #define UA_TYPES_DATACHANGENOTIFICATION 123
    
 Argument
 ^^^^^^^^
@@ -1665,7 +1693,21 @@ An argument for a method.
        UA_LocalizedText description;
    } UA_Argument;
    
-   #define UA_TYPES_ARGUMENT 122
+   #define UA_TYPES_ARGUMENT 124
+   
+TransferSubscriptionsRequest
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_RequestHeader requestHeader;
+       size_t subscriptionIdsSize;
+       UA_UInt32 *subscriptionIds;
+       UA_Boolean sendInitialValues;
+   } UA_TransferSubscriptionsRequest;
+   
+   #define UA_TYPES_TRANSFERSUBSCRIPTIONSREQUEST 125
    
 ChannelSecurityToken
 ^^^^^^^^^^^^^^^^^^^^
@@ -1680,7 +1722,7 @@ The token that identifies a set of keys for an active secure channel.
        UA_UInt32 revisedLifetime;
    } UA_ChannelSecurityToken;
    
-   #define UA_TYPES_CHANNELSECURITYTOKEN 123
+   #define UA_TYPES_CHANNELSECURITYTOKEN 126
    
 ServerState
 ^^^^^^^^^^^
@@ -1700,7 +1742,7 @@ ServerState
    } UA_ServerState;
    UA_STATIC_ASSERT(sizeof(UA_ServerState) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_SERVERSTATE 124
+   #define UA_TYPES_SERVERSTATE 127
    
 EventNotificationList
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1712,7 +1754,7 @@ EventNotificationList
        UA_EventFieldList *events;
    } UA_EventNotificationList;
    
-   #define UA_TYPES_EVENTNOTIFICATIONLIST 125
+   #define UA_TYPES_EVENTNOTIFICATIONLIST 128
    
 AnonymousIdentityToken
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1724,7 +1766,7 @@ A token representing an anonymous user.
        UA_String policyId;
    } UA_AnonymousIdentityToken;
    
-   #define UA_TYPES_ANONYMOUSIDENTITYTOKEN 126
+   #define UA_TYPES_ANONYMOUSIDENTITYTOKEN 129
    
 FilterOperator
 ^^^^^^^^^^^^^^
@@ -1754,7 +1796,7 @@ FilterOperator
    } UA_FilterOperator;
    UA_STATIC_ASSERT(sizeof(UA_FilterOperator) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_FILTEROPERATOR 127
+   #define UA_TYPES_FILTEROPERATOR 130
    
 AggregateFilter
 ^^^^^^^^^^^^^^^
@@ -1768,7 +1810,7 @@ AggregateFilter
        UA_AggregateConfiguration aggregateConfiguration;
    } UA_AggregateFilter;
    
-   #define UA_TYPES_AGGREGATEFILTER 128
+   #define UA_TYPES_AGGREGATEFILTER 131
    
 RepublishResponse
 ^^^^^^^^^^^^^^^^^
@@ -1780,7 +1822,7 @@ RepublishResponse
        UA_NotificationMessage notificationMessage;
    } UA_RepublishResponse;
    
-   #define UA_TYPES_REPUBLISHRESPONSE 129
+   #define UA_TYPES_REPUBLISHRESPONSE 132
    
 DeleteSubscriptionsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1795,7 +1837,7 @@ DeleteSubscriptionsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DeleteSubscriptionsResponse;
    
-   #define UA_TYPES_DELETESUBSCRIPTIONSRESPONSE 130
+   #define UA_TYPES_DELETESUBSCRIPTIONSRESPONSE 133
    
 RegisterNodesRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -1809,7 +1851,7 @@ Registers one or more nodes for repeated use within a session.
        UA_NodeId *nodesToRegister;
    } UA_RegisterNodesRequest;
    
-   #define UA_TYPES_REGISTERNODESREQUEST 131
+   #define UA_TYPES_REGISTERNODESREQUEST 134
    
 StructureDefinition
 ^^^^^^^^^^^^^^^^^^^
@@ -1824,7 +1866,7 @@ StructureDefinition
        UA_StructureField *fields;
    } UA_StructureDefinition;
    
-   #define UA_TYPES_STRUCTUREDEFINITION 132
+   #define UA_TYPES_STRUCTUREDEFINITION 135
    
 MethodAttributes
 ^^^^^^^^^^^^^^^^
@@ -1842,7 +1884,7 @@ The attributes for a method node.
        UA_Boolean userExecutable;
    } UA_MethodAttributes;
    
-   #define UA_TYPES_METHODATTRIBUTES 133
+   #define UA_TYPES_METHODATTRIBUTES 136
    
 UserNameIdentityToken
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1857,7 +1899,7 @@ A token representing a user identified by a user name and password.
        UA_String encryptionAlgorithm;
    } UA_UserNameIdentityToken;
    
-   #define UA_TYPES_USERNAMEIDENTITYTOKEN 134
+   #define UA_TYPES_USERNAMEIDENTITYTOKEN 137
    
 UnregisterNodesRequest
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1871,7 +1913,7 @@ Unregisters one or more previously registered nodes.
        UA_NodeId *nodesToUnregister;
    } UA_UnregisterNodesRequest;
    
-   #define UA_TYPES_UNREGISTERNODESREQUEST 135
+   #define UA_TYPES_UNREGISTERNODESREQUEST 138
    
 OpenSecureChannelResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1886,7 +1928,7 @@ Creates a secure channel with a server.
        UA_ByteString serverNonce;
    } UA_OpenSecureChannelResponse;
    
-   #define UA_TYPES_OPENSECURECHANNELRESPONSE 136
+   #define UA_TYPES_OPENSECURECHANNELRESPONSE 139
    
 SetTriggeringResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1905,7 +1947,7 @@ SetTriggeringResponse
        UA_DiagnosticInfo *removeDiagnosticInfos;
    } UA_SetTriggeringResponse;
    
-   #define UA_TYPES_SETTRIGGERINGRESPONSE 137
+   #define UA_TYPES_SETTRIGGERINGRESPONSE 140
    
 SimpleAttributeOperand
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1920,7 +1962,7 @@ SimpleAttributeOperand
        UA_String indexRange;
    } UA_SimpleAttributeOperand;
    
-   #define UA_TYPES_SIMPLEATTRIBUTEOPERAND 138
+   #define UA_TYPES_SIMPLEATTRIBUTEOPERAND 141
    
 RepublishRequest
 ^^^^^^^^^^^^^^^^
@@ -1933,7 +1975,7 @@ RepublishRequest
        UA_UInt32 retransmitSequenceNumber;
    } UA_RepublishRequest;
    
-   #define UA_TYPES_REPUBLISHREQUEST 139
+   #define UA_TYPES_REPUBLISHREQUEST 142
    
 RegisterNodesResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1947,7 +1989,7 @@ Registers one or more nodes for repeated use within a session.
        UA_NodeId *registeredNodeIds;
    } UA_RegisterNodesResponse;
    
-   #define UA_TYPES_REGISTERNODESRESPONSE 140
+   #define UA_TYPES_REGISTERNODESRESPONSE 143
    
 ModifyMonitoredItemsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1962,7 +2004,7 @@ ModifyMonitoredItemsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_ModifyMonitoredItemsResponse;
    
-   #define UA_TYPES_MODIFYMONITOREDITEMSRESPONSE 141
+   #define UA_TYPES_MODIFYMONITOREDITEMSRESPONSE 144
    
 DeleteSubscriptionsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1975,7 +2017,7 @@ DeleteSubscriptionsRequest
        UA_UInt32 *subscriptionIds;
    } UA_DeleteSubscriptionsRequest;
    
-   #define UA_TYPES_DELETESUBSCRIPTIONSREQUEST 142
+   #define UA_TYPES_DELETESUBSCRIPTIONSREQUEST 145
    
 RedundancySupport
 ^^^^^^^^^^^^^^^^^
@@ -1993,7 +2035,7 @@ RedundancySupport
    } UA_RedundancySupport;
    UA_STATIC_ASSERT(sizeof(UA_RedundancySupport) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_REDUNDANCYSUPPORT 143
+   #define UA_TYPES_REDUNDANCYSUPPORT 146
    
 BrowsePath
 ^^^^^^^^^^
@@ -2006,7 +2048,7 @@ A request to translate a path into a node id.
        UA_RelativePath relativePath;
    } UA_BrowsePath;
    
-   #define UA_TYPES_BROWSEPATH 144
+   #define UA_TYPES_BROWSEPATH 147
    
 ObjectAttributes
 ^^^^^^^^^^^^^^^^
@@ -2023,7 +2065,7 @@ The attributes for an object node.
        UA_Byte eventNotifier;
    } UA_ObjectAttributes;
    
-   #define UA_TYPES_OBJECTATTRIBUTES 145
+   #define UA_TYPES_OBJECTATTRIBUTES 148
    
 PublishRequest
 ^^^^^^^^^^^^^^
@@ -2036,7 +2078,7 @@ PublishRequest
        UA_SubscriptionAcknowledgement *subscriptionAcknowledgements;
    } UA_PublishRequest;
    
-   #define UA_TYPES_PUBLISHREQUEST 146
+   #define UA_TYPES_PUBLISHREQUEST 149
    
 FindServersRequest
 ^^^^^^^^^^^^^^^^^^
@@ -2053,7 +2095,7 @@ Finds the servers known to the discovery server.
        UA_String *serverUris;
    } UA_FindServersRequest;
    
-   #define UA_TYPES_FINDSERVERSREQUEST 147
+   #define UA_TYPES_FINDSERVERSREQUEST 150
    
 ReferenceDescription
 ^^^^^^^^^^^^^^^^^^^^
@@ -2071,7 +2113,7 @@ The description of a reference.
        UA_ExpandedNodeId typeDefinition;
    } UA_ReferenceDescription;
    
-   #define UA_TYPES_REFERENCEDESCRIPTION 148
+   #define UA_TYPES_REFERENCEDESCRIPTION 151
    
 CreateSubscriptionRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2088,7 +2130,7 @@ CreateSubscriptionRequest
        UA_Byte priority;
    } UA_CreateSubscriptionRequest;
    
-   #define UA_TYPES_CREATESUBSCRIPTIONREQUEST 149
+   #define UA_TYPES_CREATESUBSCRIPTIONREQUEST 152
    
 CallResponse
 ^^^^^^^^^^^^
@@ -2103,7 +2145,7 @@ CallResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_CallResponse;
    
-   #define UA_TYPES_CALLRESPONSE 150
+   #define UA_TYPES_CALLRESPONSE 153
    
 DeleteNodesResponse
 ^^^^^^^^^^^^^^^^^^^
@@ -2119,7 +2161,7 @@ Delete one or more nodes from the server address space.
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DeleteNodesResponse;
    
-   #define UA_TYPES_DELETENODESRESPONSE 151
+   #define UA_TYPES_DELETENODESRESPONSE 154
    
 ModifyMonitoredItemsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2134,7 +2176,7 @@ ModifyMonitoredItemsRequest
        UA_MonitoredItemModifyRequest *itemsToModify;
    } UA_ModifyMonitoredItemsRequest;
    
-   #define UA_TYPES_MODIFYMONITOREDITEMSREQUEST 152
+   #define UA_TYPES_MODIFYMONITOREDITEMSREQUEST 155
    
 ServiceFault
 ^^^^^^^^^^^^
@@ -2146,7 +2188,7 @@ The response returned by all services when there is a service level error.
        UA_ResponseHeader responseHeader;
    } UA_ServiceFault;
    
-   #define UA_TYPES_SERVICEFAULT 153
+   #define UA_TYPES_SERVICEFAULT 156
    
 PublishResponse
 ^^^^^^^^^^^^^^^
@@ -2166,7 +2208,7 @@ PublishResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_PublishResponse;
    
-   #define UA_TYPES_PUBLISHRESPONSE 154
+   #define UA_TYPES_PUBLISHRESPONSE 157
    
 CreateMonitoredItemsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2181,7 +2223,7 @@ CreateMonitoredItemsRequest
        UA_MonitoredItemCreateRequest *itemsToCreate;
    } UA_CreateMonitoredItemsRequest;
    
-   #define UA_TYPES_CREATEMONITOREDITEMSREQUEST 155
+   #define UA_TYPES_CREATEMONITOREDITEMSREQUEST 158
    
 OpenSecureChannelRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2198,7 +2240,7 @@ Creates a secure channel with a server.
        UA_UInt32 requestedLifetime;
    } UA_OpenSecureChannelRequest;
    
-   #define UA_TYPES_OPENSECURECHANNELREQUEST 156
+   #define UA_TYPES_OPENSECURECHANNELREQUEST 159
    
 CloseSessionRequest
 ^^^^^^^^^^^^^^^^^^^
@@ -2211,7 +2253,7 @@ Closes a session with the server.
        UA_Boolean deleteSubscriptions;
    } UA_CloseSessionRequest;
    
-   #define UA_TYPES_CLOSESESSIONREQUEST 157
+   #define UA_TYPES_CLOSESESSIONREQUEST 160
    
 SetTriggeringRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -2228,7 +2270,7 @@ SetTriggeringRequest
        UA_UInt32 *linksToRemove;
    } UA_SetTriggeringRequest;
    
-   #define UA_TYPES_SETTRIGGERINGREQUEST 158
+   #define UA_TYPES_SETTRIGGERINGREQUEST 161
    
 BrowseResult
 ^^^^^^^^^^^^
@@ -2243,7 +2285,7 @@ The result of a browse operation.
        UA_ReferenceDescription *references;
    } UA_BrowseResult;
    
-   #define UA_TYPES_BROWSERESULT 159
+   #define UA_TYPES_BROWSERESULT 162
    
 AddReferencesRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -2257,7 +2299,7 @@ Adds one or more references to the server address space.
        UA_AddReferencesItem *referencesToAdd;
    } UA_AddReferencesRequest;
    
-   #define UA_TYPES_ADDREFERENCESREQUEST 160
+   #define UA_TYPES_ADDREFERENCESREQUEST 163
    
 AddNodesItem
 ^^^^^^^^^^^^
@@ -2275,7 +2317,7 @@ A request to add a node to the server address space.
        UA_ExpandedNodeId typeDefinition;
    } UA_AddNodesItem;
    
-   #define UA_TYPES_ADDNODESITEM 161
+   #define UA_TYPES_ADDNODESITEM 164
    
 ServerStatusDataType
 ^^^^^^^^^^^^^^^^^^^^
@@ -2291,7 +2333,7 @@ ServerStatusDataType
        UA_LocalizedText shutdownReason;
    } UA_ServerStatusDataType;
    
-   #define UA_TYPES_SERVERSTATUSDATATYPE 162
+   #define UA_TYPES_SERVERSTATUSDATATYPE 165
    
 BrowseNextResponse
 ^^^^^^^^^^^^^^^^^^
@@ -2307,7 +2349,7 @@ Continues one or more browse operations.
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_BrowseNextResponse;
    
-   #define UA_TYPES_BROWSENEXTRESPONSE 163
+   #define UA_TYPES_BROWSENEXTRESPONSE 166
    
 AxisInformation
 ^^^^^^^^^^^^^^^
@@ -2323,7 +2365,7 @@ AxisInformation
        UA_Double *axisSteps;
    } UA_AxisInformation;
    
-   #define UA_TYPES_AXISINFORMATION 164
+   #define UA_TYPES_AXISINFORMATION 167
    
 ApplicationDescription
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -2342,7 +2384,7 @@ Describes an application and how to find it.
        UA_String *discoveryUrls;
    } UA_ApplicationDescription;
    
-   #define UA_TYPES_APPLICATIONDESCRIPTION 165
+   #define UA_TYPES_APPLICATIONDESCRIPTION 168
    
 ReadRequest
 ^^^^^^^^^^^
@@ -2357,7 +2399,7 @@ ReadRequest
        UA_ReadValueId *nodesToRead;
    } UA_ReadRequest;
    
-   #define UA_TYPES_READREQUEST 166
+   #define UA_TYPES_READREQUEST 169
    
 ActivateSessionRequest
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -2376,7 +2418,7 @@ Activates a session with the server.
        UA_SignatureData userTokenSignature;
    } UA_ActivateSessionRequest;
    
-   #define UA_TYPES_ACTIVATESESSIONREQUEST 167
+   #define UA_TYPES_ACTIVATESESSIONREQUEST 170
    
 BrowsePathResult
 ^^^^^^^^^^^^^^^^
@@ -2390,7 +2432,7 @@ The result of a translate opearation.
        UA_BrowsePathTarget *targets;
    } UA_BrowsePathResult;
    
-   #define UA_TYPES_BROWSEPATHRESULT 168
+   #define UA_TYPES_BROWSEPATHRESULT 171
    
 AddNodesRequest
 ^^^^^^^^^^^^^^^
@@ -2404,7 +2446,7 @@ Adds one or more nodes to the server address space.
        UA_AddNodesItem *nodesToAdd;
    } UA_AddNodesRequest;
    
-   #define UA_TYPES_ADDNODESREQUEST 169
+   #define UA_TYPES_ADDNODESREQUEST 172
    
 BrowseRequest
 ^^^^^^^^^^^^^
@@ -2420,7 +2462,7 @@ Browse the references for one or more nodes from the server address space.
        UA_BrowseDescription *nodesToBrowse;
    } UA_BrowseRequest;
    
-   #define UA_TYPES_BROWSEREQUEST 170
+   #define UA_TYPES_BROWSEREQUEST 173
    
 WriteRequest
 ^^^^^^^^^^^^
@@ -2433,7 +2475,7 @@ WriteRequest
        UA_WriteValue *nodesToWrite;
    } UA_WriteRequest;
    
-   #define UA_TYPES_WRITEREQUEST 171
+   #define UA_TYPES_WRITEREQUEST 174
    
 AddNodesResponse
 ^^^^^^^^^^^^^^^^
@@ -2449,7 +2491,7 @@ Adds one or more nodes to the server address space.
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_AddNodesResponse;
    
-   #define UA_TYPES_ADDNODESRESPONSE 172
+   #define UA_TYPES_ADDNODESRESPONSE 175
    
 AttributeOperand
 ^^^^^^^^^^^^^^^^
@@ -2464,7 +2506,7 @@ AttributeOperand
        UA_String indexRange;
    } UA_AttributeOperand;
    
-   #define UA_TYPES_ATTRIBUTEOPERAND 173
+   #define UA_TYPES_ATTRIBUTEOPERAND 176
    
 DataChangeFilter
 ^^^^^^^^^^^^^^^^
@@ -2477,7 +2519,7 @@ DataChangeFilter
        UA_Double deadbandValue;
    } UA_DataChangeFilter;
    
-   #define UA_TYPES_DATACHANGEFILTER 174
+   #define UA_TYPES_DATACHANGEFILTER 177
    
 EndpointDescription
 ^^^^^^^^^^^^^^^^^^^
@@ -2497,7 +2539,7 @@ The description of a endpoint that can be used to access a server.
        UA_Byte securityLevel;
    } UA_EndpointDescription;
    
-   #define UA_TYPES_ENDPOINTDESCRIPTION 175
+   #define UA_TYPES_ENDPOINTDESCRIPTION 178
    
 DeleteReferencesRequest
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2511,7 +2553,7 @@ Delete one or more references from the server address space.
        UA_DeleteReferencesItem *referencesToDelete;
    } UA_DeleteReferencesRequest;
    
-   #define UA_TYPES_DELETEREFERENCESREQUEST 176
+   #define UA_TYPES_DELETEREFERENCESREQUEST 179
    
 TranslateBrowsePathsToNodeIdsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2525,7 +2567,7 @@ Translates one or more paths in the server address space.
        UA_BrowsePath *browsePaths;
    } UA_TranslateBrowsePathsToNodeIdsRequest;
    
-   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST 177
+   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST 180
    
 FindServersResponse
 ^^^^^^^^^^^^^^^^^^^
@@ -2539,7 +2581,7 @@ Finds the servers known to the discovery server.
        UA_ApplicationDescription *servers;
    } UA_FindServersResponse;
    
-   #define UA_TYPES_FINDSERVERSRESPONSE 178
+   #define UA_TYPES_FINDSERVERSRESPONSE 181
    
 CreateSessionRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -2559,7 +2601,7 @@ Creates a new session with the server.
        UA_UInt32 maxResponseMessageSize;
    } UA_CreateSessionRequest;
    
-   #define UA_TYPES_CREATESESSIONREQUEST 179
+   #define UA_TYPES_CREATESESSIONREQUEST 182
    
 ContentFilterElement
 ^^^^^^^^^^^^^^^^^^^^
@@ -2572,7 +2614,7 @@ ContentFilterElement
        UA_ExtensionObject *filterOperands;
    } UA_ContentFilterElement;
    
-   #define UA_TYPES_CONTENTFILTERELEMENT 180
+   #define UA_TYPES_CONTENTFILTERELEMENT 183
    
 TranslateBrowsePathsToNodeIdsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2588,7 +2630,7 @@ Translates one or more paths in the server address space.
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_TranslateBrowsePathsToNodeIdsResponse;
    
-   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE 181
+   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE 184
    
 BrowseResponse
 ^^^^^^^^^^^^^^
@@ -2604,7 +2646,7 @@ Browse the references for one or more nodes from the server address space.
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_BrowseResponse;
    
-   #define UA_TYPES_BROWSERESPONSE 182
+   #define UA_TYPES_BROWSERESPONSE 185
    
 CreateSessionResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2627,7 +2669,7 @@ Creates a new session with the server.
        UA_UInt32 maxRequestMessageSize;
    } UA_CreateSessionResponse;
    
-   #define UA_TYPES_CREATESESSIONRESPONSE 183
+   #define UA_TYPES_CREATESESSIONRESPONSE 186
    
 ContentFilter
 ^^^^^^^^^^^^^
@@ -2639,7 +2681,7 @@ ContentFilter
        UA_ContentFilterElement *elements;
    } UA_ContentFilter;
    
-   #define UA_TYPES_CONTENTFILTER 184
+   #define UA_TYPES_CONTENTFILTER 187
    
 GetEndpointsResponse
 ^^^^^^^^^^^^^^^^^^^^
@@ -2653,7 +2695,7 @@ Gets the endpoints used by the server.
        UA_EndpointDescription *endpoints;
    } UA_GetEndpointsResponse;
    
-   #define UA_TYPES_GETENDPOINTSRESPONSE 185
+   #define UA_TYPES_GETENDPOINTSRESPONSE 188
    
 EventFilter
 ^^^^^^^^^^^
@@ -2666,4 +2708,4 @@ EventFilter
        UA_ContentFilter whereClause;
    } UA_EventFilter;
    
-   #define UA_TYPES_EVENTFILTER 186
+   #define UA_TYPES_EVENTFILTER 189

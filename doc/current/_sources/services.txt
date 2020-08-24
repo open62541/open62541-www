@@ -553,6 +553,8 @@ its Session.
 
 .. code-block:: c
 
-   /* Not Implemented */
+   void Service_TransferSubscriptions(UA_Server *server, UA_Session *session,
+                                      const UA_TransferSubscriptionsRequest *request,
+                                      UA_TransferSubscriptionsResponse *response);
    
    #endif /* UA_ENABLE_SUBSCRIPTIONS */

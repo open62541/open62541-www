@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Access Control Plugin API &mdash; open62541 1.1.2-155-gee275e79 documentation</title>
+  <title>Access Control Plugin API &mdash; open62541 1.1.2-167-gcf18edda documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.2-155-gee275e79',
+              VERSION:'1.1.2-167-gcf18edda',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -189,6 +189,9 @@
 <span id="access-control"></span><h1>Access Control Plugin API<a class="headerlink" href="#access-control-plugin-api" title="Permalink to this headline">¶</a></h1>
 <p>The access control callback is used to authenticate sessions and grant access
 rights accordingly.</p>
+<p>The <tt class="docutils literal"><span class="pre">sessionId</span></tt> and <tt class="docutils literal"><span class="pre">sessionContext</span></tt> can be both NULL. This is the case
+when, for example, a MonitoredItem (the underlying Subscription) is detached
+from its Session but continues to run.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">struct</span> <span class="n">UA_AccessControl</span> <span class="p">{</span>
     <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">;</span>
     <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="n">UA_AccessControl</span> <span class="o">*</span><span class="n">ac</span><span class="p">);</span>
@@ -258,6 +261,16 @@ rights accordingly.</p>
     <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowBrowseNode</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AccessControl</span> <span class="o">*</span><span class="n">ac</span><span class="p">,</span>
                                   <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
                                   <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+    <span class="cm">/* Allow transfer of a subscription to another session. The Server shall</span>
+<span class="cm">     * validate that the Client of that Session is operating on behalf of the</span>
+<span class="cm">     * same user */</span>
+    <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowTransferSubscription</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AccessControl</span> <span class="o">*</span><span class="n">ac</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">oldSessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">oldSessionContext</span><span class="p">,</span>
+                                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">newSessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">newSessionContext</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
 <span class="cp">#ifdef UA_ENABLE_HISTORIZING</span>
     <span class="cm">/* Allow insert,replace,update of historical data */</span>
     <span class="n">UA_Boolean</span> <span class="p">(</span><span class="o">*</span><span class="n">allowHistoryUpdateUpdateData</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_AccessControl</span> <span class="o">*</span><span class="n">ac</span><span class="p">,</span>
