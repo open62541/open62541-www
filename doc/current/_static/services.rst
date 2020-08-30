@@ -467,7 +467,9 @@ Used to create and delete triggering links for a triggering item.
 
 .. code-block:: c
 
-   /* Not Implemented */
+   void Service_SetTriggering(UA_Server *server, UA_Session *session,
+                              const UA_SetTriggeringRequest *request,
+                              UA_SetTriggeringResponse *response);
    
 Subscription Service Set
 ------------------------
