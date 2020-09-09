@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.1.2-185-g982c22eb documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.1.2-190-ga90b2cd0 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.2-185-g982c22eb',
+              VERSION:'1.1.2-190-ga90b2cd0',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -123,8 +123,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#writergroup">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id1">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetwriter">DataSetWriter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#subscribeddataset">SubscribedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
 </ul>
 </li>
@@ -655,6 +655,59 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="subscribeddataset">
+<h2>SubscribedDataSet<a class="headerlink" href="#subscribeddataset" title="Permalink to this headline">¶</a></h2>
+<p>SubscribedDataSet describes the processing of the received DataSet. SubscribedDataSet defines which field
+in the DataSet is mapped to which Variable in the OPC UA Application. SubscribedDataSet has two sub-types
+called the TargetVariablesType and SubscribedDataSetMirrorType.
+SubscribedDataSetMirrorType is currently not supported. SubscribedDataSet is set to TargetVariablesType
+and then the list of target Variables are created in the Subscriber AddressSpace.
+TargetVariables are a list of variables that are to be added in the Subscriber AddressSpace.
+It defines a list of Variable mappings between received DataSet fields and added Variables
+in the Subscriber AddressSpace.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* SubscribedDataSetDataType Definition */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_SDS_TARGET</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_SDS_MIRROR</span>
+<span class="p">}</span> <span class="n">UA_SubscribedDataSetEnumType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Standard-defined FieldTargetDataType */</span>
+    <span class="n">UA_FieldTargetDataType</span> <span class="n">targetVariable</span><span class="p">;</span>
+
+    <span class="cm">/* If realtime-handling is required, set this pointer non-NULL and it will be used</span>
+<span class="cm">     * to memcpy the value instead of using the Write service.</span>
+<span class="cm">     * If the afterWrite method pointer is set, it will be called after a memcpy update</span>
+<span class="cm">     * to the value. */</span>
+    <span class="n">UA_DataValue</span> <span class="o">**</span><span class="n">externalDataValue</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">targetVariableContext</span><span class="p">;</span> <span class="cm">/* user-defined pointer */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">afterWrite</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerIdentifier</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetVariableIdentifier</span><span class="p">,</span>
+                       <span class="kt">void</span> <span class="o">*</span><span class="n">targetVariableContext</span><span class="p">,</span>
+                       <span class="n">UA_DataValue</span> <span class="o">**</span><span class="n">externalDataValue</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_FieldTargetVariable</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">targetVariablesSize</span><span class="p">;</span>
+    <span class="n">UA_FieldTargetVariable</span> <span class="o">*</span><span class="n">targetVariables</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_TargetVariables</span><span class="p">;</span>
+
+<span class="cm">/* Return Status Code after creating TargetVariables in Subscriber AddressSpace */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_createTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                              <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                              <span class="kt">size_t</span> <span class="n">targetVariablesSize</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">UA_FieldTargetVariable</span> <span class="o">*</span><span class="n">targetVariables</span><span class="p">);</span>
+
+<span class="cm">/* To Do:Implementation of SubscribedDataSetMirrorType</span>
+<span class="cm"> * UA_StatusCode</span>
+<span class="cm"> * A_PubSubDataSetReader_createDataSetMirror(UA_Server *server, UA_NodeId dataSetReaderIdentifier,</span>
+<span class="cm"> * UA_SubscribedDataSetMirrorDataType* mirror) */</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="datasetreader">
 <h2>DataSetReader<a class="headerlink" href="#datasetreader" title="Permalink to this headline">¶</a></h2>
 <p>DataSetReader can receive NetworkMessages with the DataSetMessage
@@ -682,40 +735,24 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
     <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
     <span class="n">UA_ExtensionObject</span> <span class="n">messageSettings</span><span class="p">;</span>
     <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
-    <span class="n">UA_TargetVariablesDataType</span> <span class="n">subscribedDataSetTarget</span><span class="p">;</span>
+    <span class="n">UA_SubscribedDataSetEnumType</span> <span class="n">subscribedDataSetType</span><span class="p">;</span>
+    <span class="cm">/* TODO UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror */</span>
+    <span class="k">union</span> <span class="p">{</span>
+        <span class="n">UA_TargetVariables</span> <span class="n">subscribedDataSetTarget</span><span class="p">;</span>
+        <span class="c1">// UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror;</span>
+    <span class="p">}</span> <span class="n">subscribedDataSet</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
 
 <span class="cm">/* Update configuration to the dataSetReader */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_DataSetReader_updateConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
-                                   <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+                                     <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                                     <span class="k">const</span> <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="cm">/* Get configuration of the dataSetReader */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_DataSetReader_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
-                                 <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="subscribeddataset">
-<h2>SubscribedDataSet<a class="headerlink" href="#subscribeddataset" title="Permalink to this headline">¶</a></h2>
-<p>SubscribedDataSet describes the processing of the received DataSet. SubscribedDataSet defines which field
-in the DataSet is mapped to which Variable in the OPC UA Application. SubscribedDataSet has two sub-types
-called the TargetVariablesType and SubscribedDataSetMirrorType.
-SubscribedDataSetMirrorType is currently not supported. SubscribedDataSet is set to TargetVariablesType
-and then the list of target Variables are created in the Subscriber AddressSpace.
-TargetVariables are a list of variables that are to be added in the Subscriber AddressSpace.
-It defines a list of Variable mappings between received DataSet fields and added Variables
-in the Subscriber AddressSpace.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Return Status Code after creating TargetVariables in Subscriber AddressSpace */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_DataSetReader_createTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
-                                             <span class="n">UA_TargetVariablesDataType</span><span class="o">*</span> <span class="n">targetVariables</span><span class="p">);</span>
-
-<span class="cm">/* To Do:Implementation of SubscribedDataSetMirrorType</span>
-<span class="cm"> * UA_StatusCode</span>
-<span class="cm"> * A_PubSubDataSetReader_createDataSetMirror(UA_Server *server, UA_NodeId dataSetReaderIdentifier,</span>
-<span class="cm"> * UA_SubscribedDataSetMirrorDataType* mirror) */</span>
+                                  <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
