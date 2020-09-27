@@ -539,6 +539,11 @@ The following functions are shorthand for creating ExpandedNodeIds.
        id.serverIndex = 0; id.namespaceUri = UA_STRING_NULL; return id;
    }
    
+   /* Does the ExpandedNodeId point to a local node? That is, are namespaceUri and
+    * serverIndex empty? */
+   UA_Boolean
+   UA_ExpandedNodeId_isLocal(const UA_ExpandedNodeId *n);
+   
    /* Total ordering of ExpandedNodeId */
    UA_Order
    UA_ExpandedNodeId_order(const UA_ExpandedNodeId *n1, const UA_ExpandedNodeId *n2);
