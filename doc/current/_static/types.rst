@@ -620,6 +620,12 @@ Human readable text with an optional locale identifier.
        lt.text = UA_STRING_ALLOC(text); return lt;
    }
    
+   /* 
+    * Check if the StatusCode is bad.
+    * @return Returns UA_TRUE if StatusCode is bad, else UA_FALSE. */
+   UA_Boolean
+   UA_StatusCode_isBad(const UA_StatusCode code);
+   
 .. _numericrange:
 
 NumericRange
