@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Working with Data Types &mdash; open62541 1.1.2-226-gb26c8d19 documentation</title>
+  <title>Working with Data Types &mdash; open62541 1.1.2-233-g0be4d364 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.2-226-gb26c8d19',
+              VERSION:'1.1.2-233-g0be4d364',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -318,6 +318,53 @@ integer array.</p>
     <span class="n">v3</span><span class="p">.</span><span class="n">arrayDimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
     <span class="n">UA_Variant_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v3</span><span class="p">);</span>
 <span class="p">}</span>
+
+<span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">prettyprint</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_ReadRequest</span> <span class="n">rr</span><span class="p">;</span>
+    <span class="n">UA_ReadRequest_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rr</span><span class="p">);</span>
+    <span class="n">UA_ReadValueId</span> <span class="n">rvi</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+    <span class="n">UA_ReadValueId_init</span><span class="p">(</span><span class="n">rvi</span><span class="p">);</span>
+    <span class="n">UA_ReadValueId_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rvi</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="n">rr</span><span class="p">.</span><span class="n">nodesToRead</span> <span class="o">=</span> <span class="n">rvi</span><span class="p">;</span>
+    <span class="n">rr</span><span class="p">.</span><span class="n">nodesToReadSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">out</span> <span class="o">=</span> <span class="n">UA_STRING_NULL</span><span class="p">;</span>
+    <span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rr</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READREQUEST</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+
+    <span class="n">UA_ReadResponse</span> <span class="n">resp</span><span class="p">;</span>
+    <span class="n">UA_ReadResponse_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">resp</span><span class="p">);</span>
+    <span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">resp</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READRESPONSE</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+
+    <span class="n">UA_ReferenceDescription</span> <span class="n">br</span><span class="p">;</span>
+    <span class="n">UA_ReferenceDescription_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">br</span><span class="p">);</span>
+    <span class="n">br</span><span class="p">.</span><span class="n">nodeClass</span> <span class="o">=</span> <span class="p">(</span><span class="n">UA_NodeClass</span><span class="p">)</span><span class="mi">5</span><span class="p">;</span>
+    <span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">br</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCEDESCRIPTION</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+
+    <span class="n">UA_Float</span> <span class="n">matrix</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">};</span>
+    <span class="n">UA_UInt32</span> <span class="n">matrix_dims</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">};</span>
+    <span class="n">UA_DataValue</span> <span class="n">dv</span><span class="p">;</span>
+    <span class="n">UA_DataValue_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dv</span><span class="p">);</span>
+    <span class="n">UA_Variant_setArray</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dv</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">matrix</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_FLOAT</span><span class="p">]);</span>
+    <span class="n">dv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">matrix_dims</span><span class="p">;</span>
+    <span class="n">dv</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="n">dv</span><span class="p">.</span><span class="n">hasValue</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">dv</span><span class="p">.</span><span class="n">hasStatus</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">dv</span><span class="p">.</span><span class="n">hasServerTimestamp</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">dv</span><span class="p">.</span><span class="n">hasSourcePicoseconds</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dv</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATAVALUE</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span> <span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 <p>It follows the main function, making use of the above definitions.</p>
@@ -325,8 +372,6 @@ integer array.</p>
     <span class="n">variables_basic</span><span class="p">();</span>
     <span class="n">variables_nodeids</span><span class="p">();</span>
     <span class="n">variables_variants</span><span class="p">();</span>
-    <span class="k">return</span> <span class="n">EXIT_SUCCESS</span><span class="p">;</span>
-<span class="p">}</span>
 </pre></div>
 </div>
 </div>

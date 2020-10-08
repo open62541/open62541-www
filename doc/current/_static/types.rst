@@ -479,6 +479,9 @@ A NodeId that allows the namespace URI to be specified instead of an index.
    
    extern const UA_ExpandedNodeId UA_EXPANDEDNODEID_NULL;
    
+   UA_StatusCode
+   UA_ExpandedNodeId_print(const UA_ExpandedNodeId *id, UA_String *output);
+   
    #ifdef UA_ENABLE_PARSING
    /* Parse the ExpandedNodeId format defined in Part 6, 5.3.1.11:
     *
@@ -1096,6 +1099,17 @@ The following functions are used for generic handling of data types.
     * @param p The memory location of the variable
     * @param type The datatype description of the variable */
    void UA_delete(void *p, const UA_DataType *type);
+   
+   #ifdef UA_ENABLE_TYPEDESCRIPTION
+   /* Pretty-print the value from the datatype.
+    *
+    * @param p The memory location of the variable
+    * @param type The datatype description of the variable
+    * @param output A string that is memory-allocated for the pretty-printed output
+    * @return Indicates whether the operation succeeded*/
+   UA_StatusCode
+   UA_print(void *p, const UA_DataType *type, UA_String *output);
+   #endif
    
 .. _array-handling:
 
