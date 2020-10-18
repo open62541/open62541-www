@@ -1552,31 +1552,13 @@ Utility Functions
 .. code-block:: c
 
    /* Add a new namespace to the server. Returns the index of the new namespace */
-   UA_UInt16 UA_THREADSAFE UA_Server_addNamespace(UA_Server *server, const char* name);
+   UA_UInt16 UA_THREADSAFE
+   UA_Server_addNamespace(UA_Server *server, const char* name);
    
    /* Get namespace by name from the server. */
    UA_StatusCode UA_THREADSAFE
    UA_Server_getNamespaceByName(UA_Server *server, const UA_String namespaceUri,
                                 size_t* foundIndex);
-   
-   #ifdef UA_ENABLE_HISTORIZING
-   UA_Boolean UA_THREADSAFE
-   UA_Server_AccessControl_allowHistoryUpdateUpdateData(UA_Server *server,
-                                                        const UA_NodeId *sessionId,
-                                                        void *sessionContext,
-                                                        const UA_NodeId *nodeId,
-                                                        UA_PerformUpdateType performInsertReplace,
-                                                        const UA_DataValue *value);
-   
-   UA_Boolean UA_THREADSAFE
-   UA_Server_AccessControl_allowHistoryUpdateDeleteRawModified(UA_Server *server,
-                                                               const UA_NodeId *sessionId,
-                                                               void *sessionContext,
-                                                               const UA_NodeId *nodeId,
-                                                               UA_DateTime startTimestamp,
-                                                               UA_DateTime endTimestamp,
-                                                               bool isDeleteModified);
-   #endif /* UA_ENABLE_HISTORIZING */
    
 .. _async-operations:
 
