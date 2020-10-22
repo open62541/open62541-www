@@ -144,7 +144,7 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
    } UA_ETFConfiguration;
    #endif
    
-   typedef struct {
+   struct UA_PubSubConnectionConfig {
        UA_String name;
        UA_Boolean enabled;
        UA_PublisherIdType publisherIdType;
@@ -161,7 +161,23 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
        /* ETF related connection configuration - Not in PubSub specfication */
        UA_ETFConfiguration etfConfiguration;
    #endif
-   } UA_PubSubConnectionConfig;
+   };
+   
+The UA_ServerConfig_addPubSubTransportLayer is used to add a transport layer
+to the server configuration. The list memory is allocated and will be freed
+with UA_PubSubManager_delete.
+
+.. note:: If the UA_String transportProfileUri was dynamically allocated
+          the memory has to be freed when no longer required.
+
+.. note:: This has to be done before the server is started with UA_Server_run.
+
+.. code-block:: c
+
+   
+   UA_StatusCode
+   UA_ServerConfig_addPubSubTransportLayer(UA_ServerConfig *config,
+                                           UA_PubSubTransportLayer *pubsubTransportLayer);
    
    UA_StatusCode
    UA_Server_addPubSubConnection(UA_Server *server,

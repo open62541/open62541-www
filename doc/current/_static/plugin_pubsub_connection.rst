@@ -15,6 +15,12 @@ provides basis services like send, regist, unregist, receive, close.
 .. code-block:: c
 
    
+   struct UA_PubSubConnectionConfig;
+   typedef struct UA_PubSubConnectionConfig UA_PubSubConnectionConfig;
+   
+   struct UA_PubSubChannel;
+   typedef struct UA_PubSubChannel UA_PubSubChannel;
+   
    typedef enum {
        UA_PUBSUB_CHANNEL_RDY,
        UA_PUBSUB_CHANNEL_PUB,
@@ -23,9 +29,6 @@ provides basis services like send, regist, unregist, receive, close.
        UA_PUBSUB_CHANNEL_ERROR,
        UA_PUBSUB_CHANNEL_CLOSED
    } UA_PubSubChannelState;
-   
-   struct UA_PubSubChannel;
-   typedef struct UA_PubSubChannel UA_PubSubChannel;
    
    /* Interface structure between network plugin and internal implementation */
    struct UA_PubSubChannel {
@@ -76,20 +79,5 @@ informations about the TransportLayer handling.
        UA_String transportProfileUri;
        UA_PubSubChannel *(*createPubSubChannel)(UA_PubSubConnectionConfig *connectionConfig);
    } UA_PubSubTransportLayer;
-   
-The UA_ServerConfig_addPubSubTransportLayer is used to add a transport layer
-to the server configuration. The list memory is allocated and will be freed
-with UA_PubSubManager_delete.
-
-.. note:: If the UA_String transportProfileUri was dynamically allocated
-          the memory has to be freed when no longer required.
-
-.. note:: This has to be done before the server is started with UA_Server_run.
-
-.. code-block:: c
-
-   UA_StatusCode
-   UA_ServerConfig_addPubSubTransportLayer(UA_ServerConfig *config,
-                                           UA_PubSubTransportLayer *pubsubTransportLayer);
    
    #endif /* UA_ENABLE_PUBSUB */

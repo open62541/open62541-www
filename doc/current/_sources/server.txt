@@ -263,6 +263,7 @@ The :ref:`tutorials` provide a good starting point for this.
        UA_String_clear(&config->customHostname);
        UA_String_copy(&customHostname, &config->customHostname);
    }
+   
 .. _server-lifecycle:
 
 Server Lifecycle
