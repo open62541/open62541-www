@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.1.2-264-g7e6c6c97 documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.1.2-269-gef0c6873 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.2-264-g7e6c6c97',
+              VERSION:'1.1.2-269-gef0c6873',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -120,6 +120,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#connections">Connections</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#publisheddatasets">PublishedDataSets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetfields">DataSetFields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-callback-implementation">Custom Callback Implementation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writergroup">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id1">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetwriter">DataSetWriter</a></li>
@@ -282,9 +283,6 @@ Compile the human-readable name of the StatusCodes into the binary. Disabled by 
 <dd>Enable loading OPC UA PubSub configuration from File/ByteString. Enabling PubSub informationmodel methods also will add a method to the Publish/Subscribe object which allows configuring PubSub at runtime.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_INFORMATIONMODEL</strong></dt>
 <dd>Enable the information model representation of the PubSub configuration. For more details take a look at the following section <cite>PubSub Information Model Representation</cite>. Disabled by default.</dd>
-<dt><strong>UA_ENABLE_PUBSUB_CUSTOM_PUBLISH_HANDLING</strong></dt>
-<dd>Enable the OPC UA PubSub support with custom callback implementation for Publisher and Subscriber. The option will provide flexibility to use the user defined callback mechanism for sending
-packets in Publisher and receiving packets in the Subscriber. Disabled by default.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_ETH_UADP</strong></dt>
 <dd>Enable the OPC UA Ethernet PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame without IP or UDP headers. This option will include Publish and Subscribe based on
 EtherType B62C. Disabled by default.</dd>
@@ -526,6 +524,25 @@ handling process.</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="custom-callback-implementation">
+<h2>Custom Callback Implementation<a class="headerlink" href="#custom-callback-implementation" title="Permalink to this headline">¶</a></h2>
+<p>The user can use his own callback implementation for publishing
+and subscribing. The user must take care of the callback to call for
+every publishing or subscibing interval</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">addCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">identifier</span><span class="p">,</span>
+                                       <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">,</span>
+                                       <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">changeCustomCallbackInterval</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">identifier</span><span class="p">,</span>
+                                                  <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">,</span> <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">removeCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
+
+<span class="p">}</span> <span class="n">UA_PubSub_CallbackLifecycle</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="writergroup">
 <h2>WriterGroup<a class="headerlink" href="#writergroup" title="Permalink to this headline">¶</a></h2>
 <p>All WriterGroups are created within a PubSubConnection and automatically
@@ -585,7 +602,8 @@ UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
     <span class="kt">size_t</span> <span class="n">groupPropertiesSize</span><span class="p">;</span>
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">groupProperties</span><span class="p">;</span>
     <span class="n">UA_PubSubEncodingType</span> <span class="n">encodingMimeType</span><span class="p">;</span>
-
+    <span class="cm">/* PubSub Manager Callback */</span>
+    <span class="n">UA_PubSub_CallbackLifecycle</span> <span class="n">pubsubManagerCallback</span><span class="p">;</span>
     <span class="cm">/* non std. config parameter. maximum count of embedded DataSetMessage in</span>
 <span class="cm">     * one NetworkMessage */</span>
     <span class="n">UA_UInt16</span> <span class="n">maxEncapsulatedDataSetMessageCount</span><span class="p">;</span>
@@ -803,6 +821,8 @@ offsets stored in an offset buffer.</p>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
     <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
+    <span class="cm">/* PubSub Manager Callback */</span>
+    <span class="n">UA_PubSub_CallbackLifecycle</span> <span class="n">pubsubManagerCallback</span><span class="p">;</span>
     <span class="cm">/* non std. field */</span>
     <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
