@@ -138,7 +138,8 @@ until a message is received or the duration times out.
         *
         * @param nl The network layer
         * @return Returns UA_STATUSCODE_GOOD or an error code. */
-       UA_StatusCode (*start)(UA_ServerNetworkLayer *nl, const UA_String *customHostname);
+       UA_StatusCode (*start)(UA_ServerNetworkLayer *nl, const UA_Logger *logger,
+                              const UA_String *customHostname);
    
        /* Listen for new and closed connections and arriving packets. Calls
         * UA_Server_processBinaryMessage for the arriving packets. Closed

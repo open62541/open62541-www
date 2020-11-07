@@ -14,7 +14,7 @@ logger.
 
    
    typedef enum {
-       UA_LOGLEVEL_TRACE,
+       UA_LOGLEVEL_TRACE = 0,
        UA_LOGLEVEL_DEBUG,
        UA_LOGLEVEL_INFO,
        UA_LOGLEVEL_WARNING,
@@ -23,7 +23,7 @@ logger.
    } UA_LogLevel;
    
    typedef enum {
-       UA_LOGCATEGORY_NETWORK,
+       UA_LOGCATEGORY_NETWORK = 0,
        UA_LOGCATEGORY_SECURECHANNEL,
        UA_LOGCATEGORY_SESSION,
        UA_LOGCATEGORY_SERVER,

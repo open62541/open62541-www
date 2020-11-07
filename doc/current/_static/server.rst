@@ -1552,6 +1552,12 @@ Utility Functions
 
 .. code-block:: c
 
+   
+   /* Lookup a datatype by its NodeId. Takes the custom types in the server
+    * configuration into account. Return NULL if none found. */
+   const UA_DataType *
+   UA_Server_findDataType(UA_Server *server, const UA_NodeId *typeId);
+   
    /* Add a new namespace to the server. Returns the index of the new namespace */
    UA_UInt16 UA_THREADSAFE
    UA_Server_addNamespace(UA_Server *server, const char* name);

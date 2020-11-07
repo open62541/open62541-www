@@ -666,6 +666,17 @@ defined interval.
    void
    UA_Client_removeCallback(UA_Client *client, UA_UInt64 callbackId);
    
+Client Utility Functions
+------------------------
+
+.. code-block:: c
+
+   
+   /* Lookup a datatype by its NodeId. Takes the custom types in the client
+    * configuration into account. Return NULL if none found. */
+   const UA_DataType *
+   UA_Client_findDataType(UA_Client *client, const UA_NodeId *typeId);
+   
 .. toctree::
 
    client_highlevel
