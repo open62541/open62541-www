@@ -130,10 +130,6 @@ The :ref:`tutorials` provide a good starting point for this.
        UA_Server_AsyncOperationNotifyCallback asyncOperationNotifyCallback;
    #endif
    
-   #if UA_MULTITHREADING >= 200
-       UA_UInt16 nThreads; /* Experimental feature */
-   #endif
-   
 .. note:: See the section for :ref:`async
    operations<async-operations>`.
 
@@ -145,11 +141,6 @@ The :ref:`tutorials` provide a good starting point for this.
    
        /* Certificate Verification */
        UA_CertificateVerification certificateVerification;
-   
-       /* Relax constraints for the InformationModel */
-       UA_Boolean relaxEmptyValueConstraint; /* Nominally, only variables with data
-                                              * type BaseDataType can have an empty
-                                              * value. */
    
        /* Limits for SecureChannels */
        UA_UInt16 maxSecureChannels;
