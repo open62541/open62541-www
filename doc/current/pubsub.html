@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.1.3-321-g9183c68d documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.1.3-325-g713e769a documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.1.3-321-g9183c68d',
+              VERSION:'1.1.3-325-g713e769a',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -283,6 +283,11 @@ Compile the human-readable name of the StatusCodes into the binary. Disabled by 
 <dd>Enable loading OPC UA PubSub configuration from File/ByteString. Enabling PubSub informationmodel methods also will add a method to the Publish/Subscribe object which allows configuring PubSub at runtime.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_INFORMATIONMODEL</strong></dt>
 <dd>Enable the information model representation of the PubSub configuration. For more details take a look at the following section <cite>PubSub Information Model Representation</cite>. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_MONITORING</strong></dt>
+<dd>Enable the experimental PubSub monitoring. This feature provides a basic framework to implement monitoring/timeout checks for PubSub components.
+Initially the MessageReceiveTimeout check of a DataSetReader is provided. It uses the internal server callback implementation.
+The monitoring backend can be changed by the application to satisfy realtime requirements.
+Disabled by default.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_ETH_UADP</strong></dt>
 <dd>Enable the OPC UA Ethernet PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame without IP or UDP headers. This option will include Publish and Subscribe based on
 EtherType B62C. Disabled by default.</dd>
@@ -309,7 +314,15 @@ can enabled/disable by changing the UA_ENABLE_PUBSUB_INFORMATIONMODEL option.</p
 and the PubSub functionality. It is possible to create multiple connections with
 different transport protocols at runtime.</p>
 <p>Take a look on the PubSub Tutorials for mor details about the API usage.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span>  <span class="p">{</span>
+    <span class="n">UA_PUBSUB_COMPONENT_CONNECTION</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_WRITERGROUP</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_DATASETWRITER</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_READERGROUP</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_DATASETREADER</span>
+<span class="p">}</span> <span class="n">UA_PubSubComponentEnumType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
     <span class="n">UA_PUBSUB_PUBLISHERID_NUMERIC</span><span class="p">,</span>
     <span class="n">UA_PUBSUB_PUBLISHERID_STRING</span>
 <span class="p">}</span> <span class="n">UA_PublisherIdType</span><span class="p">;</span>
@@ -341,6 +354,44 @@ different transport protocols at runtime.</p>
     <span class="cm">/* ETF related connection configuration - Not in PubSub specfication */</span>
     <span class="n">UA_ETFConfiguration</span> <span class="n">etfConfiguration</span><span class="p">;</span>
 <span class="cp">#endif</span>
+<span class="p">};</span>
+
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_MONITORING</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_MONITORING_MESSAGE_RECEIVE_TIMEOUT</span>
+    <span class="c1">// extend as needed</span>
+<span class="p">}</span> <span class="n">UA_PubSubMonitoringType</span><span class="p">;</span>
+
+<span class="cm">/* PubSub monitoring interface */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">createMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                      <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">startMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                     <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">stopMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                    <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">updateMonitoringInterval</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                              <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                      <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_PubSubMonitoringInterface</span><span class="p">;</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_MONITORING */</span><span class="cp"></span>
+
+<span class="cm">/* General PubSub configuration */</span>
+<span class="k">struct</span> <span class="n">UA_PubSubConfiguration</span> <span class="p">{</span>
+
+    <span class="cm">/* Callback for PubSub component state changes:</span>
+<span class="cm">    If provided this callback informs the application about PubSub component state changes.</span>
+<span class="cm">    E.g. state change from operational to error in case of a DataSetReader MessageReceiveTimeout.</span>
+<span class="cm">    The status code provides additional information. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pubsubStateChangeCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">Id</span><span class="p">,</span>
+                                      <span class="n">UA_PubSubState</span> <span class="n">state</span><span class="p">,</span>
+                                      <span class="n">UA_StatusCode</span> <span class="n">status</span><span class="p">);</span><span class="c1">// TODO: maybe status code provides not enough information about the state change</span>
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_MONITORING</span>
+    <span class="n">UA_PubSubMonitoringInterface</span> <span class="n">monitoringInterface</span><span class="p">;</span>
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_MONITORING */</span><span class="cp"></span>
 <span class="p">};</span>
 </pre></div>
 </div>
