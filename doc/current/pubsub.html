@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.2.0-rc1-1-g19c006a3 documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.2.0-rc1-5-gaa39b0fd documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.2.0-rc1-1-g19c006a3',
+              VERSION:'1.2.0-rc1-5-gaa39b0fd',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -291,9 +291,6 @@ Disabled by default.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_ETH_UADP</strong></dt>
 <dd>Enable the OPC UA Ethernet PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame without IP or UDP headers. This option will include Publish and Subscribe based on
 EtherType B62C. Disabled by default.</dd>
-<dt><strong>UA_ENABLE_PUBSUB_ETH_UADP_ETF</strong></dt>
-<dd>Enable ETF feature to allow the user to transmit packets at calculated transmission time with nanosecond precision, in addition to the PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame.
-Disabled by default.</dd>
 <dt><strong>UA_ENABLE_PUBSUB_ETH_UADP_XDP</strong></dt>
 <dd>Enable XDP feature to allow the user to receive packets using the eXpress Data Path (XDP), which bypasses TCP/IP layers and transfers the frames from hardware/netdev to user application thereby reducing the receiving time,
 in addition to the PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame. Disabled by default.</dd>
@@ -327,16 +324,6 @@ different transport protocols at runtime.</p>
     <span class="n">UA_PUBSUB_PUBLISHERID_STRING</span>
 <span class="p">}</span> <span class="n">UA_PublisherIdType</span><span class="p">;</span>
 
-<span class="cp">#ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
-    <span class="n">UA_Int32</span> <span class="n">socketPriority</span><span class="p">;</span>
-    <span class="n">UA_Boolean</span> <span class="n">sotxtimeEnabled</span><span class="p">;</span>
-    <span class="cm">/* SO_TXTIME-specific additional socket config */</span>
-    <span class="n">UA_Int32</span> <span class="n">sotxtimeDeadlinemode</span><span class="p">;</span>
-    <span class="n">UA_Int32</span> <span class="n">sotxtimeReceiveerrors</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">UA_ETFConfiguration</span><span class="p">;</span>
-<span class="cp">#endif</span>
-
 <span class="k">struct</span> <span class="n">UA_PubSubConnectionConfig</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">enabled</span><span class="p">;</span>
@@ -350,10 +337,6 @@ different transport protocols at runtime.</p>
     <span class="kt">size_t</span> <span class="n">connectionPropertiesSize</span><span class="p">;</span>
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">connectionProperties</span><span class="p">;</span>
     <span class="n">UA_Variant</span> <span class="n">connectionTransportSettings</span><span class="p">;</span>
-<span class="cp">#ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF</span>
-    <span class="cm">/* ETF related connection configuration - Not in PubSub specfication */</span>
-    <span class="n">UA_ETFConfiguration</span> <span class="n">etfConfiguration</span><span class="p">;</span>
-<span class="cp">#endif</span>
 <span class="p">};</span>
 
 <span class="cp">#ifdef UA_ENABLE_PUBSUB_MONITORING</span>
@@ -875,8 +858,14 @@ offsets stored in an offset buffer.</p>
     <span class="cm">/* PubSub Manager Callback */</span>
     <span class="n">UA_PubSub_CallbackLifecycle</span> <span class="n">pubsubManagerCallback</span><span class="p">;</span>
     <span class="cm">/* non std. field */</span>
+    <span class="n">UA_Duration</span> <span class="n">subscribingInterval</span><span class="p">;</span> <span class="c1">// Callback interval for subscriber: set the least publishingInterval value of all DSRs in this RG</span>
+    <span class="n">UA_Boolean</span> <span class="n">enableBlockingSocket</span><span class="p">;</span> <span class="c1">// To enable or disable blocking socket option</span>
+    <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span> <span class="c1">// Timeout for receive to wait for the packets</span>
     <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_ReaderGroupConfig_clear</span><span class="p">(</span><span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">readerGroupConfig</span><span class="p">);</span>
 
 <span class="cm">/* Add DataSetReader to the ReaderGroup */</span>
 <span class="n">UA_StatusCode</span>
