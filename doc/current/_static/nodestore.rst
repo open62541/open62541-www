@@ -237,9 +237,9 @@ correctness of casting from ``UA_Node`` to a specific node type.
    
    /* Ordered tree structure for fast member check */
    typedef struct UA_ReferenceTarget {
-       /* Zip-Tree for fast lookup */
-       ZIP_ENTRY(UA_ReferenceTarget) idTreeFields; /* Must be the first member */
-       ZIP_ENTRY(UA_ReferenceTarget) nameTreeFields;
+       /* Binary-Tree for fast lookup */
+       struct aa_entry idTreeEntry;
+       struct aa_entry nameTreeEntry;
        UA_UInt32 targetIdHash;   /* Hash of the target's NodeId */
        UA_UInt32 targetNameHash; /* Hash of the target's BrowseName */
    
@@ -253,14 +253,6 @@ correctness of casting from ``UA_Node`` to a specific node type.
        UA_ExpandedNodeId targetId;
    } UA_ReferenceTarget;
    
-   ZIP_HEAD(UA_ReferenceTargetIdTree, UA_ReferenceTarget);
-   typedef struct UA_ReferenceTargetIdTree UA_ReferenceTargetIdTree;
-   ZIP_PROTOTYPE(UA_ReferenceTargetIdTree, UA_ReferenceTarget, UA_ReferenceTarget)
-   
-   ZIP_HEAD(UA_ReferenceTargetNameTree, UA_ReferenceTarget);
-   typedef struct UA_ReferenceTargetNameTree UA_ReferenceTargetNameTree;
-   ZIP_PROTOTYPE(UA_ReferenceTargetNameTree, UA_ReferenceTarget, UA_UInt32)
-   
    /* List of reference targets with the same reference type and direction */
    typedef struct {
        UA_Byte referenceTypeIndex;
@@ -272,8 +264,8 @@ correctness of casting from ``UA_Node`` to a specific node type.
            struct UA_ReferenceTarget *tqh_first;
            struct UA_ReferenceTarget **tqh_last;
        } queueHead;
-       UA_ReferenceTargetIdTree refTargetsIdTree;
-       UA_ReferenceTargetNameTree refTargetsNameTree;
+       struct aa_entry *idTreeRoot;   /* Fast lookup based on the target id */
+       struct aa_entry *nameTreeRoot; /* Fast lookup based on the target browseName*/
    } UA_NodeReferenceKind;
    
    /* Every Node starts with these attributes */
