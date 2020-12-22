@@ -1,7 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/doc_latex"
   "../doc_src/types.rst"
-  "../doc_src/constants.rst"
+  "../doc_src/common.rst"
+  "../doc_src/util.rst"
   "../doc_src/statuscodes.rst"
   "../doc_src/types_generated.rst"
   "../doc_src/server_config.rst"
@@ -23,6 +24,7 @@ file(REMOVE_RECURSE
   "../doc_src/tutorial_server_variabletype.rst"
   "../doc_src/tutorial_server_datasource.rst"
   "../doc_src/tutorial_server_events.rst"
+  "../doc_src/tutorial_server_alarms_conditions.rst"
   "../doc_src/tutorial_server_monitoreditems.rst"
   "../doc_src/tutorial_server_object.rst"
   "../doc_src/tutorial_server_method.rst"

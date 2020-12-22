@@ -23,13 +23,24 @@ Client Lifecycle
 .. code-block:: c
 
    
-   /* Create a new client */
-   UA_Client *
-   UA_Client_new(void);
+   /* The method UA_Client_new is defined in client_config_default.h. So default
+    * plugins outside of the core library (for logging, etc) are already available
+    * during the initialization.
+    *
+    * UA_Client * UA_Client_new(void);
+    */
    
-   /* Get the client connection status */
-   UA_ClientState
-   UA_Client_getState(UA_Client *client);
+   /* Creates a new client. Moves the config into the client with a shallow copy.
+    * The config content is cleared together with the client. */
+   UA_Client *
+   UA_Client_newWithConfig(const UA_ClientConfig *config);
+   
+   /* Returns the current state. All arguments except ``client`` can be NULL. */
+   void
+   UA_Client_getState(UA_Client *client,
+                      UA_SecureChannelState *channelState,
+                      UA_SessionState *sessionState,
+                      UA_StatusCode *connectStatus);
    
    /* Get the client configuration */
    UA_ClientConfig *
@@ -38,28 +49,31 @@ Client Lifecycle
    /* Get the client context */
    static UA_INLINE void *
    UA_Client_getContext(UA_Client *client) {
-       UA_ClientConfig *config = UA_Client_getConfig(client); /* Cannot fail */
-       return config->clientContext;
+       return UA_Client_getConfig(client)->clientContext; /* Cannot fail */
    }
    
-   /* Reset a client */
-   void
-   UA_Client_reset(UA_Client *client);
-   
-   /* Delete a client */
+   /* (Disconnect and) delete the client */
    void
    UA_Client_delete(UA_Client *client);
    
 Connect to a Server
 -------------------
 
+Once a client is connected to an endpointUrl, it is not possible to switch to
+another server. A new client has to be created for that.
+
+Once a connection is established, the client keeps the connection open and
+reconnects if necessary.
+
+If the connection fails unrecoverably (state->connectStatus is set to an
+error), the client is no longer usable. Create a new client if required.
+
 .. code-block:: c
 
    
-   typedef void (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
-           UA_UInt32 requestId, void *response);
-   
-   /* Connect to the server
+   /* Connect to the server. First a SecureChannel is opened, then a Session. The
+    * client configuration restricts the SecureChannel selection and contains the
+    * UserIdentityToken for the Session.
     *
     * @param client to use
     * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
@@ -67,10 +81,13 @@ Connect to a Server
    UA_StatusCode
    UA_Client_connect(UA_Client *client, const char *endpointUrl);
    
+   /* Connect async (non-blocking) to the server. After initiating the connection,
+    * call UA_Client_run_iterate repeatedly until the connection is fully
+    * established. You can set a callback to client->config.stateCallback to be
+    * notified when the connection status changes. Or use UA_Client_getState to get
+    * the state manually. */
    UA_StatusCode
-   UA_Client_connect_async(UA_Client *client, const char *endpointUrl,
-                           UA_ClientAsyncServiceCallback callback,
-                           void *userdata);
+   UA_Client_connectAsync(UA_Client *client, const char *endpointUrl);
    
    /* Connect to the server without creating a session
     *
@@ -78,27 +95,70 @@ Connect to a Server
     * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
     * @return Indicates whether the operation succeeded or returns an error code */
    UA_StatusCode
-   UA_Client_connect_noSession(UA_Client *client, const char *endpointUrl);
+   UA_Client_connectSecureChannel(UA_Client *client, const char *endpointUrl);
    
-   /* Connect to the selected server with the given username and password
-    *
-    * @param client to use
-    * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
-    * @param username
-    * @param password
-    * @return Indicates whether the operation succeeded or returns an error code */
+   /* Connect async (non-blocking) only the SecureChannel */
    UA_StatusCode
-   UA_Client_connect_username(UA_Client *client, const char *endpointUrl,
-                              const char *username, const char *password);
+   UA_Client_connectSecureChannelAsync(UA_Client *client, const char *endpointUrl);
    
-   /* Disconnect and close a connection to the selected server */
+   /* Connect to the server and create+activate a Session with the given username
+    * and password. This first set the UserIdentityToken in the client config and
+    * then calls the regular connect method. */
+   static UA_INLINE UA_StatusCode
+   UA_Client_connectUsername(UA_Client *client, const char *endpointUrl,
+                             const char *username, const char *password) {
+       UA_UserNameIdentityToken* identityToken = UA_UserNameIdentityToken_new();
+       if(!identityToken)
+           return UA_STATUSCODE_BADOUTOFMEMORY;
+       identityToken->userName = UA_STRING_ALLOC(username);
+       identityToken->password = UA_STRING_ALLOC(password);
+       UA_ClientConfig *cc = UA_Client_getConfig(client);
+       UA_ExtensionObject_clear(&cc->userIdentityToken);
+       cc->userIdentityToken.encoding = UA_EXTENSIONOBJECT_DECODED;
+       cc->userIdentityToken.content.decoded.type = &UA_TYPES[UA_TYPES_USERNAMEIDENTITYTOKEN];
+       cc->userIdentityToken.content.decoded.data = identityToken;
+       return UA_Client_connect(client, endpointUrl);
+   }
+   
+   /* Disconnect and close a connection to the selected server. Disconnection is
+    * always performed async (without blocking). */
    UA_StatusCode
    UA_Client_disconnect(UA_Client *client);
    
+   /* Disconnect async. Run UA_Client_run_iterate until the callback notifies that
+    * all connections are closed. */
    UA_StatusCode
-   UA_Client_disconnect_async(UA_Client *client, UA_UInt32 *requestId);
+   UA_Client_disconnectAsync(UA_Client *client);
    
-   /* Close a connection to the selected server */
+   /* Disconnect the SecureChannel but keep the Session intact (if it exists).
+    * This is always an async (non-blocking) operation. */
+   UA_StatusCode
+   UA_Client_disconnectSecureChannel(UA_Client *client);
+   
+   /* Deprecated methods */
+   
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_connect_async(UA_Client *client, const char *endpointUrl) {
+       return UA_Client_connectAsync(client, endpointUrl);
+   }
+   
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_connect_noSession(UA_Client *client, const char *endpointUrl) {
+       return UA_Client_connectSecureChannel(client, endpointUrl);
+   }
+   
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_connect_username(UA_Client *client, const char *endpointUrl,
+                              const char *username, const char *password) {
+       return UA_Client_connectUsername(client, endpointUrl,
+                                        username, password);
+   }
+   
+   UA_DEPRECATED static UA_INLINE UA_StatusCode
+   UA_Client_disconnect_async(UA_Client *client, UA_UInt32 *requestId) {
+       return UA_Client_disconnect(client);
+   }
+   
    UA_DEPRECATED static UA_INLINE UA_StatusCode
    UA_Client_close(UA_Client *client) {
        return UA_Client_disconnect(client);
@@ -391,6 +451,10 @@ different ordering.
     * a custom timeout
     *
     * The userdata and requestId arguments can be NULL. */
+   
+   typedef void (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
+           UA_UInt32 requestId, void *response);
+   
    UA_StatusCode
    __UA_Client_AsyncService(UA_Client *client, const void *request,
                             const UA_DataType *requestType,
@@ -407,10 +471,10 @@ different ordering.
     * background. Internal housekeeping, renewal of SecureChannels and subscription
     * management is done as well. */
    UA_StatusCode
-   UA_Client_run_iterate(UA_Client *client, UA_UInt16 timeout);
+   UA_Client_run_iterate(UA_Client *client, UA_UInt32 timeout);
    
    UA_DEPRECATED static UA_INLINE UA_StatusCode
-   UA_Client_runAsync(UA_Client *client, UA_UInt16 timeout) {
+   UA_Client_runAsync(UA_Client *client, UA_UInt32 timeout) {
        return UA_Client_run_iterate(client, timeout);
    }
    
@@ -499,8 +563,10 @@ defined interval.
    void
    UA_Client_removeCallback(UA_Client *client, UA_UInt64 callbackId);
    
-   #define UA_Client_removeRepeatedCallback(client, callbackId) \
-       UA_Client_removeCallback(client, callbackId)
+   UA_DEPRECATED static UA_INLINE void
+   UA_Client_removeRepeatedCallback(UA_Client *client, UA_UInt64 callbackId) {
+       UA_Client_removeCallback(client, callbackId);
+   }
    
 .. toctree::
 

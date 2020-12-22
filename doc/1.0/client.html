@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Client &mdash; open62541 1.0.2-6-geb56179e documentation</title>
+  <title>Client &mdash; open62541 1.1.3-3-gbbcafda5 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.2-6-geb56179e',
+              VERSION:'1.1.3-3-gbbcafda5',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -105,8 +105,6 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Client</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a></li>
@@ -123,8 +121,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -217,21 +214,15 @@ The usual usage is as follows:</p>
 <li>After shutdown of the client, clean up the configuration (free memory)</li>
 </ol>
 <p>The <a class="reference internal" href="tutorials.html#tutorials"><em>Tutorials</em></a> provide a good starting point for this.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
-    <span class="n">UA_CLIENTSTATE_DISCONNECTED</span><span class="p">,</span>         <span class="cm">/* The client is disconnected */</span>
-    <span class="n">UA_CLIENTSTATE_WAITING_FOR_ACK</span><span class="p">,</span>      <span class="cm">/* The Client has sent HEL and waiting */</span>
-    <span class="n">UA_CLIENTSTATE_CONNECTED</span><span class="p">,</span>            <span class="cm">/* A TCP connection to the server is open */</span>
-    <span class="n">UA_CLIENTSTATE_SECURECHANNEL</span><span class="p">,</span>        <span class="cm">/* A SecureChannel to the server is open */</span>
-    <span class="n">UA_CLIENTSTATE_SESSION</span><span class="p">,</span>              <span class="cm">/* A session with the server is open */</span>
-    <span class="n">UA_CLIENTSTATE_SESSION_DISCONNECTED</span><span class="p">,</span> <span class="cm">/* Disconnected vs renewed? */</span>
-    <span class="n">UA_CLIENTSTATE_SESSION_RENEWED</span>       <span class="cm">/* A session with the server is open (renewed) */</span>
-<span class="p">}</span> <span class="n">UA_ClientState</span><span class="p">;</span>
-
-<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="cm">/* Basic client configuration */</span>
     <span class="kt">void</span> <span class="o">*</span><span class="n">clientContext</span><span class="p">;</span> <span class="cm">/* User-defined data attached to the client */</span>
     <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>   <span class="cm">/* Logger used by the client */</span>
     <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span>  <span class="cm">/* Response timeout in ms */</span>
+
+    <span class="cm">/* The description must be internally consistent.</span>
+<span class="cm">     * - The ApplicationUri set in the ApplicationDescription must match the</span>
+<span class="cm">     *   URI set in the server certificate */</span>
     <span class="n">UA_ApplicationDescription</span> <span class="n">clientDescription</span><span class="p">;</span>
 
     <span class="cm">/* Basic connection configuration */</span>
@@ -282,12 +273,19 @@ The usual usage is as follows:</p>
     <span class="n">UA_CertificateVerification</span> <span class="n">certificateVerification</span><span class="p">;</span>
 
     <span class="cm">/* Callbacks for async connection handshakes */</span>
-    <span class="n">UA_ConnectClientConnection</span> <span class="n">connectionFunc</span><span class="p">;</span>
     <span class="n">UA_ConnectClientConnection</span> <span class="n">initConnectionFunc</span><span class="p">;</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pollConnectionFunc</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">pollConnectionFunc</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">,</span>
+                                        <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">);</span>
 
-    <span class="cm">/* Callback for state changes */</span>
-    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">stateCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_ClientState</span> <span class="n">clientState</span><span class="p">);</span>
+    <span class="cm">/* Callback for state changes. The client state is differentated into the</span>
+<span class="cm">     * SecureChannel state and the Session state. The connectStatus is set if</span>
+<span class="cm">     * the client connection (including reconnects) has failed and the client</span>
+<span class="cm">     * has to &quot;give up&quot;. If the connectStatus is not set, the client still has</span>
+<span class="cm">     * hope to connect or recover. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">stateCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                          <span class="n">UA_SecureChannelState</span> <span class="n">channelState</span><span class="p">,</span>
+                          <span class="n">UA_SessionState</span> <span class="n">sessionState</span><span class="p">,</span>
+                          <span class="n">UA_StatusCode</span> <span class="n">connectStatus</span><span class="p">);</span>
 
     <span class="cm">/* When connectivityCheckInterval is greater than 0, every</span>
 <span class="cm">     * connectivityCheckInterval (in ms), a async read request is performed on</span>
@@ -314,13 +312,24 @@ The usual usage is as follows:</p>
 </div>
 <div class="section" id="client-lifecycle">
 <h2>Client Lifecycle<a class="headerlink" href="#client-lifecycle" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Create a new client */</span>
-<span class="n">UA_Client</span> <span class="o">*</span>
-<span class="nf">UA_Client_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* The method UA_Client_new is defined in client_config_default.h. So default</span>
+<span class="cm"> * plugins outside of the core library (for logging, etc) are already available</span>
+<span class="cm"> * during the initialization.</span>
+<span class="cm"> *</span>
+<span class="cm"> * UA_Client * UA_Client_new(void);</span>
+<span class="cm"> */</span>
 
-<span class="cm">/* Get the client connection status */</span>
-<span class="n">UA_ClientState</span>
-<span class="nf">UA_Client_getState</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
+<span class="cm">/* Creates a new client. Moves the config into the client with a shallow copy.</span>
+<span class="cm"> * The config content is cleared together with the client. */</span>
+<span class="n">UA_Client</span> <span class="o">*</span>
+<span class="nf">UA_Client_newWithConfig</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ClientConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Returns the current state. All arguments except ``client`` can be NULL. */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Client_getState</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                   <span class="n">UA_SecureChannelState</span> <span class="o">*</span><span class="n">channelState</span><span class="p">,</span>
+                   <span class="n">UA_SessionState</span> <span class="o">*</span><span class="n">sessionState</span><span class="p">,</span>
+                   <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">connectStatus</span><span class="p">);</span>
 
 <span class="cm">/* Get the client configuration */</span>
 <span class="n">UA_ClientConfig</span> <span class="o">*</span>
@@ -329,15 +338,10 @@ The usual usage is as follows:</p>
 <span class="cm">/* Get the client context */</span>
 <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span> <span class="o">*</span>
 <span class="nf">UA_Client_getContext</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_ClientConfig</span> <span class="o">*</span><span class="n">config</span> <span class="o">=</span> <span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span> <span class="cm">/* Cannot fail */</span>
-    <span class="k">return</span> <span class="n">config</span><span class="o">-&gt;</span><span class="n">clientContext</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">clientContext</span><span class="p">;</span> <span class="cm">/* Cannot fail */</span>
 <span class="p">}</span>
 
-<span class="cm">/* Reset a client */</span>
-<span class="kt">void</span>
-<span class="nf">UA_Client_reset</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
-
-<span class="cm">/* Delete a client */</span>
+<span class="cm">/* (Disconnect and) delete the client */</span>
 <span class="kt">void</span>
 <span class="nf">UA_Client_delete</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
 </pre></div>
@@ -345,10 +349,15 @@ The usual usage is as follows:</p>
 </div>
 <div class="section" id="connect-to-a-server">
 <h2>Connect to a Server<a class="headerlink" href="#connect-to-a-server" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
-        <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-
-<span class="cm">/* Connect to the server</span>
+<p>Once a client is connected to an endpointUrl, it is not possible to switch to
+another server. A new client has to be created for that.</p>
+<p>Once a connection is established, the client keeps the connection open and
+reconnects if necessary.</p>
+<p>If the connection fails unrecoverably (state-&gt;connectStatus is set to an
+error), the client is no longer usable. Create a new client if required.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Connect to the server. First a SecureChannel is opened, then a Session. The</span>
+<span class="cm"> * client configuration restricts the SecureChannel selection and contains the</span>
+<span class="cm"> * UserIdentityToken for the Session.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param client to use</span>
 <span class="cm"> * @param endpointURL to connect (for example &quot;opc.tcp://localhost:4840&quot;)</span>
@@ -356,10 +365,13 @@ The usual usage is as follows:</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Client_connect</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
+<span class="cm">/* Connect async (non-blocking) to the server. After initiating the connection,</span>
+<span class="cm"> * call UA_Client_run_iterate repeatedly until the connection is fully</span>
+<span class="cm"> * established. You can set a callback to client-&gt;config.stateCallback to be</span>
+<span class="cm"> * notified when the connection status changes. Or use UA_Client_getState to get</span>
+<span class="cm"> * the state manually. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_connect_async</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
-                        <span class="n">UA_ClientAsyncServiceCallback</span> <span class="n">callback</span><span class="p">,</span>
-                        <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">);</span>
+<span class="nf">UA_Client_connectAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
 <span class="cm">/* Connect to the server without creating a session</span>
 <span class="cm"> *</span>
@@ -367,27 +379,70 @@ The usual usage is as follows:</p>
 <span class="cm"> * @param endpointURL to connect (for example &quot;opc.tcp://localhost:4840&quot;)</span>
 <span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_connect_noSession</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="nf">UA_Client_connectSecureChannel</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
-<span class="cm">/* Connect to the selected server with the given username and password</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param client to use</span>
-<span class="cm"> * @param endpointURL to connect (for example &quot;opc.tcp://localhost:4840&quot;)</span>
-<span class="cm"> * @param username</span>
-<span class="cm"> * @param password</span>
-<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="cm">/* Connect async (non-blocking) only the SecureChannel */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_connect_username</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">username</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span><span class="p">);</span>
+<span class="nf">UA_Client_connectSecureChannelAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
-<span class="cm">/* Disconnect and close a connection to the selected server */</span>
+<span class="cm">/* Connect to the server and create+activate a Session with the given username</span>
+<span class="cm"> * and password. This first set the UserIdentityToken in the client config and</span>
+<span class="cm"> * then calls the regular connect method. */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_connectUsername</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">username</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_UserNameIdentityToken</span><span class="o">*</span> <span class="n">identityToken</span> <span class="o">=</span> <span class="n">UA_UserNameIdentityToken_new</span><span class="p">();</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">identityToken</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UA_STATUSCODE_BADOUTOFMEMORY</span><span class="p">;</span>
+    <span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">userName</span> <span class="o">=</span> <span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">username</span><span class="p">);</span>
+    <span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">password</span> <span class="o">=</span> <span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">password</span><span class="p">);</span>
+    <span class="n">UA_ClientConfig</span> <span class="o">*</span><span class="n">cc</span> <span class="o">=</span> <span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+    <span class="n">UA_ExtensionObject_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">);</span>
+    <span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">UA_EXTENSIONOBJECT_DECODED</span><span class="p">;</span>
+    <span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_USERNAMEIDENTITYTOKEN</span><span class="p">];</span>
+    <span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">identityToken</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">endpointUrl</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Disconnect and close a connection to the selected server. Disconnection is</span>
+<span class="cm"> * always performed async (without blocking). */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Client_disconnect</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
 
+<span class="cm">/* Disconnect async. Run UA_Client_run_iterate until the callback notifies that</span>
+<span class="cm"> * all connections are closed. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_disconnect_async</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+<span class="nf">UA_Client_disconnectAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
 
-<span class="cm">/* Close a connection to the selected server */</span>
+<span class="cm">/* Disconnect the SecureChannel but keep the Session intact (if it exists).</span>
+<span class="cm"> * This is always an async (non-blocking) operation. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_disconnectSecureChannel</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">);</span>
+
+<span class="cm">/* Deprecated methods */</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_connect_async</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Client_connectAsync</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">endpointUrl</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_connect_noSession</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Client_connectSecureChannel</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">endpointUrl</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_connect_username</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">username</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Client_connectUsername</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">endpointUrl</span><span class="p">,</span>
+                                     <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_disconnect_async</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">requestId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+<span class="p">}</span>
+
 <span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Client_close</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">UA_Client_disconnect</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
@@ -670,6 +725,10 @@ different ordering.</p>
 <span class="cm"> * a custom timeout</span>
 <span class="cm"> *</span>
 <span class="cm"> * The userdata and requestId arguments can be NULL. */</span>
+
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+        <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+
 <span class="n">UA_StatusCode</span>
 <span class="nf">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                          <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">requestType</span><span class="p">,</span>
@@ -686,10 +745,10 @@ different ordering.</p>
 <span class="cm"> * background. Internal housekeeping, renewal of SecureChannels and subscription</span>
 <span class="cm"> * management is done as well. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_run_iterate</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">);</span>
+<span class="nf">UA_Client_run_iterate</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">);</span>
 
 <span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_runAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt16</span> <span class="n">timeout</span><span class="p">)</span> <span class="p">{</span>
+<span class="nf">UA_Client_runAsync</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="n">UA_Client_run_iterate</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">timeout</span><span class="p">);</span>
 <span class="p">}</span>
 
@@ -776,8 +835,10 @@ defined interval.</p>
 <span class="kt">void</span>
 <span class="nf">UA_Client_removeCallback</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
 
-<span class="cp">#define UA_Client_removeRepeatedCallback(client, callbackId) \</span>
-<span class="cp">    UA_Client_removeCallback(client, callbackId)</span>
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="kt">void</span>
+<span class="nf">UA_Client_removeRepeatedCallback</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Client_removeCallback</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">callbackId</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">

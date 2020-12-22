@@ -26,6 +26,9 @@ part of the response.
    typedef void (*UA_Service)(UA_Server*, UA_Session*,
                               const void *request, void *response);
    
+   typedef void (*UA_ChannelService)(UA_Server*, UA_SecureChannel*,
+                                     const void *request, void *response);
+   
 Discovery Service Set
 ---------------------
 This Service Set defines Services used to discover the Endpoints implemented
@@ -150,7 +153,6 @@ the Server to close the Session.
 .. code-block:: c
 
    void Service_ActivateSession(UA_Server *server, UA_SecureChannel *channel,
-                                UA_Session *session,
                                 const UA_ActivateSessionRequest *request,
                                 UA_ActivateSessionResponse *response);
    
@@ -160,7 +162,7 @@ Used to terminate a Session.
 
 .. code-block:: c
 
-   void Service_CloseSession(UA_Server *server, UA_Session *session,
+   void Service_CloseSession(UA_Server *server, UA_SecureChannel *channel,
                              const UA_CloseSessionRequest *request,
                              UA_CloseSessionResponse *response);
    
@@ -328,7 +330,8 @@ or to read ranges of elements of the composite.
 .. code-block:: c
 
    void Service_Read(UA_Server *server, UA_Session *session,
-                     const UA_ReadRequest *request, UA_ReadResponse *response);
+                     const UA_ReadRequest *request,
+                     UA_ReadResponse *response);
    
 Write Service
 ^^^^^^^^^^^^^
@@ -340,7 +343,8 @@ or to write ranges of elements of the composite.
 .. code-block:: c
 
    void Service_Write(UA_Server *server, UA_Session *session,
-                      const UA_WriteRequest *request, UA_WriteResponse *response);
+                      const UA_WriteRequest *request,
+                      UA_WriteResponse *response);
    
 HistoryRead Service
 ^^^^^^^^^^^^^^^^^^^
@@ -389,6 +393,12 @@ the method's execution cannot be returned to the Client and are discarded.
    void Service_Call(UA_Server *server, UA_Session *session,
                      const UA_CallRequest *request,
                      UA_CallResponse *response);
+   
+   # if UA_MULTITHREADING >= 100
+   void Service_CallAsync(UA_Server *server, UA_Session *session, UA_UInt32 requestId,
+                          const UA_CallRequest *request, UA_CallResponse *response,
+                          UA_Boolean *finished);
+   #endif
    #endif
    
    #ifdef UA_ENABLE_SUBSCRIPTIONS

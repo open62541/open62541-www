@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Information Modelling &mdash; open62541 1.0.2-6-geb56179e documentation</title>
+  <title>Information Modelling &mdash; open62541 1.1.3-3-gbbcafda5 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.2-6-geb56179e',
+              VERSION:'1.1.3-3-gbbcafda5',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -119,14 +119,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodestore-plugin-api">Nodestore Plugin API</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#nodestore-plugin-api">Nodestore Plugin API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -220,20 +218,26 @@ model of the underlying representation.</p>
 <p>Nodes contain attributes according to their node type. The base node
 attributes are common to all node types. In the OPC UA <a class="reference internal" href="services.html#services"><em>Services</em></a>,
 attributes are referred to via the <a class="reference internal" href="types.html#nodeid"><em>NodeId</em></a> of the containing node and
-an integer <a class="reference internal" href="constants.html#attribute-id"><em>Attribute Id</em></a>.</p>
+an integer <a class="reference internal" href="common.html#attribute-id"><em>Attribute Id</em></a>.</p>
 <p>Internally, open62541 uses <tt class="docutils literal"><span class="pre">UA_Node</span></tt> in places where the exact node type is
 not known or not important. The <tt class="docutils literal"><span class="pre">nodeClass</span></tt> attribute is used to ensure the
 correctness of casting from <tt class="docutils literal"><span class="pre">UA_Node</span></tt> to a specific node type.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Ordered tree structure for fast member check */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTarget</span> <span class="p">{</span>
-    <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">zipfields</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">targetHash</span><span class="p">;</span> <span class="cm">/* Hash of the target nodeid */</span>
-    <span class="n">UA_ExpandedNodeId</span> <span class="n">target</span><span class="p">;</span>
+    <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">idTreeFields</span><span class="p">;</span>
+    <span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTarget</span><span class="p">)</span> <span class="n">nameTreeFields</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">targetIdHash</span><span class="p">;</span>   <span class="cm">/* Hash of the target&#39;s NodeId */</span>
+    <span class="n">UA_UInt32</span> <span class="n">targetNameHash</span><span class="p">;</span> <span class="cm">/* Hash of the target&#39;s BrowseName */</span>
+    <span class="n">UA_ExpandedNodeId</span> <span class="n">targetId</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_ReferenceTarget</span><span class="p">;</span>
 
-<span class="n">ZIP_HEAD</span><span class="p">(</span><span class="n">UA_ReferenceTargetHead</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">);</span>
-<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTargetHead</span> <span class="n">UA_ReferenceTargetHead</span><span class="p">;</span>
-<span class="n">ZIP_PROTTYPE</span><span class="p">(</span><span class="n">UA_ReferenceTargetHead</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">)</span>
+<span class="n">ZIP_HEAD</span><span class="p">(</span><span class="n">UA_ReferenceTargetIdTree</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTargetIdTree</span> <span class="n">UA_ReferenceTargetIdTree</span><span class="p">;</span>
+<span class="n">ZIP_PROTTYPE</span><span class="p">(</span><span class="n">UA_ReferenceTargetIdTree</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">)</span>
+
+<span class="n">ZIP_HEAD</span><span class="p">(</span><span class="n">UA_ReferenceTargetNameTree</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_ReferenceTargetNameTree</span> <span class="n">UA_ReferenceTargetNameTree</span><span class="p">;</span>
+<span class="n">ZIP_PROTTYPE</span><span class="p">(</span><span class="n">UA_ReferenceTargetNameTree</span><span class="p">,</span> <span class="n">UA_ReferenceTarget</span><span class="p">,</span> <span class="n">UA_UInt32</span><span class="p">)</span>
 
 <span class="cm">/* List of reference targets with the same reference type and direction */</span>
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
@@ -241,7 +245,8 @@ correctness of casting from <tt class="docutils literal"><span class="pre">UA_No
     <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">;</span>
     <span class="kt">size_t</span> <span class="n">refTargetsSize</span><span class="p">;</span>
     <span class="n">UA_ReferenceTarget</span> <span class="o">*</span><span class="n">refTargets</span><span class="p">;</span>
-    <span class="n">UA_ReferenceTargetHead</span> <span class="n">refTargetsTree</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTargetIdTree</span> <span class="n">refTargetsIdTree</span><span class="p">;</span>
+    <span class="n">UA_ReferenceTargetNameTree</span> <span class="n">refTargetsNameTree</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_NodeReferenceKind</span><span class="p">;</span>
 
 <span class="cp">#define UA_NODE_BASEATTRIBUTES                  \</span>
@@ -397,6 +402,9 @@ providing context</em> is part of a Call request message.</p>
 
     <span class="cm">/* Members specific to open62541 */</span>
     <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">;</span>
+<span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
+    <span class="n">UA_Boolean</span> <span class="n">async</span><span class="p">;</span> <span class="cm">/* Indicates an async method call */</span>
+<span class="cp">#endif</span>
 <span class="p">}</span> <span class="n">UA_MethodNode</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -567,84 +575,66 @@ open62541.</p>
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="nodestore-plugin-api">
-<h1>Nodestore Plugin API<a class="headerlink" href="#nodestore-plugin-api" title="Permalink to this headline">¶</a></h1>
+<h2>Nodestore Plugin API<a class="headerlink" href="#nodestore-plugin-api" title="Permalink to this headline">¶</a></h2>
 <p>The following definitions are used for implementing custom node storage
 backends. <strong>Most users will want to use the default nodestore and don&#8217;t need
 to work with the nodestore API</strong>.</p>
 <p>Outside of custom nodestore implementations, users should not manually edit
 nodes. Please use the OPC UA services for that. Otherwise, all consistency
 checks are omitted. This can crash the application eventually.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* For non-multithreaded access, some nodestores allow that nodes are edited</span>
-<span class="cm"> * without a copy/replace. This is not possible when the node is only an</span>
-<span class="cm"> * intermediate representation and stored e.g. in a database backend. */</span>
-<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="n">inPlaceEditAllowed</span><span class="p">;</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* Nodestore context and lifecycle */</span>
-<span class="n">UA_StatusCode</span> <span class="nf">UA_Nodestore_new</span><span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="n">nsCtx</span><span class="p">);</span>
-<span class="kt">void</span> <span class="nf">UA_Nodestore_delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>The following definitions are used to create empty nodes of the different
-node types. The memory is managed by the nodestore. Therefore, the node has
-to be removed via a special deleteNode function. (If the new node is not
-added to the nodestore.)</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_Node</span> <span class="o">*</span>
-<span class="nf">UA_Nodestore_newNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">);</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Nodestore context and lifecycle */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">context</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">);</span>
 
-<span class="kt">void</span>
-<span class="nf">UA_Nodestore_deleteNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>pointer is no longer accessed afterwards.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span>
-<span class="nf">UA_Nodestore_getNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+    <span class="cm">/* The following definitions are used to create empty nodes of the different</span>
+<span class="cm">     * node types. The memory is managed by the nodestore. Therefore, the node</span>
+<span class="cm">     * has to be removed via a special deleteNode function. (If the new node is</span>
+<span class="cm">     * not added to the nodestore.) */</span>
+    <span class="n">UA_Node</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">newNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">);</span>
 
-<span class="kt">void</span>
-<span class="nf">UA_Nodestore_releaseNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
-<span class="cm"> * deleteNode function or inserted / replaced into the nodestore). */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_getNodeCopy</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-                         <span class="n">UA_Node</span> <span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
+    <span class="cm">/* ``Get`` returns a pointer to an immutable node. ``Release`` indicates</span>
+<span class="cm">     * that the pointer is no longer accessed afterwards. */</span>
+    <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">getNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
 
-<span class="cm">/* Inserts a new node into the nodestore. If the NodeId is zero, then a fresh</span>
-<span class="cm"> * numeric NodeId is assigned. If insertion fails, the node is deleted. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_insertNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">addedNodeId</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">releaseNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* To replace a node, get an editable copy of the node, edit and replace with</span>
-<span class="cm"> * this function. If the node was already replaced since the copy was made,</span>
-<span class="cm"> * UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not found,</span>
-<span class="cm"> * UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases, the editable</span>
-<span class="cm"> * node is deleted. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_replaceNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+    <span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
+<span class="cm">     * deleteNode function or inserted / replaced into the nodestore). */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_Node</span> <span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
 
-<span class="cm">/* Removes a node from the nodestore. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Nodestore_removeNode</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+    <span class="cm">/* Inserts a new node into the nodestore. If the NodeId is zero, then a</span>
+<span class="cm">     * fresh numeric NodeId is assigned. If insertion fails, the node is</span>
+<span class="cm">     * deleted. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">insertNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span>
+                                <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">addedNodeId</span><span class="p">);</span>
 
-<span class="cm">/* Execute a callback for every node in the nodestore. */</span>
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
-<span class="kt">void</span>
-<span class="nf">UA_Nodestore_iterate</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodestoreVisitor</span> <span class="n">visitor</span><span class="p">,</span>
-                     <span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="node-handling">
-<h1>Node Handling<a class="headerlink" href="#node-handling" title="Permalink to this headline">¶</a></h1>
-<p>To be used only in the nodestore and internally in the SDK. The following
-methods specialize internally for the different node classes, distinguished
-by the NodeClass attribute.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
+    <span class="cm">/* To replace a node, get an editable copy of the node, edit and replace</span>
+<span class="cm">     * with this function. If the node was already replaced since the copy was</span>
+<span class="cm">     * made, UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not</span>
+<span class="cm">     * found, UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases,</span>
+<span class="cm">     * the editable node is deleted. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">replaceNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+    <span class="cm">/* Removes a node from the nodestore. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+
+    <span class="cm">/* Execute a callback for every node in the nodestore. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span> <span class="n">UA_NodestoreVisitor</span> <span class="n">visitor</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_Nodestore</span><span class="p">;</span>
+
+<span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
 <span class="cm"> * and so on). The attributes are copied. Note that the attributes structs do</span>
 <span class="cm"> * not contain NodeId, NodeClass and BrowseName. The NodeClass of the node needs</span>
-<span class="cm"> * to be correctly set before calling this method. UA_Node_deleteMembers is</span>
-<span class="cm"> * called on the node when an error occurs internally. */</span>
+<span class="cm"> * to be correctly set before calling this method. UA_Node_clear is called on</span>
+<span class="cm"> * the node when an error occurs internally. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Node_setAttributes</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attributes</span><span class="p">,</span>
                       <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">);</span>
@@ -659,7 +649,8 @@ by the NodeClass attribute.</p>
 
 <span class="cm">/* Add a single reference to the node */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">);</span>
+<span class="nf">UA_Node_addReference</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_AddReferencesItem</span> <span class="o">*</span><span class="n">item</span><span class="p">,</span>
+                     <span class="n">UA_UInt32</span> <span class="n">targetBrowseNameHash</span><span class="p">);</span>
 
 <span class="cm">/* Delete a single reference from the node */</span>
 <span class="n">UA_StatusCode</span>
@@ -669,10 +660,11 @@ by the NodeClass attribute.</p>
 <span class="kt">void</span>
 <span class="nf">UA_Node_deleteReferences</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="cm">/* Remove all malloc&#39;ed members of the node */</span>
+<span class="cm">/* Remove all malloc&#39;ed members of the node and reset */</span>
 <span class="kt">void</span>
-<span class="nf">UA_Node_deleteMembers</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+<span class="nf">UA_Node_clear</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
 </pre></div>
+</div>
 </div>
 </div>
 

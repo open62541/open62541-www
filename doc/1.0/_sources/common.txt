@@ -1,7 +1,7 @@
-Standard-Defined Constants
-==========================
-This section contains numerical and string constants that are defined in the
-OPC UA standard.
+Common Definitions
+==================
+
+Common definitions for Client, Server and PubSub.
 
 .. _attribute-id:
 
@@ -35,7 +35,8 @@ the node type. Possible attributes are as follows:
        UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL = 19,
        UA_ATTRIBUTEID_HISTORIZING             = 20,
        UA_ATTRIBUTEID_EXECUTABLE              = 21,
-       UA_ATTRIBUTEID_USEREXECUTABLE          = 22
+       UA_ATTRIBUTEID_USEREXECUTABLE          = 22,
+       UA_ATTRIBUTEID_DATATYPEDEFINITION      = 23
    } UA_AttributeId;
    
 Access Level Masks
@@ -102,9 +103,6 @@ well (but less common).
    #define UA_VALUERANK_TWO_DIMENSIONS            2
    #define UA_VALUERANK_THREE_DIMENSIONS          3
    
-Internal Constants
-==================
-
 Rule Handling
 -------------
 
@@ -136,3 +134,74 @@ The Order enum is used to establish an absolute ordering between elements.
        UA_ORDER_EQ = 0,
        UA_ORDER_MORE = 1
    } UA_Order;
+   
+Connection State
+----------------
+
+.. code-block:: c
+
+   
+   typedef enum {
+       UA_SECURECHANNELSTATE_CLOSED,
+       UA_SECURECHANNELSTATE_HEL_SENT,
+       UA_SECURECHANNELSTATE_HEL_RECEIVED,
+       UA_SECURECHANNELSTATE_ACK_SENT,
+       UA_SECURECHANNELSTATE_ACK_RECEIVED,
+       UA_SECURECHANNELSTATE_OPN_SENT,
+       UA_SECURECHANNELSTATE_OPEN,
+       UA_SECURECHANNELSTATE_CLOSING
+   } UA_SecureChannelState;
+   
+   typedef enum {
+       UA_SESSIONSTATE_CLOSED,
+       UA_SESSIONSTATE_CREATE_REQUESTED,
+       UA_SESSIONSTATE_CREATED,
+       UA_SESSIONSTATE_ACTIVATE_REQUESTED,
+       UA_SESSIONSTATE_ACTIVATED,
+       UA_SESSIONSTATE_CLOSING
+   } UA_SessionState;
+   
+Statistic counters
+------------------
+
+The stack manage statistic counter for the following layers:
+
+- Network
+- Secure channel
+- Session
+
+The session layer counters are matching the counters of the
+ServerDiagnosticsSummaryDataType that are defined in the OPC UA Part 5
+specification. Counter of the other layers are not specified by OPC UA but
+are harmonized with the session layer counters if possible.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       size_t currentConnectionCount;
+       size_t cumulatedConnectionCount;
+       size_t rejectedConnectionCount;
+       size_t connectionTimeoutCount;
+       size_t connectionAbortCount;
+   } UA_NetworkStatistics;
+   
+   typedef struct {
+       size_t currentChannelCount;
+       size_t cumulatedChannelCount;
+       size_t rejectedChannelCount;
+       size_t channelTimeoutCount; /* only used by servers */
+       size_t channelAbortCount;
+       size_t channelPurgeCount;   /* only used by servers */
+   } UA_SecureChannelStatistics;
+   
+   typedef struct {
+       size_t currentSessionCount;
+       size_t cumulatedSessionCount;
+       size_t securityRejectedSessionCount; /* only used by servers */
+       size_t rejectedSessionCount;
+       size_t sessionTimeoutCount;          /* only used by servers */
+       size_t sessionAbortCount;            /* only used by servers */
+   } UA_SessionStatistics;
+   
+.. include:: util.rst

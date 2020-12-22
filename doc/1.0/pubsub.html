@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Publish/Subscribe &mdash; open62541 1.0.2-6-geb56179e documentation</title>
+  <title>Publish/Subscribe &mdash; open62541 1.1.3-3-gbbcafda5 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.2-6-geb56179e',
+              VERSION:'1.1.3-3-gbbcafda5',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                1.0
+                1.1
               </div>
             
           
@@ -104,12 +104,9 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
-<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
@@ -124,6 +121,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#publisheddatasets">PublishedDataSets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetfields">DataSetFields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writergroup">WriterGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">WriterGroup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetwriter">DataSetWriter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
@@ -277,6 +275,16 @@ different transport protocols at runtime.</p>
     <span class="n">UA_PUBSUB_PUBLISHERID_STRING</span>
 <span class="p">}</span> <span class="n">UA_PublisherIdType</span><span class="p">;</span>
 
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Int32</span> <span class="n">socketPriority</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">sotxtimeEnabled</span><span class="p">;</span>
+    <span class="cm">/* SO_TXTIME-specific additional socket config */</span>
+    <span class="n">UA_Int32</span> <span class="n">sotxtimeDeadlinemode</span><span class="p">;</span>
+    <span class="n">UA_Int32</span> <span class="n">sotxtimeReceiveerrors</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ETFConfiguration</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">enabled</span><span class="p">;</span>
@@ -290,6 +298,14 @@ different transport protocols at runtime.</p>
     <span class="kt">size_t</span> <span class="n">connectionPropertiesSize</span><span class="p">;</span>
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">connectionProperties</span><span class="p">;</span>
     <span class="n">UA_Variant</span> <span class="n">connectionTransportSettings</span><span class="p">;</span>
+
+    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
+    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
+
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF</span>
+    <span class="cm">/* ETF related connection configuration - Not in PubSub specfication */</span>
+    <span class="n">UA_ETFConfiguration</span> <span class="n">etfConfiguration</span><span class="p">;</span>
+<span class="cp">#endif</span>
 <span class="p">}</span> <span class="n">UA_PubSubConnectionConfig</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span>
@@ -358,10 +374,12 @@ functions to add new fields.</p>
         <span class="n">UA_PublishedEventConfig</span> <span class="n">event</span><span class="p">;</span>
         <span class="n">UA_PublishedEventTemplateConfig</span> <span class="n">eventTemplate</span><span class="p">;</span>
     <span class="p">}</span> <span class="n">config</span><span class="p">;</span>
+    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
+    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_PublishedDataSetConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
-<span class="nf">UA_PublishedDataSetConfig_deleteMembers</span><span class="p">(</span><span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
+<span class="nf">UA_PublishedDataSetConfig_clear</span><span class="p">(</span><span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_StatusCode</span> <span class="n">addResult</span><span class="p">;</span>
@@ -379,6 +397,11 @@ functions to add new fields.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_getPublishedDataSetConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">pds</span><span class="p">,</span>
                                     <span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the DataSetMetaData for an specific PDS */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPublishedDataSetMetaData</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">pds</span><span class="p">,</span>
+                                      <span class="n">UA_DataSetMetaDataType</span> <span class="o">*</span><span class="n">metaData</span><span class="p">);</span>
 
 <span class="cm">/* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes</span>
 <span class="cm"> * all contained and linked PDS Fields. Connected WriterGroups will be also</span>
@@ -399,6 +422,9 @@ handling process.</p>
     <span class="n">UA_String</span> <span class="n">fieldNameAlias</span><span class="p">;</span>
     <span class="n">UA_Boolean</span> <span class="n">promotedField</span><span class="p">;</span>
     <span class="n">UA_PublishedVariableDataType</span> <span class="n">publishParameters</span><span class="p">;</span>
+    <span class="cm">/* non std. field */</span>
+    <span class="n">UA_Boolean</span> <span class="n">staticValueSourceEnabled</span><span class="p">;</span>
+    <span class="n">UA_DataValue</span> <span class="n">staticValueSource</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetVariableConfig</span><span class="p">;</span>
 
 <span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
@@ -412,10 +438,12 @@ handling process.</p>
         <span class="cm">/* events need other config later */</span>
         <span class="n">UA_DataSetVariableConfig</span> <span class="n">variable</span><span class="p">;</span>
     <span class="p">}</span> <span class="n">field</span><span class="p">;</span>
+    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
+    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetFieldConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
-<span class="nf">UA_DataSetFieldConfig_deleteMembers</span><span class="p">(</span><span class="n">UA_DataSetFieldConfig</span> <span class="o">*</span><span class="n">dataSetFieldConfig</span><span class="p">);</span>
+<span class="nf">UA_DataSetFieldConfig_clear</span><span class="p">(</span><span class="n">UA_DataSetFieldConfig</span> <span class="o">*</span><span class="n">dataSetFieldConfig</span><span class="p">);</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_StatusCode</span> <span class="n">result</span><span class="p">;</span>
@@ -451,6 +479,38 @@ contained in the WriterGroup.</p>
     <span class="n">UA_PUBSUB_ENCODING_JSON</span><span class="p">,</span>
     <span class="n">UA_PUBSUB_ENCODING_UADP</span>
 <span class="p">}</span> <span class="n">UA_PubSubEncodingType</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>WriterGroup<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The message publishing can be configured for realtime requirements. The RT-levels
+go along with different requirements. The below listed levels can be configured:</p>
+<p>UA_PUBSUB_RT_NONE -
+&#8212;&gt; Description: Default &#8220;none-RT&#8221; Mode
+&#8212;&gt; Requirements: -
+&#8212;&gt; Restrictions: -
+UA_PUBSUB_RT_DIRECT_VALUE_ACCESS (Preview - not implemented)
+&#8212;&gt; Description: Normally, the latest value for each DataSetField is read out of the information model. Within this RT-mode, the
+value source of each field configured as static pointer to an DataValue. The publish cycle won&#8217;t use call the server read function.
+&#8212;&gt; Requirements: All fields must be configured with a &#8216;staticValueSource&#8217;.
+&#8212;&gt; Restrictions: -
+UA_PUBSUB_RT_FIXED_LENGTH (Preview - not implemented)
+&#8212;&gt; Description: All DataSetFields have a known, non-changing length. The server will pre-generate some
+buffers and use only memcopy operations to generate requested PubSub packages.
+&#8212;&gt; Requirements: DataSetFields with variable size can&#8217;t be used within this mode.
+&#8212;&gt; Restrictions: The configuration must be frozen and changes are not allowed while the WriterGroup is &#8216;Operational&#8217;.
+UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
+&#8212;&gt; Description: -
+&#8212;&gt; Requirements: -
+&#8212;&gt; Restrictions: -</p>
+<p>WARNING! For hard real time requirements the underlying system must be rt-capable.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_RT_NONE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_RT_DIRECT_VALUE_ACCESS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_RT_FIXED_SIZE</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_RT_DETERMINISTIC</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">UA_PubSubRTLevel</span><span class="p">;</span>
 
 <span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
     <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
@@ -469,10 +529,14 @@ contained in the WriterGroup.</p>
     <span class="cm">/* non std. config parameter. maximum count of embedded DataSetMessage in</span>
 <span class="cm">     * one NetworkMessage */</span>
     <span class="n">UA_UInt16</span> <span class="n">maxEncapsulatedDataSetMessageCount</span><span class="p">;</span>
+    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
+    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
+    <span class="cm">/* non std. field */</span>
+    <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_WriterGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
-<span class="nf">UA_WriterGroupConfig_deleteMembers</span><span class="p">(</span><span class="n">UA_WriterGroupConfig</span> <span class="o">*</span><span class="n">writerGroupConfig</span><span class="p">);</span>
+<span class="nf">UA_WriterGroupConfig_clear</span><span class="p">(</span><span class="n">UA_WriterGroupConfig</span> <span class="o">*</span><span class="n">writerGroupConfig</span><span class="p">);</span>
 
 <span class="cm">/* Add a new WriterGroup to an existing Connection */</span>
 <span class="n">UA_StatusCode</span>
@@ -491,6 +555,18 @@ contained in the WriterGroup.</p>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_removeWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_freezeWriterGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_unfreezeWriterGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setWriterGroupOperational</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setWriterGroupDisabled</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -507,13 +583,16 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
     <span class="n">UA_DataSetFieldContentMask</span> <span class="n">dataSetFieldContentMask</span><span class="p">;</span>
     <span class="n">UA_UInt32</span> <span class="n">keyFrameCount</span><span class="p">;</span>
     <span class="n">UA_ExtensionObject</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
     <span class="n">UA_String</span> <span class="n">dataSetName</span><span class="p">;</span>
     <span class="kt">size_t</span> <span class="n">dataSetWriterPropertiesSize</span><span class="p">;</span>
     <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">dataSetWriterProperties</span><span class="p">;</span>
+    <span class="cm">/* This flag is &#39;read only&#39; and is set internally based on the PubSub state. */</span>
+    <span class="n">UA_Boolean</span> <span class="n">configurationFrozen</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetWriterConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
-<span class="nf">UA_DataSetWriterConfig_deleteMembers</span><span class="p">(</span><span class="n">UA_DataSetWriterConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
+<span class="nf">UA_DataSetWriterConfig_clear</span><span class="p">(</span><span class="n">UA_DataSetWriterConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
 
 <span class="cm">/* Add a new DataSetWriter to a existing WriterGroup. The DataSetWriter must be</span>
 <span class="cm"> * coupled with a PublishedDataSet on creation.</span>
@@ -562,6 +641,7 @@ on the Subscriber side</p>
     <span class="n">UA_Double</span> <span class="n">messageReceiveTimeout</span><span class="p">;</span>
     <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
     <span class="n">UA_UadpDataSetReaderMessageDataType</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
     <span class="n">UA_TargetVariablesDataType</span> <span class="n">subscribedDataSetTarget</span><span class="p">;</span>
 <span class="p">}</span> <span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
 
@@ -609,10 +689,11 @@ deleted if the connection is removed.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_removeDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerIdentifier</span><span class="p">);</span>
 
-<span class="cm">/* To Do: Update Configuration of ReaderGroup */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_ReaderGroup_updateConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+<span class="cm">/* To Do: Update Configuration of ReaderGroup</span>
+<span class="cm"> * UA_StatusCode</span>
+<span class="cm"> * UA_Server_ReaderGroup_updateConfig(UA_Server *server, UA_NodeId readerGroupIdentifier,</span>
+<span class="cm"> *                                    const UA_ReaderGroupConfig *config);</span>
+<span class="cm"> */</span>
 
 <span class="cm">/* Get configuraiton of ReaderGroup */</span>
 <span class="n">UA_StatusCode</span>

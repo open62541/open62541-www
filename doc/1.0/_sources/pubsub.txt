@@ -91,6 +91,16 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
        UA_PUBSUB_PUBLISHERID_STRING
    } UA_PublisherIdType;
    
+   #ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF
+   typedef struct {
+       UA_Int32 socketPriority;
+       UA_Boolean sotxtimeEnabled;
+       /* SO_TXTIME-specific additional socket config */
+       UA_Int32 sotxtimeDeadlinemode;
+       UA_Int32 sotxtimeReceiveerrors;
+   } UA_ETFConfiguration;
+   #endif
+   
    typedef struct {
        UA_String name;
        UA_Boolean enabled;
@@ -104,6 +114,14 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
        size_t connectionPropertiesSize;
        UA_KeyValuePair *connectionProperties;
        UA_Variant connectionTransportSettings;
+   
+       /* This flag is 'read only' and is set internally based on the PubSub state. */
+       UA_Boolean configurationFrozen;
+   
+   #ifdef UA_ENABLE_PUBSUB_ETH_UADP_ETF
+       /* ETF related connection configuration - Not in PubSub specfication */
+       UA_ETFConfiguration etfConfiguration;
+   #endif
    } UA_PubSubConnectionConfig;
    
    UA_StatusCode
@@ -174,10 +192,12 @@ functions to add new fields.
            UA_PublishedEventConfig event;
            UA_PublishedEventTemplateConfig eventTemplate;
        } config;
+       /* This flag is 'read only' and is set internally based on the PubSub state. */
+       UA_Boolean configurationFrozen;
    } UA_PublishedDataSetConfig;
    
    void
-   UA_PublishedDataSetConfig_deleteMembers(UA_PublishedDataSetConfig *pdsConfig);
+   UA_PublishedDataSetConfig_clear(UA_PublishedDataSetConfig *pdsConfig);
    
    typedef struct {
        UA_StatusCode addResult;
@@ -195,6 +215,11 @@ functions to add new fields.
    UA_StatusCode
    UA_Server_getPublishedDataSetConfig(UA_Server *server, const UA_NodeId pds,
                                        UA_PublishedDataSetConfig *config);
+   
+   /* Returns a deep copy of the DataSetMetaData for an specific PDS */
+   UA_StatusCode
+   UA_Server_getPublishedDataSetMetaData(UA_Server *server, const UA_NodeId pds,
+                                         UA_DataSetMetaDataType *metaData);
    
    /* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes
     * all contained and linked PDS Fields. Connected WriterGroups will be also
@@ -217,6 +242,9 @@ handling process.
        UA_String fieldNameAlias;
        UA_Boolean promotedField;
        UA_PublishedVariableDataType publishParameters;
+       /* non std. field */
+       UA_Boolean staticValueSourceEnabled;
+       UA_DataValue staticValueSource;
    } UA_DataSetVariableConfig;
    
    typedef enum {
@@ -230,10 +258,12 @@ handling process.
            /* events need other config later */
            UA_DataSetVariableConfig variable;
        } field;
+       /* This flag is 'read only' and is set internally based on the PubSub state. */
+       UA_Boolean configurationFrozen;
    } UA_DataSetFieldConfig;
    
    void
-   UA_DataSetFieldConfig_deleteMembers(UA_DataSetFieldConfig *dataSetFieldConfig);
+   UA_DataSetFieldConfig_clear(UA_DataSetFieldConfig *dataSetFieldConfig);
    
    typedef struct {
        UA_StatusCode result;
@@ -272,6 +302,42 @@ contained in the WriterGroup.
        UA_PUBSUB_ENCODING_UADP
    } UA_PubSubEncodingType;
    
+WriterGroup
+-----------
+The message publishing can be configured for realtime requirements. The RT-levels
+go along with different requirements. The below listed levels can be configured:
+
+UA_PUBSUB_RT_NONE -
+---> Description: Default "none-RT" Mode
+---> Requirements: -
+---> Restrictions: -
+UA_PUBSUB_RT_DIRECT_VALUE_ACCESS (Preview - not implemented)
+---> Description: Normally, the latest value for each DataSetField is read out of the information model. Within this RT-mode, the
+value source of each field configured as static pointer to an DataValue. The publish cycle won't use call the server read function.
+---> Requirements: All fields must be configured with a 'staticValueSource'.
+---> Restrictions: -
+UA_PUBSUB_RT_FIXED_LENGTH (Preview - not implemented)
+---> Description: All DataSetFields have a known, non-changing length. The server will pre-generate some
+buffers and use only memcopy operations to generate requested PubSub packages.
+---> Requirements: DataSetFields with variable size can't be used within this mode.
+---> Restrictions: The configuration must be frozen and changes are not allowed while the WriterGroup is 'Operational'.
+UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
+---> Description: -
+---> Requirements: -
+---> Restrictions: -
+
+WARNING! For hard real time requirements the underlying system must be rt-capable.
+
+
+.. code-block:: c
+
+   typedef enum {
+       UA_PUBSUB_RT_NONE = 0,
+       UA_PUBSUB_RT_DIRECT_VALUE_ACCESS = 1,
+       UA_PUBSUB_RT_FIXED_SIZE = 2,
+       UA_PUBSUB_RT_DETERMINISTIC = 4,
+   } UA_PubSubRTLevel;
+   
    typedef struct {
        UA_String name;
        UA_Boolean enabled;
@@ -289,10 +355,14 @@ contained in the WriterGroup.
        /* non std. config parameter. maximum count of embedded DataSetMessage in
         * one NetworkMessage */
        UA_UInt16 maxEncapsulatedDataSetMessageCount;
+       /* This flag is 'read only' and is set internally based on the PubSub state. */
+       UA_Boolean configurationFrozen;
+       /* non std. field */
+       UA_PubSubRTLevel rtLevel;
    } UA_WriterGroupConfig;
    
    void
-   UA_WriterGroupConfig_deleteMembers(UA_WriterGroupConfig *writerGroupConfig);
+   UA_WriterGroupConfig_clear(UA_WriterGroupConfig *writerGroupConfig);
    
    /* Add a new WriterGroup to an existing Connection */
    UA_StatusCode
@@ -311,6 +381,18 @@ contained in the WriterGroup.
    
    UA_StatusCode
    UA_Server_removeWriterGroup(UA_Server *server, const UA_NodeId writerGroup);
+   
+   UA_StatusCode
+   UA_Server_freezeWriterGroupConfiguration(UA_Server *server, const UA_NodeId writerGroup);
+   
+   UA_StatusCode
+   UA_Server_unfreezeWriterGroupConfiguration(UA_Server *server, const UA_NodeId writerGroup);
+   
+   UA_StatusCode
+   UA_Server_setWriterGroupOperational(UA_Server *server, const UA_NodeId writerGroup);
+   
+   UA_StatusCode
+   UA_Server_setWriterGroupDisabled(UA_Server *server, const UA_NodeId writerGroup);
    
 .. _dsw:
 
@@ -331,13 +413,16 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
        UA_DataSetFieldContentMask dataSetFieldContentMask;
        UA_UInt32 keyFrameCount;
        UA_ExtensionObject messageSettings;
+       UA_ExtensionObject transportSettings;
        UA_String dataSetName;
        size_t dataSetWriterPropertiesSize;
        UA_KeyValuePair *dataSetWriterProperties;
+       /* This flag is 'read only' and is set internally based on the PubSub state. */
+       UA_Boolean configurationFrozen;
    } UA_DataSetWriterConfig;
    
    void
-   UA_DataSetWriterConfig_deleteMembers(UA_DataSetWriterConfig *pdsConfig);
+   UA_DataSetWriterConfig_clear(UA_DataSetWriterConfig *pdsConfig);
    
    /* Add a new DataSetWriter to a existing WriterGroup. The DataSetWriter must be
     * coupled with a PublishedDataSet on creation.
@@ -388,6 +473,7 @@ on the Subscriber side
        UA_Double messageReceiveTimeout;
        UA_PubSubSecurityParameters securityParameters;
        UA_UadpDataSetReaderMessageDataType messageSettings;
+       UA_ExtensionObject transportSettings;
        UA_TargetVariablesDataType subscribedDataSetTarget;
    } UA_DataSetReaderConfig;
    
@@ -437,10 +523,11 @@ deleted if the connection is removed.
    UA_StatusCode
    UA_Server_removeDataSetReader(UA_Server *server, UA_NodeId readerIdentifier);
    
-   /* To Do: Update Configuration of ReaderGroup */
-   UA_StatusCode
-   UA_Server_ReaderGroup_updateConfig(UA_Server *server, UA_NodeId readerGroupIdentifier,
-                                     const UA_ReaderGroupConfig *config);
+   /* To Do: Update Configuration of ReaderGroup
+    * UA_StatusCode
+    * UA_Server_ReaderGroup_updateConfig(UA_Server *server, UA_NodeId readerGroupIdentifier,
+    *                                    const UA_ReaderGroupConfig *config);
+    */
    
    /* Get configuraiton of ReaderGroup */
    UA_StatusCode
