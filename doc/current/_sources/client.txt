@@ -568,6 +568,22 @@ invalidate the connection if not renewed.
            const UA_DataType *requestType, UA_ClientAsyncServiceCallback callback,
            const UA_DataType *responseType, void *userdata, UA_UInt32 *requestId);
    
+Set new userdata and callback for an existing request.
+
+@param client Pointer to the UA_Client
+@param requestId RequestId of the request, which was returned by
+       UA_Client_sendAsyncRequest before
+@param userdata The new userdata.
+@param callback The new callback
+@return UA_StatusCode UA_STATUSCODE_GOOD on success
+        UA_STATUSCODE_BADNOTFOUND when no request with requestId is found.
+
+.. code-block:: c
+
+   UA_StatusCode
+   UA_Client_modifyAsyncCallback(UA_Client *client, UA_UInt32 requestId,
+           void *userdata, UA_ClientAsyncServiceCallback callback);
+   
    /* Listen on the network and process arriving asynchronous responses in the
     * background. Internal housekeeping, renewal of SecureChannels and subscription
     * management is done as well. */
