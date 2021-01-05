@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html4" lang="" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Working with Publish/Subscribe &mdash; open62541 1.0.4-1-g9a031ebf documentation</title>
+  <title>Working with Publish/Subscribe &mdash; open62541 1.0.5-1-g982f0796 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -28,7 +31,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.4-1-g9a031ebf',
+              VERSION:'1.0.5-1-g982f0796',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -58,7 +61,7 @@
           
 
           
-            <a href="toc.html" class="icon icon-home" alt="Documentation Home"> open62541
+            <a href="toc.html" class="icon icon-home"> open62541
           
 
           
@@ -110,7 +113,6 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_server_alarms_conditions.html">Using Alarms and Conditions Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="">Working with Publish/Subscribe</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#publishing-fields">Publishing Fields</a></li>
@@ -122,9 +124,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -167,6 +172,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -180,7 +187,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/tutorial_pubsub_publish.txt" rel="nofollow"> View page source</a>
           
         
@@ -230,9 +237,7 @@ the system preconfiguration and connection can be found in
     <span class="n">connectionConfig</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
     <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">address</span><span class="p">,</span> <span class="n">networkAddressUrl</span><span class="p">,</span>
                          <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NETWORKADDRESSURLDATATYPE</span><span class="p">]);</span>
-    <span class="cm">/* Changed to static publisherId from random generation to identify</span>
-<span class="cm">     * the publisher on Subscriber side */</span>
-    <span class="n">connectionConfig</span><span class="p">.</span><span class="n">publisherId</span><span class="p">.</span><span class="n">numeric</span> <span class="o">=</span> <span class="mi">2234</span><span class="p">;</span>
+    <span class="n">connectionConfig</span><span class="p">.</span><span class="n">publisherId</span><span class="p">.</span><span class="n">numeric</span> <span class="o">=</span> <span class="n">UA_UInt32_random</span><span class="p">();</span>
     <span class="n">UA_Server_addPubSubConnection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">connectionConfig</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">connectionIdent</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
@@ -289,24 +294,11 @@ configuration parameters for the message creation.</p>
     <span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">UA_FALSE</span><span class="p">;</span>
     <span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">writerGroupId</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
     <span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">encodingMimeType</span> <span class="o">=</span> <span class="n">UA_PUBSUB_ENCODING_UADP</span><span class="p">;</span>
-    <span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">messageSettings</span><span class="p">.</span><span class="n">encoding</span>             <span class="o">=</span> <span class="n">UA_EXTENSIONOBJECT_DECODED</span><span class="p">;</span>
-    <span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">messageSettings</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UADPWRITERGROUPMESSAGEDATATYPE</span><span class="p">];</span>
     <span class="cm">/* The configuration flags for the messages are encapsulated inside the</span>
 <span class="cm">     * message- and transport settings extension objects. These extension</span>
 <span class="cm">     * objects are defined by the standard. e.g.</span>
 <span class="cm">     * UadpWriterGroupMessageDataType */</span>
-    <span class="n">UA_UadpWriterGroupMessageDataType</span> <span class="o">*</span><span class="n">writerGroupMessage</span>  <span class="o">=</span> <span class="n">UA_UadpWriterGroupMessageDataType_new</span><span class="p">();</span>
-    <span class="cm">/* Change message settings of writerGroup to send PublisherId,</span>
-<span class="cm">     * WriterGroupId in GroupHeader and DataSetWriterId in PayloadHeader</span>
-<span class="cm">     * of NetworkMessage */</span>
-    <span class="n">writerGroupMessage</span><span class="o">-&gt;</span><span class="n">networkMessageContentMask</span>          <span class="o">=</span> <span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)(</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_PUBLISHERID</span> <span class="o">|</span>
-                                                              <span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_GROUPHEADER</span> <span class="o">|</span>
-                                                              <span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_WRITERGROUPID</span> <span class="o">|</span>
-                                                              <span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER</span><span class="p">);</span>
-    <span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">messageSettings</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">writerGroupMessage</span><span class="p">;</span>
     <span class="n">UA_Server_addWriterGroup</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">connectionIdent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">writerGroupConfig</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">writerGroupIdent</span><span class="p">);</span>
-    <span class="n">UA_Server_setWriterGroupOperational</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">writerGroupIdent</span><span class="p">);</span>
-    <span class="n">UA_UadpWriterGroupMessageDataType_delete</span><span class="p">(</span><span class="n">writerGroupMessage</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -375,37 +367,29 @@ which already contains the decoding code for UADP messages.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="protocol.html" class="btn btn-neutral float-right" title="Protocol" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="tutorial_client_firststeps.html" class="btn btn-neutral float-left" title="Building a Simple Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="protocol.html" class="btn btn-neutral float-right" title="Protocol" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorial_client_firststeps.html" class="btn btn-neutral float-left" title="Building a Simple Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2016, The open62541 authors
+        &#169; Copyright 2016, The open62541 authors.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

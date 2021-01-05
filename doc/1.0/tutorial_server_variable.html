@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html4" lang="" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Adding Variables to a Server &mdash; open62541 1.0.4-1-g9a031ebf documentation</title>
+  <title>Adding Variables to a Server &mdash; open62541 1.0.5-1-g982f0796 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -28,7 +31,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.4-1-g9a031ebf',
+              VERSION:'1.0.5-1-g982f0796',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -58,7 +61,7 @@
           
 
           
-            <a href="toc.html" class="icon icon-home" alt="Documentation Home"> open62541
+            <a href="toc.html" class="icon icon-home"> open62541
           
 
           
@@ -110,7 +113,6 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial_server_alarms_conditions.html">Using Alarms and Conditions Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
 </ul>
@@ -119,9 +121,12 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -164,6 +169,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -177,7 +184,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/tutorial_server_variable.txt" rel="nofollow"> View page source</a>
           
         
@@ -225,35 +232,6 @@ read only. See below for making the variable writable.</p>
     <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">myIntegerNodeId</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
                               <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">myIntegerName</span><span class="p">,</span>
                               <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">),</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">static</span> <span class="kt">void</span>
-<span class="nf">addMatrixVariable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">UA_VariableAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span> <span class="s">&quot;Double Matrix&quot;</span><span class="p">);</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">accessLevel</span> <span class="o">=</span> <span class="n">UA_ACCESSLEVELMASK_READ</span> <span class="o">|</span> <span class="n">UA_ACCESSLEVELMASK_WRITE</span><span class="p">;</span>
-
-    <span class="cm">/* Set the variable value constraints */</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">dataType</span> <span class="o">=</span> <span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">].</span><span class="n">typeId</span><span class="p">;</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">valueRank</span> <span class="o">=</span> <span class="n">UA_VALUERANK_TWO_DIMENSIONS</span><span class="p">;</span>
-    <span class="n">UA_UInt32</span> <span class="n">arrayDims</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">};</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">arrayDims</span><span class="p">;</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-
-    <span class="cm">/* Set the value. The array dimensions need to be the same for the value. */</span>
-    <span class="n">UA_Double</span> <span class="n">zero</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">};</span>
-    <span class="n">UA_Variant_setArray</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">]);</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">arrayDimensions</span> <span class="o">=</span> <span class="n">arrayDims</span><span class="p">;</span>
-    <span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">arrayDimensionsSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-
-    <span class="n">UA_NodeId</span> <span class="n">myIntegerNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;double.matrix&quot;</span><span class="p">);</span>
-    <span class="n">UA_QualifiedName</span> <span class="n">myIntegerName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;double matrix&quot;</span><span class="p">);</span>
-    <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
-    <span class="n">UA_NodeId</span> <span class="n">parentReferenceNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
-    <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">myIntegerNodeId</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
-                              <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">myIntegerName</span><span class="p">,</span>
-                              <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">),</span>
-                              <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -321,8 +299,16 @@ every write.</p>
 
     <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
     <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
-    <span class="n">UA_ServerConfig</span><span class="o">*</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-    <span class="n">config</span><span class="o">-&gt;</span><span class="n">verifyRequestTimestamp</span> <span class="o">=</span> <span class="n">UA_RULEHANDLING_ACCEPT</span><span class="p">;</span>
+
+    <span class="n">addVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">writeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="n">writeWrongVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+
+    <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">?</span> <span class="n">EXIT_SUCCESS</span> <span class="o">:</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -332,37 +318,29 @@ every write.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="tutorial_server_datasource.html" class="btn btn-neutral float-right" title="Connecting a Variable with a Physical Process" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="tutorial_server_firststeps.html" class="btn btn-neutral float-left" title="Building a Simple Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="tutorial_server_datasource.html" class="btn btn-neutral float-right" title="Connecting a Variable with a Physical Process" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorial_server_firststeps.html" class="btn btn-neutral float-left" title="Building a Simple Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2016, The open62541 authors
+        &#169; Copyright 2016, The open62541 authors.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

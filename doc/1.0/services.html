@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html4" lang="" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Services &mdash; open62541 1.0.4-1-g9a031ebf documentation</title>
+  <title>Services &mdash; open62541 1.0.5-1-g982f0796 documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -28,7 +31,7 @@
       <script type="text/javascript">
           var DOCUMENTATION_OPTIONS = {
               URL_ROOT:'./',
-              VERSION:'1.0.4-1-g9a031ebf',
+              VERSION:'1.0.5-1-g982f0796',
               LANGUAGE:'',
               COLLAPSE_INDEX:false,
               FILE_SUFFIX:'.html',
@@ -44,7 +47,7 @@
 
     
     <link rel="next" title="Information Modelling" href="nodestore.html" />
-    <link rel="prev" title="Data Types" href="types.html" /> 
+    <link rel="prev" title="Boolean" href="types_generated.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -58,7 +61,7 @@
           
 
           
-            <a href="toc.html" class="icon icon-home" alt="Documentation Home"> open62541
+            <a href="toc.html" class="icon icon-home"> open62541
           
 
           
@@ -176,9 +179,12 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
 </ul>
@@ -221,6 +227,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -232,7 +240,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/services.txt" rel="nofollow"> View page source</a>
           
         
@@ -264,9 +272,6 @@ the request and response structures. Possible error codes are returned as
 part of the response.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Service</span><span class="p">)(</span><span class="n">UA_Server</span><span class="o">*</span><span class="p">,</span> <span class="n">UA_Session</span><span class="o">*</span><span class="p">,</span>
                            <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-
-<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ChannelService</span><span class="p">)(</span><span class="n">UA_Server</span><span class="o">*</span><span class="p">,</span> <span class="n">UA_SecureChannel</span><span class="o">*</span><span class="p">,</span>
-                                  <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 </pre></div>
 </div>
 <div class="section" id="discovery-service-set">
@@ -381,6 +386,7 @@ Session. This Service request shall be issued by the Client before it issues
 any other Service request after CreateSession. Failure to do so shall cause
 the Server to close the Session.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_ActivateSession</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_SecureChannel</span> <span class="o">*</span><span class="n">channel</span><span class="p">,</span>
+                             <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                              <span class="k">const</span> <span class="n">UA_ActivateSessionRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                              <span class="n">UA_ActivateSessionResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 </pre></div>
@@ -389,7 +395,7 @@ the Server to close the Session.</p>
 <div class="section" id="closesession">
 <h3>CloseSession<a class="headerlink" href="#closesession" title="Permalink to this headline">¶</a></h3>
 <p>Used to terminate a Session.</p>
-<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_CloseSession</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_SecureChannel</span> <span class="o">*</span><span class="n">channel</span><span class="p">,</span>
+<div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_CloseSession</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                           <span class="k">const</span> <span class="n">UA_CloseSessionRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                           <span class="n">UA_CloseSessionResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 </pre></div>
@@ -542,8 +548,7 @@ elements are indexed, such as an array, this Service allows Clients to read
 the entire set of indexed values as a composite, to read individual elements
 or to read ranges of elements of the composite.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_Read</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                  <span class="k">const</span> <span class="n">UA_ReadRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                  <span class="n">UA_ReadResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+                  <span class="k">const</span> <span class="n">UA_ReadRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="n">UA_ReadResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -554,8 +559,7 @@ elements are indexed, such as an array, this Service allows Clients to write
 the entire set of indexed values as a composite, to write individual elements
 or to write ranges of elements of the composite.</p>
 <div class="highlight-c"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">Service_Write</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
-                   <span class="k">const</span> <span class="n">UA_WriteRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
-                   <span class="n">UA_WriteResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
+                   <span class="k">const</span> <span class="n">UA_WriteRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="n">UA_WriteResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -599,12 +603,6 @@ the method&#8217;s execution cannot be returned to the Client and are discarded.
 <span class="kt">void</span> <span class="nf">Service_Call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span>
                   <span class="k">const</span> <span class="n">UA_CallRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span>
                   <span class="n">UA_CallResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">);</span>
-
-<span class="cp"># if UA_MULTITHREADING &gt;= 100</span>
-<span class="kt">void</span> <span class="nf">Service_CallAsync</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Session</span> <span class="o">*</span><span class="n">session</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">requestId</span><span class="p">,</span>
-                       <span class="k">const</span> <span class="n">UA_CallRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">,</span> <span class="n">UA_CallResponse</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span>
-                       <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">finished</span><span class="p">);</span>
-<span class="cp">#endif</span>
 <span class="cp">#endif</span>
 
 <span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
@@ -759,37 +757,29 @@ its Session.</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="nodestore.html" class="btn btn-neutral float-right" title="Information Modelling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="types.html" class="btn btn-neutral float-left" title="Data Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="nodestore.html" class="btn btn-neutral float-right" title="Information Modelling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="types_generated.html" class="btn btn-neutral float-left" title="Boolean" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2016, The open62541 authors
+        &#169; Copyright 2016, The open62541 authors.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

@@ -10,7 +10,7 @@ rights accordingly.
    
    struct UA_AccessControl {
        void *context;
-       void (*clear)(UA_AccessControl *ac);
+       void (*deleteMembers)(UA_AccessControl *ac);
    
        /* Supported login mechanisms. The server endpoints are created from here. */
        size_t userTokenPoliciesSize;
@@ -72,11 +72,6 @@ rights accordingly.
        UA_Boolean (*allowDeleteReference)(UA_Server *server, UA_AccessControl *ac,
                                           const UA_NodeId *sessionId, void *sessionContext,
                                           const UA_DeleteReferencesItem *item);
-   
-       /* Allow browsing a node */
-       UA_Boolean (*allowBrowseNode)(UA_Server *server, UA_AccessControl *ac,
-                                     const UA_NodeId *sessionId, void *sessionContext,
-                                     const UA_NodeId *nodeId, void *nodeContext);
    #ifdef UA_ENABLE_HISTORIZING
        /* Allow insert,replace,update of historical data */
        UA_Boolean (*allowHistoryUpdateUpdateData)(UA_Server *server, UA_AccessControl *ac,
