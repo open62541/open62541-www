@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Building a Simple Server &mdash; open62541 1.2.0-5-gcc3a3d396-dirty documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Adding Variables to a Server" href="tutorial_server_variable.html" />
+    <link rel="prev" title="Working with Data Types" href="tutorial_datatypes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building a Simple Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#server-configuration-and-plugins">Server Configuration and Plugins</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding Variables to a Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_datasource.html">Connecting a Variable with a Physical Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_alarms_conditions.html">Using Alarms and Conditions Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Building a Simple Server</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tutorial_server_firststeps.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="building-a-simple-server">
+<h1>Building a Simple Server<a class="headerlink" href="#building-a-simple-server" title="Permalink to this headline">¶</a></h1>
+<p>This series of tutorial guide you through your first steps with open62541.
+For compiling the examples, you need a compiler (MS Visual Studio 2015 or
+newer, GCC, Clang and MinGW32 are all known to be working). The compilation
+instructions are given for GCC but should be straightforward to adapt.</p>
+<p>It will also be very helpful to install an OPC UA Client with a graphical
+frontend, such as UAExpert by Unified Automation. That will enable you to
+examine the information model of any OPC UA server.</p>
+<p>To get started, downdload the open62541 single-file release from
+<a class="reference external" href="http://open62541.org">http://open62541.org</a> or generate it according to the <a class="reference internal" href="building.html#building"><span class="std std-ref">build instructions</span></a> with the “amalgamation” option enabled. From now on, we assume
+you have the <code class="docutils literal notranslate"><span class="pre">open62541.c/.h</span></code> files in the current folder. Now create a new
+C source-file called <code class="docutils literal notranslate"><span class="pre">myServer.c</span></code> with the following content:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;open62541/server.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;open62541/server_config_default.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+
+<span class="k">static</span> <span class="k">volatile</span> <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="n">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span> <span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="n">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
+
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+
+    <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">?</span> <span class="nl">EXIT_SUCCESS</span> <span class="p">:</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This is all that is needed for a simple OPC UA server. With the GCC compiler,
+the following command produces an executable:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myServer.c -o myServer
+</pre></div>
+</div>
+<p>In a MinGW environment, the Winsock library must be added.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myServer.c -lws2_32 -o myServer.exe
+</pre></div>
+</div>
+<p>Now start the server (stop with ctrl-c):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ./myServer
+</pre></div>
+</div>
+<p>You have now compiled and run your first OPC UA server. You can go ahead and
+browse the information model with client. The server is listening on
+<code class="docutils literal notranslate"><span class="pre">opc.tcp://localhost:4840</span></code>. In the next two sections, we will continue to
+explain the different parts of the code in detail.</p>
+<div class="section" id="server-configuration-and-plugins">
+<h2>Server Configuration and Plugins<a class="headerlink" href="#server-configuration-and-plugins" title="Permalink to this headline">¶</a></h2>
+<p><em>open62541</em> provides a flexible framework for building OPC UA servers and
+clients. The goals is to have a core library that accommodates for all use
+cases and runs on all platforms. Users can then adjust the library to fit
+their use case via configuration and by developing (platform-specific)
+plugins. The core library is based on C99 only and does not even require
+basic POSIX support. For example, the lowlevel networking code is implemented
+as an exchangeable plugin. But don’t worry. <em>open62541</em> provides plugin
+implementations for most platforms and sensible default configurations
+out-of-the-box.</p>
+<p>In the above server code, we simply take the default server configuration and
+add a single TCP network layer that is listerning on port 4840.</p>
+</div>
+<div class="section" id="server-lifecycle">
+<h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
+<p>The code in this example shows the three parts for server lifecycle
+management: Creating a server, running the server, and deleting the server.
+Creating and deleting a server is trivial once the configuration is set up.
+The server is started with <code class="docutils literal notranslate"><span class="pre">UA_Server_run</span></code>. Internally, the server then
+uses timeouts to schedule regular tasks. Between the timeouts, the server
+listens on the network layer for incoming messages.</p>
+<p>You might ask how the server knows when to stop running. For this, we have
+created a global variable <code class="docutils literal notranslate"><span class="pre">running</span></code>. Furthermore, we have registered the
+method <code class="docutils literal notranslate"><span class="pre">stopHandler</span></code> that catches the signal (interrupt) the program
+receives when the operating systems tries to close it. This happens for
+example when you press ctrl-c in a terminal program. The signal handler then
+sets the variable <code class="docutils literal notranslate"><span class="pre">running</span></code> to false and the server shuts down once it
+takes back control.</p>
+<p>In order to integrated OPC UA in a single-threaded application with its own
+mainloop (for example provided by a GUI toolkit), one can alternatively drive
+the server manually. See the section of the server documentation on
+<a class="reference internal" href="server.html#server-lifecycle"><span class="std std-ref">Server Lifecycle</span></a> for details.</p>
+<p>The server configuration and lifecycle management is needed for all servers.
+We will use it in the following tutorials without further comment.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="tutorial_server_variable.html" class="btn btn-neutral float-right" title="Adding Variables to a Server" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorial_datatypes.html" class="btn btn-neutral float-left" title="Working with Data Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
