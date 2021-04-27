@@ -1,0 +1,105 @@
++++
+fragment = "table"
+#disabled = false
+date = "2020-09-29"
+weight = 30
+#background = "primary"
+
+
+title = "Documentation Reference"
+subtitle= " "
+title_align = "left" # Default is center, can be left, right or center
+
+[header]
+  [[header.values]]
+    text = "Version"
+    # hide_on_mobile = true
+    color = "success"
+
+  [[header.values]]
+    text = "Status"
+    hide_on_mobile = true
+    
+  [[header.values]]
+    text = "Web Version"
+
+  [[header.values]]
+    text = "PDF Version"
+
+[[rows]]
+  [[rows.values]]
+    header = "Development Branch"
+
+  [[rows.values]]
+    text = "Development"
+
+  [[rows.values]]
+    #button = "Long Button"
+    #url = "#"
+    #color = "success"
+    icon = "fas fa-external-link-alt"
+    url = "https://open62541.org/doc/current/toc.html#"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "https://open62541.org/doc/open62541-current.pdf"
+    align = "center"
+
+  #[[rows.values]]
+  #  button = "Button"
+  #  url = "#"
+  #  color = "danger"
+  #  align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.1 Release"
+
+  [[rows.values]]
+    text = "Newest release"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "https://open62541.org/doc/1.1/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "https://open62541.org/doc/open62541-1.1.pdf"
+    align = "center"
+    
+[[rows]]
+  [[rows.values]]
+    header = "1.0 Release"
+
+  [[rows.values]]
+    text = "Certified"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "https://open62541.org/doc/1.0/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "https://open62541.org/doc/open62541-1.0.pdf"
+    align = "center"
+
+ [[rows]]
+  [[rows.values]]
+    header = "0.3 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "https://open62541.org/doc/0.3/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "https://open62541.org/doc/open62541-0.3.pdf"
+    align = "center"
++++
