@@ -1,0 +1,976 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Publish/Subscribe &mdash; open62541 1.2.0-rc2-44-ge5eba7bd documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.2.0-rc2-44-ge5eba7bd',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="prev" title="PubSub Connection Plugin API" href="plugin_pubsub_connection.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">Access Control Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_pubsub_connection.html">PubSub Connection Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Publish/Subscribe</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pubsub-compile-flags">PubSub compile flags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pubsub-information-model-representation">PubSub Information Model Representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connections">Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#publisheddatasets">PublishedDataSets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasetfields">DataSetFields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-callback-implementation">Custom Callback Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writergroup">WriterGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">WriterGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasetwriter">DataSetWriter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subscribeddataset">SubscribedDataSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="internal.html">Internals</a> &raquo;</li>
+        
+      <li>Publish/Subscribe</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pubsub.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="publish-subscribe">
+<span id="pubsub"></span><h1>Publish/Subscribe<a class="headerlink" href="#publish-subscribe" title="Permalink to this headline">¶</a></h1>
+<p>Work in progress!
+This part will be a new chapter later.</p>
+<p>In PubSub the participating OPC UA Applications take their roles as Publishers and Subscribers. Publishers are the
+sources of data, while Subscribers consume that data. Communication in PubSub is message-based.
+Publishers send messages to a Message Oriented Middleware, without knowledge of what, if any, Subscribers there may be.
+Similarly, Subscribers express interest in specific types of data, and process messages that contain this data,
+without knowledge of what Publishers there are.</p>
+<p>Message Oriented Middleware is software or hardware infrastructure that supports sending and receiving messages between distributed systems.
+OPC UA PubSub supports two different Message Oriented Middleware variants, namely the broker-less form and broker-based form.
+A broker-less form is where the Message Oriented Middleware is the network infrastructure that is able to route datagram-based messages.
+Subscribers and Publishers use datagram protocols like UDP. In a broker-based form, the core component of the Message Oriented Middleware
+is a message Broker. Subscribers and Publishers use standard messaging protocols like AMQP or MQTT to communicate with the Broker.</p>
+<p>This makes PubSub suitable for applications where location independence and/or scalability are required.</p>
+<p>The Publish/Subscribe (PubSub) extension for OPC UA enables fast and efficient
+1:m communication. The PubSub extension is protocol agnostic and can be used
+with broker based protocols like MQTT and AMQP or brokerless implementations like UDP-Multicasting.</p>
+<p>The PubSub API uses the following scheme:</p>
+<ol class="arabic simple">
+<li>Create a configuration for the needed PubSub element.</li>
+<li>Call the add[element] function and pass in the configuration.</li>
+<li>The add[element] function returns the unique nodeId of the internally created element.</li>
+</ol>
+<p>Take a look on the PubSub Tutorials for more details about the API usage.:</p>
+<div class="highlight-python"><div class="highlight"><pre>+-----------+
+| UA_Server |
++-----------+
+ |    |
+ |    |
+ |    |
+ |    |  +----------------------+
+ |    +--&gt; UA_PubSubConnection  |  UA_Server_addPubSubConnection
+ |       +----------------------+
+ |        |    |
+ |        |    |    +----------------+
+ |        |    +----&gt; UA_WriterGroup |  UA_PubSubConnection_addWriterGroup
+ |        |         +----------------+
+ |        |              |
+ |        |              |    +------------------+
+ |        |              +----&gt; UA_DataSetWriter |  UA_WriterGroup_addDataSetWriter     +-+
+ |        |                   +------------------+                                        |
+ |        |                                                                               |
+ |        |         +----------------+                                                    | r
+ |        +---------&gt; UA_ReaderGroup |    UA_PubSubConnection_addReaderGroup              | e
+ |                  +----------------+                                                    | f
+ |                       |                                                                |
+ |                       |    +------------------+                                        |
+ |                       +----&gt; UA_DataSetReader |  UA_ReaderGroup_addDataSetReader       |
+ |                            +------------------+                                        |
+ |                                 |                                                      |
+ |                                 |    +----------------------+                          |
+ |                                 +----&gt; UA_SubscribedDataSet |                          |
+ |                                      +----------------------+                          |
+ |                                           |                                            |
+ |                                           |    +----------------------------+          |
+ |                                           +----&gt; UA_TargetVariablesDataType |          |
+ |                                           |    +----------------------------+          |
+ |                                           |                                            |
+ |                                           |    +------------------------------------+  |
+ |                                           +----&gt; UA_SubscribedDataSetMirrorDataType |  |
+ |                                                +------------------------------------+  |
+ |                                                                                        |
+ |       +---------------------------+                                                    |
+ +-------&gt; UA_PubSubPublishedDataSet |  UA_Server_addPublishedDataSet                   &lt;-+
+         +---------------------------+
+               |
+               |    +-----------------+
+               +----&gt; UA_DataSetField |  UA_PublishedDataSet_addDataSetField
+                    +-----------------+
+</pre></div>
+</div>
+<div class="section" id="pubsub-compile-flags">
+<h2>PubSub compile flags<a class="headerlink" href="#pubsub-compile-flags" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>UA_ENABLE_PUBSUB</strong></dt>
+<dd>Enable the experimental OPC UA PubSub support. The option will include the PubSub UDP multicast plugin. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_DELTAFRAMES</strong></dt>
+<dd>The PubSub messages differentiate between keyframe (all published values contained) and deltaframe (only changed values contained) messages.
+Deltaframe messages creation consumes some additional ressources and can be disabled with this flag. Disabled by default.
+Compile the human-readable name of the StatusCodes into the binary. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_FILE_CONFIG</strong></dt>
+<dd>Enable loading OPC UA PubSub configuration from File/ByteString. Enabling PubSub informationmodel methods also will add a method to the Publish/Subscribe object which allows configuring PubSub at runtime.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_INFORMATIONMODEL</strong></dt>
+<dd>Enable the information model representation of the PubSub configuration. For more details take a look at the following section <cite>PubSub Information Model Representation</cite>. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_MONITORING</strong></dt>
+<dd>Enable the experimental PubSub monitoring. This feature provides a basic framework to implement monitoring/timeout checks for PubSub components.
+Initially the MessageReceiveTimeout check of a DataSetReader is provided. It uses the internal server callback implementation.
+The monitoring backend can be changed by the application to satisfy realtime requirements.
+Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_ETH_UADP</strong></dt>
+<dd>Enable the OPC UA Ethernet PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame without IP or UDP headers. This option will include Publish and Subscribe based on
+EtherType B62C. Disabled by default.</dd>
+<dt><strong>UA_ENABLE_PUBSUB_ETH_UADP_XDP</strong></dt>
+<dd>Enable XDP feature to allow the user to receive packets using the eXpress Data Path (XDP), which bypasses TCP/IP layers and transfers the frames from hardware/netdev to user application thereby reducing the receiving time,
+in addition to the PubSub support to transport UADP NetworkMessages as payload of Ethernet II frame. Disabled by default.</dd>
+</dl>
+</div>
+<div class="section" id="pubsub-information-model-representation">
+<h2>PubSub Information Model Representation<a class="headerlink" href="#pubsub-information-model-representation" title="Permalink to this headline">¶</a></h2>
+<p id="pubsub-informationmodel">The complete PubSub configuration is available inside the information model.
+The entry point is the node &#8216;PublishSubscribe, located under the Server node.
+The standard defines for PubSub no new Service set. The configuration can optionally
+done over methods inside the information model. The information model representation
+of the current PubSub configuration is generated automatically. This feature
+can enabled/disable by changing the UA_ENABLE_PUBSUB_INFORMATIONMODEL option.</p>
+</div>
+<div class="section" id="connections">
+<h2>Connections<a class="headerlink" href="#connections" title="Permalink to this headline">¶</a></h2>
+<p>The PubSub connections are the abstraction between the concrete transport protocol
+and the PubSub functionality. It is possible to create multiple connections with
+different transport protocols at runtime.</p>
+<p>Take a look on the PubSub Tutorials for mor details about the API usage.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span>  <span class="p">{</span>
+    <span class="n">UA_PUBSUB_COMPONENT_CONNECTION</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_WRITERGROUP</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_DATASETWRITER</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_READERGROUP</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_COMPONENT_DATASETREADER</span>
+<span class="p">}</span> <span class="n">UA_PubSubComponentEnumType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_PUBLISHERID_NUMERIC</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_PUBLISHERID_STRING</span>
+<span class="p">}</span> <span class="n">UA_PublisherIdType</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">UA_PubSubConnectionConfig</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">enabled</span><span class="p">;</span>
+    <span class="n">UA_PublisherIdType</span> <span class="n">publisherIdType</span><span class="p">;</span>
+    <span class="k">union</span> <span class="p">{</span> <span class="cm">/* std: valid types UInt or String */</span>
+        <span class="n">UA_UInt32</span> <span class="n">numeric</span><span class="p">;</span>
+        <span class="n">UA_String</span> <span class="n">string</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">publisherId</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">transportProfileUri</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">address</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">connectionPropertiesSize</span><span class="p">;</span>
+    <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">connectionProperties</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">connectionTransportSettings</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_MONITORING</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_MONITORING_MESSAGE_RECEIVE_TIMEOUT</span>
+    <span class="c1">// extend as needed</span>
+<span class="p">}</span> <span class="n">UA_PubSubMonitoringType</span><span class="p">;</span>
+
+<span class="cm">/* PubSub monitoring interface */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">createMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                      <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">startMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                     <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">stopMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                    <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">updateMonitoringInterval</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                              <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">deleteMonitoring</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">Id</span><span class="p">,</span> <span class="n">UA_PubSubComponentEnumType</span> <span class="n">eComponentType</span><span class="p">,</span>
+                                      <span class="n">UA_PubSubMonitoringType</span> <span class="n">eMonitoringType</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_PubSubMonitoringInterface</span><span class="p">;</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_MONITORING */</span><span class="cp"></span>
+
+<span class="cm">/* General PubSub configuration */</span>
+<span class="k">struct</span> <span class="n">UA_PubSubConfiguration</span> <span class="p">{</span>
+
+    <span class="cm">/* Callback for PubSub component state changes:</span>
+<span class="cm">    If provided this callback informs the application about PubSub component state changes.</span>
+<span class="cm">    E.g. state change from operational to error in case of a DataSetReader MessageReceiveTimeout.</span>
+<span class="cm">    The status code provides additional information. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pubsubStateChangeCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">Id</span><span class="p">,</span>
+                                      <span class="n">UA_PubSubState</span> <span class="n">state</span><span class="p">,</span>
+                                      <span class="n">UA_StatusCode</span> <span class="n">status</span><span class="p">);</span><span class="c1">// TODO: maybe status code provides not enough information about the state change</span>
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_MONITORING</span>
+    <span class="n">UA_PubSubMonitoringInterface</span> <span class="n">monitoringInterface</span><span class="p">;</span>
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_MONITORING */</span><span class="cp"></span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The UA_ServerConfig_addPubSubTransportLayer is used to add a transport layer
+to the server configuration. The list memory is allocated and will be freed
+with UA_PubSubManager_delete.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If the UA_String transportProfileUri was dynamically allocated
+the memory has to be freed when no longer required.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This has to be done before the server is started with UA_Server_run.</p>
+</div>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_StatusCode</span>
+<span class="nf">UA_ServerConfig_addPubSubTransportLayer</span><span class="p">(</span><span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">,</span>
+                                        <span class="n">UA_PubSubTransportLayer</span> <span class="o">*</span><span class="n">pubsubTransportLayer</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addPubSubConnection</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">connectionConfig</span><span class="p">,</span>
+                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">connectionIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the config */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPubSubConnectionConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">connection</span><span class="p">,</span>
+                                    <span class="n">UA_PubSubConnectionConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Remove Connection, identified by the NodeId. Deletion of Connection</span>
+<span class="cm"> * removes all contained WriterGroups and Writers. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removePubSubConnection</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">connection</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="publisheddatasets">
+<h2>PublishedDataSets<a class="headerlink" href="#publisheddatasets" title="Permalink to this headline">¶</a></h2>
+<p>The PublishedDataSets (PDS) are containers for the published information. The
+PDS contain the published variables and meta informations. The metadata is
+commonly autogenerated or given as constant argument as part of the template
+functions. The template functions are standard defined and intended for
+configuration tools. You should normally create a empty PDS and call the
+functions to add new fields.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* The UA_PUBSUB_DATASET_PUBLISHEDITEMS has currently no additional members and</span>
+<span class="cm"> * thus no dedicated config structure. */</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDITEMS</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDEVENTS</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDITEMS_TEMPLATE</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASET_PUBLISHEDEVENTS_TEMPLATE</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">UA_PublishedDataSetType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_DataSetMetaDataType</span> <span class="n">metaData</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">variablesToAddSize</span><span class="p">;</span>
+    <span class="n">UA_PublishedVariableDataType</span> <span class="o">*</span><span class="n">variablesToAdd</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedDataItemsTemplateConfig</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_NodeId</span> <span class="n">eventNotfier</span><span class="p">;</span>
+    <span class="n">UA_ContentFilter</span> <span class="n">filter</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedEventConfig</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_DataSetMetaDataType</span> <span class="n">metaData</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">eventNotfier</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">selectedFieldsSize</span><span class="p">;</span>
+    <span class="n">UA_SimpleAttributeOperand</span> <span class="o">*</span><span class="n">selectedFields</span><span class="p">;</span>
+    <span class="n">UA_ContentFilter</span> <span class="n">filter</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedEventTemplateConfig</span><span class="p">;</span>
+
+<span class="cm">/* Configuration structure for PublishedDataSet */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_PublishedDataSetType</span> <span class="n">publishedDataSetType</span><span class="p">;</span>
+    <span class="k">union</span> <span class="p">{</span>
+        <span class="cm">/* The UA_PUBSUB_DATASET_PUBLISHEDITEMS has currently no additional members</span>
+<span class="cm">         * and thus no dedicated config structure.*/</span>
+        <span class="n">UA_PublishedDataItemsTemplateConfig</span> <span class="n">itemsTemplate</span><span class="p">;</span>
+        <span class="n">UA_PublishedEventConfig</span> <span class="n">event</span><span class="p">;</span>
+        <span class="n">UA_PublishedEventTemplateConfig</span> <span class="n">eventTemplate</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">config</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PublishedDataSetConfig</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_PublishedDataSetConfig_clear</span><span class="p">(</span><span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">addResult</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">fieldAddResultsSize</span><span class="p">;</span>
+    <span class="n">UA_StatusCode</span> <span class="o">*</span><span class="n">fieldAddResults</span><span class="p">;</span>
+    <span class="n">UA_ConfigurationVersionDataType</span> <span class="n">configurationVersion</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_AddPublishedDataSetResult</span><span class="p">;</span>
+
+<span class="n">UA_AddPublishedDataSetResult</span>
+<span class="nf">UA_Server_addPublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">publishedDataSetConfig</span><span class="p">,</span>
+                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">pdsIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the config */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPublishedDataSetConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">pds</span><span class="p">,</span>
+                                    <span class="n">UA_PublishedDataSetConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the DataSetMetaData for an specific PDS */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPublishedDataSetMetaData</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">pds</span><span class="p">,</span>
+                                      <span class="n">UA_DataSetMetaDataType</span> <span class="o">*</span><span class="n">metaData</span><span class="p">);</span>
+
+<span class="cm">/* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes</span>
+<span class="cm"> * all contained and linked PDS Fields. Connected WriterGroups will be also</span>
+<span class="cm"> * removed. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removePublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">pds</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datasetfields">
+<h2>DataSetFields<a class="headerlink" href="#datasetfields" title="Permalink to this headline">¶</a></h2>
+<p>The description of published variables is named DataSetField. Each
+DataSetField contains the selection of one information model node. The
+DataSetField has additional parameters for the publishing, sampling and error
+handling process.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="n">UA_ConfigurationVersionDataType</span> <span class="n">configurationVersion</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">fieldNameAlias</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">promotedField</span><span class="p">;</span>
+    <span class="n">UA_PublishedVariableDataType</span> <span class="n">publishParameters</span><span class="p">;</span>
+
+    <span class="cm">/* non std. field */</span>
+    <span class="k">struct</span> <span class="p">{</span>
+        <span class="n">UA_Boolean</span> <span class="n">rtFieldSourceEnabled</span><span class="p">;</span>
+        <span class="cm">/* If the rtInformationModelNode is set, the nodeid in publishParameter must point</span>
+<span class="cm">         * to a node with external data source backend defined</span>
+<span class="cm">         * */</span>
+        <span class="n">UA_Boolean</span> <span class="n">rtInformationModelNode</span><span class="p">;</span>
+        <span class="c1">//TODO -&gt; decide if suppress C++ warnings and use &#39;UA_DataValue * * const staticValueSource;&#39;</span>
+        <span class="n">UA_DataValue</span> <span class="o">**</span> <span class="n">staticValueSource</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">rtValueSource</span><span class="p">;</span>
+
+
+<span class="p">}</span> <span class="n">UA_DataSetVariableConfig</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_DATASETFIELD_VARIABLE</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_DATASETFIELD_EVENT</span>
+<span class="p">}</span> <span class="n">UA_DataSetFieldType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_DataSetFieldType</span> <span class="n">dataSetFieldType</span><span class="p">;</span>
+    <span class="k">union</span> <span class="p">{</span>
+        <span class="cm">/* events need other config later */</span>
+        <span class="n">UA_DataSetVariableConfig</span> <span class="n">variable</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">field</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DataSetFieldConfig</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_DataSetFieldConfig_clear</span><span class="p">(</span><span class="n">UA_DataSetFieldConfig</span> <span class="o">*</span><span class="n">dataSetFieldConfig</span><span class="p">);</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">result</span><span class="p">;</span>
+    <span class="n">UA_ConfigurationVersionDataType</span> <span class="n">configurationVersion</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DataSetFieldResult</span><span class="p">;</span>
+
+<span class="n">UA_DataSetFieldResult</span>
+<span class="nf">UA_Server_addDataSetField</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">publishedDataSet</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_DataSetFieldConfig</span> <span class="o">*</span><span class="n">fieldConfig</span><span class="p">,</span>
+                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">fieldIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the config */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getDataSetFieldConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dsf</span><span class="p">,</span>
+                                <span class="n">UA_DataSetFieldConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="n">UA_DataSetFieldResult</span>
+<span class="nf">UA_Server_removeDataSetField</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dsf</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="custom-callback-implementation">
+<h2>Custom Callback Implementation<a class="headerlink" href="#custom-callback-implementation" title="Permalink to this headline">¶</a></h2>
+<p>The user can use his own callback implementation for publishing
+and subscribing. The user must take care of the callback to call for
+every publishing or subscibing interval</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">addCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">identifier</span><span class="p">,</span>
+                                       <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">,</span>
+                                       <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">changeCustomCallbackInterval</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">identifier</span><span class="p">,</span>
+                                                  <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">,</span> <span class="n">UA_Double</span> <span class="n">interval_ms</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">removeCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
+
+<span class="p">}</span> <span class="n">UA_PubSub_CallbackLifecycle</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="writergroup">
+<h2>WriterGroup<a class="headerlink" href="#writergroup" title="Permalink to this headline">¶</a></h2>
+<p>All WriterGroups are created within a PubSubConnection and automatically
+deleted if the connection is removed. The WriterGroup is primary used as
+container for <a class="reference internal" href="#dsw"><em>DataSetWriter</em></a> and network message settings. The WriterGroup can be
+imagined as producer of the network messages. The creation of network
+messages is controlled by parameters like the publish interval, which is e.g.
+contained in the WriterGroup.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_ENCODING_BINARY</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_ENCODING_JSON</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_ENCODING_UADP</span>
+<span class="p">}</span> <span class="n">UA_PubSubEncodingType</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>WriterGroup<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The message publishing can be configured for realtime requirements. The RT-levels
+go along with different requirements. The below listed levels can be configured:</p>
+<p>UA_PUBSUB_RT_NONE -
+&#8212;&gt; Description: Default &#8220;none-RT&#8221; Mode
+&#8212;&gt; Requirements: -
+&#8212;&gt; Restrictions: -
+UA_PUBSUB_RT_DIRECT_VALUE_ACCESS (Preview - not implemented)
+&#8212;&gt; Description: Normally, the latest value for each DataSetField is read out of the information model. Within this RT-mode, the
+value source of each field configured as static pointer to an DataValue. The publish cycle won&#8217;t use call the server read function.
+&#8212;&gt; Requirements: All fields must be configured with a &#8216;staticValueSource&#8217;.
+&#8212;&gt; Restrictions: -
+UA_PUBSUB_RT_FIXED_LENGTH (Preview - not implemented)
+&#8212;&gt; Description: All DataSetFields have a known, non-changing length. The server will pre-generate some
+buffers and use only memcopy operations to generate requested PubSub packages.
+&#8212;&gt; Requirements: DataSetFields with variable size can&#8217;t be used within this mode.
+&#8212;&gt; Restrictions: The configuration must be frozen and changes are not allowed while the WriterGroup is &#8216;Operational&#8217;.
+UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
+&#8212;&gt; Description: -
+&#8212;&gt; Requirements: -
+&#8212;&gt; Restrictions: -</p>
+<p>WARNING! For hard real time requirements the underlying system must be rt-capable.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_RT_NONE</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_RT_DIRECT_VALUE_ACCESS</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_RT_FIXED_SIZE</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_RT_DETERMINISTIC</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">}</span> <span class="n">UA_PubSubRTLevel</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">enabled</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">writerGroupId</span><span class="p">;</span>
+    <span class="n">UA_Duration</span> <span class="n">publishingInterval</span><span class="p">;</span>
+    <span class="n">UA_Double</span> <span class="n">keepAliveTime</span><span class="p">;</span>
+    <span class="n">UA_Byte</span> <span class="n">priority</span><span class="p">;</span>
+    <span class="n">UA_MessageSecurityMode</span> <span class="n">securityMode</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">groupPropertiesSize</span><span class="p">;</span>
+    <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">groupProperties</span><span class="p">;</span>
+    <span class="n">UA_PubSubEncodingType</span> <span class="n">encodingMimeType</span><span class="p">;</span>
+    <span class="cm">/* PubSub Manager Callback */</span>
+    <span class="n">UA_PubSub_CallbackLifecycle</span> <span class="n">pubsubManagerCallback</span><span class="p">;</span>
+    <span class="cm">/* non std. config parameter. maximum count of embedded DataSetMessage in</span>
+<span class="cm">     * one NetworkMessage */</span>
+    <span class="n">UA_UInt16</span> <span class="n">maxEncapsulatedDataSetMessageCount</span><span class="p">;</span>
+    <span class="cm">/* non std. field */</span>
+    <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_WriterGroupConfig</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_WriterGroupConfig_clear</span><span class="p">(</span><span class="n">UA_WriterGroupConfig</span> <span class="o">*</span><span class="n">writerGroupConfig</span><span class="p">);</span>
+
+<span class="cm">/* Add a new WriterGroup to an existing Connection */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">connection</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_WriterGroupConfig</span> <span class="o">*</span><span class="n">writerGroupConfig</span><span class="p">,</span>
+                         <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">writerGroupIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the config */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getWriterGroupConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">,</span>
+                               <span class="n">UA_WriterGroupConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_updateWriterGroupConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">writerGroupIdentifier</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_WriterGroupConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get state of WriterGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_WriterGroup_getState</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">writerGroupIdentifier</span><span class="p">,</span>
+                               <span class="n">UA_PubSubState</span> <span class="o">*</span><span class="n">state</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_freezeWriterGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_unfreezeWriterGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setWriterGroupOperational</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setWriterGroupDisabled</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datasetwriter">
+<span id="dsw"></span><h2>DataSetWriter<a class="headerlink" href="#datasetwriter" title="Permalink to this headline">¶</a></h2>
+<p>The DataSetWriters are the glue between the WriterGroups and the
+PublishedDataSets. The DataSetWriter contain configuration parameters and
+flags which influence the creation of DataSet messages. These messages are
+encapsulated inside the network message. The DataSetWriter must be linked
+with an existing PublishedDataSet and be contained within a WriterGroup.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">dataSetWriterId</span><span class="p">;</span>
+    <span class="n">UA_DataSetFieldContentMask</span> <span class="n">dataSetFieldContentMask</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">keyFrameCount</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="n">dataSetName</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">dataSetWriterPropertiesSize</span><span class="p">;</span>
+    <span class="n">UA_KeyValuePair</span> <span class="o">*</span><span class="n">dataSetWriterProperties</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DataSetWriterConfig</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_DataSetWriterConfig_clear</span><span class="p">(</span><span class="n">UA_DataSetWriterConfig</span> <span class="o">*</span><span class="n">pdsConfig</span><span class="p">);</span>
+
+<span class="cm">/* Add a new DataSetWriter to a existing WriterGroup. The DataSetWriter must be</span>
+<span class="cm"> * coupled with a PublishedDataSet on creation.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Part 14, 7.1.5.2.1 defines: The link between the PublishedDataSet and</span>
+<span class="cm"> * DataSetWriter shall be created when an instance of the DataSetWriterType is</span>
+<span class="cm"> * created. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addDataSetWriter</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">writerGroup</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dataSet</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataSetWriterConfig</span> <span class="o">*</span><span class="n">dataSetWriterConfig</span><span class="p">,</span>
+                           <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">writerIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Returns a deep copy of the config */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getDataSetWriterConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dsw</span><span class="p">,</span>
+                                 <span class="n">UA_DataSetWriterConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get state of DataSetWriter */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetWriter_getState</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetWriterIdentifier</span><span class="p">,</span>
+                               <span class="n">UA_PubSubState</span> <span class="o">*</span><span class="n">state</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeDataSetWriter</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dsw</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subscribeddataset">
+<h2>SubscribedDataSet<a class="headerlink" href="#subscribeddataset" title="Permalink to this headline">¶</a></h2>
+<p>SubscribedDataSet describes the processing of the received DataSet. SubscribedDataSet defines which field
+in the DataSet is mapped to which Variable in the OPC UA Application. SubscribedDataSet has two sub-types
+called the TargetVariablesType and SubscribedDataSetMirrorType.
+SubscribedDataSetMirrorType is currently not supported. SubscribedDataSet is set to TargetVariablesType
+and then the list of target Variables are created in the Subscriber AddressSpace.
+TargetVariables are a list of variables that are to be added in the Subscriber AddressSpace.
+It defines a list of Variable mappings between received DataSet fields and added Variables
+in the Subscriber AddressSpace.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* SubscribedDataSetDataType Definition */</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_PUBSUB_SDS_TARGET</span><span class="p">,</span>
+    <span class="n">UA_PUBSUB_SDS_MIRROR</span>
+<span class="p">}</span> <span class="n">UA_SubscribedDataSetEnumType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Standard-defined FieldTargetDataType */</span>
+    <span class="n">UA_FieldTargetDataType</span> <span class="n">targetVariable</span><span class="p">;</span>
+
+    <span class="cm">/* If realtime-handling is required, set this pointer non-NULL and it will be used</span>
+<span class="cm">     * to memcpy the value instead of using the Write service.</span>
+<span class="cm">     * If the afterWrite method pointer is set, it will be called after a memcpy update</span>
+<span class="cm">     * to the value. */</span>
+    <span class="n">UA_DataValue</span> <span class="o">**</span><span class="n">externalDataValue</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">targetVariableContext</span><span class="p">;</span> <span class="cm">/* user-defined pointer */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">afterWrite</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerIdentifier</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">targetVariableIdentifier</span><span class="p">,</span>
+                       <span class="kt">void</span> <span class="o">*</span><span class="n">targetVariableContext</span><span class="p">,</span>
+                       <span class="n">UA_DataValue</span> <span class="o">**</span><span class="n">externalDataValue</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_FieldTargetVariable</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">targetVariablesSize</span><span class="p">;</span>
+    <span class="n">UA_FieldTargetVariable</span> <span class="o">*</span><span class="n">targetVariables</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_TargetVariables</span><span class="p">;</span>
+
+<span class="cm">/* Return Status Code after creating TargetVariables in Subscriber AddressSpace */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_createTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                              <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                              <span class="kt">size_t</span> <span class="n">targetVariablesSize</span><span class="p">,</span>
+                                              <span class="k">const</span> <span class="n">UA_FieldTargetVariable</span> <span class="o">*</span><span class="n">targetVariables</span><span class="p">);</span>
+
+<span class="cm">/* To Do:Implementation of SubscribedDataSetMirrorType</span>
+<span class="cm"> * UA_StatusCode</span>
+<span class="cm"> * A_PubSubDataSetReader_createDataSetMirror(UA_Server *server, UA_NodeId dataSetReaderIdentifier,</span>
+<span class="cm"> * UA_SubscribedDataSetMirrorDataType* mirror) */</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datasetreader">
+<h2>DataSetReader<a class="headerlink" href="#datasetreader" title="Permalink to this headline">¶</a></h2>
+<p>DataSetReader can receive NetworkMessages with the DataSetMessage
+of interest sent by the Publisher. DataSetReaders represent
+the configuration necessary to receive and process DataSetMessages
+on the Subscriber side. DataSetReader must be linked with a
+SubscribedDataSet and be contained within a ReaderGroup.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Parameters for PubSubSecurity */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Int32</span> <span class="n">securityMode</span><span class="p">;</span>          <span class="cm">/* placeholder datatype &#39;MessageSecurityMode&#39; */</span>
+    <span class="n">UA_String</span> <span class="n">securityGroupId</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">keyServersSize</span><span class="p">;</span>
+    <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">keyServers</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_PubSubSecurityParameters</span><span class="p">;</span>
+
+<span class="cm">/* Parameters for PubSub DataSetReader Configuration */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">publisherId</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">writerGroupId</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">dataSetWriterId</span><span class="p">;</span>
+    <span class="n">UA_DataSetMetaDataType</span> <span class="n">dataSetMetaData</span><span class="p">;</span>
+    <span class="n">UA_DataSetFieldContentMask</span> <span class="n">dataSetFieldContentMask</span><span class="p">;</span>
+    <span class="n">UA_Double</span> <span class="n">messageReceiveTimeout</span><span class="p">;</span>
+    <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">messageSettings</span><span class="p">;</span>
+    <span class="n">UA_ExtensionObject</span> <span class="n">transportSettings</span><span class="p">;</span>
+    <span class="n">UA_SubscribedDataSetEnumType</span> <span class="n">subscribedDataSetType</span><span class="p">;</span>
+    <span class="cm">/* TODO UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror */</span>
+    <span class="k">union</span> <span class="p">{</span>
+        <span class="n">UA_TargetVariables</span> <span class="n">subscribedDataSetTarget</span><span class="p">;</span>
+        <span class="c1">// UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror;</span>
+    <span class="p">}</span> <span class="n">subscribedDataSet</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
+
+<span class="cm">/* Update configuration to the dataSetReader */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_updateConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                     <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                                     <span class="k">const</span> <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get configuration of the dataSetReader */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                                  <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get state of DataSetReader */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_DataSetReader_getState</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">dataSetReaderIdentifier</span><span class="p">,</span>
+                               <span class="n">UA_PubSubState</span> <span class="o">*</span><span class="n">state</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="readergroup">
+<h2>ReaderGroup<a class="headerlink" href="#readergroup" title="Permalink to this headline">¶</a></h2>
+<p>ReaderGroup is used to group a list of DataSetReaders. All ReaderGroups are
+created within a PubSubConnection and automatically deleted if the connection
+is removed. All network message related filters are only available in the DataSetReader.</p>
+<p>The RT-levels go along with different requirements. The below listed levels can be configured
+for a ReaderGroup.
+UA_PUBSUB_RT_NONE &#8211;&gt; No RT applied to this level
+PUBSUB_CONFIG_FASTPATH_FIXED_OFFSETS &#8211;&gt; Extends PubSub RT functionality and implements fast path
+message decoding in the Subscriber. Uses a buffered network message and only decodes the necessary
+offsets stored in an offset buffer.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* ReaderGroup configuration */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">UA_PubSubSecurityParameters</span> <span class="n">securityParameters</span><span class="p">;</span>
+    <span class="cm">/* PubSub Manager Callback */</span>
+    <span class="n">UA_PubSub_CallbackLifecycle</span> <span class="n">pubsubManagerCallback</span><span class="p">;</span>
+    <span class="cm">/* non std. field */</span>
+    <span class="n">UA_Duration</span> <span class="n">subscribingInterval</span><span class="p">;</span> <span class="c1">// Callback interval for subscriber: set the least publishingInterval value of all DSRs in this RG</span>
+    <span class="n">UA_Boolean</span> <span class="n">enableBlockingSocket</span><span class="p">;</span> <span class="c1">// To enable or disable blocking socket option</span>
+    <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">;</span> <span class="c1">// Timeout for receive to wait for the packets</span>
+    <span class="n">UA_PubSubRTLevel</span> <span class="n">rtLevel</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_ReaderGroupConfig_clear</span><span class="p">(</span><span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">readerGroupConfig</span><span class="p">);</span>
+
+<span class="cm">/* Add DataSetReader to the ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_DataSetReaderConfig</span> <span class="o">*</span><span class="n">dataSetReaderConfig</span><span class="p">,</span>
+                                      <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Remove DataSetReader from ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* To Do: Update Configuration of ReaderGroup</span>
+<span class="cm"> * UA_StatusCode</span>
+<span class="cm"> * UA_Server_ReaderGroup_updateConfig(UA_Server *server, UA_NodeId readerGroupIdentifier,</span>
+<span class="cm"> *                                    const UA_ReaderGroupConfig *config);</span>
+<span class="cm"> */</span>
+
+<span class="cm">/* Get configuraiton of ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_ReaderGroup_getConfig</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                               <span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Get state of ReaderGroup */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_ReaderGroup_getState</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupIdentifier</span><span class="p">,</span>
+                               <span class="n">UA_PubSubState</span> <span class="o">*</span><span class="n">state</span><span class="p">);</span>
+
+<span class="cm">/* Add ReaderGroup to the created connection */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">connectionIdentifier</span><span class="p">,</span>
+                                   <span class="k">const</span> <span class="n">UA_ReaderGroupConfig</span> <span class="o">*</span><span class="n">readerGroupConfig</span><span class="p">,</span>
+                                   <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
+
+<span class="cm">/* Remove ReaderGroup from connection */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">groupIdentifier</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_freezeReaderGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_unfreezeReaderGroupConfiguration</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setReaderGroupOperational</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setReaderGroupDisabled</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">readerGroupId</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span><span class="cp"></span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="plugin_pubsub_connection.html" class="btn btn-neutral float-left" title="PubSub Connection Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
