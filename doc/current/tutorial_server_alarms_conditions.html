@@ -1,0 +1,810 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Using Alarms and Conditions Server &mdash; open62541 1.2.0-rc2-44-ge5eba7bd documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.2.0-rc2-44-ge5eba7bd',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="next" title="Building a Simple Client" href="tutorial_client_firststeps.html" />
+    <link rel="prev" title="Generating events" href="tutorial_server_events.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_firststeps.html">Building a Simple Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding Variables to a Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_datasource.html">Connecting a Variable with a Physical Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Using Alarms and Conditions Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trigger-alarm-events-by-changing-states">Trigger Alarm events by changing States</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Using Alarms and Conditions Server</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tutorial_server_alarms_conditions.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-alarms-and-conditions-server">
+<h1>Using Alarms and Conditions Server<a class="headerlink" href="#using-alarms-and-conditions-server" title="Permalink to this headline">¶</a></h1>
+<p>Besides the usage of monitored items and events to observe the changes in the
+server, it is also important to make use of the Alarms and Conditions Server
+Model. Alarms are events which are triggered automatically by the server
+dependent on internal server logic or user specific logic when the state of
+server components change. The state of a component is represented through a
+condition. So the values of all the condition children (Fields) are the
+actual state of the component.</p>
+<div class="section" id="trigger-alarm-events-by-changing-states">
+<h2>Trigger Alarm events by changing States<a class="headerlink" href="#trigger-alarm-events-by-changing-states" title="Permalink to this headline">¶</a></h2>
+<p>The following example will be based on the server events tutorial. Please
+make sure to understand the principle of normal events before proceeding with
+this example!</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_NodeId</span> <span class="n">conditionSource</span><span class="p">;</span>
+<span class="k">static</span> <span class="n">UA_NodeId</span> <span class="n">conditionInstance_1</span><span class="p">;</span>
+<span class="k">static</span> <span class="n">UA_NodeId</span> <span class="n">conditionInstance_2</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">addConditionSourceObject</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_ObjectAttributes</span> <span class="n">object_attr</span> <span class="o">=</span> <span class="n">UA_ObjectAttributes_default</span><span class="p">;</span>
+    <span class="n">object_attr</span><span class="p">.</span><span class="n">eventNotifier</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="n">object_attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en&quot;</span><span class="p">,</span> <span class="s">&quot;ConditionSourceObject&quot;</span><span class="p">);</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span>  <span class="n">UA_Server_addObjectNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+                                      <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span>
+                                      <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">),</span>
+                                      <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;ConditionSourceObject&quot;</span><span class="p">),</span>
+                                      <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEOBJECTTYPE</span><span class="p">),</span>
+                                      <span class="n">object_attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">conditionSource</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Creating Condition Source failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* ConditionSource should be EventNotifier of another Object (usually the</span>
+<span class="cm">     * Server Object). If this Reference is not created by user then the A&amp;C</span>
+<span class="cm">     * Server will create &quot;HasEventSource&quot; reference to the Server Object</span>
+<span class="cm">     * automatically when the condition is created*/</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_addReference</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_SERVER</span><span class="p">),</span>
+                                     <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASNOTIFIER</span><span class="p">),</span>
+                                     <span class="n">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="n">conditionSource</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="p">,</span>
+                                                               <span class="n">conditionSource</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">),</span>
+                                     <span class="n">UA_TRUE</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Create a condition instance from OffNormalAlarmType. The condition source is
+the Object created in addConditionSourceObject(). The condition will be
+exposed in Address Space through the HasComponent reference to the condition
+source.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">addCondition_1</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">addConditionSourceObject</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;creating Condition Source failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_createCondition</span><span class="p">(</span><span class="n">server</span><span class="p">,</span>
+                                       <span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+                                       <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OFFNORMALALARMTYPE</span><span class="p">),</span>
+                                       <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Condition 1&quot;</span><span class="p">),</span> <span class="n">conditionSource</span><span class="p">,</span>
+                                       <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_HASCOMPONENT</span><span class="p">),</span>
+                                       <span class="o">&amp;</span><span class="n">conditionInstance_1</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Create a condition instance from OffNormalAlarmType. The condition source is
+the server Object. The condition won&#8217;t be exposed in Address Space.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">addCondition_2</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span>
+        <span class="n">UA_Server_createCondition</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+                                  <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OFFNORMALALARMTYPE</span><span class="p">),</span>
+                                  <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Condition 2&quot;</span><span class="p">),</span>
+                                  <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_SERVER</span><span class="p">),</span>
+                                  <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">conditionInstance_2</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addVariable_1_triggerAlarmOfCondition_1</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span><span class="o">*</span> <span class="n">outNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_VariableAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en&quot;</span><span class="p">,</span> <span class="s">&quot;Activate Condition 1&quot;</span><span class="p">);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">accessLevel</span> <span class="o">=</span> <span class="n">UA_ACCESSLEVELMASK_READ</span> <span class="o">|</span> <span class="n">UA_ACCESSLEVELMASK_WRITE</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">tboolValue</span> <span class="o">=</span> <span class="n">UA_FALSE</span><span class="p">;</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tboolValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+
+    <span class="n">UA_QualifiedName</span> <span class="n">CallbackTestVariableName</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Activate Condition 1&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentReferenceNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">variableTypeNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">);</span>
+    <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                              <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">CallbackTestVariableName</span><span class="p">,</span>
+                              <span class="n">variableTypeNodeId</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">outNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addVariable_2_changeSeverityOfCondition_2</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                          <span class="n">UA_NodeId</span><span class="o">*</span> <span class="n">outNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_VariableAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en&quot;</span><span class="p">,</span> <span class="s">&quot;Change Severity Condition 2&quot;</span><span class="p">);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">accessLevel</span> <span class="o">=</span> <span class="n">UA_ACCESSLEVELMASK_READ</span> <span class="o">|</span> <span class="n">UA_ACCESSLEVELMASK_WRITE</span><span class="p">;</span>
+    <span class="n">UA_UInt16</span> <span class="n">severityValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">severityValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
+
+    <span class="n">UA_QualifiedName</span> <span class="n">CallbackTestVariableName</span> <span class="o">=</span>
+        <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Change Severity Condition 2&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentReferenceNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">variableTypeNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">);</span>
+    <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                              <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">CallbackTestVariableName</span><span class="p">,</span>
+                              <span class="n">variableTypeNodeId</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">outNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">addVariable_3_returnCondition_1_toNormalState</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                              <span class="n">UA_NodeId</span><span class="o">*</span> <span class="n">outNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_VariableAttributes</span> <span class="n">attr</span> <span class="o">=</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en&quot;</span><span class="p">,</span> <span class="s">&quot;Return to Normal Condition 1&quot;</span><span class="p">);</span>
+    <span class="n">attr</span><span class="p">.</span><span class="n">accessLevel</span> <span class="o">=</span> <span class="n">UA_ACCESSLEVELMASK_READ</span> <span class="o">|</span> <span class="n">UA_ACCESSLEVELMASK_WRITE</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">rtn</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rtn</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+
+    <span class="n">UA_QualifiedName</span> <span class="n">CallbackTestVariableName</span> <span class="o">=</span>
+        <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Return to Normal Condition 1&quot;</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">parentReferenceNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
+    <span class="n">UA_NodeId</span> <span class="n">variableTypeNodeId</span> <span class="o">=</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_BASEDATAVARIABLETYPE</span><span class="p">);</span>
+    <span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                              <span class="n">parentReferenceNodeId</span><span class="p">,</span> <span class="n">CallbackTestVariableName</span><span class="p">,</span>
+                              <span class="n">variableTypeNodeId</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">outNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span>
+<span class="nf">afterWriteCallbackVariable_1</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                             <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                             <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;ActiveState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateIdField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Id&quot;</span><span class="p">);</span>
+    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
+
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span>
+        <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                             <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Time&quot;</span><span class="p">),</span>
+                                             <span class="o">&amp;</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">sourceTimestamp</span><span class="p">,</span>
+                                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">UA_Boolean</span> <span class="o">*</span><span class="p">)(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+        <span class="cm">/* By writing &quot;true&quot; in ActiveState/Id, the A&amp;C server will set the</span>
+<span class="cm">         * related fields automatically and then will trigger event</span>
+<span class="cm">         * notification. */</span>
+        <span class="n">UA_Boolean</span> <span class="n">activeStateId</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+        <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">activeStateId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+        <span class="n">retval</span> <span class="o">|=</span> <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                              <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">activeStateField</span><span class="p">,</span>
+                                                              <span class="n">activeStateIdField</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                         <span class="s">&quot;Setting ActiveState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                         <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="cm">/* By writing &quot;false&quot; in ActiveState/Id, the A&amp;C server will set only</span>
+<span class="cm">         * the ActiveState field automatically to the value &quot;Inactive&quot;. The user</span>
+<span class="cm">         * should trigger the event manually by calling</span>
+<span class="cm">         * UA_Server_triggerConditionEvent inside the application or call</span>
+<span class="cm">         * ConditionRefresh method with client to update the event notification. */</span>
+        <span class="n">UA_Boolean</span> <span class="n">activeStateId</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+        <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">activeStateId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                             <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">activeStateField</span><span class="p">,</span>
+                                                             <span class="n">activeStateIdField</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                         <span class="s">&quot;Setting ActiveState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                         <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_triggerConditionEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                 <span class="n">conditionSource</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                           <span class="s">&quot;Triggering condition event failed. StatusCode %s&quot;</span><span class="p">,</span>
+                           <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The callback only changes the severity field of the condition 2. The severity
+field is of ConditionVariableType, so changes in it triggers an event
+notification automatically by the server.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
+<span class="nf">afterWriteCallbackVariable_2</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                             <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                             <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+   <span class="cm">/* Another way to set fields of conditions */</span>
+    <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_2</span><span class="p">,</span>
+                                         <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Severity&quot;</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="n">UA_UInt16</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">.</span><span class="n">data</span><span class="p">,</span>
+                                         <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>RTN = return to normal.</p>
+<p>Retain will be set to false, thus no events will be generated for condition 1
+(although EnabledState/=true). To set Retain to true again, the disable and
+enable methods should be called respectively.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="kt">void</span>
+<span class="nf">afterWriteCallbackVariable_3</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">//UA_QualifiedName enabledStateField = UA_QUALIFIEDNAME(0,&quot;EnabledState&quot;);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">ackedStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;AckedState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">confirmedStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;ConfirmedState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;ActiveState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">severityField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Severity&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">messageField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Message&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">commentField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Comment&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">retainField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Retain&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">idField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Id&quot;</span><span class="p">);</span>
+
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span>
+        <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                             <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Time&quot;</span><span class="p">),</span>
+                                             <span class="o">&amp;</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">serverTimestamp</span><span class="p">,</span>
+                                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATETIME</span><span class="p">]);</span>
+    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">idValue</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">idValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">|=</span> <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                          <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">activeStateField</span><span class="p">,</span>
+                                                          <span class="n">idField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting ActiveState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">ackedStateField</span><span class="p">,</span>
+                                                         <span class="n">idField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting AckedState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">confirmedStateField</span><span class="p">,</span>
+                                                         <span class="n">idField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting ConfirmedState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_UInt16</span> <span class="n">severityValue</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">severityValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">severityField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting Severity Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_LocalizedText</span> <span class="n">messageValue</span> <span class="o">=</span>
+        <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en&quot;</span><span class="p">,</span> <span class="s">&quot;Condition returned to normal state&quot;</span><span class="p">);</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">messageValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">messageField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting Message Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_LocalizedText</span> <span class="n">commentValue</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en&quot;</span><span class="p">,</span> <span class="s">&quot;Normal State&quot;</span><span class="p">);</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">commentValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">commentField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting Comment Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_Boolean</span> <span class="n">retainValue</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">retainValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">retainField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting Retain Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_triggerConditionEvent</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                             <span class="n">conditionSource</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+     <span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                    <span class="s">&quot;Triggering condition event failed. StatusCode %s&quot;</span><span class="p">,</span>
+                    <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+     <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">enteringEnabledStateCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">condition</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_Boolean</span> <span class="n">retain</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">condition</span><span class="p">,</span>
+                                                <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Retain&quot;</span><span class="p">),</span>
+                                                <span class="o">&amp;</span><span class="n">retain</span><span class="p">,</span>
+                                                <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This is user specific function which will be called upon acknowledging an
+alarm notification. In this example we will set the Alarm to Inactive state.
+The server is responsible of setting standard fields related to Acknowledge
+Method and triggering the alarm notification.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">enteringAckedStateCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">condition</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* deactivate Alarm when acknowledging*/</span>
+    <span class="n">UA_Boolean</span> <span class="n">activeStateId</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;ActiveState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateIdField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Id&quot;</span><span class="p">);</span>
+
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">activeStateId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span>
+        <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">condition</span><span class="p">,</span>
+                                                    <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">activeStateField</span><span class="p">,</span>
+                                                    <span class="n">activeStateIdField</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting ActiveState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">enteringConfirmedStateCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">condition</span><span class="p">)</span> <span class="p">{</span>
+     <span class="cm">/* Deactivate Alarm and put it out of the interesting state (by writing</span>
+<span class="cm">     * false to Retain field) when confirming*/</span>
+    <span class="n">UA_Boolean</span> <span class="n">activeStateId</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">retain</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;ActiveState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">activeStateIdField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Id&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">retainField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Retain&quot;</span><span class="p">);</span>
+
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">activeStateId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span>
+        <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">condition</span><span class="p">,</span>
+                                                    <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">activeStateField</span><span class="p">,</span>
+                                                    <span class="n">activeStateIdField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting ActiveState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">retain</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">*</span><span class="n">condition</span><span class="p">,</span>
+                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">retainField</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting ActiveState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">setUpEnvironment</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">UA_NodeId</span> <span class="n">variable_1</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">variable_2</span><span class="p">;</span>
+    <span class="n">UA_NodeId</span> <span class="n">variable_3</span><span class="p">;</span>
+    <span class="n">UA_ValueCallback</span> <span class="n">callback</span><span class="p">;</span>
+    <span class="n">callback</span><span class="p">.</span><span class="n">onRead</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+    <span class="cm">/* Exposed condition 1. We will add to it user specific callbacks when</span>
+<span class="cm">     * entering enabled state, when acknowledging and when confirming. */</span>
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">addCondition_1</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;adding condition 1 failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_TwoStateVariableChangeCallback</span> <span class="n">userSpecificCallback</span> <span class="o">=</span> <span class="n">enteringEnabledStateCallback</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionTwoStateVariableCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                            <span class="n">conditionSource</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span>
+                                                            <span class="n">userSpecificCallback</span><span class="p">,</span>
+                                                            <span class="n">UA_ENTERING_ENABLEDSTATE</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;adding entering enabled state callback failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">userSpecificCallback</span> <span class="o">=</span> <span class="n">enteringAckedStateCallback</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionTwoStateVariableCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                            <span class="n">conditionSource</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span>
+                                                            <span class="n">userSpecificCallback</span><span class="p">,</span>
+                                                            <span class="n">UA_ENTERING_ACKEDSTATE</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;adding entering acked state callback failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">userSpecificCallback</span> <span class="o">=</span> <span class="n">enteringConfirmedStateCallback</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionTwoStateVariableCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_1</span><span class="p">,</span>
+                                                            <span class="n">conditionSource</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span>
+                                                            <span class="n">userSpecificCallback</span><span class="p">,</span>
+                                                            <span class="n">UA_ENTERING_CONFIRMEDSTATE</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;adding entering confirmed state callback failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Unexposed condition 2. No user specific callbacks, so the server will</span>
+<span class="cm">     * behave in a standard manner upon entering enabled state, acknowledging</span>
+<span class="cm">     * and confirming. We will set Retain field to true and enable the condition</span>
+<span class="cm">     * so we can receive event notifications (we cannot call enable method on</span>
+<span class="cm">     * unexposed condition using a client like UaExpert or Softing). */</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">addCondition_2</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;adding condition 2 failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">UA_Boolean</span> <span class="n">retain</span> <span class="o">=</span> <span class="n">UA_TRUE</span><span class="p">;</span>
+    <span class="n">UA_Server_writeObjectProperty_scalar</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_2</span><span class="p">,</span>
+                                         <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Retain&quot;</span><span class="p">),</span>
+                                         <span class="o">&amp;</span><span class="n">retain</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+
+    <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">;</span>
+    <span class="n">UA_Boolean</span> <span class="n">enabledStateId</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">enabledStateField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;EnabledState&quot;</span><span class="p">);</span>
+    <span class="n">UA_QualifiedName</span> <span class="n">enabledStateIdField</span> <span class="o">=</span> <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;Id&quot;</span><span class="p">);</span>
+    <span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">enabledStateId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">conditionInstance_2</span><span class="p">,</span>
+                                                         <span class="o">&amp;</span><span class="n">value</span><span class="p">,</span> <span class="n">enabledStateField</span><span class="p">,</span>
+                                                         <span class="n">enabledStateIdField</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting EnabledState/Id Field failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+
+    <span class="cm">/* Add 3 variables to trigger condition events */</span>
+    <span class="n">addVariable_1_triggerAlarmOfCondition_1</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">variable_1</span><span class="p">);</span>
+
+    <span class="n">callback</span><span class="p">.</span><span class="n">onWrite</span> <span class="o">=</span> <span class="n">afterWriteCallbackVariable_1</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">variable_1</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting variable 1 Callback failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="cm">/* Severity can change internally also when the condition disabled and</span>
+<span class="cm">     * retain is false. However, in this case no events will be generated. */</span>
+    <span class="n">addVariable_2_changeSeverityOfCondition_2</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">variable_2</span><span class="p">);</span>
+
+    <span class="n">callback</span><span class="p">.</span><span class="n">onWrite</span> <span class="o">=</span> <span class="n">afterWriteCallbackVariable_2</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">variable_2</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting variable 2 Callback failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+        <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">addVariable_3_returnCondition_1_toNormalState</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">variable_3</span><span class="p">);</span>
+
+    <span class="n">callback</span><span class="p">.</span><span class="n">onWrite</span> <span class="o">=</span> <span class="n">afterWriteCallbackVariable_3</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">variable_3</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">!=</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span> <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+                     <span class="s">&quot;Setting variable 3 Callback failed. StatusCode %s&quot;</span><span class="p">,</span>
+                     <span class="n">UA_StatusCode_name</span><span class="p">(</span><span class="n">retval</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>It follows the main server code, making use of the above definitions.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="k">static</span> <span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="cm">/* default server values */</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+    <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+
+    <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">();</span>
+    <span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
+
+    <span class="n">UA_StatusCode</span> <span class="n">retval</span> <span class="o">=</span> <span class="n">setUpEnvironment</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span>
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+
+    <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">retval</span> <span class="o">==</span> <span class="n">UA_STATUSCODE_GOOD</span> <span class="o">?</span> <span class="n">EXIT_SUCCESS</span> <span class="o">:</span> <span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="tutorial_client_firststeps.html" class="btn btn-neutral float-right" title="Building a Simple Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorial_server_events.html" class="btn btn-neutral float-left" title="Generating events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

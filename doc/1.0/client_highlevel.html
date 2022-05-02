@@ -1,0 +1,890 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Highlevel Client Functionality &mdash; open62541 1.0.5-1-g982f0796 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.0.5-1-g982f0796',
+              LANGUAGE:'',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: ''
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="next" title="Subscriptions" href="client_subscriptions.html" />
+    <link rel="prev" title="Client" href="client.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#nodestore-plugin-api">Nodestore Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-handling">Node Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="client.html">Client</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html#client-configuration">Client Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#client-lifecycle">Client Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#connect-to-a-server">Connect to a Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#discovery">Discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#asynchronous-services">Asynchronous Services</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="client.html#timed-callbacks">Timed Callbacks</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="">Highlevel Client Functionality</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#read-attributes">Read Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#historical-access">Historical Access</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#write-attributes">Write Attributes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#method-calling">Method Calling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#node-management">Node Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html#internal-constants">Internal Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="client.html">Client</a> &raquo;</li>
+        
+      <li>Highlevel Client Functionality</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/client_highlevel.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="highlevel-client-functionality">
+<span id="client-highlevel"></span><h1>Highlevel Client Functionality<a class="headerlink" href="#highlevel-client-functionality" title="Permalink to this headline">¶</a></h1>
+<p>The following definitions are convenience functions making use of the
+standard OPC UA services in the background. This is a less flexible way of
+handling the stack, because at many places sensible defaults are presumed; at
+the same time using these functions is the easiest way of implementing an OPC
+UA application, as you will not have to consider all the details that go into
+the OPC UA services. If more flexibility is needed, you can always achieve
+the same functionality using the raw <a class="reference internal" href="client.html#client-services"><em>OPC UA services</em></a>.</p>
+<div class="section" id="read-attributes">
+<h2>Read Attributes<a class="headerlink" href="#read-attributes" title="Permalink to this headline">¶</a></h2>
+<p>The following functions can be used to retrieve a single node attribute. Use
+the regular service to read several attributes at once.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                          <span class="n">UA_AttributeId</span> <span class="n">attributeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">out</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">outDataType</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readNodeIdAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_NODEID</span><span class="p">,</span>
+                                     <span class="n">outNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readNodeClassAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_NodeClass</span> <span class="o">*</span><span class="n">outNodeClass</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_NODECLASS</span><span class="p">,</span>
+                                     <span class="n">outNodeClass</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODECLASS</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readBrowseNameAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="n">UA_QualifiedName</span> <span class="o">*</span><span class="n">outBrowseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_BROWSENAME</span><span class="p">,</span>
+                                     <span class="n">outBrowseName</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUALIFIEDNAME</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readDisplayNameAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">outDisplayName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span>
+                                     <span class="n">outDisplayName</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readDescriptionAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">outDescription</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DESCRIPTION</span><span class="p">,</span>
+                                     <span class="n">outDescription</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readWriteMaskAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">outWriteMask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_WRITEMASK</span><span class="p">,</span>
+                                     <span class="n">outWriteMask</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readUserWriteMaskAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">outUserWriteMask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_ATTRIBUTEID_USERWRITEMASK</span><span class="p">,</span>
+                                     <span class="n">outUserWriteMask</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readIsAbstractAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outIsAbstract</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ISABSTRACT</span><span class="p">,</span>
+                                     <span class="n">outIsAbstract</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readSymmetricAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outSymmetric</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_SYMMETRIC</span><span class="p">,</span>
+                                     <span class="n">outSymmetric</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readInverseNameAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">outInverseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_INVERSENAME</span><span class="p">,</span>
+                                     <span class="n">outInverseName</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readContainsNoLoopsAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                       <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outContainsNoLoops</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_ATTRIBUTEID_CONTAINSNOLOOPS</span><span class="p">,</span>
+                                     <span class="n">outContainsNoLoops</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readEventNotifierAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">outEventNotifier</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EVENTNOTIFIER</span><span class="p">,</span>
+                                     <span class="n">outEventNotifier</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readValueAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                             <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">outValue</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span>
+                                     <span class="n">outValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIANT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readDataTypeAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outDataType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DATATYPE</span><span class="p">,</span>
+                                     <span class="n">outDataType</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readValueRankAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">outValueRank</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUERANK</span><span class="p">,</span>
+                                     <span class="n">outValueRank</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readArrayDimensionsAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                       <span class="kt">size_t</span> <span class="o">*</span><span class="n">outArrayDimensionsSize</span><span class="p">,</span>
+                                       <span class="n">UA_UInt32</span> <span class="o">**</span><span class="n">outArrayDimensions</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readAccessLevelAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">outAccessLevel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ACCESSLEVEL</span><span class="p">,</span>
+                                     <span class="n">outAccessLevel</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readUserAccessLevelAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                       <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">outUserAccessLevel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_ATTRIBUTEID_USERACCESSLEVEL</span><span class="p">,</span>
+                                     <span class="n">outUserAccessLevel</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readMinimumSamplingIntervalAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                               <span class="n">UA_Double</span> <span class="o">*</span><span class="n">outMinSamplingInterval</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</span><span class="p">,</span>
+                                     <span class="n">outMinSamplingInterval</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readHistorizingAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outHistorizing</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_HISTORIZING</span><span class="p">,</span>
+                                     <span class="n">outHistorizing</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readExecutableAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outExecutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EXECUTABLE</span><span class="p">,</span>
+                                     <span class="n">outExecutable</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readUserExecutableAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outUserExecutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="n">UA_ATTRIBUTEID_USEREXECUTABLE</span><span class="p">,</span>
+                                     <span class="n">outUserExecutable</span><span class="p">,</span>
+                                     <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="historical-access">
+<h2>Historical Access<a class="headerlink" href="#historical-access" title="Permalink to this headline">¶</a></h2>
+<p>The following functions can be used to read a single node historically.
+Use the regular service to read several nodes at once.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#ifdef UA_ENABLE_HISTORIZING</span>
+<span class="k">typedef</span> <span class="nf">UA_Boolean</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_HistoricalIteratorCallback</span><span class="p">)(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="n">UA_Boolean</span> <span class="n">moreDataAvailable</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_ExtensionObject</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_EXPERIMENTAL_HISTORIZING</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryRead_events</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">UA_HistoricalIteratorCallback</span> <span class="n">callback</span><span class="p">,</span>
+                                <span class="n">UA_DateTime</span> <span class="n">startTime</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="n">endTime</span><span class="p">,</span>
+                                <span class="n">UA_String</span> <span class="n">indexRange</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_EventFilter</span> <span class="n">filter</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">numValuesPerNode</span><span class="p">,</span>
+                                <span class="n">UA_TimestampsToReturn</span> <span class="n">timestampsToReturn</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+<span class="cp">#endif </span><span class="c1">// UA_ENABLE_EXPERIMENTAL_HISTORIZING</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryRead_raw</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">UA_HistoricalIteratorCallback</span> <span class="n">callback</span><span class="p">,</span>
+                             <span class="n">UA_DateTime</span> <span class="n">startTime</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="n">endTime</span><span class="p">,</span>
+                             <span class="n">UA_String</span> <span class="n">indexRange</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">returnBounds</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">numValuesPerNode</span><span class="p">,</span>
+                             <span class="n">UA_TimestampsToReturn</span> <span class="n">timestampsToReturn</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_EXPERIMENTAL_HISTORIZING</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryRead_modified</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_HistoricalIteratorCallback</span> <span class="n">callback</span><span class="p">,</span>
+                                  <span class="n">UA_DateTime</span> <span class="n">startTime</span><span class="p">,</span> <span class="n">UA_DateTime</span> <span class="n">endTime</span><span class="p">,</span>
+                                  <span class="n">UA_String</span> <span class="n">indexRange</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">returnBounds</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">numValuesPerNode</span><span class="p">,</span>
+                                  <span class="n">UA_TimestampsToReturn</span> <span class="n">timestampsToReturn</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+<span class="cp">#endif </span><span class="c1">// UA_ENABLE_EXPERIMENTAL_HISTORIZING</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryUpdate_insert</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                               <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryUpdate_replace</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryUpdate_update</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                               <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_HistoryUpdate_deleteRaw</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="n">UA_DateTime</span> <span class="n">startTimestamp</span><span class="p">,</span>
+                                  <span class="n">UA_DateTime</span> <span class="n">endTimestamp</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="c1">// UA_ENABLE_HISTORIZING</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="write-attributes">
+<h2>Write Attributes<a class="headerlink" href="#write-attributes" title="Permalink to this headline">¶</a></h2>
+<p>The following functions can be use to write a single node attribute at a
+time. Use the regular write service to write several attributes at once.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                           <span class="n">UA_AttributeId</span> <span class="n">attributeId</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">inDataType</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeNodeIdAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">newNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_NODEID</span><span class="p">,</span>
+                                      <span class="n">newNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeNodeClassAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="o">*</span><span class="n">newNodeClass</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_NODECLASS</span><span class="p">,</span>
+                                      <span class="n">newNodeClass</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODECLASS</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeBrowseNameAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="o">*</span><span class="n">newBrowseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_BROWSENAME</span><span class="p">,</span>
+                                      <span class="n">newBrowseName</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUALIFIEDNAME</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeDisplayNameAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">newDisplayName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span>
+                                      <span class="n">newDisplayName</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeDescriptionAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">newDescription</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DESCRIPTION</span><span class="p">,</span>
+                                      <span class="n">newDescription</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeWriteMaskAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newWriteMask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_WRITEMASK</span><span class="p">,</span>
+                                      <span class="n">newWriteMask</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeUserWriteMaskAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newUserWriteMask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_ATTRIBUTEID_USERWRITEMASK</span><span class="p">,</span>
+                                      <span class="n">newUserWriteMask</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeIsAbstractAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">newIsAbstract</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ISABSTRACT</span><span class="p">,</span>
+                                      <span class="n">newIsAbstract</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeSymmetricAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">newSymmetric</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_SYMMETRIC</span><span class="p">,</span>
+                                      <span class="n">newSymmetric</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeInverseNameAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">newInverseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_INVERSENAME</span><span class="p">,</span>
+                                      <span class="n">newInverseName</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeContainsNoLoopsAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">newContainsNoLoops</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_ATTRIBUTEID_CONTAINSNOLOOPS</span><span class="p">,</span>
+                                      <span class="n">newContainsNoLoops</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeEventNotifierAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="k">const</span> <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">newEventNotifier</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_ATTRIBUTEID_EVENTNOTIFIER</span><span class="p">,</span>
+                                      <span class="n">newEventNotifier</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeValueAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">newValue</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span>
+                                      <span class="n">newValue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIANT</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeDataTypeAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">newDataType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DATATYPE</span><span class="p">,</span>
+                                      <span class="n">newDataType</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeValueRankAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                  <span class="k">const</span> <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">newValueRank</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUERANK</span><span class="p">,</span>
+                                      <span class="n">newValueRank</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeArrayDimensionsAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                        <span class="kt">size_t</span> <span class="n">newArrayDimensionsSize</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">newArrayDimensions</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeAccessLevelAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">newAccessLevel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ACCESSLEVEL</span><span class="p">,</span>
+                                      <span class="n">newAccessLevel</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeUserAccessLevelAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">newUserAccessLevel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_ATTRIBUTEID_USERACCESSLEVEL</span><span class="p">,</span>
+                                      <span class="n">newUserAccessLevel</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeMinimumSamplingIntervalAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                                <span class="k">const</span> <span class="n">UA_Double</span> <span class="o">*</span><span class="n">newMinInterval</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</span><span class="p">,</span>
+                                      <span class="n">newMinInterval</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeHistorizingAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">newHistorizing</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_HISTORIZING</span><span class="p">,</span>
+                                      <span class="n">newHistorizing</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeExecutableAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                   <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">newExecutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EXECUTABLE</span><span class="p">,</span>
+                                      <span class="n">newExecutable</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_writeUserExecutableAttribute</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                       <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">newUserExecutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_ATTRIBUTEID_USEREXECUTABLE</span><span class="p">,</span>
+                                      <span class="n">newUserExecutable</span><span class="p">,</span>
+                                      <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="method-calling">
+<h2>Method Calling<a class="headerlink" href="#method-calling" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_call</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span>
+               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">methodId</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span>
+               <span class="kt">size_t</span> <span class="o">*</span><span class="n">outputSize</span><span class="p">,</span> <span class="n">UA_Variant</span> <span class="o">**</span><span class="n">output</span><span class="p">);</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="node-management">
+<h2>Node Management<a class="headerlink" href="#node-management" title="Permalink to this headline">¶</a></h2>
+<p>See the section on <a class="reference internal" href="server.html#addnodes"><em>server-side node management</em></a>.</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addReference</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">sourceNodeId</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_String</span> <span class="n">targetServerUri</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="n">targetNodeId</span><span class="p">,</span>
+                       <span class="n">UA_NodeClass</span> <span class="n">targetNodeClass</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_deleteReference</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">sourceNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="n">targetNodeId</span><span class="p">,</span>
+                          <span class="n">UA_Boolean</span> <span class="n">deleteBidirectional</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_deleteNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                     <span class="n">UA_Boolean</span> <span class="n">deleteTargetReferences</span><span class="p">);</span>
+
+<span class="cm">/* Protect against redundant definitions for server/client */</span>
+<span class="cp">#ifndef UA_DEFAULT_ATTRIBUTES_DEFINED</span>
+<span class="cp">#define UA_DEFAULT_ATTRIBUTES_DEFINED</span>
+<span class="cm">/* The default for variables is &quot;BaseDataType&quot; for the datatype, -2 for the</span>
+<span class="cm"> * valuerank and a read-accesslevel. */</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_VariableTypeAttributes</span> <span class="n">UA_VariableTypeAttributes_default</span><span class="p">;</span>
+<span class="cm">/* Methods are executable by default */</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">UA_MethodAttributes_default</span><span class="p">;</span>
+<span class="cm">/* The remaining attribute definitions are currently all zeroed out */</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">UA_ObjectAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ObjectTypeAttributes</span> <span class="n">UA_ObjectTypeAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ReferenceTypeAttributes</span> <span class="n">UA_ReferenceTypeAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_DataTypeAttributes</span> <span class="n">UA_DataTypeAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">UA_ViewAttributes_default</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_addNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeAttributes</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addVariableNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addVariableTypeNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_VariableTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                              <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLETYPE</span><span class="p">,</span>
+                               <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLETYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addObjectNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">attr</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTATTRIBUTES</span><span class="p">],</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addObjectTypeNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_ObjectTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                            <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECTTYPE</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTTYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addViewNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                      <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_VIEW</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VIEWATTRIBUTES</span><span class="p">],</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addReferenceTypeNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_ReferenceTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                               <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_REFERENCETYPE</span><span class="p">,</span>
+                               <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCETYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addDataTypeNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_DataTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_DATATYPE</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATATYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_addMethodNode</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                        <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Client_addNode</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NODECLASS_METHOD</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="n">parentNodeId</span><span class="p">,</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_METHODATTRIBUTES</span><span class="p">],</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="misc-highlevel-functionality">
+<h2>Misc Highlevel Functionality<a class="headerlink" href="#misc-highlevel-functionality" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span class="cm">/* Get the namespace-index of a namespace-URI</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param client The UA_Client struct for this connection</span>
+<span class="cm"> * @param namespaceUri The interested namespace URI</span>
+<span class="cm"> * @param namespaceIndex The namespace index of the URI. The value is unchanged</span>
+<span class="cm"> *        in case of an error</span>
+<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_NamespaceGetIndex</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_String</span> <span class="o">*</span><span class="n">namespaceUri</span><span class="p">,</span>
+                            <span class="n">UA_UInt16</span> <span class="o">*</span><span class="n">namespaceIndex</span><span class="p">);</span>
+
+<span class="cp">#ifndef HAVE_NODEITER_CALLBACK</span>
+<span class="cp">#define HAVE_NODEITER_CALLBACK</span>
+<span class="cm">/* Iterate over all nodes referenced by parentNodeId by calling the callback</span>
+<span class="cm">   function for each child node */</span>
+<span class="k">typedef</span> <span class="nf">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span> <span class="n">childId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">,</span>
+                                                 <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_forEachChildNodeCall</span><span class="p">(</span><span class="n">UA_Client</span> <span class="o">*</span><span class="n">client</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                               <span class="n">UA_NodeIteratorCallback</span> <span class="n">callback</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="client_subscriptions.html" class="btn btn-neutral float-right" title="Subscriptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="client.html" class="btn btn-neutral float-left" title="Client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Nodestore &mdash; open62541 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="open62541 0.2.0 documentation" href="index.html"/>
+        <link rel="up" title="Internals" href="internal.html"/>
+        <link rel="next" title="Networking" href="connection.html"/>
+        <link rel="prev" title="Internals" href="internal.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="namespace_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Nodestore</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nodestore-lifecycle">Nodestore Lifecycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#node-lifecycle">Node Lifecycle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#insert-get-replace-remove">Insert / Get / Replace / Remove</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iteration">Iteration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="connection.html">Networking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="log.html">Logging</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html">Docs</a> &raquo;</li>
+        
+          <li><a href="internal.html">Internals</a> &raquo;</li>
+        
+      <li>Nodestore</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/nodestore.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="nodestore">
+<h1>Nodestore<a class="headerlink" href="#nodestore" title="Permalink to this headline">¶</a></h1>
+<p>Stores nodes that can be indexed by their NodeId. Internally, it is based on
+a hash-map implementation.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">UA_NodeStore</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_NodeStore</span> <span class="n">UA_NodeStore</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="nodestore-lifecycle">
+<h2>Nodestore Lifecycle<a class="headerlink" href="#nodestore-lifecycle" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Create a new nodestore */</span>
+<span class="n">UA_NodeStore</span> <span class="o">*</span> <span class="nf">UA_NodeStore_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="cm">/* Delete the nodestore and all nodes in it. Do not call from a read-side</span>
+<span class="cm">   critical section (multithreading). */</span>
+<span class="kt">void</span> <span class="nf">UA_NodeStore_delete</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="node-lifecycle">
+<h2>Node Lifecycle<a class="headerlink" href="#node-lifecycle" title="Permalink to this headline">¶</a></h2>
+<p>The following definitions are used to create empty nodes of the different
+node types. The memory is managed by the nodestore. Therefore, the node has
+to be removed via a special deleteNode function. (If the new node is not
+added to the nodestore.)</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Create an editable node of the given NodeClass. */</span>
+<span class="n">UA_Node</span> <span class="o">*</span> <span class="nf">UA_NodeStore_newNode</span><span class="p">(</span><span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">);</span>
+<span class="cp">#define UA_NodeStore_newObjectNode() \</span>
+<span class="cp">    (UA_ObjectNode*)UA_NodeStore_newNode(UA_NODECLASS_OBJECT)</span>
+<span class="cp">#define UA_NodeStore_newVariableNode() \</span>
+<span class="cp">    (UA_VariableNode*)UA_NodeStore_newNode(UA_NODECLASS_VARIABLE)</span>
+<span class="cp">#define UA_NodeStore_newMethodNode() \</span>
+<span class="cp">    (UA_MethodNode*)UA_NodeStore_newNode(UA_NODECLASS_METHOD)</span>
+<span class="cp">#define UA_NodeStore_newObjectTypeNode() \</span>
+<span class="cp">    (UA_ObjectTypeNode*)UA_NodeStore_newNode(UA_NODECLASS_OBJECTTYPE)</span>
+<span class="cp">#define UA_NodeStore_newVariableTypeNode() \</span>
+<span class="cp">    (UA_VariableTypeNode*)UA_NodeStore_newNode(UA_NODECLASS_VARIABLETYPE)</span>
+<span class="cp">#define UA_NodeStore_newReferenceTypeNode() \</span>
+<span class="cp">    (UA_ReferenceTypeNode*)UA_NodeStore_newNode(UA_NODECLASS_REFERENCETYPE)</span>
+<span class="cp">#define UA_NodeStore_newDataTypeNode() \</span>
+<span class="cp">    (UA_DataTypeNode*)UA_NodeStore_newNode(UA_NODECLASS_DATATYPE)</span>
+<span class="cp">#define UA_NodeStore_newViewNode() \</span>
+<span class="cp">    (UA_ViewNode*)UA_NodeStore_newNode(UA_NODECLASS_VIEW)</span>
+
+<span class="cm">/* Delete an editable node. */</span>
+<span class="kt">void</span> <span class="nf">UA_NodeStore_deleteNode</span><span class="p">(</span><span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insert-get-replace-remove">
+<h2>Insert / Get / Replace / Remove<a class="headerlink" href="#insert-get-replace-remove" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Inserts a new node into the nodestore. If the nodeid is zero, then a fresh</span>
+<span class="cm"> * numeric nodeid from namespace 1 is assigned. If insertion fails, the node is</span>
+<span class="cm"> * deleted. */</span>
+<span class="n">UA_StatusCode</span> <span class="nf">UA_NodeStore_insert</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+<span class="cm">/* The returned node is immutable. */</span>
+<span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span> <span class="nf">UA_NodeStore_get</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">);</span>
+
+<span class="cm">/* Returns an editable copy of a node (needs to be deleted with the deleteNode</span>
+<span class="cm">   function or inserted / replaced into the nodestore). */</span>
+<span class="n">UA_Node</span> <span class="o">*</span> <span class="nf">UA_NodeStore_getCopy</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">);</span>
+
+<span class="cm">/* To replace a node, get an editable copy of the node, edit and replace with</span>
+<span class="cm"> * this function. If the node was already replaced since the copy was made,</span>
+<span class="cm"> * UA_STATUSCODE_BADINTERNALERROR is returned. If the nodeid is not found,</span>
+<span class="cm"> * UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases, the editable</span>
+<span class="cm"> * node is deleted. */</span>
+<span class="n">UA_StatusCode</span> <span class="nf">UA_NodeStore_replace</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">,</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+
+<span class="cm">/* Remove a node in the nodestore. */</span>
+<span class="n">UA_StatusCode</span> <span class="nf">UA_NodeStore_remove</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="iteration">
+<h2>Iteration<a class="headerlink" href="#iteration" title="Permalink to this headline">¶</a></h2>
+<p>The following definitions are used to call a callback for every node in the
+nodestore.</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_NodeStore_nodeVisitor</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_Node</span> <span class="o">*</span><span class="n">node</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">UA_NodeStore_iterate</span><span class="p">(</span><span class="n">UA_NodeStore</span> <span class="o">*</span><span class="n">ns</span><span class="p">,</span> <span class="n">UA_NodeStore_nodeVisitor</span> <span class="n">visitor</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="connection.html" class="btn btn-neutral float-right" title="Networking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="internal.html" class="btn btn-neutral" title="Internals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
