@@ -9,5 +9,7 @@ title = "BasysKom"
   image = "basyskom.png"
 +++
 
-basyscom
+basysKom GmbH
+
+Web: https://www.basyskom.de/
 

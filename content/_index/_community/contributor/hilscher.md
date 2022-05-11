@@ -9,4 +9,6 @@ title = "Hilscher"
   image = "hilscher.png"
 +++
 
-Hilscher
+Hilscher Gesellschaft für Systemautomation mbH
+
+Web: https://www.hilscher.com/en/

@@ -1,6 +1,6 @@
 +++
 weight = 140
-title = "Wind"
+title = "Windriver"
 #subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing"
 #item_url = "#"
 #disabled = true
@@ -9,4 +9,6 @@ title = "Wind"
   image = "windriver.png"
 +++
 
-Wind
+Wind River Systems, Inc.
+
+Web: https://www.windriver.com/

@@ -8,5 +8,6 @@ title = "Technische Universität Dresden"
 [asset]
   image = "tud_plt.png"
 +++
+Chair of Process Control Systems - TU Dresden
 
-TUD
+Web: https://tu-dresden.de/ing/elektrotechnik/ifa/plt

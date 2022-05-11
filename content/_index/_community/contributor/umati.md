@@ -1,14 +1,15 @@
 +++
 weight = 110
-title = "BasysKom"
+title = "Umati"
 #subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing"
 #item_url = "#"
 #disabled = true
 
 [asset]
-  image = "basyskom.png"
+  image = "umati.jpg"
 +++
 
-basysKom GmbH
+universal machine technology interface
 
-Web: https://www.basyskom.de/
+Web: https://umati.org/
+

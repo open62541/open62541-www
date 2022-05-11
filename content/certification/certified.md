@@ -6,7 +6,7 @@ weight = 110
 #background = "secondary"
 align = "right"
 
-title = "Certified SDK"
+title = "Certification"
 #subtitle= "Easily right align the item fragment even with an image"
 
 # Subtitle pre and post item

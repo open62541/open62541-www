@@ -9,5 +9,7 @@ title = "Kalycito"
   image = "kalycito.png"
 +++
 
-Kalycito
+Kalycito Infotech Pvt Ltd.
+
+Web: https://www.kalycito.com/
 

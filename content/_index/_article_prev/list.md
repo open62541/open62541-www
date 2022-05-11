@@ -1,7 +1,7 @@
 +++ 
 date = "2021-25-11" 
 fragment = "list" 
-weight = 100
+weight = 120
 count = 2 # Default value is 10
 section = "/articles" # Default value is current section
 #summary = false # Default value is true

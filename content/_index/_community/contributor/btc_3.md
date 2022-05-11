@@ -9,4 +9,6 @@ title = "Blue Time Concept"
   image = "btc.png"
 +++
 
-BTC
+Blue Time Concept Sa
+
+Web: https://www.bluetimeconcept.ch/

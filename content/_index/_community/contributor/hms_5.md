@@ -9,5 +9,7 @@ title = "HMS"
   image = "hms.png"
 +++
 
-HMS
+HMS Industrial Networks GmbH
+
+Web: https://www.hms-networks.com/home
 
