@@ -3,7 +3,7 @@ fragment = "content"
 title = "Release: open62541 Version 1.2.3"
 weight = 100
 display_date = true
-date = "2021-12-01"
+date = "2022-04-30"
 image = "releasenote.png"
 
 summary = """

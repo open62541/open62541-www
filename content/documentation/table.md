@@ -53,11 +53,28 @@ title_align = "left" # Default is center, can be left, right or center
   #  align = "center"
 
 [[rows]]
+[[rows.values]]
+header = "1.2 Release"
+
+[[rows.values]]
+text = "Released"
+
+[[rows.values]]
+icon = "fas fa-external-link-alt"
+url = "https://open62541.org/doc/1.2/"
+align = "center"
+
+[[rows.values]]
+icon = "fas fa-download"
+url = "https://open62541.org/doc/open62541-1.2.pdf"
+align = "center"
+
+[[rows]]
   [[rows.values]]
     header = "1.1 Release"
 
   [[rows.values]]
-    text = "Newest release"
+    text = "Legacy"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"
@@ -74,7 +91,7 @@ title_align = "left" # Default is center, can be left, right or center
     header = "1.0 Release"
 
   [[rows.values]]
-    text = "Certified"
+    text = "Legacy"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"

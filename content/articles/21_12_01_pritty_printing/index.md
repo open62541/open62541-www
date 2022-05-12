@@ -3,7 +3,7 @@ fragment = "content"
 title = "Feature Spotlight: Pretty-printing in the gdb Debugger"
 weight = 100
 display_date = true
-date = "2021-12-01"
+date = "2022-05-01"
 
 summary = """
 Introduction of a little nice feature that adds a lot of convenience for developers on Linux. It's the **pretty-printing** of OPC UA data types. It reduces visual noise and makes the introspection of local variables much more convenient. 
