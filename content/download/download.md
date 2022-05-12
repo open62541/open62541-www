@@ -10,18 +10,18 @@ title = "Download"
 #subtitle= "Easily right align the item fragment even with some buttons"
 
 # Subtitle pre and post item
-pre = "Latest stable Release 1.2.3"
+pre = "Latest stable Release 1.3"
 #post = "With a simple subtitle"
 
 [[buttons]]
 text = "Source Code (zip)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.2.3.zip"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.3.zip"
 color = "primary btn-block"
 #color = "primary"
 
 [[buttons]]
 text = "Source Code (tar.gz)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.2.3.tar.gz"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.3.tar.gz"
 color = "primary btn-block"
 #color = "secondary"
 
@@ -39,17 +39,27 @@ color = "primary btn-block"
 
 +++
 
-Release notes Version 1.2.3:
+Release notes Version 1.3:
 
-This is the third patch release for the 1.2 release family of open62541.
-There were only bugfixes and no API-breaking changes applied for the patch release.
-Important changes compared to the previous release include:
+This is the first release of the 1.3 release series of open62541.
+Going forward, only fixes and non-breaking changes will be integrated in the 1.3 release family.
 
-* fix(plugin): Remove assert about the key length in ua_openssl_basic256sha256.c
-* fix(arch): Use AF_INET in the socket hints if IPV6 is disabled
-* fix(arch) : ServerNetworkLayerTCP_start continues if one network interface fails to bind
-* fix(pubsub): Allow multiple readers on the same NetworkMessage
+New features compared to the previous release series 1.2 include:
 
+* Support for OPC UA PubSub encryption (also TPM-based key handling)
+* Session authentication with x509 certificates (server-side)
+* Support for Event Filters
+* Support for Server Diagnostics
+* Binary/JSON encoding as a stable public API
+* Handling of Subscriptions with different priority
+* Greatly improved Nodeset Compiler, including support for structure values
+* Added UA_order function for all data types (equality test / absolute ordering for binary search trees, etc.)
+* Support for TLS-encrypted MQTT-based PubSub
+* Internally generate temporary self-signed certificates
+
+Besides the major functional additions, many small features, fixes and general improvements went into this release. Particularly, the memory consumption of the information model was reduced by about 1/3 compared to the 1.2 release series.
+
+Note that the v1.3 release family contains new features compared to v1.0. These have not been part of the certification that was achieved for the example server based on the v1.0 release.
 
 open62541 (http://open62541.org) is an open source and free implementation of OPC UA (OPC Unified Architecture) written in the common subset of the C99 and C++98 languages. The library is usable with all major compilers and provides the necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications. open62541 library is platform independent. All platform-specific functionality is implemented via exchangeable plugins. Plugin implementations are provided for the major operating systems.
 

@@ -19,7 +19,7 @@ A detailed description on how to build from source can be found here: [Installin
 Prebuild binaries
 You can always find prebuild binaries for every release on our [Github Release Page.](https://github.com/open62541/open62541/releases)
 
-Nightly single file releases for Linux and Windows of the last 50 commits can be found here: https://open62541.org/releases/
+<!--- Nightly single file releases for Linux and Windows of the last 50 commits can be found here: https://open62541.org/releases/ --->
 
 **OS Specific packages**
 
