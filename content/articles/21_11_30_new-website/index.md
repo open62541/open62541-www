@@ -20,3 +20,6 @@ The open62541 has now a new modern website. The website is built with the HUGO F
 * Secure static website
 * Publicly visible in the open62541-www repository
 
+
+![image](open62541_website_intro.PNG)
+

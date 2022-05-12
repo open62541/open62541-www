@@ -20,7 +20,9 @@ mailto: open62541@googlegroups.com
 **c/o**
 
 Dr. -Ing. Julius Pfrommer
+
 Fraunhoferstraße 1
+
 76131 Karlsruhe
 
 julius.pfrommer(at)iosb.fraunhofer.de
