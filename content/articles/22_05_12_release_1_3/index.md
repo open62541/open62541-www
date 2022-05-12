@@ -1,6 +1,6 @@
 +++
 fragment = "content"
-title = "Release: open62541 Version 1.2.3"
+title = "Release: open62541 Version 1.3"
 weight = 100
 display_date = true
 date = "2022-05-12"
