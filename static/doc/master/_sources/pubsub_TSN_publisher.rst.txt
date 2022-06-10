@@ -770,7 +770,7 @@ Publisher thread.
    
    /* DataSetField handling */
    static void
-   addDataSetField(UA_Server *server) {
+   _addDataSetField(UA_Server *server) {
        /* Add a field to the previous created PublishedDataSet */
        UA_NodeId dataSetFieldIdentRepeated;
        UA_DataSetFieldConfig dataSetFieldConfig;

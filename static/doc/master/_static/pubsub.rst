@@ -210,7 +210,16 @@ with UA_PubSubManager_delete.
    UA_StatusCode
    UA_ServerConfig_addPubSubTransportLayer(UA_ServerConfig *config,
                                            UA_PubSubTransportLayer pubsubTransportLayer);
-   
+Add a new PubSub connection to the given server and open it.
+@param[in] server the server to add the connection to
+@param[in] connectionConfig the configuration for the newly added connection
+@param[out] connectionIdentifier if not NULL will be set to the identifier of the
+                                 newly added connection
+@return UA_STATUSCODE_GOOD if connection was successfully added, otherwise an
+        error code.
+
+.. code-block:: c
+
    UA_StatusCode
    UA_Server_addPubSubConnection(UA_Server *server,
                                  const UA_PubSubConnectionConfig *connectionConfig,
@@ -224,7 +233,7 @@ with UA_PubSubManager_delete.
    
    /* Remove Connection, identified by the NodeId. Deletion of Connection
     * removes all contained WriterGroups and Writers. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removePubSubConnection(UA_Server *server, const UA_NodeId connection);
    
 PublishedDataSets
@@ -363,7 +372,7 @@ handling process.
        UA_ConfigurationVersionDataType configurationVersion;
    } UA_DataSetFieldResult;
    
-   UA_DataSetFieldResult
+   UA_DataSetFieldResult UA_THREADSAFE
    UA_Server_addDataSetField(UA_Server *server,
                              const UA_NodeId publishedDataSet,
                              const UA_DataSetFieldConfig *fieldConfig,
@@ -374,7 +383,7 @@ handling process.
    UA_Server_getDataSetFieldConfig(UA_Server *server, const UA_NodeId dsf,
                                    UA_DataSetFieldConfig *config);
    
-   UA_DataSetFieldResult
+   UA_DataSetFieldResult UA_THREADSAFE
    UA_Server_removeDataSetField(UA_Server *server, const UA_NodeId dsf);
    
 Custom Callback Implementation
@@ -510,7 +519,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    UA_Server_WriterGroup_getState(UA_Server *server, UA_NodeId writerGroupIdentifier,
                                   UA_PubSubState *state);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removeWriterGroup(UA_Server *server, const UA_NodeId writerGroup);
    
    UA_StatusCode
@@ -796,7 +805,7 @@ can be configured for a ReaderGroup.
                             UA_NodeId *readerGroupIdentifier);
    
    /* Remove ReaderGroup from connection */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removeReaderGroup(UA_Server *server, UA_NodeId groupIdentifier);
    
    UA_StatusCode
