@@ -22,6 +22,7 @@ It was great connecting with the community directly after two years of remote wo
 Thanks also to OSADL and Kalycito for co-organizing the booth.
 
 ![open62541 at HMI](hmi_opc_foundation_booth.png)
+(Andreas Ebner (left) and Julius Pfrommer (right) at Hannover Fair 2022)
 
 **New open62541 Website – Interview with Götz Görisch**
 
