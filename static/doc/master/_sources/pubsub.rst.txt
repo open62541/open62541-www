@@ -179,7 +179,7 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
         * change from operational to error in case of a DataSetReader
         * MessageReceiveTimeout. The status code provides additional
         * information. */
-       void (*stateChangeCallback)(UA_NodeId *Id, UA_PubSubState state,
+       void (*stateChangeCallback)(UA_Server *server, UA_NodeId *id, UA_PubSubState state,
                                    UA_StatusCode status);
        /* TODO: maybe status code provides not enough information about the state change */
    
