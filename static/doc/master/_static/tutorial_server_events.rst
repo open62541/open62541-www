@@ -103,7 +103,7 @@ The last boolean argument states whether the node should be deleted.
                                        UA_NODEID_NUMERIC(0, UA_NS0ID_SERVER),
                                        NULL, UA_TRUE);
        if(retval != UA_STATUSCODE_GOOD)
-           UA_LOG_WARNING(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND, 
+           UA_LOG_WARNING(UA_Log_Stdout, UA_LOGCATEGORY_USERLAND,
                           "Triggering event failed. StatusCode %s", UA_StatusCode_name(retval));
    
        return retval;
