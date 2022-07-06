@@ -179,7 +179,7 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
         * change from operational to error in case of a DataSetReader
         * MessageReceiveTimeout. The status code provides additional
         * information. */
-       void (*stateChangeCallback)(UA_NodeId *Id, UA_PubSubState state,
+       void (*stateChangeCallback)(UA_Server *server, UA_NodeId *id, UA_PubSubState state,
                                    UA_StatusCode status);
        /* TODO: maybe status code provides not enough information about the state change */
    
@@ -318,7 +318,7 @@ functions to add new fields.
    /* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes
     * all contained and linked PDS Fields. Connected WriterGroups will be also
     * removed. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removePublishedDataSet(UA_Server *server, const UA_NodeId pds);
    
 DataSetFields
@@ -510,7 +510,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    UA_Server_getWriterGroupConfig(UA_Server *server, const UA_NodeId writerGroup,
                                   UA_WriterGroupConfig *config);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_updateWriterGroupConfig(UA_Server *server, UA_NodeId writerGroupIdentifier,
                                      const UA_WriterGroupConfig *config);
    
@@ -528,10 +528,10 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    UA_StatusCode
    UA_Server_unfreezeWriterGroupConfiguration(UA_Server *server, const UA_NodeId writerGroup);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setWriterGroupOperational(UA_Server *server, const UA_NodeId writerGroup);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setWriterGroupDisabled(UA_Server *server, const UA_NodeId writerGroup);
    
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
@@ -578,7 +578,7 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
     * Part 14, 7.1.5.2.1 defines: The link between the PublishedDataSet and
     * DataSetWriter shall be created when an instance of the DataSetWriterType is
     * created. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addDataSetWriter(UA_Server *server,
                               const UA_NodeId writerGroup, const UA_NodeId dataSet,
                               const UA_DataSetWriterConfig *dataSetWriterConfig,
@@ -594,7 +594,7 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
    UA_Server_DataSetWriter_getState(UA_Server *server, UA_NodeId dataSetWriterIdentifier,
                                   UA_PubSubState *state);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removeDataSetWriter(UA_Server *server, const UA_NodeId dsw);
    
 SubscribedDataSet

@@ -28,6 +28,9 @@ The :ref:`tutorials` provide a good starting point for this.
    
    struct UA_ServerConfig {
        UA_Logger logger;
+       void *context; /* Used to attach custom data to a server config. This can
+                       * then be retrieved e.g. in a callback that forwards a
+                       * pointer to the server. */
    
 Server Description
 ^^^^^^^^^^^^^^^^^^
@@ -1666,7 +1669,7 @@ would cause the node to be deleted.
                                                   UA_TwoStateVariableCallbackType callbackType);
    
    /* Delete a condition from the address space and the internal lists.
-    * 
+    *
     * @param server The server object
     * @param condition The NodeId of the node representation of the Condition Instance
     * @param conditionSource The NodeId of the node representation of the Condition Source

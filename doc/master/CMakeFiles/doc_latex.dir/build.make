@@ -114,7 +114,7 @@ doc/CMakeFiles/doc_latex: doc_src/tutorials.rst
 doc/CMakeFiles/doc_latex: doc_src/ua-wireshark-pubsub.png
 doc/CMakeFiles/doc_latex: doc_src/ua-wireshark.png
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building LaTeX sources for documentation with Sphinx"
-	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.10.4/x64/bin/sphinx-build -b latex /home/runner/work/open62541/open62541/build/doc_src /home/runner/work/open62541/open62541/build/doc_latex
+	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.10.5/x64/bin/sphinx-build -b latex /home/runner/work/open62541/open62541/build/doc_src /home/runner/work/open62541/open62541/build/doc_latex
 
 doc_src/client.rst: ../tools/c2rst.py
 doc_src/client.rst: ../include/open62541/client.h
