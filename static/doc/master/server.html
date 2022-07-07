@@ -1631,6 +1631,60 @@ would cause the node to be deleted.</p>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span><span class="w"></span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">hierarchialReferenceType</span><span class="p">,</span><span class="w"></span>
 <span class="w">                          </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The method pair UA_Server_addCondition_begin and _finish splits the
+UA_Server_createCondtion in two parts similiar to the
+UA_Server_addNode_begin / _finish pair. This is useful if the node shall be
+modified before finish the instantiation. For example to add children with
+specific NodeIds.
+For details refer to the UA_Server_addNode_begin / _finish methods.</p>
+<p>Additionally to UA_Server_addNode_begin UA_Server_addCondition_begin checks
+if the passed condition type is a subtype of the OPC UA ConditionType.</p>
+<p>&#64;param server The server object
+&#64;param conditionId The NodeId of the requested Condition Object. When passing</p>
+<blockquote>
+<div><p>UA_NODEID_NUMERIC(X,0) an unused nodeid in namespace X will be used.
+E.g. passing UA_NODEID_NULL will result in a NodeId in namespace 0.</p>
+</div></blockquote>
+<p>&#64;param conditionType The NodeId of the node representation of the ConditionType
+&#64;param conditionName The name of the condition to be added
+&#64;param outConditionId The NodeId of the added Condition
+&#64;return The StatusCode of the UA_Server_addCondition_begin method</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Server_addCondition_begin</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"></span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span><span class="w"></span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">conditionName</span><span class="p">,</span><span class="w"></span>
+<span class="w">                             </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Second call of the UA_Server_addCondition_begin and _finish pair.</p>
+<dl class="simple">
+<dt>Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:</dt><dd><ul class="simple">
+<li><p>checks whether the condition source has HasEventSource reference to its
+parent. If not, a HasEventSource reference will be created between
+condition source and server object</p></li>
+<li><p>exposes the condition in the address space if hierarchialReferenceType is
+not UA_NODEID_NULL by adding a reference of this type from the condition
+source to the condition instance</p></li>
+<li><p>initializes the standard condition fields and callbacks</p></li>
+</ul>
+</dd>
+</dl>
+<p>&#64;param server The server object
+&#64;param conditionId The NodeId of the unfinished Condition Object
+&#64;param conditionSource The NodeId of the Condition Source (Parent of the Condition)
+&#64;param hierarchialReferenceType The NodeId of Hierarchical ReferenceType</p>
+<blockquote>
+<div><p>between Condition and its source</p>
+</div></blockquote>
+<p>&#64;return The StatusCode of the UA_Server_addCondition_finish method</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Server_addCondition_finish</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">hierarchialReferenceType</span><span class="p">);</span><span class="w"></span>
 
 <span class="cm">/* Set the value of condition field.</span>
 <span class="cm"> *</span>
