@@ -203,18 +203,36 @@ different transport protocols at runtime.</p>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubComponentEnumType</span><span class="p">;</span><span class="w"></span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_PUBLISHERID_NUMERIC</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_PUBLISHERID_STRING</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_BYTE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_STRING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"></span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PublisherIdType</span><span class="p">;</span><span class="w"></span>
+
+<span class="cm">/* Publisher Id</span>
+<span class="cm">    Valid types are defined in Part 14, 7.2.2.2.2 NetworkMessage Layout:</span>
+
+<span class="cm">    Bit range 0-2: PublisherId Type</span>
+<span class="cm">    000 The PublisherId is of DataType Byte This is the default value if ExtendedFlags1 is omitted</span>
+<span class="cm">    001 The PublisherId is of DataType UInt16</span>
+<span class="cm">    010 The PublisherId is of DataType UInt32</span>
+<span class="cm">    011 The PublisherId is of DataType UInt64</span>
+<span class="cm">    100 The PublisherId is of DataType String</span>
+<span class="cm">*/</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">byte</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">uint16</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">uint32</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">uint64</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">string</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_PublisherId</span><span class="p">;</span><span class="w"></span>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_PubSubConnectionConfig</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">enabled</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PublisherIdType</span><span class="w"> </span><span class="n">publisherIdType</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* std: valid types UInt or String */</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numeric</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_String</span><span class="w"> </span><span class="n">string</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">transportProfileUri</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">address</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">connectionPropertiesSize</span><span class="p">;</span><span class="w"></span>

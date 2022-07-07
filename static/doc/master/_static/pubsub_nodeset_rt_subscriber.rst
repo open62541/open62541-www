@@ -250,7 +250,8 @@ Create Subscriber connection for the Subscriber thread
        UA_NetworkAddressUrlDataType networkAddressUrlsubscribe = *networkAddressUrlSubscriber;
        connectionConfig.transportProfileUri                    = UA_STRING(ETH_TRANSPORT_PROFILE);
        UA_Variant_setScalar(&connectionConfig.address, &networkAddressUrlsubscribe, &UA_TYPES[UA_TYPES_NETWORKADDRESSURLDATATYPE]);
-       connectionConfig.publisherId.numeric                    = UA_UInt32_random();
+       connectionConfig.publisherIdType                        = UA_PUBLISHERIDTYPE_UINT32;
+       connectionConfig.publisherId.uint32                     = UA_UInt32_random();
        retval |= UA_Server_addPubSubConnection(server, &connectionConfig, &connectionIdentSubscriber);
        if (retval == UA_STATUSCODE_GOOD)
             UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER,"The PubSub Connection was created successfully!");

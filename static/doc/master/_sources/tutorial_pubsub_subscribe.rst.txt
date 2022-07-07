@@ -68,7 +68,8 @@ the system preconfiguration and connection can be found in
        connectionConfig.enabled = UA_TRUE;
        UA_Variant_setScalar(&connectionConfig.address, networkAddressUrl,
                             &UA_TYPES[UA_TYPES_NETWORKADDRESSURLDATATYPE]);
-       connectionConfig.publisherId.numeric = UA_UInt32_random ();
+       connectionConfig.publisherIdType = UA_PUBLISHERIDTYPE_UINT32;
+       connectionConfig.publisherId.uint32 = UA_UInt32_random();
        retval |= UA_Server_addPubSubConnection (server, &connectionConfig, &connectionIdentifier);
        if (retval != UA_STATUSCODE_GOOD) {
            return retval;
