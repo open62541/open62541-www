@@ -1649,7 +1649,7 @@ Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:
     * @param value Variant Value to be written to the Field
     * @param fieldName Name of the Field in which the value should be written
     * @return The StatusCode of the UA_Server_setConditionField method*/
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setConditionField(UA_Server *server,
                                const UA_NodeId condition,
                                const UA_Variant *value,
