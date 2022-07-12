@@ -725,6 +725,7 @@ SubscribedDataSet and be contained within a ReaderGroup.
            // UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror;
        } subscribedDataSet;
        /* non std. fields */
+       UA_String linkedStandaloneSubscribedDataSetName;
        UA_PubSubRtEncoding expectedEncoding;
    } UA_DataSetReaderConfig;
    
@@ -743,6 +744,29 @@ SubscribedDataSet and be contained within a ReaderGroup.
    UA_StatusCode
    UA_Server_DataSetReader_getState(UA_Server *server, UA_NodeId dataSetReaderIdentifier,
                                     UA_PubSubState *state);
+   
+   typedef struct {
+       UA_String name;
+       UA_SubscribedDataSetEnumType subscribedDataSetType;
+       union {
+           /* datasetmirror is currently not implemented */
+           UA_TargetVariablesDataType target;
+       } subscribedDataSet;
+       UA_DataSetMetaDataType dataSetMetaData;
+       UA_Boolean isConnected;
+   } UA_StandaloneSubscribedDataSetConfig;
+   
+   void
+   UA_StandaloneSubscribedDataSetConfig_clear(UA_StandaloneSubscribedDataSetConfig *sdsConfig);
+   
+   UA_StatusCode
+   UA_Server_addStandaloneSubscribedDataSet(UA_Server *server,
+                                  const UA_StandaloneSubscribedDataSetConfig *subscribedDataSetConfig,
+                                  UA_NodeId *sdsIdentifier);
+   
+   /* Remove StandaloneSubscribedDataSet, identified by the NodeId. */
+   UA_StatusCode
+   UA_Server_removeStandaloneSubscribedDataSet(UA_Server *server, const UA_NodeId sds);
    
 ReaderGroup
 -----------
