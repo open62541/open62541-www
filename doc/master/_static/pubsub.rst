@@ -119,18 +119,36 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
    } UA_PubSubComponentEnumType;
    
    typedef enum {
-       UA_PUBSUB_PUBLISHERID_NUMERIC,
-       UA_PUBSUB_PUBLISHERID_STRING
+       UA_PUBLISHERIDTYPE_BYTE = 0,
+       UA_PUBLISHERIDTYPE_UINT16 = 1,
+       UA_PUBLISHERIDTYPE_UINT32 = 2,
+       UA_PUBLISHERIDTYPE_UINT64 = 3,
+       UA_PUBLISHERIDTYPE_STRING = 4
    } UA_PublisherIdType;
+   
+   /* Publisher Id
+       Valid types are defined in Part 14, 7.2.2.2.2 NetworkMessage Layout:
+   
+       Bit range 0-2: PublisherId Type
+       000 The PublisherId is of DataType Byte This is the default value if ExtendedFlags1 is omitted
+       001 The PublisherId is of DataType UInt16
+       010 The PublisherId is of DataType UInt32
+       011 The PublisherId is of DataType UInt64
+       100 The PublisherId is of DataType String
+   */
+   typedef union {
+       UA_Byte byte;
+       UA_UInt16 uint16;
+       UA_UInt32 uint32;
+       UA_UInt64 uint64;
+       UA_String string;
+   } UA_PublisherId;
    
    struct UA_PubSubConnectionConfig {
        UA_String name;
        UA_Boolean enabled;
        UA_PublisherIdType publisherIdType;
-       union { /* std: valid types UInt or String */
-           UA_UInt32 numeric;
-           UA_String string;
-       } publisherId;
+       UA_PublisherId publisherId;
        UA_String transportProfileUri;
        UA_Variant address;
        size_t connectionPropertiesSize;
@@ -707,6 +725,7 @@ SubscribedDataSet and be contained within a ReaderGroup.
            // UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror;
        } subscribedDataSet;
        /* non std. fields */
+       UA_String linkedStandaloneSubscribedDataSetName;
        UA_PubSubRtEncoding expectedEncoding;
    } UA_DataSetReaderConfig;
    
@@ -725,6 +744,29 @@ SubscribedDataSet and be contained within a ReaderGroup.
    UA_StatusCode
    UA_Server_DataSetReader_getState(UA_Server *server, UA_NodeId dataSetReaderIdentifier,
                                     UA_PubSubState *state);
+   
+   typedef struct {
+       UA_String name;
+       UA_SubscribedDataSetEnumType subscribedDataSetType;
+       union {
+           /* datasetmirror is currently not implemented */
+           UA_TargetVariablesDataType target;
+       } subscribedDataSet;
+       UA_DataSetMetaDataType dataSetMetaData;
+       UA_Boolean isConnected;
+   } UA_StandaloneSubscribedDataSetConfig;
+   
+   void
+   UA_StandaloneSubscribedDataSetConfig_clear(UA_StandaloneSubscribedDataSetConfig *sdsConfig);
+   
+   UA_StatusCode
+   UA_Server_addStandaloneSubscribedDataSet(UA_Server *server,
+                                  const UA_StandaloneSubscribedDataSetConfig *subscribedDataSetConfig,
+                                  UA_NodeId *sdsIdentifier);
+   
+   /* Remove StandaloneSubscribedDataSet, identified by the NodeId. */
+   UA_StatusCode
+   UA_Server_removeStandaloneSubscribedDataSet(UA_Server *server, const UA_NodeId sds);
    
 ReaderGroup
 -----------
