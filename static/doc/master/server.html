@@ -557,37 +557,51 @@ following methods enable an interaction with a particular session.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Manually close a session */</span><span class="w"></span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
 <span class="n">UA_Server_closeSession</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Session attributes: Besides the user-definable session context pointer (set
+by the AccessControl plugin when the Session is created), a session carries
+attributes in a key-value list. Some attributes are present in every session
+and shown in the list below. Additional attributes can be manually set as
+meta-data.</p>
+<p>Always present as session attributes are:</p>
+<ul class="simple">
+<li><p>0:localeIds [UA_String]: List of preferred languages (read-only)</p></li>
+<li><p>0:clientDescription [UA_ApplicationDescription]: Client description (read-only)</p></li>
+<li><p>0:sessionName [String] Client-defined name of the session (read-only)</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Returns a shallow copy of the attribute. Don&#39;t _clear or _delete the value</span>
+<span class="cm"> * variant. Don&#39;t use the value once the Session could be already closed in the</span>
+<span class="cm"> * background or the attribute of the session replaced. Hence don&#39;t use this in a</span>
+<span class="cm"> * multi-threaded application. */</span><span class="w"></span>
+<span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Server_getSessionAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span><span class="w"></span>
 
-<span class="cm">/* Session Parameters: Besides the user-definable session context pointer,</span>
-<span class="cm"> * so-called session parameters are a way to attach key-value parameters to a</span>
-<span class="cm"> * session. This enables &quot;plugins&quot; to attach data to a session without impacting</span>
-<span class="cm"> * the user-definedable session context pointer. */</span><span class="w"></span>
-
+<span class="cm">/* Return a deep copy of the attribute */</span><span class="w"></span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
-<span class="n">UA_Server_setSessionParameter</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span><span class="w"></span>
-
-<span class="kt">void</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
-<span class="nf">UA_Server_deleteSessionParameter</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">);</span><span class="w"></span>
-
-<span class="cm">/* Returns NULL if the session or the parameter are not defined. Returns a deep</span>
-<span class="cm"> * copy otherwise */</span><span class="w"></span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
-<span class="n">UA_Server_getSessionParameter</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"></span>
-<span class="w">                              </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span><span class="w"></span>
+<span class="n">UA_Server_getSessionAttributeCopy</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span><span class="w"></span>
 
 <span class="cm">/* Returns NULL if the parameter is not defined or not a scalar or not of the</span>
-<span class="cm"> * right datatype. Otherwise a deep copy of the scalar value is filled at the</span>
-<span class="cm"> * target location of the void pointer. */</span><span class="w"></span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
-<span class="n">UA_Server_getSessionParameter_scalar</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"></span>
+<span class="cm"> * right datatype. Otherwise a shallow copy of the scalar value is created at</span>
+<span class="cm"> * the target location of the void pointer. Hence don&#39;t use this in a</span>
+<span class="cm"> * multi-threaded application. */</span><span class="w"></span>
+<span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Server_getSessionAttribute_scalar</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"></span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"></span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"></span>
 <span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span><span class="w"></span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
+<span class="n">UA_Server_setSessionAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span><span class="w"></span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
+<span class="n">UA_Server_deleteSessionAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
