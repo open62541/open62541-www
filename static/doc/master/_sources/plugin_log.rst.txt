@@ -14,15 +14,15 @@ logger.
 
    
    typedef enum {
-       UA_LOGLEVEL_TRACE = 0,
-       UA_LOGLEVEL_DEBUG,
-       UA_LOGLEVEL_INFO,
-       UA_LOGLEVEL_WARNING,
-       UA_LOGLEVEL_ERROR,
-       UA_LOGLEVEL_FATAL
+       UA_LOGLEVEL_TRACE   = 100,
+       UA_LOGLEVEL_DEBUG   = 200,
+       UA_LOGLEVEL_INFO    = 300,
+       UA_LOGLEVEL_WARNING = 400,
+       UA_LOGLEVEL_ERROR   = 500,
+       UA_LOGLEVEL_FATAL   = 600
    } UA_LogLevel;
    
-   #define UA_LOGCATEGORIES 8
+   #define UA_LOGCATEGORIES 9
    
    typedef enum {
        UA_LOGCATEGORY_NETWORK = 0,
@@ -32,7 +32,8 @@ logger.
        UA_LOGCATEGORY_CLIENT,
        UA_LOGCATEGORY_USERLAND,
        UA_LOGCATEGORY_SECURITYPOLICY,
-       UA_LOGCATEGORY_EVENTLOOP
+       UA_LOGCATEGORY_EVENTLOOP,
+       UA_LOGCATEGORY_PUBSUB
    } UA_LogCategory;
    
    typedef struct {
