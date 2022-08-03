@@ -457,13 +457,28 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_NodeReferenceKind_switch</span><span class="p">(</span><span class="n">UA_NodeReferenceKind</span><span class="w"> </span><span class="o">*</span><span class="n">rk</span><span class="p">);</span><span class="w"></span>
 
+<span class="cm">/* Singly-linked LocalizedText list */</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_LocalizedTextListEntry</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_LocalizedTextListEntry</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="n">localizedText</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_LocalizedTextListEntry</span><span class="p">;</span><span class="w"></span>
+
 <span class="cm">/* Every Node starts with these attributes */</span><span class="w"></span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_NodeHead</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="n">nodeClass</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="n">displayName</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="n">description</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/* A node can have different localizations for displayName and description.</span>
+<span class="cm">     * The server selects a suitable localization depending on the locale ids</span>
+<span class="cm">     * that are set for the current session.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Locales are added simply by writing a LocalizedText value with a new</span>
+<span class="cm">     * locale. A locale can be removed by writing a LocalizedText value of the</span>
+<span class="cm">     * corresponding locale with an empty text field. */</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_LocalizedTextListEntry</span><span class="w"> </span><span class="o">*</span><span class="n">displayName</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_LocalizedTextListEntry</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">;</span><span class="w"></span>
+
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">writeMask</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">referencesSize</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_NodeReferenceKind</span><span class="w"> </span><span class="o">*</span><span class="n">references</span><span class="p">;</span><span class="w"></span>
