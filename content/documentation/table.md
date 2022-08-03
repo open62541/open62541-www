@@ -38,12 +38,12 @@ title_align = "left" # Default is center, can be left, right or center
     #url = "#"
     #color = "success"
     icon = "fas fa-external-link-alt"
-    url = "https://open62541.org/doc/current/toc.html#"
+    url = "https://open62541.org/doc/master/toc.html#"
     align = "center"
 
   [[rows.values]]
     icon = "fas fa-download"
-    url = "https://open62541.org/doc/open62541-current.pdf"
+    url = "https://open62541.org/doc/open62541-master.pdf"
     align = "center"
 
   #[[rows.values]]
