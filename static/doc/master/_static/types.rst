@@ -296,13 +296,22 @@ A 16 byte value that can be used as a globally unique identifier.
    
    extern const UA_Guid UA_GUID_NULL;
    
-   UA_Boolean UA_Guid_equal(const UA_Guid *g1, const UA_Guid *g2);
+   UA_Boolean
+   UA_Guid_equal(const UA_Guid *g1, const UA_Guid *g2);
    
-   #ifdef UA_ENABLE_PARSING
-   /* Parse the Guid format defined in Part 6, 5.1.3.
+   /* Print a Guid in the human-readable format defined in Part 6, 5.1.3
+    *
     * Format: C496578A-0DFE-4B8F-870A-745238C6AEAE
     *         |       |    |    |    |            |
-    *         0       8    13   18   23           36 */
+    *         0       8    13   18   23           36
+    *
+    * This allocates memory if the output argument is an empty string. Tries to use
+    * the given buffer otherwise. */
+   UA_StatusCode
+   UA_Guid_print(const UA_Guid *guid, UA_String *output);
+   
+   /* Parse the humand-readable Guid format */
+   #ifdef UA_ENABLE_PARSING
    UA_StatusCode
    UA_Guid_parse(UA_Guid *guid, const UA_String str);
    
@@ -415,14 +424,16 @@ An identifier for a node in the address space of an OPC UA Server.
     *   UA_NODEID("ns=10;s=Hello:World")
     *   UA_NODEID("g=09087e75-8e5e-499b-954f-f2a9603db28a")
     *   UA_NODEID("ns=1;b=b3BlbjYyNTQxIQ==") // base64
-    * */
+    *
+    * The method can either use a pre-allocated string buffer or allocates memory
+    * internally if called with an empty output string. */
    UA_StatusCode
    UA_NodeId_print(const UA_NodeId *id, UA_String *output);
    
-   #ifdef UA_ENABLE_PARSING
    /* Parse the human-readable NodeId format. Attention! String and
     * ByteString NodeIds have their identifier malloc'ed and need to be
     * cleaned up. */
+   #ifdef UA_ENABLE_PARSING
    UA_StatusCode
    UA_NodeId_parse(UA_NodeId *id, const UA_String str);
    
@@ -507,18 +518,24 @@ A NodeId that allows the namespace URI to be specified instead of an index.
    
    extern const UA_ExpandedNodeId UA_EXPANDEDNODEID_NULL;
    
-   UA_StatusCode
-   UA_ExpandedNodeId_print(const UA_ExpandedNodeId *id, UA_String *output);
-   
-   #ifdef UA_ENABLE_PARSING
-   /* Parse the ExpandedNodeId format defined in Part 6, 5.3.1.11:
+   /* Print the ExpandedNodeId in the humand-readable format defined in Part 6,
+    * 5.3.1.11:
     *
     *   svr=<serverindex>;ns=<namespaceindex>;<type>=<value>
     *     or
     *   svr=<serverindex>;nsu=<uri>;<type>=<value>
     *
-    * The definitions for svr, ns and nsu can be omitted and will be set to zero /
-    * the empty string.*/
+    * The definitions for svr, ns and nsu is omitted if zero / the empty string.
+    *
+    * The method can either use a pre-allocated string buffer or allocates memory
+    * internally if called with an empty output string. */
+   UA_StatusCode
+   UA_ExpandedNodeId_print(const UA_ExpandedNodeId *id, UA_String *output);
+   
+   /* Parse the human-readable NodeId format. Attention! String and
+    * ByteString NodeIds have their identifier malloc'ed and need to be
+    * cleaned up. */
+   #ifdef UA_ENABLE_PARSING
    UA_StatusCode
    UA_ExpandedNodeId_parse(UA_ExpandedNodeId *id, const UA_String str);
    
@@ -1179,7 +1196,9 @@ The following functions are used for generic handling of data types.
     * @param type The datatype description of the variable */
    void UA_delete(void *p, const UA_DataType *type);
    
-   /* Pretty-print the value from the datatype.
+   /* Pretty-print the value from the datatype. The output is pretty-printed JSON5.
+    * Note that this format is non-standard and should not be sent over the
+    * network. It can however be read by our own JSON decoding.
     *
     * @param p The memory location of the variable
     * @param type The datatype description of the variable
@@ -1187,8 +1206,8 @@ The following functions are used for generic handling of data types.
     *        memory for string is already allocated, we try to use the existing
     *        string (the length is adjusted). If the string is empty, memory
     *        is allocated for it.
-    * @return Indicates whether the operation succeeded*/
-   #ifdef UA_ENABLE_TYPEDESCRIPTION
+    * @return Indicates whether the operation succeeded */
+   #ifdef UA_ENABLE_JSON_ENCODING
    UA_StatusCode
    UA_print(const void *p, const UA_DataType *type, UA_String *output);
    #endif
@@ -1257,9 +1276,6 @@ additional data types can be forwarded.
 JSON En/Decoding
 ----------------
 
-The JSON encoding always produces an encoding that is compatible with the OPC
-UA specification.
-
 The JSON decoding can parse the official encoding from the OPC UA
 specification. It further allows the following extensions:
 
@@ -1286,6 +1302,15 @@ formats that also include data in the OPC UA type system.
        const UA_String *serverUris;
        size_t serverUrisSize;
        UA_Boolean useReversible;
+   
+       UA_Boolean prettyPrint;   /* Add newlines and spaces for legibility */
+   
+       /* Enabling the following options leads to non-standard compatible JSON5
+        * encoding! Use it for pretty-printing, but not for sending messages over
+        * the network. (Our own decoding can still parse it.) */
+   
+       UA_Boolean unquotedKeys;  /* Don't print quotes around object element keys */
+       UA_Boolean stringNodeIds; /* String encoding for NodeIds, like "ns=1;i=42" */
    } UA_EncodeJsonOptions;
    
    /* Returns the number of bytes the value src takes in json encoding. Returns

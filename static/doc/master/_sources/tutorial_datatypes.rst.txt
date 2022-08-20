@@ -133,7 +133,7 @@ integer array.
        UA_Variant_clear(&v3);
    }
    
-   #ifdef UA_ENABLE_TYPEDESCRIPTION
+   #ifdef UA_ENABLE_JSON_ENCODING
    static void
    prettyprint(void) {
        UA_ReadRequest rr;

@@ -582,13 +582,22 @@ seconds.</p>
 
 <span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">UA_GUID_NULL</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">UA_Boolean</span><span class="w"> </span><span class="nf">UA_Guid_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">g1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">g2</span><span class="p">);</span><span class="w"></span>
+<span class="n">UA_Boolean</span><span class="w"></span>
+<span class="nf">UA_Guid_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">g1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">g2</span><span class="p">);</span><span class="w"></span>
 
-<span class="cp">#ifdef UA_ENABLE_PARSING</span>
-<span class="cm">/* Parse the Guid format defined in Part 6, 5.1.3.</span>
+<span class="cm">/* Print a Guid in the human-readable format defined in Part 6, 5.1.3</span>
+<span class="cm"> *</span>
 <span class="cm"> * Format: C496578A-0DFE-4B8F-870A-745238C6AEAE</span>
 <span class="cm"> *         |       |    |    |    |            |</span>
-<span class="cm"> *         0       8    13   18   23           36 */</span><span class="w"></span>
+<span class="cm"> *         0       8    13   18   23           36</span>
+<span class="cm"> *</span>
+<span class="cm"> * This allocates memory if the output argument is an empty string. Tries to use</span>
+<span class="cm"> * the given buffer otherwise. */</span><span class="w"></span>
+<span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Guid_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">guid</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span><span class="w"></span>
+
+<span class="cm">/* Parse the humand-readable Guid format */</span><span class="w"></span>
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_Guid_parse</span><span class="p">(</span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">guid</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span><span class="w"></span>
 
@@ -696,14 +705,16 @@ seconds.</p>
 <span class="cm"> *   UA_NODEID(&quot;ns=10;s=Hello:World&quot;)</span>
 <span class="cm"> *   UA_NODEID(&quot;g=09087e75-8e5e-499b-954f-f2a9603db28a&quot;)</span>
 <span class="cm"> *   UA_NODEID(&quot;ns=1;b=b3BlbjYyNTQxIQ==&quot;) // base64</span>
-<span class="cm"> * */</span><span class="w"></span>
+<span class="cm"> *</span>
+<span class="cm"> * The method can either use a pre-allocated string buffer or allocates memory</span>
+<span class="cm"> * internally if called with an empty output string. */</span><span class="w"></span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_NodeId_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span><span class="w"></span>
 
-<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="cm">/* Parse the human-readable NodeId format. Attention! String and</span>
 <span class="cm"> * ByteString NodeIds have their identifier malloc&#39;ed and need to be</span>
 <span class="cm"> * cleaned up. */</span><span class="w"></span>
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_NodeId_parse</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span><span class="w"></span>
 
@@ -785,18 +796,24 @@ seconds.</p>
 
 <span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">UA_EXPANDEDNODEID_NULL</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">UA_StatusCode</span><span class="w"></span>
-<span class="nf">UA_ExpandedNodeId_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span><span class="w"></span>
-
-<span class="cp">#ifdef UA_ENABLE_PARSING</span>
-<span class="cm">/* Parse the ExpandedNodeId format defined in Part 6, 5.3.1.11:</span>
+<span class="cm">/* Print the ExpandedNodeId in the humand-readable format defined in Part 6,</span>
+<span class="cm"> * 5.3.1.11:</span>
 <span class="cm"> *</span>
 <span class="cm"> *   svr=&lt;serverindex&gt;;ns=&lt;namespaceindex&gt;;&lt;type&gt;=&lt;value&gt;</span>
 <span class="cm"> *     or</span>
 <span class="cm"> *   svr=&lt;serverindex&gt;;nsu=&lt;uri&gt;;&lt;type&gt;=&lt;value&gt;</span>
 <span class="cm"> *</span>
-<span class="cm"> * The definitions for svr, ns and nsu can be omitted and will be set to zero /</span>
-<span class="cm"> * the empty string.*/</span><span class="w"></span>
+<span class="cm"> * The definitions for svr, ns and nsu is omitted if zero / the empty string.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The method can either use a pre-allocated string buffer or allocates memory</span>
+<span class="cm"> * internally if called with an empty output string. */</span><span class="w"></span>
+<span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_ExpandedNodeId_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span><span class="w"></span>
+
+<span class="cm">/* Parse the human-readable NodeId format. Attention! String and</span>
+<span class="cm"> * ByteString NodeIds have their identifier malloc&#39;ed and need to be</span>
+<span class="cm"> * cleaned up. */</span><span class="w"></span>
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_ExpandedNodeId_parse</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span><span class="w"></span>
 
@@ -1423,7 +1440,9 @@ following method to retrieve the data type description.</p>
 <span class="cm"> * @param type The datatype description of the variable */</span><span class="w"></span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">UA_delete</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span><span class="w"></span>
 
-<span class="cm">/* Pretty-print the value from the datatype.</span>
+<span class="cm">/* Pretty-print the value from the datatype. The output is pretty-printed JSON5.</span>
+<span class="cm"> * Note that this format is non-standard and should not be sent over the</span>
+<span class="cm"> * network. It can however be read by our own JSON decoding.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param p The memory location of the variable</span>
 <span class="cm"> * @param type The datatype description of the variable</span>
@@ -1431,8 +1450,8 @@ following method to retrieve the data type description.</p>
 <span class="cm"> *        memory for string is already allocated, we try to use the existing</span>
 <span class="cm"> *        string (the length is adjusted). If the string is empty, memory</span>
 <span class="cm"> *        is allocated for it.</span>
-<span class="cm"> * @return Indicates whether the operation succeeded*/</span><span class="w"></span>
-<span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
+<span class="cm"> * @return Indicates whether the operation succeeded */</span><span class="w"></span>
+<span class="cp">#ifdef UA_ENABLE_JSON_ENCODING</span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span><span class="w"></span>
 <span class="cp">#endif</span>
@@ -1499,8 +1518,6 @@ additional data types can be forwarded.</p>
 </section>
 <section id="json-en-decoding">
 <h2>JSON En/Decoding<a class="headerlink" href="#json-en-decoding" title="Permalink to this heading">¶</a></h2>
-<p>The JSON encoding always produces an encoding that is compatible with the OPC
-UA specification.</p>
 <p>The JSON decoding can parse the official encoding from the OPC UA
 specification. It further allows the following extensions:</p>
 <ul class="simple">
@@ -1523,6 +1540,15 @@ formats that also include data in the OPC UA type system.</p>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">useReversible</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">prettyPrint</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Add newlines and spaces for legibility */</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/* Enabling the following options leads to non-standard compatible JSON5</span>
+<span class="cm">     * encoding! Use it for pretty-printing, but not for sending messages over</span>
+<span class="cm">     * the network. (Our own decoding can still parse it.) */</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">unquotedKeys</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Don&#39;t print quotes around object element keys */</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">stringNodeIds</span><span class="p">;</span><span class="w"> </span><span class="cm">/* String encoding for NodeIds, like &quot;ns=1;i=42&quot; */</span><span class="w"></span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="p">;</span><span class="w"></span>
 
 <span class="cm">/* Returns the number of bytes the value src takes in json encoding. Returns</span>
