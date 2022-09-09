@@ -703,6 +703,9 @@ defined interval.
    void
    UA_Client_removeCallback(UA_Client *client, UA_UInt64 callbackId);
    
+   #define UA_Client_removeRepeatedCallback(server, callbackId)    \
+       UA_Client_removeCallback(server, callbackId);
+   
 Client Utility Functions
 ------------------------
 
