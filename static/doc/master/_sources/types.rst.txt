@@ -104,7 +104,7 @@ An integer value between 0 and 18 446 744 073 709 551 615.
 .. code-block:: c
 
    typedef uint64_t UA_UInt64;
-   #define UA_UINT64_MIN (uint64_t)0
+   #define UA_UINT64_MIN 0
    #define UA_UINT64_MAX (uint64_t)18446744073709551615ULL
    
 Float
@@ -114,6 +114,8 @@ An IEEE single precision (32 bit) floating point value.
 .. code-block:: c
 
    typedef float UA_Float;
+   #define UA_FLOAT_MIN FLT_MIN;
+   #define UA_FLOAT_MAX FLT_MAX;
    
 Double
 ^^^^^^
@@ -122,6 +124,8 @@ An IEEE double precision (64 bit) floating point value.
 .. code-block:: c
 
    typedef double UA_Double;
+   #define UA_DOUBLE_MIN DBL_MIN;
+   #define UA_DOUBLE_MAX DBL_MAX;
    
 .. _statuscode:
 
@@ -1130,11 +1134,6 @@ type operations as static inline functions.
    UA_Boolean
    UA_DataType_isNumeric(const UA_DataType *type);
    
-   /* Return the Data Type Precedence-Rank defined in Part 4.
-    * If there is no Precedence-Rank assigned with the type -1 is returned.*/
-   UA_Int16
-   UA_DataType_getPrecedence(const UA_DataType *type);
-   
 Builtin data types can be accessed as UA_TYPES[UA_TYPES_XXX], where XXX is
 the name of the data type. If only the NodeId of a type is known, use the
 following method to retrieve the data type description.
@@ -1283,9 +1282,10 @@ specification. It further allows the following extensions:
   (https://json5.org/). This allows for more human-readable encoding and adds
   convenience features such as trailing commas in arrays and comments within
   JSON documents.
+- Int64/UInt64 don't necessarily have to be wrapped into a string.
 - If `UA_ENABLE_PARSING` is set, NodeIds and ExpandedNodeIds can be given in
-  the string encoding (see `UA_NodeId_parse`). The standard encoding is to
-  express NodeIds as JSON objects.
+  the string encoding (e.g. "ns=1;i=42", see `UA_NodeId_parse`). The standard
+  encoding is to express NodeIds as JSON objects.
 
 These extensions are not intended to be used for the OPC UA protocol on the
 network. They were rather added to allow more convenient configuration file
