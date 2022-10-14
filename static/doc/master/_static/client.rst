@@ -354,7 +354,7 @@ Discovery
 Services
 --------
 
-The raw OPC UA services are exposed to the client. But most of them time, it
+The raw OPC UA services are exposed to the client. But most of the time, it
 is better to use the convenience functions from ``ua_client_highlevel.h``
 that wrap the raw services.
 
@@ -547,7 +547,7 @@ happens a client should periodically call `UA_Client_run_iterate`
 explicitly.
 
 Connection and session management are also performed in
-`UA_Client_run_iterate`, so to keep a connection healthy any client need to
+`UA_Client_run_iterate`, so to keep a connection healthy any client needs to
 consider how and when it is appropriate to do the call.
 This is especially true for the periodic renewal of a SecureChannel's
 SecurityToken which is designed to have a limited lifetime and will
@@ -568,7 +568,7 @@ invalidate the connection if not renewed.
     * The statusCode received when the client is shutting down is
     * UA_STATUSCODE_BADSHUTDOWN.
     *
-    * The statusCode received when the client don't receive response
+    * The statusCode received when the client doesn't receive response
     * after specified config->timeout (in ms) is
     * UA_STATUSCODE_BADTIMEOUT.
     *
@@ -597,7 +597,7 @@ invalidate the connection if not renewed.
     * @param client Pointer to the UA_Client
     * @param requestId RequestId of the request, which was returned by
     *        UA_Client_sendAsyncRequest before
-    * @param userdata The new userdata.
+    * @param userdata The new userdata
     * @param callback The new callback
     * @return UA_StatusCode UA_STATUSCODE_GOOD on success
     *         UA_STATUSCODE_BADNOTFOUND when no request with requestId is found. */
@@ -615,7 +615,7 @@ invalidate the connection if not renewed.
     * SecureChannel during a downtime when no time-critical operations are
     * performed. This method is asynchronous. The renewal is triggered (the OPN
     * message is sent) but not completed. The OPN response is handled with
-    * ``UA_Client_run_iterate`` or a synchronous servica-call operation.
+    * ``UA_Client_run_iterate`` or a synchronous service-call operation.
     *
     * @return The return value is UA_STATUSCODE_GOODCALLAGAIN if the SecureChannel
     *         has not elapsed at least 75% of its lifetime. Otherwise the
@@ -635,7 +635,7 @@ invalidate the connection if not renewed.
     * The statusCode received when the client is shutting down is
     * UA_STATUSCODE_BADSHUTDOWN.
     *
-    * The statusCode received when the client don't receive response
+    * The statusCode received when the client doesn't receive response
     * after specified timeout (in ms) is
     * UA_STATUSCODE_BADTIMEOUT.
     *
@@ -668,7 +668,7 @@ defined interval.
     * @param callback The callback that shall be added.
     * @param data Data that is forwarded to the callback.
     * @param date The timestamp for the execution time.
-    * @param callbackId Set to the identifier of the repeated callback . This can
+    * @param callbackId Set to the identifier of the repeated callback. This can
     *        be used to cancel the callback later on. If the pointer is null, the
     *        identifier is not set.
     * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
@@ -685,7 +685,7 @@ defined interval.
     * @param interval_ms The callback shall be repeatedly executed with the given
     *        interval (in ms). The interval must be positive. The first execution
     *        occurs at now() + interval at the latest.
-    * @param callbackId Set to the identifier of the repeated callback . This can
+    * @param callbackId Set to the identifier of the repeated callback. This can
     *        be used to cancel the callback later on. If the pointer is null, the
     *        identifier is not set.
     * @return Upon success, UA_STATUSCODE_GOOD is returned. An error code
