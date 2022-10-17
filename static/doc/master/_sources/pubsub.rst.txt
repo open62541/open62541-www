@@ -511,6 +511,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
        UA_MessageSecurityMode securityMode; /* via the UA_WriterGroupDataType */
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        UA_PubSubSecurityPolicy *securityPolicy;
+       UA_String securityGroupId;
    #endif
    } UA_WriterGroupConfig;
    
@@ -810,6 +811,7 @@ can be configured for a ReaderGroup.
        UA_MessageSecurityMode securityMode;
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        UA_PubSubSecurityPolicy *securityPolicy;
+       UA_String securityGroupId;
    #endif
    } UA_ReaderGroupConfig;
    
