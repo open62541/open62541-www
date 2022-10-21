@@ -114,7 +114,7 @@ doc/CMakeFiles/doc: doc_src/tutorials.rst
 doc/CMakeFiles/doc: doc_src/ua-wireshark-pubsub.png
 doc/CMakeFiles/doc: doc_src/ua-wireshark.png
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building HTML documentation with Sphinx"
-	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.10.7/x64/bin/sphinx-build -b html /home/runner/work/open62541/open62541/build/doc_src /home/runner/work/open62541/open62541/build/doc
+	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.10.8/x64/bin/sphinx-build -b html /home/runner/work/open62541/open62541/build/doc_src /home/runner/work/open62541/open62541/build/doc
 
 doc_src/client.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/client.rst: /home/runner/work/open62541/open62541/include/open62541/client.h
