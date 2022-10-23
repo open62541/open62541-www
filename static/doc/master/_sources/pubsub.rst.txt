@@ -365,7 +365,7 @@ handling process.
            //TODO -> decide if suppress C++ warnings and use 'UA_DataValue * * const staticValueSource;'
            UA_DataValue ** staticValueSource;
        } rtValueSource;
-   
+       UA_UInt32 maxStringLength;
    
    } UA_DataSetVariableConfig;
    
