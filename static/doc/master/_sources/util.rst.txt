@@ -190,7 +190,7 @@ Helper functions for converting data types
        volatile UA_Byte c = 0;
        for(size_t i = 0; i < length; ++i) {
            UA_Byte x = a[i], y = b[i];
-           c |= x ^ y;
+           c = c | (x ^ y);
        }
        return !c;
    }
