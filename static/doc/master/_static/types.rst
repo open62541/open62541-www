@@ -159,29 +159,21 @@ bitfield.
    
    /* Extracts the severity from a StatusCode. See Part 4, Section 7.34 for
     * details. */
-   static UA_INLINE UA_Boolean
-   UA_StatusCode_isBad(UA_StatusCode code) {
-       return ((code >> 30) >= 0x02);
-   }
+   UA_INLINABLE(UA_Boolean UA_StatusCode_isBad(UA_StatusCode code),
+                { return ((code >> 30) >= 0x02); })
    
-   static UA_INLINE UA_Boolean
-   UA_StatusCode_isUncertain(UA_StatusCode code) {
-       return ((code >> 30) == 0x01);
-   }
+   UA_INLINABLE(UA_Boolean UA_StatusCode_isUncertain(UA_StatusCode code),
+                { return ((code >> 30) == 0x01); })
    
-   static UA_INLINE UA_Boolean
-   UA_StatusCode_isGood(UA_StatusCode code) {
-       return ((code >> 30) == 0x00);
-   }
+   UA_INLINABLE(UA_Boolean UA_StatusCode_isGood(UA_StatusCode code),
+                { return ((code >> 30) == 0x00); })
    
    /* Compares the top 16 bits of two StatusCodes for equality. This should only
     * be used when processing user-defined StatusCodes e.g when processing a ReadResponse.
     * As a convention, the lower bits of StatusCodes should not be used internally, meaning
     * can compare them without the use of this function. */
-   static UA_INLINE UA_Boolean
-   UA_StatusCode_isEqualTop (UA_StatusCode s1, UA_StatusCode s2) {
-     return ((s1 & 0xFFFF0000) == (s2 & 0xFFFF0000));
-   }
+   UA_INLINABLE(UA_Boolean UA_StatusCode_isEqualTop(UA_StatusCode s1, UA_StatusCode s2),
+                { return ((s1 & 0xFFFF0000) == (s2 & 0xFFFF0000)); })
    
 String
 ^^^^^^
@@ -212,13 +204,13 @@ of the char-array.
 
 .. code-block:: c
 
-   static UA_INLINE UA_String
-   UA_STRING(char *chars) {
-       UA_String s; s.length = 0; s.data = NULL;
+   UA_INLINABLE(UA_String UA_STRING(char *chars), {
+       UA_String s = {0};
        if(!chars)
            return s;
-       s.length = strlen(chars); s.data = (UA_Byte*)chars; return s;
-   }
+       s.length = strlen(chars); s.data = (UA_Byte*)chars;
+       return s;
+   })
    
    #define UA_STRING_ALLOC(CHARS) UA_String_fromChars(CHARS)
    
