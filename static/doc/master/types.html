@@ -83,6 +83,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#generic-type-handling">Generic Type Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#binary-encoding-decoding">Binary Encoding/Decoding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#json-en-decoding">JSON En/Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#xml-en-decoding">XML En/Decoding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#array-handling">Array handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#random-number-generator">Random Number Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generated-data-type-definitions">Generated Data Type Definitions</a><ul>
@@ -1608,6 +1609,62 @@ formats that also include data in the OPC UA type system.</p>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span><span class="w"></span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_JSON_ENCODING */</span><span class="cp"></span>
+</pre></div>
+</div>
+</section>
+<section id="xml-en-decoding">
+<h2>XML En/Decoding<a class="headerlink" href="#xml-en-decoding" title="Permalink to this heading">¶</a></h2>
+<p>The XML decoding can parse the official encoding from the OPC UA
+specification.</p>
+<p>These extensions are not intended to be used for the OPC UA protocol on the
+network. They were rather added to allow more convenient configuration file
+formats that also include data in the OPC UA type system.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_XML_ENCODING</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">prettyPrint</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Add newlines and spaces for legibility */</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_EncodeXmlOptions</span><span class="p">;</span><span class="w"></span>
+
+<span class="cm">/* Returns the number of bytes the value src takes in xml encoding. Returns</span>
+<span class="cm"> * zero if an error occurs. */</span><span class="w"></span>
+<span class="kt">size_t</span><span class="w"></span>
+<span class="nf">UA_calcSizeXml</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"></span>
+<span class="w">               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeXmlOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span><span class="w"></span>
+
+<span class="cm">/* Encodes the scalar value described by type to xml encoding.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param src The value. Must not be NULL.</span>
+<span class="cm"> * @param type The value type. Must not be NULL.</span>
+<span class="cm"> * @param outBuf Pointer to ByteString containing the result if the encoding</span>
+<span class="cm"> *        was successful</span>
+<span class="cm"> * @return Returns a statuscode whether encoding succeeded. */</span><span class="w"></span>
+<span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_encodeXml</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeXmlOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span><span class="w"></span>
+
+<span class="cm">/* The structure with the decoding options may be extended in the future.</span>
+<span class="cm"> * Zero-out the entire structure initially to ensure code-compatibility when</span>
+<span class="cm"> * more fields are added in a later release. */</span><span class="w"></span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customTypes</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Begin of a linked list with custom</span>
+<span class="cm">                                          * datatype definitions */</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_DecodeXmlOptions</span><span class="p">;</span><span class="w"></span>
+
+<span class="cm">/* Decodes a scalar value described by type from xml encoding.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param src The buffer with the xml encoded value. Must not be NULL.</span>
+<span class="cm"> * @param dst The target value. Must not be NULL. The target is assumed to have</span>
+<span class="cm"> *        size type-&gt;memSize. The value is reset to zero before decoding. If</span>
+<span class="cm"> *        decoding fails, members are deleted and the value is reset (zeroed)</span>
+<span class="cm"> *        again.</span>
+<span class="cm"> * @param type The value type. Must not be NULL.</span>
+<span class="cm"> * @param options The options struct for decoding, currently unused</span>
+<span class="cm"> * @return Returns a statuscode whether decoding succeeded. */</span><span class="w"></span>
+<span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_decodeXml</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"></span>
+<span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeXmlOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span><span class="w"></span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_XML_ENCODING */</span><span class="cp"></span>
 </pre></div>
 </div>
 </section>
