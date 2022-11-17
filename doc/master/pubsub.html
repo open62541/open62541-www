@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PubSub &mdash; open62541 1.3.2-undefined documentation</title>
+  <title>PubSub &mdash; open62541 1.3.3-undefined documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -17,6 +17,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -67,6 +68,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#subscribeddataset">SubscribedDataSet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#securitygroup">SecurityGroup</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
@@ -87,8 +89,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="toc.html" class="icon icon-home"></a> &raquo;</li>
-      <li>PubSub</li>
+      <li><a href="toc.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">PubSub</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/pubsub.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -448,7 +450,7 @@ handling process.</p>
 <span class="w">        </span><span class="c1">//TODO -&gt; decide if suppress C++ warnings and use &#39;UA_DataValue * * const staticValueSource;&#39;</span>
 <span class="w">        </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">staticValueSource</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">rtValueSource</span><span class="p">;</span><span class="w"></span>
-
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxStringLength</span><span class="p">;</span><span class="w"></span>
 
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetVariableConfig</span><span class="p">;</span><span class="w"></span>
 
@@ -523,9 +525,9 @@ imagined as producer of the network messages. The creation of network
 messages is controlled by parameters like the publish interval, which is e.g.
 contained in the WriterGroup.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_BINARY</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_JSON</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_UADP</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_UADP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_JSON</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_BINARY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"></span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubEncodingType</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
@@ -586,6 +588,7 @@ UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w"> </span><span class="cm">/* via the UA_WriterGroupDataType */</span><span class="w"></span>
 <span class="cp">#ifdef UA_ENABLE_PUBSUB_ENCRYPTION</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span><span class="w"></span>
 <span class="cp">#endif</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_WriterGroupConfig</span><span class="p">;</span><span class="w"></span>
 
@@ -758,15 +761,7 @@ of interest sent by the Publisher. DataSetReaders represent
 the configuration necessary to receive and process DataSetMessages
 on the Subscriber side. DataSetReader must be linked with a
 SubscribedDataSet and be contained within a ReaderGroup.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Parameters for PubSubSecurity */</span><span class="w"></span>
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w">          </span><span class="cm">/* placeholder datatype &#39;MessageSecurityMode&#39; */</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">keyServersSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_Int32</span><span class="w"> </span><span class="o">*</span><span class="n">keyServers</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubSecurityParameters</span><span class="p">;</span><span class="w"></span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PUBSUB_RT_UNKNOWN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PUBSUB_RT_VARIANT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PUBSUB_RT_DATA_VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
@@ -782,7 +777,6 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="n">dataSetMetaData</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_DataSetFieldContentMask</span><span class="w"> </span><span class="n">dataSetFieldContentMask</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">messageReceiveTimeout</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PubSubSecurityParameters</span><span class="w"> </span><span class="n">securityParameters</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_SubscribedDataSetEnumType</span><span class="w"> </span><span class="n">subscribedDataSetType</span><span class="p">;</span><span class="w"></span>
@@ -855,7 +849,6 @@ buffer.</p></li>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* ReaderGroup configuration */</span><span class="w"></span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PubSubSecurityParameters</span><span class="w"> </span><span class="n">securityParameters</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="cm">/* PubSub Manager Callback */</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PubSub_CallbackLifecycle</span><span class="w"> </span><span class="n">pubsubManagerCallback</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="cm">/* non std. field */</span><span class="w"></span>
@@ -865,6 +858,8 @@ buffer.</p></li>
 <span class="w">    </span><span class="n">UA_PubSubRTLevel</span><span class="w"> </span><span class="n">rtLevel</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">groupPropertiesSize</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_KeyValuePair</span><span class="w"> </span><span class="o">*</span><span class="n">groupProperties</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">    </span><span class="cm">/* Messages are decrypted if a SecurityPolicy is configured and the</span>
 <span class="cm">     * securityMode set accordingly. The symmetric key is a runtime information</span>
@@ -872,6 +867,7 @@ buffer.</p></li>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w"></span>
 <span class="cp">#ifdef UA_ENABLE_PUBSUB_ENCRYPTION</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span><span class="w"></span>
 <span class="cp">#endif</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="p">;</span><span class="w"></span>
 
@@ -936,6 +932,60 @@ buffer.</p></li>
 <span class="w">                                       </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">keyNonce</span><span class="p">);</span><span class="w"></span>
 <span class="cp">#endif</span>
 
+<span class="cp">#ifdef UA_ENABLE_PUBSUB_SKS</span>
+</pre></div>
+</div>
+</section>
+<section id="securitygroup">
+<h2>SecurityGroup<a class="headerlink" href="#securitygroup" title="Permalink to this heading">¶</a></h2>
+<p>A SecurityGroup is an abstraction that represents the message security settings and
+security keys for a subset of NetworkMessages exchanged between Publishers and
+Subscribers. The SecurityGroup objects are created on a Security Key Service (SKS). The
+SKS manages the access to the keys based on the role permission for a user assigned to
+a SecurityGroup Object. A SecurityGroup is identified with a unique identifier called
+the SecurityGroupId. It is unique within the SKS.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The access to the SecurityGroup and therefore the securitykeys managed by SKS
+requires management of Roles and Permissions in the SKS. The Role Permission
+model is not supported at the time of writing. However, the access control plugin can
+be used to create and manage role permission on SecurityGroup object.</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupName</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_Duration</span><span class="w"> </span><span class="n">keyLifeTime</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityPolicyUri</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxFutureKeyCount</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxPastKeyCount</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_SecurityGroupConfig</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>&#64;brief Creates a SecurityGroup object and add it to the list in PubSub Manager. If the
+information model is enabled then the SecurityGroup object Node is also created in the
+server. A keyStorage with initial list of keys is created with a SecurityGroup. A
+callback is added to new SecurityGroup which updates the keys periodically at each
+KeyLifeTime expire.</p>
+<p>&#64;param server The server instance
+&#64;param securityGroupFolderNodeId The parent node of the SecurityGroup. It must be of
+SecurityGroupFolderType
+&#64;param securityGroupConfig The security settings of a SecurityGroup
+&#64;param securityGroupNodeId The output nodeId of the new SecurityGroup
+&#64;return UA_StatusCode The return status code</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
+<span class="n">UA_Server_addSecurityGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">securityGroupFolderNodeId</span><span class="p">,</span><span class="w"></span>
+<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityGroupConfig</span><span class="w"> </span><span class="o">*</span><span class="n">securityGroupConfig</span><span class="p">,</span><span class="w"></span>
+<span class="w">                           </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">securityGroupNodeId</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>&#64;brief Removes the SecurityGroup from PubSub Manager. It removes the KeyStorage
+associated with the SecurityGroup from the server.</p>
+<p>&#64;param server The server instance
+&#64;param securityGroup The nodeId of the securityGroup to be removed
+&#64;return UA_StatusCode The returned status code.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"></span>
+<span class="n">UA_Server_removeSecurityGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">securityGroup</span><span class="p">);</span><span class="w"></span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_SKS */</span><span class="cp"></span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span><span class="cp"></span>
 </pre></div>

@@ -1751,6 +1751,28 @@ Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:
                              const UA_NodeId condition,
                              const UA_NodeId conditionSource);
    
+   /*
+   * Set the LimitState of the LimitAlarmType
+   *
+   * @param server The server object
+   * @param conditionId The NodeId of the node representation of the Condition Instance
+   * @param limitValue The value from the trigger node
+   */
+   UA_StatusCode
+   UA_Server_setLimitState(UA_Server *server, const UA_NodeId conditionId,
+                           UA_Double limitValue);
+   
+   /*
+   * Parse the certifcate and set Expiration date
+   *
+   * @param server The server object
+   * @param conditionId The NodeId of the node representation of the Condition Instance
+   * @param cert The certificate for parsing
+   */
+   UA_StatusCode
+   UA_Server_setExpirationDate(UA_Server *server, const UA_NodeId conditionId,
+                               UA_ByteString  cert);
+   
    #endif /* UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS */
    
 Update the Server Certificate at Runtime
@@ -1878,7 +1900,6 @@ are structured per OPC UA communication layer.
 
    
    typedef struct {
-      UA_NetworkStatistics ns;
       UA_SecureChannelStatistics scs;
       UA_SessionStatistics ss;
    } UA_ServerStatistics;

@@ -365,7 +365,7 @@ handling process.
            //TODO -> decide if suppress C++ warnings and use 'UA_DataValue * * const staticValueSource;'
            UA_DataValue ** staticValueSource;
        } rtValueSource;
-   
+       UA_UInt32 maxStringLength;
    
    } UA_DataSetVariableConfig;
    
@@ -444,9 +444,9 @@ contained in the WriterGroup.
 
    
    typedef enum {
-       UA_PUBSUB_ENCODING_BINARY,
-       UA_PUBSUB_ENCODING_JSON,
-       UA_PUBSUB_ENCODING_UADP
+       UA_PUBSUB_ENCODING_UADP = 0,
+       UA_PUBSUB_ENCODING_JSON = 1,
+       UA_PUBSUB_ENCODING_BINARY = 2
    } UA_PubSubEncodingType;
    
 WriterGroup
@@ -511,6 +511,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
        UA_MessageSecurityMode securityMode; /* via the UA_WriterGroupDataType */
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        UA_PubSubSecurityPolicy *securityPolicy;
+       UA_String securityGroupId;
    #endif
    } UA_WriterGroupConfig;
    
@@ -691,14 +692,6 @@ SubscribedDataSet and be contained within a ReaderGroup.
 .. code-block:: c
 
    
-   /* Parameters for PubSubSecurity */
-   typedef struct {
-       UA_Int32 securityMode;          /* placeholder datatype 'MessageSecurityMode' */
-       UA_String securityGroupId;
-       size_t keyServersSize;
-       UA_Int32 *keyServers;
-   } UA_PubSubSecurityParameters;
-   
    typedef enum {
        UA_PUBSUB_RT_UNKNOWN = 0,
        UA_PUBSUB_RT_VARIANT = 1,
@@ -715,7 +708,6 @@ SubscribedDataSet and be contained within a ReaderGroup.
        UA_DataSetMetaDataType dataSetMetaData;
        UA_DataSetFieldContentMask dataSetFieldContentMask;
        UA_Double messageReceiveTimeout;
-       UA_PubSubSecurityParameters securityParameters;
        UA_ExtensionObject messageSettings;
        UA_ExtensionObject transportSettings;
        UA_SubscribedDataSetEnumType subscribedDataSetType;
@@ -791,7 +783,6 @@ can be configured for a ReaderGroup.
    /* ReaderGroup configuration */
    typedef struct {
        UA_String name;
-       UA_PubSubSecurityParameters securityParameters;
        /* PubSub Manager Callback */
        UA_PubSub_CallbackLifecycle pubsubManagerCallback;
        /* non std. field */
@@ -801,6 +792,8 @@ can be configured for a ReaderGroup.
        UA_PubSubRTLevel rtLevel;
        size_t groupPropertiesSize;
        UA_KeyValuePair *groupProperties;
+       UA_PubSubEncodingType encodingMimeType;
+       UA_ExtensionObject transportSettings;
    
        /* Messages are decrypted if a SecurityPolicy is configured and the
         * securityMode set accordingly. The symmetric key is a runtime information
@@ -808,6 +801,7 @@ can be configured for a ReaderGroup.
        UA_MessageSecurityMode securityMode;
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        UA_PubSubSecurityPolicy *securityPolicy;
+       UA_String securityGroupId;
    #endif
    } UA_ReaderGroupConfig;
    
@@ -872,5 +866,65 @@ can be configured for a ReaderGroup.
                                           UA_ByteString keyNonce);
    #endif
    
+   #ifdef UA_ENABLE_PUBSUB_SKS
+SecurityGroup
+-------------
+
+A SecurityGroup is an abstraction that represents the message security settings and
+security keys for a subset of NetworkMessages exchanged between Publishers and
+Subscribers. The SecurityGroup objects are created on a Security Key Service (SKS). The
+SKS manages the access to the keys based on the role permission for a user assigned to
+a SecurityGroup Object. A SecurityGroup is identified with a unique identifier called
+the SecurityGroupId. It is unique within the SKS.
+
+.. note:: The access to the SecurityGroup and therefore the securitykeys managed by SKS
+          requires management of Roles and Permissions in the SKS. The Role Permission
+          model is not supported at the time of writing. However, the access control plugin can
+          be used to create and manage role permission on SecurityGroup object.
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_String securityGroupName;
+       UA_Duration keyLifeTime;
+       UA_String securityPolicyUri;
+       UA_UInt32 maxFutureKeyCount;
+       UA_UInt32 maxPastKeyCount;
+   } UA_SecurityGroupConfig;
+   
+@brief Creates a SecurityGroup object and add it to the list in PubSub Manager. If the
+information model is enabled then the SecurityGroup object Node is also created in the
+server. A keyStorage with initial list of keys is created with a SecurityGroup. A
+callback is added to new SecurityGroup which updates the keys periodically at each
+KeyLifeTime expire.
+
+@param server The server instance
+@param securityGroupFolderNodeId The parent node of the SecurityGroup. It must be of
+SecurityGroupFolderType
+@param securityGroupConfig The security settings of a SecurityGroup
+@param securityGroupNodeId The output nodeId of the new SecurityGroup
+@return UA_StatusCode The return status code
+
+.. code-block:: c
+
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_addSecurityGroup(UA_Server *server, UA_NodeId securityGroupFolderNodeId,
+                              const UA_SecurityGroupConfig *securityGroupConfig,
+                              UA_NodeId *securityGroupNodeId);
+   
+@brief Removes the SecurityGroup from PubSub Manager. It removes the KeyStorage
+associated with the SecurityGroup from the server.
+
+@param server The server instance
+@param securityGroup The nodeId of the securityGroup to be removed
+@return UA_StatusCode The returned status code.
+
+.. code-block:: c
+
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_removeSecurityGroup(UA_Server *server, const UA_NodeId securityGroup);
+   
+   #endif /* UA_ENABLE_PUBSUB_SKS */
    
    #endif /* UA_ENABLE_PUBSUB */
