@@ -516,6 +516,8 @@ The following methods are a shorthand for creating NodeIds.
    /* Returns a non-cryptographic hash for NodeId */
    UA_UInt32 UA_NodeId_hash(const UA_NodeId *n);
    
+.. _expandednodeid:
+
 ExpandedNodeId
 ^^^^^^^^^^^^^^
 A NodeId that allows the namespace URI to be specified instead of an index.
