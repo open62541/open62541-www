@@ -47,7 +47,6 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
@@ -97,7 +96,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated.html">Generated Definitions</a></li>
 </ul>
 
         </div>
@@ -276,7 +276,7 @@ handling</span></a>.</p>
 </section>
 <section id="nodes-and-node-lifecycle">
 <h3>Nodes and Node Lifecycle<a class="headerlink" href="#nodes-and-node-lifecycle" title="Permalink to this heading">¶</a></h3>
-<p>See the section for <a class="reference internal" href="nodestore.html#node-lifecycle"><span class="std std-ref">node lifecycle handling</span></a>.</p>
+<p>See the section for <a class="reference internal" href="plugin_nodestore.html#node-lifecycle"><span class="std std-ref">node lifecycle handling</span></a>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="n">nodestore</span><span class="p">;</span><span class="w"></span>
 <span class="n">UA_GlobalNodeLifecycle</span><span class="w"> </span><span class="n">nodeLifecycle</span><span class="p">;</span><span class="w"></span>
 </pre></div>
@@ -1287,7 +1287,7 @@ that namespace”. To find out which NodeId was actually assigned to the new
 node, you may pass a pointer <cite>outNewNodeId</cite>, which will (after a successful
 node insertion) contain the nodeId of the new node. You may also pass a
 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> pointer if this result is not needed.</p>
-<p>See the Section <a class="reference internal" href="nodestore.html#node-lifecycle"><span class="std std-ref">Node Lifecycle: Constructors, Destructors and Node Contexts</span></a> on constructors and on attaching
+<p>See the Section <a class="reference internal" href="plugin_nodestore.html#node-lifecycle"><span class="std std-ref">Node Lifecycle: Constructors, Destructors and Node Contexts</span></a> on constructors and on attaching
 user-defined data to nodes.</p>
 <p>The methods for node addition and deletion take mostly const arguments that
 are not modified. When creating a node, a deep copy of the node identifier,
@@ -1295,7 +1295,7 @@ node attributes, etc. is created. Therefore, it is possible to call for
 example <code class="docutils literal notranslate"><span class="pre">UA_Server_addVariablenode</span></code> with a value attribute (a
 <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>) pointing to a memory location on the stack. If you need
 changes to a variable value to manifest at a specific memory location, please
-use a <a class="reference internal" href="#datasource"><span class="std std-ref">Data Source Callback</span></a> or a <a class="reference internal" href="nodestore.html#value-callback"><span class="std std-ref">Value Callback</span></a>.</p>
+use a <a class="reference internal" href="#datasource"><span class="std std-ref">Data Source Callback</span></a> or a <a class="reference internal" href="plugin_nodestore.html#value-callback"><span class="std std-ref">Value Callback</span></a>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Protect against redundant definitions for server/client */</span><span class="w"></span>
 <span class="cp">#ifndef UA_DEFAULT_ATTRIBUTES_DEFINED</span>
 <span class="cp">#define UA_DEFAULT_ATTRIBUTES_DEFINED</span>
@@ -1793,23 +1793,23 @@ source to the condition instance</p></li>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">);</span><span class="w"></span>
 
 <span class="cm">/*</span>
-<span class="cm">* Set the LimitState of the LimitAlarmType</span>
-<span class="cm">*</span>
-<span class="cm">* @param server The server object</span>
-<span class="cm">* @param conditionId The NodeId of the node representation of the Condition Instance</span>
-<span class="cm">* @param limitValue The value from the trigger node</span>
-<span class="cm">*/</span><span class="w"></span>
+<span class="cm"> * Set the LimitState of the LimitAlarmType</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param conditionId The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param limitValue The value from the trigger node</span>
+<span class="cm"> */</span><span class="w"></span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_Server_setLimitState</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span><span class="w"></span>
 <span class="w">                        </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">limitValue</span><span class="p">);</span><span class="w"></span>
 
 <span class="cm">/*</span>
-<span class="cm">* Parse the certifcate and set Expiration date</span>
-<span class="cm">*</span>
-<span class="cm">* @param server The server object</span>
-<span class="cm">* @param conditionId The NodeId of the node representation of the Condition Instance</span>
-<span class="cm">* @param cert The certificate for parsing</span>
-<span class="cm">*/</span><span class="w"></span>
+<span class="cm"> * Parse the certifcate and set Expiration date</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param conditionId The NodeId of the node representation of the Condition Instance</span>
+<span class="cm"> * @param cert The certificate for parsing</span>
+<span class="cm"> */</span><span class="w"></span>
 <span class="n">UA_StatusCode</span><span class="w"></span>
 <span class="nf">UA_Server_setExpirationDate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span><span class="w"></span>
 <span class="w">                            </span><span class="n">UA_ByteString</span><span class="w">  </span><span class="n">cert</span><span class="p">);</span><span class="w"></span>
@@ -1952,7 +1952,7 @@ are structured per OPC UA communication layer.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2016, The open62541 authors.</p>
+    <p>&#169; Copyright .</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

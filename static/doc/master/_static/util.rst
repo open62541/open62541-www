@@ -1,26 +1,20 @@
-Forward Declarations
---------------------
-Opaque pointers used by the plugins.
+Random Number Generator
+-----------------------
+If UA_MULTITHREADING is defined, then the seed is stored in thread
+local storage. The seed is initialized for every thread in the
+server/client.
 
 .. code-block:: c
 
    
-   struct UA_Server;
-   typedef struct UA_Server UA_Server;
+   void
+   UA_random_seed(UA_UInt64 seed);
    
-   struct UA_ServerConfig;
-   typedef struct UA_ServerConfig UA_ServerConfig;
+   UA_UInt32
+   UA_UInt32_random(void); /* no cryptographic entropy */
    
-   typedef void (*UA_ServerCallback)(UA_Server *server, void *data);
-   
-   struct UA_Client;
-   typedef struct UA_Client UA_Client;
-   
-   /* Timer policy to handle cycle misses */
-   typedef enum {
-       UA_TIMER_HANDLE_CYCLEMISS_WITH_CURRENTTIME,
-       UA_TIMER_HANDLE_CYCLEMISS_WITH_BASETIME
-   } UA_TimerPolicy;
+   UA_Guid
+   UA_Guid_random(void);   /* no cryptographic entropy */
    
 Key Value Map
 -------------

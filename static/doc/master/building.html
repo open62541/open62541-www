@@ -21,7 +21,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installing open62541" href="installing.html" />
+    <link rel="next" title="Tutorials" href="tutorials.html" />
     <link rel="prev" title="Introduction" href="index.html" /> 
 </head>
 
@@ -66,6 +66,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#minimizing-the-binary-size">Minimizing the binary size</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#prebuilt-packages">Prebuilt packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arch">Arch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openbsd">OpenBSD</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#building-the-examples">Building the Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#building-for-specific-architectures">Building for specific architectures</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#windows-linux-macos">Windows, Linux, MacOS</a></li>
@@ -74,7 +80,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
@@ -85,7 +90,8 @@
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated.html">Generated Definitions</a></li>
 </ul>
 
         </div>
@@ -114,12 +120,11 @@
              
   <section id="building-open62541">
 <span id="building"></span><h1>Building open62541<a class="headerlink" href="#building-open62541" title="Permalink to this heading">¶</a></h1>
-<p>open62541 uses CMake to build the library and binaries. The library version is automatically
-detected using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">describe</span></code>. This command returns a valid version string based on the current tag.
-If you did not directly clone the sources, but use the tar or zip package from a release, you need
-to manually specify the version. In that case use e.g. <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">-DOPEN62541_VERSION=v1.0.3</span></code>.</p>
 <section id="building-the-library">
 <h2>Building the Library<a class="headerlink" href="#building-the-library" title="Permalink to this heading">¶</a></h2>
+<p>open62541 uses CMake to build the library and binaries. CMake generates a
+Makefile or a Visual Studio project. This is then used to perform the actual
+build.</p>
 <section id="building-with-cmake-on-ubuntu-or-debian">
 <h3>Building with CMake on Ubuntu or Debian<a class="headerlink" href="#building-with-cmake-on-ubuntu-or-debian" title="Permalink to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install git build-essential gcc pkg-config cmake python
@@ -146,6 +151,25 @@ make doc <span class="c1"># html documentation</span>
 make doc_pdf <span class="c1"># pdf documentation (requires LaTeX)</span>
 </pre></div>
 </div>
+<p>You can install open62541 using the well known <cite>make install</cite> command. This
+allows you to use pre-built libraries and headers for your own project. In order
+to use open62541 as a shared library (.dll or .so) make sure to activate the
+<code class="docutils literal notranslate"><span class="pre">BUILD_SHARED_LIBS</span></code> CMake option.</p>
+<p>To override the default installation directory use <code class="docutils literal notranslate"><span class="pre">cmake</span>
+<span class="pre">-DCMAKE_INSTALL_PREFIX=/some/path</span></code>. Based on the SDK Features you selected, as
+described in <a class="reference internal" href="#build-options"><span class="std std-ref">Build Options</span></a>, these features will also be included in the
+installation. Thus we recommend to enable as many non-experimental features as
+possible for the installed binary.</p>
+<p>In your own CMake project you can then include the open62541 library using:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># optionally you can also specify a specific version</span>
+<span class="c"># e.g. find_package(open62541 1.0.0)</span>
+<span class="nb">find_package</span><span class="p">(</span><span class="s">open62541</span><span class="w"> </span><span class="s">REQUIRED</span><span class="w"> </span><span class="s">COMPONENTS</span><span class="w"> </span><span class="s">Events</span><span class="w"> </span><span class="s">FullNamespace</span><span class="p">)</span>
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">main</span><span class="w"> </span><span class="s">main.cpp</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">main</span><span class="w"> </span><span class="s">open62541::open62541</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A full list of enabled features during build time is stored in the CMake
+Variable <code class="docutils literal notranslate"><span class="pre">open62541_COMPONENTS_ALL</span></code></p>
 </section>
 <section id="building-with-cmake-on-windows">
 <h3>Building with CMake on Windows<a class="headerlink" href="#building-with-cmake-on-windows" title="Permalink to this heading">¶</a></h3>
@@ -196,7 +220,8 @@ brew install check <span class="c1"># for unit tests</span>
 </section>
 <section id="building-on-openbsd">
 <h3>Building on OpenBSD<a class="headerlink" href="#building-on-openbsd" title="Permalink to this heading">¶</a></h3>
-<p>The procedure below works on OpenBSD 5.8 with gcc version 4.8.4, cmake version 3.2.3 and Python version 2.7.10.</p>
+<p>The procedure below works on OpenBSD 5.8 with gcc version 4.8.4, cmake version
+3.2.3 and Python version 2.7.10.</p>
 <ul class="simple">
 <li><p>Install a recent gcc, python and cmake:</p></li>
 </ul>
@@ -494,10 +519,50 @@ debugging.</p>
 </ul>
 </section>
 </section>
+<section id="prebuilt-packages">
+<h2>Prebuilt packages<a class="headerlink" href="#prebuilt-packages" title="Permalink to this heading">¶</a></h2>
+<section id="debian">
+<h3>Debian<a class="headerlink" href="#debian" title="Permalink to this heading">¶</a></h3>
+<p>Debian packages can be found in our official PPA:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Daily Builds (based on master branch): <a class="reference external" href="https://launchpad.net/~open62541-team/+archive/ubuntu/daily">https://launchpad.net/~open62541-team/+archive/ubuntu/daily</a></p></li>
+<li><p>Release Builds (starting with Version 0.4): <a class="reference external" href="https://launchpad.net/~open62541-team/+archive/ubuntu/ppa">https://launchpad.net/~open62541-team/+archive/ubuntu/ppa</a></p></li>
+</ul>
+</div></blockquote>
+<p>Install them with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:open62541-team/ppa
+sudo apt-get update
+sudo apt-get install libopen62541-1-dev
+</pre></div>
+</div>
+</section>
+<section id="arch">
+<h3>Arch<a class="headerlink" href="#arch" title="Permalink to this heading">¶</a></h3>
+<p>Arch packages are available in the AUR:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Stable Builds: <a class="reference external" href="https://aur.archlinux.org/packages/open62541/">https://aur.archlinux.org/packages/open62541/</a></p></li>
+<li><p>Unstable Builds (current master): <a class="reference external" href="https://aur.archlinux.org/packages/open62541-git/">https://aur.archlinux.org/packages/open62541-git/</a></p></li>
+<li><p>In order to add custom build options (<a class="reference internal" href="#build-options"><span class="std std-ref">Build Options</span></a>), you can set the environment variable <code class="docutils literal notranslate"><span class="pre">OPEN62541_CMAKE_FLAGS</span></code></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="openbsd">
+<h3>OpenBSD<a class="headerlink" href="#openbsd" title="Permalink to this heading">¶</a></h3>
+<p>Starting with OpenBSD 6.7 the ports directory misc/open62541 can
+build the released version of open62541.
+Install the binary package from the OpenBSD mirrors:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pkg_add open62541
+</pre></div>
+</div>
+</section>
+</section>
 <section id="building-the-examples">
 <h2>Building the Examples<a class="headerlink" href="#building-the-examples" title="Permalink to this heading">¶</a></h2>
-<p>Make sure that you can build the shared library as explained in the previous steps. Even easier way
-to build the examples is to install open62541 in your operating system (see <a class="reference internal" href="installing.html#installing"><span class="std std-ref">Installing open62541</span></a>).</p>
+<p>Make sure that you have installed the shared library as explained in the
+previous steps. Even easier way to build the examples is to install open62541 in
+your operating system (see <span class="xref std std-ref">installing</span>).</p>
 <p>Then the compiler should automatically find the includes and the shared library.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp /path-to/examples/tutorial_server_firststeps.c . <span class="c1"># copy the example server</span>
 gcc -std<span class="o">=</span>c99 -o server tutorial_server_firststeps.c -lopen62541
@@ -629,13 +694,13 @@ There is no standard way of doing the following across all IDEs, but you need to
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="installing.html" class="btn btn-neutral float-right" title="Installing open62541" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2016, The open62541 authors.</p>
+    <p>&#169; Copyright .</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

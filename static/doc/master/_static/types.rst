@@ -214,7 +214,8 @@ of the char-array.
 
    UA_INLINABLE(UA_String
                 UA_STRING(char *chars), {
-       UA_String s = {0};
+       UA_String s;
+       memset(&s, 0, sizeof(s));
        if(!chars)
            return s;
        s.length = strlen(chars); s.data = (UA_Byte*)chars;
@@ -727,7 +728,8 @@ with a single element (min==max).
    
    UA_INLINABLE(UA_NumericRange
                 UA_NUMERICRANGE(const char *s), {
-       UA_NumericRange nr = {0};
+       UA_NumericRange nr;
+       memset(&nr, 0, sizeof(nr)); 
        UA_NumericRange_parse(&nr, UA_STRING((char*)(uintptr_t)s));
        return nr;
    })
@@ -1530,34 +1532,26 @@ length 0 but a data pointer ``UA_EMPTY_ARRAY_SENTINEL``.
    void
    UA_Array_delete(void *p, size_t size, const UA_DataType *type);
    
-Random Number Generator
------------------------
-If UA_MULTITHREADING is defined, then the seed is stored in thread
-local storage. The seed is initialized for every thread in the
-server/client.
-
-.. code-block:: c
-
-   void UA_random_seed(UA_UInt64 seed);
-   UA_UInt32 UA_UInt32_random(void); /* no cryptographic entropy */
-   UA_Guid UA_Guid_random(void);     /* no cryptographic entropy */
-   
 .. _generated-types:
 
 Generated Data Type Definitions
 -------------------------------
 
-The following data types were auto-generated from a definition in XML format.
+The OPC UA standard defines many data types that are combinations of the 25
+builtin data types. See the section on :ref:`generated-definitions` for the
+list of data types that are integrated for this build of the open62541
+library.
 
 .. code-block:: c
 
    
-   /* The following is used to exclude type names in the definition of UA_DataType
-    * structures if the feature is disabled. */
+   /* Helper used to exclude type names in the definition of UA_DataType structures
+    * if the feature is disabled. */
    #ifdef UA_ENABLE_TYPEDESCRIPTION
    # define UA_TYPENAME(name) name,
    #else
    # define UA_TYPENAME(name)
    #endif
    
-.. include:: types_generated.rst
+   #include <open62541/types_generated.h>
+   #include <open62541/types_generated_handling.h>

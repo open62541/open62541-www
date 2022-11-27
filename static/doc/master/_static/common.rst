@@ -43,6 +43,8 @@ the node type. Possible attributes are as follows:
        UA_ATTRIBUTEID_ACCESSLEVELEX           = 27
    } UA_AttributeId;
    
+.. _access-level-mask:
+
 Access Level Masks
 ------------------
 The access level to a node is given by the following constants that are ANDed
@@ -59,6 +61,8 @@ with the overall access level.
    #define UA_ACCESSLEVELMASK_STATUSWRITE    (0x01u << 5u)
    #define UA_ACCESSLEVELMASK_TIMESTAMPWRITE (0x01u << 6u)
    
+.. _write-mask:
+
 Write Masks
 -----------
 The write mask and user write mask is given by the following constants that
@@ -90,8 +94,10 @@ are ANDed for the overall write mask. Part 3: 5.2.7 Table 2
    #define UA_WRITEMASK_WRITEMASK               (0x01u << 20u)
    #define UA_WRITEMASK_VALUEFORVARIABLETYPE    (0x01u << 21u)
    
-ValueRanks
-----------
+.. _valuerank-defines:
+
+ValueRank
+---------
 The following are the most common ValueRanks used for Variables,
 VariableTypes and method arguments. ValueRanks higher than 3 are valid as
 well (but less common).
@@ -107,6 +113,8 @@ well (but less common).
    #define UA_VALUERANK_TWO_DIMENSIONS            2
    #define UA_VALUERANK_THREE_DIMENSIONS          3
    
+.. _eventnotifier:
+
 EventNotifier
 -------------
 The following are the available EventNotifier used for Nodes.
@@ -214,5 +222,23 @@ but are harmonized with the Session layer counters if possible.
        size_t sessionTimeoutCount;          /* only used by servers */
        size_t sessionAbortCount;            /* only used by servers */
    } UA_SessionStatistics;
+   
+Forward Declarations
+--------------------
+Opaque pointers used in Client, Server and PubSub.
+
+.. code-block:: c
+
+   
+   struct UA_Server;
+   typedef struct UA_Server UA_Server;
+   
+   struct UA_ServerConfig;
+   typedef struct UA_ServerConfig UA_ServerConfig;
+   
+   typedef void (*UA_ServerCallback)(UA_Server *server, void *data);
+   
+   struct UA_Client;
+   typedef struct UA_Client UA_Client;
    
 .. include:: util.rst

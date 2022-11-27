@@ -5,7 +5,6 @@ open62541 Documentation
 
    index
    building
-   installing
    tutorials
    protocol
    types
@@ -16,4 +15,5 @@ open62541 Documentation
    pubsub
    common
    nodeset_compiler
-   internal
+   plugin
+   generated
