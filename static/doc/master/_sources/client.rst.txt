@@ -124,6 +124,14 @@ Advanced Client Configuration
        /* Certificate Verification Plugin */
        UA_CertificateVerification certificateVerification;
    
+       /* Available SecurityPolicies for Authentication. The policy defined by the
+        * AccessControl is selected. If no policy is defined, the policy of the secure channel
+        * is selected.*/
+       size_t authSecurityPoliciesSize;
+       UA_SecurityPolicy *authSecurityPolicies;
+       /* SecurityPolicyUri for the Authentication. */
+       UA_String authSecurityPolicyUri;
+   
        /* Callback for state changes. The client state is differentated into the
         * SecureChannel state and the Session state. The connectStatus is set if
         * the client connection (including reconnects) has failed and the client
