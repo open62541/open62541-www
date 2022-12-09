@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#subscriptions">Subscriptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pubsub">PubSub</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#historical-access">Historical Access</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reverse-connect">Reverse Connect</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
@@ -90,6 +91,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id7">Async Operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">Reverse Connect</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -434,6 +436,12 @@ ModellingRule of their InstanceDeclaration</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">deleteEventCapability</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">deleteAtTimeDataCapability</span><span class="p">;</span><span class="w"></span>
 <span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+<section id="reverse-connect">
+<h3>Reverse Connect<a class="headerlink" href="#reverse-connect" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reverseReconnectInterval</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default is 15000 ms */</span><span class="w"></span>
 <span class="p">};</span><span class="w"></span>
 
 <span class="kt">void</span><span class="w"></span>
@@ -1936,6 +1944,50 @@ are structured per OPC UA communication layer.</p>
 
 <span class="n">UA_ServerStatistics</span><span class="w"></span>
 <span class="nf">UA_Server_getStatistics</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h2>Reverse Connect<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
+<p>The reverse connect feature of OPC UA permits the server instead of the client to
+establish the connection.
+The client must expose the listening port so the server is able to reach it.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<p>The reverse connect state change callback is called whenever the state of a reverse
+connect is changed by a connection attempt, a successful connection or a connection
+loss.</p>
+<p>The reverse connect states reflect the state of the secure channel currently associated
+with a reverse connect. The state will remain UA_SECURECHANNELSTATE_CONNECTING while
+the server attempts repeatedly to establish a connection.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_Server_ReverseConnectStateCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                                      </span><span class="n">UA_SecureChannelState</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Registers a reverse connect in the server.
+The server periodically attempts to establish a connection if the initial connect fails
+or if the connection breaks.</p>
+<p>&#64;param server The server object
+&#64;param url The URL of the remote client
+&#64;param stateCallback The callback which will be called on state changes
+&#64;param callbackContext The context for the state callback
+&#64;param handle Is set to the handle of the reverse connect if not NULL
+&#64;return Returns UA_STATUSCODE_GOOD if the reverse connect has been registered</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Server_addReverseConnect</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">url</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                          </span><span class="n">UA_Server_ReverseConnectStateCallback</span><span class="w"> </span><span class="n">stateCallback</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Removes a reverse connect from the server and closes the connection if it is currently
+open.</p>
+<p>&#64;param server The server object
+&#64;param handle The handle of the reverse connect to remove
+&#64;return Returns UA_STATUSCODE_GOOD if the reverse connect has been successfully removed</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"></span>
+<span class="nf">UA_Server_removeReverseConnect</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">handle</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
