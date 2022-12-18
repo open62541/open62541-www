@@ -30,7 +30,20 @@ efficient 1:m communication. The PubSub extension is protocol agnostic and
 can be used with broker based protocols like MQTT and AMQP or brokerless
 implementations like UDP-Multicasting.
 
-The PubSub API uses the following scheme:
+The configuration model for PubSub uses the following components:
+
+.. code-block:: c
+
+   
+   typedef enum  {
+       UA_PUBSUB_COMPONENT_CONNECTION,
+       UA_PUBSUB_COMPONENT_WRITERGROUP,
+       UA_PUBSUB_COMPONENT_DATASETWRITER,
+       UA_PUBSUB_COMPONENT_READERGROUP,
+       UA_PUBSUB_COMPONENT_DATASETREADER
+   } UA_PubSubComponentEnumType;
+   
+The open62541 PubSub API uses the following scheme:
 
 1. Create a configuration for the needed PubSub element.
 
@@ -105,21 +118,12 @@ The PubSub connections are the abstraction between the concrete transport protoc
 and the PubSub functionality. It is possible to create multiple connections with
 different transport protocols at runtime.
 
-Take a look on the PubSub Tutorials for mor details about the API usage.
-
 .. code-block:: c
 
    
-   typedef enum  {
-       UA_PUBSUB_COMPONENT_CONNECTION,
-       UA_PUBSUB_COMPONENT_WRITERGROUP,
-       UA_PUBSUB_COMPONENT_DATASETWRITER,
-       UA_PUBSUB_COMPONENT_READERGROUP,
-       UA_PUBSUB_COMPONENT_DATASETREADER
-   } UA_PubSubComponentEnumType;
-   
+   /* Valid PublisherId types from Part 14 */
    typedef enum {
-       UA_PUBLISHERIDTYPE_BYTE = 0,
+       UA_PUBLISHERIDTYPE_BYTE   = 0,
        UA_PUBLISHERIDTYPE_UINT16 = 1,
        UA_PUBLISHERIDTYPE_UINT32 = 2,
        UA_PUBLISHERIDTYPE_UINT64 = 3,
@@ -151,8 +155,7 @@ Take a look on the PubSub Tutorials for mor details about the API usage.
        UA_PublisherId publisherId;
        UA_String transportProfileUri;
        UA_Variant address;
-       size_t connectionPropertiesSize;
-       UA_KeyValuePair *connectionProperties;
+       UA_KeyValueMap connectionProperties;
        UA_Variant connectionTransportSettings;
    };
    
@@ -494,8 +497,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
        UA_Byte priority;
        UA_ExtensionObject transportSettings;
        UA_ExtensionObject messageSettings;
-       size_t groupPropertiesSize;
-       UA_KeyValuePair *groupProperties;
+       UA_KeyValueMap groupProperties;
        UA_PubSubEncodingType encodingMimeType;
        /* PubSub Manager Callback */
        UA_PubSub_CallbackLifecycle pubsubManagerCallback;
@@ -584,8 +586,7 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
        UA_ExtensionObject messageSettings;
        UA_ExtensionObject transportSettings;
        UA_String dataSetName;
-       size_t dataSetWriterPropertiesSize;
-       UA_KeyValuePair *dataSetWriterProperties;
+       UA_KeyValueMap dataSetWriterProperties;
    } UA_DataSetWriterConfig;
    
    void
@@ -790,8 +791,7 @@ can be configured for a ReaderGroup.
        UA_Boolean enableBlockingSocket; // To enable or disable blocking socket option
        UA_UInt32 timeout; // Timeout for receive to wait for the packets
        UA_PubSubRTLevel rtLevel;
-       size_t groupPropertiesSize;
-       UA_KeyValuePair *groupProperties;
+       UA_KeyValueMap groupProperties;
        UA_PubSubEncodingType encodingMimeType;
        UA_ExtensionObject transportSettings;
    

@@ -272,8 +272,8 @@ copied to the NodeId parameter.
        connectionOptions[1].key = UA_QUALIFIEDNAME(0, "enablesotxtime");
        UA_Boolean enableTxTime  = UA_TRUE;
        UA_Variant_setScalar(&connectionOptions[1].value, &enableTxTime, &UA_TYPES[UA_TYPES_BOOLEAN]);
-       connectionConfig.connectionProperties     = connectionOptions;
-       connectionConfig.connectionPropertiesSize = 2;
+       connectionConfig.connectionProperties.map     = connectionOptions;
+       connectionConfig.connectionProperties.mapSize = 2;
        UA_Server_addPubSubConnection(server, &connectionConfig, &connectionIdent);
    }
    
