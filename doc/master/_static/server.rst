@@ -340,6 +340,13 @@ Historical Access
        UA_Boolean deleteEventCapability;
        UA_Boolean deleteAtTimeDataCapability;
    #endif
+   
+Reverse Connect
+^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+       UA_UInt32 reverseReconnectInterval; /* Default is 15000 ms */
    };
    
    void
@@ -1752,23 +1759,23 @@ Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:
                              const UA_NodeId conditionSource);
    
    /*
-   * Set the LimitState of the LimitAlarmType
-   *
-   * @param server The server object
-   * @param conditionId The NodeId of the node representation of the Condition Instance
-   * @param limitValue The value from the trigger node
-   */
+    * Set the LimitState of the LimitAlarmType
+    *
+    * @param server The server object
+    * @param conditionId The NodeId of the node representation of the Condition Instance
+    * @param limitValue The value from the trigger node
+    */
    UA_StatusCode
    UA_Server_setLimitState(UA_Server *server, const UA_NodeId conditionId,
                            UA_Double limitValue);
    
    /*
-   * Parse the certifcate and set Expiration date
-   *
-   * @param server The server object
-   * @param conditionId The NodeId of the node representation of the Condition Instance
-   * @param cert The certificate for parsing
-   */
+    * Parse the certifcate and set Expiration date
+    *
+    * @param server The server object
+    * @param conditionId The NodeId of the node representation of the Condition Instance
+    * @param cert The certificate for parsing
+    */
    UA_StatusCode
    UA_Server_setExpirationDate(UA_Server *server, const UA_NodeId conditionId,
                                UA_ByteString  cert);
@@ -1906,3 +1913,57 @@ are structured per OPC UA communication layer.
    
    UA_ServerStatistics
    UA_Server_getStatistics(UA_Server *server);
+   
+Reverse Connect
+---------------
+
+The reverse connect feature of OPC UA permits the server instead of the client to
+establish the connection.
+The client must expose the listening port so the server is able to reach it.
+
+.. code-block:: c
+
+   
+The reverse connect state change callback is called whenever the state of a reverse
+connect is changed by a connection attempt, a successful connection or a connection
+loss.
+
+The reverse connect states reflect the state of the secure channel currently associated
+with a reverse connect. The state will remain UA_SECURECHANNELSTATE_CONNECTING while
+the server attempts repeatedly to establish a connection.
+
+.. code-block:: c
+
+   typedef void (*UA_Server_ReverseConnectStateCallback)(UA_Server *server, UA_UInt64 handle,
+                                                         UA_SecureChannelState state,
+                                                         void *context);
+   
+Registers a reverse connect in the server.
+The server periodically attempts to establish a connection if the initial connect fails
+or if the connection breaks.
+
+@param server The server object
+@param url The URL of the remote client
+@param stateCallback The callback which will be called on state changes
+@param callbackContext The context for the state callback
+@param handle Is set to the handle of the reverse connect if not NULL
+@return Returns UA_STATUSCODE_GOOD if the reverse connect has been registered
+
+.. code-block:: c
+
+   UA_StatusCode
+   UA_Server_addReverseConnect(UA_Server *server, UA_String url,
+                                             UA_Server_ReverseConnectStateCallback stateCallback,
+                                             void *callbackContext, UA_UInt64 *handle);
+   
+Removes a reverse connect from the server and closes the connection if it is currently
+open.
+
+@param server The server object
+@param handle The handle of the reverse connect to remove
+@return Returns UA_STATUSCODE_GOOD if the reverse connect has been successfully removed
+
+.. code-block:: c
+
+   UA_StatusCode
+   UA_Server_removeReverseConnect(UA_Server *server, UA_UInt64 handle);

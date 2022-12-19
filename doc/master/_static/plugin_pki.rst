@@ -1,0 +1,40 @@
+Public Key Infrastructure Integration
+=====================================
+This file contains interface definitions for integration in a Public Key
+Infrastructure (PKI). Currently only one plugin interface is defined.
+
+Certificate Verification
+------------------------
+This plugin verifies that the origin of the certificate is trusted. It does
+not assign any access rights/roles to the holder of the certificate.
+
+Usually, implementations of the certificate verification plugin provide an
+initialization method that takes a trust-list and a revocation-list as input.
+The lifecycle of the plugin is attached to a server or client config. The
+``clear`` method is called automatically when the config is destroyed.
+
+.. code-block:: c
+
+   
+   struct UA_CertificateVerification;
+   typedef struct UA_CertificateVerification UA_CertificateVerification;
+   
+   struct UA_CertificateVerification {
+       void *context;
+   
+       /* Verify the certificate against the configured policies and trust chain. */
+       UA_StatusCode (*verifyCertificate)(void *verificationContext,
+                                          const UA_ByteString *certificate);
+   
+       /* Verify that the certificate has the applicationURI in the subject name. */
+       UA_StatusCode (*verifyApplicationURI)(void *verificationContext,
+                                             const UA_ByteString *certificate,
+                                             const UA_String *applicationURI);
+   
+       /* Get the expire date from certificate */
+       UA_StatusCode (*getExpirationDate)(UA_DateTime *expiryDateTime, 
+                                          UA_ByteString *certificate);
+   
+       /* Delete the certificate verification context */
+       void (*clear)(UA_CertificateVerification *cv);
+   };

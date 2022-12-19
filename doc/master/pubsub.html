@@ -47,13 +47,11 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-pointer">Node Pointer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">PubSub</a><ul>
@@ -73,7 +71,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generated.html">Generated Definitions</a></li>
 </ul>
 
         </div>
@@ -125,7 +124,17 @@ and/or scalability are required.</p>
 efficient 1:m communication. The PubSub extension is protocol agnostic and
 can be used with broker based protocols like MQTT and AMQP or brokerless
 implementations like UDP-Multicasting.</p>
-<p>The PubSub API uses the following scheme:</p>
+<p>The configuration model for PubSub uses the following components:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONNECTION</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_WRITERGROUP</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_DATASETWRITER</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_READERGROUP</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_DATASETREADER</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubComponentEnumType</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The open62541 PubSub API uses the following scheme:</p>
 <ol class="arabic simple">
 <li><p>Create a configuration for the needed PubSub element.</p></li>
 <li><p>Call the add[element] function and pass in the configuration.</p></li>
@@ -195,17 +204,9 @@ UA_ENABLE_PUBSUB_INFORMATIONMODEL option.</p>
 <p>The PubSub connections are the abstraction between the concrete transport protocol
 and the PubSub functionality. It is possible to create multiple connections with
 different transport protocols at runtime.</p>
-<p>Take a look on the PubSub Tutorials for mor details about the API usage.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w">  </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONNECTION</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_WRITERGROUP</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_DATASETWRITER</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_READERGROUP</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_DATASETREADER</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubComponentEnumType</span><span class="p">;</span><span class="w"></span>
-
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Valid PublisherId types from Part 14 */</span><span class="w"></span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_BYTE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_BYTE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT64</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
@@ -237,8 +238,7 @@ different transport protocols at runtime.</p>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">transportProfileUri</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">address</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">connectionPropertiesSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_KeyValuePair</span><span class="w"> </span><span class="o">*</span><span class="n">connectionProperties</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">connectionProperties</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">connectionTransportSettings</span><span class="p">;</span><span class="w"></span>
 <span class="p">};</span><span class="w"></span>
 
@@ -571,8 +571,7 @@ UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
 <span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">priority</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">groupPropertiesSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_KeyValuePair</span><span class="w"> </span><span class="o">*</span><span class="n">groupProperties</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">groupProperties</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="cm">/* PubSub Manager Callback */</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PubSub_CallbackLifecycle</span><span class="w"> </span><span class="n">pubsubManagerCallback</span><span class="p">;</span><span class="w"></span>
@@ -657,8 +656,7 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">dataSetName</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">dataSetWriterPropertiesSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_KeyValuePair</span><span class="w"> </span><span class="o">*</span><span class="n">dataSetWriterProperties</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">dataSetWriterProperties</span><span class="p">;</span><span class="w"></span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetWriterConfig</span><span class="p">;</span><span class="w"></span>
 
 <span class="kt">void</span><span class="w"></span>
@@ -856,8 +854,7 @@ buffer.</p></li>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">enableBlockingSocket</span><span class="p">;</span><span class="w"> </span><span class="c1">// To enable or disable blocking socket option</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">;</span><span class="w"> </span><span class="c1">// Timeout for receive to wait for the packets</span>
 <span class="w">    </span><span class="n">UA_PubSubRTLevel</span><span class="w"> </span><span class="n">rtLevel</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">groupPropertiesSize</span><span class="p">;</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_KeyValuePair</span><span class="w"> </span><span class="o">*</span><span class="n">groupProperties</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">groupProperties</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span><span class="w"></span>
 
@@ -1004,7 +1001,7 @@ associated with the SecurityGroup from the server.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2016, The open62541 authors.</p>
+    <p>&#169; Copyright .</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
