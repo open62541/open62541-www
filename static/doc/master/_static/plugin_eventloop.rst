@@ -434,20 +434,19 @@ Configuration parameters for the entire ConnectionManager:
                            messages (default 64kB).
 
 Open Connection Parameters:
-- Active Connection
-  - 0:hostname [string]: Hostname (or IPv4/v6 address) to connect to (required).
-  - 0:port [uint16]: Port of the target host (required).
-- Passive Connection (Listening on a port for incoming connections)
-  - 0:listen-port [uint16]: Port to listen for new connections (required).
-  - 0:listen-hostnames [string array]: Hostnames of the devices to listen on
-                                       (default: listen on all devices).
+- 0:address [string | array of string]: Hostname or IPv4/v6 address for the
+            connection (scalar parameter required for active connections).
+            For listen-connections the address implies the network interfaces
+            for listening (default: listen on all interfaces).
+- 0:port [uint16]: Port of the target host (required).
+- 0:listen [boolean]: Listen-connection or active-connection (default: false)
 
 Connection Callback Parameters (first callback only):
 - Active Connection
-  - 0:remote-hostname [string]: Hostname of the remote connection.
-- Passive Connection
-  - 0:listen-hostname [string]: Local hostname for that particular
-                                listen-connection.
+  - 0:remote-address [string]: Address of the remote side (hostname or IP address).
+- Listen Connection
+  - 0:listen-address [string]: Local address for that particular
+                               listen-connection.
   - 0:listen-port [uint16]: Port on which the connection listens.
 
 Send Parameters:
@@ -475,7 +474,7 @@ Open Connection Parameters:
 
 - 0:listen [boolean]: Use the connection for listening or for sending
       (default: false)
-- 0:hostname [string | string array]: Hostname (or IPv4/v6 address) for
+- 0:address [string | string array]: Hostname (or IPv4/v6 address) for
       sending or receiving. A scalar is required for sending. For listening a
       string array for the list-hostnames is possible as well (default: list
       on all hostnames).
