@@ -541,6 +541,13 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
                                   UA_PubSubState *state);
    
    UA_StatusCode UA_THREADSAFE
+   UA_Server_WriterGroup_publish(UA_Server *server, const UA_NodeId writerGroupIdentifier);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_WriterGroup_lastPublishTimestamp(UA_Server *server, const UA_NodeId writerGroupId,
+                                       UA_DateTime *timestamp);
+   
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removeWriterGroup(UA_Server *server, const UA_NodeId writerGroup);
    
    UA_StatusCode
