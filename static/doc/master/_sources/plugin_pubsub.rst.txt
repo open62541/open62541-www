@@ -48,7 +48,7 @@ provides basis services like send, regist, unregist, receive, close.
    
        /* Sending out the content of the buf parameter */
        UA_StatusCode (*send)(UA_PubSubChannel *channel, UA_ExtensionObject *transportSettings,
-                             const UA_ByteString *buf);
+                             UA_ByteString *buf);
    
        /* Register to an specified message source, e.g. multicast group or topic. Callback is used for mqtt. */
        UA_StatusCode (*regist)(UA_PubSubChannel *channel, UA_ExtensionObject *transportSettings,
@@ -67,6 +67,14 @@ provides basis services like send, regist, unregist, receive, close.
        /* Closing the connection and implicit free of the channel structures. */
        UA_StatusCode (*close)(UA_PubSubChannel *channel);
    
+       UA_StatusCode (*closeSubscriber)(UA_PubSubChannel *channel);
+       UA_StatusCode (*closePublisher)(UA_PubSubChannel *channel);
+       UA_StatusCode (*openSubscriber)(UA_PubSubChannel *channel);
+       UA_StatusCode (*openPublisher)(UA_PubSubChannel *channel);
+   
+       UA_StatusCode (*allocNetworkBuffer)(UA_PubSubChannel *channel, UA_ByteString *buf, size_t bufSize);
+       UA_StatusCode (*freeNetworkBuffer)(UA_PubSubChannel *channel, UA_ByteString *buf);
+   
        /* Giving the connection protocoll time to process inbound and outbound traffic. */
        UA_StatusCode (*yield)(UA_PubSubChannel *channel, UA_UInt16 timeout);
    };
@@ -83,9 +91,25 @@ information about the TransportLayer handling.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_PubSubTransportLayer {
        UA_String transportProfileUri;
-       UA_PubSubChannel *(*createPubSubChannel)(UA_PubSubConnectionConfig *connectionConfig);
+       void *connectionManager;
+       // UA_Server *server;
+       UA_PubSubChannel *(*createPubSubChannel)(struct UA_PubSubTransportLayer *tl, void *ctx);
+       UA_StatusCode (*createWriterGroupPubSubChannel)(UA_PubSubChannel** outChannel, struct UA_PubSubTransportLayer *tl, const UA_ExtensionObject *writerGroupTransportSettings, void *ctx);
    } UA_PubSubTransportLayer;
+   
+   
+   typedef struct {
+       void *connection;
+       UA_NetworkAddressUrlDataType *connectionAddress;
+       UA_PubSubConnectionConfig *connectionConfig;
+       UA_NetworkAddressUrlDataType  *writerGroupAddress;
+       UA_Server *server;
+       UA_Logger *logger;
+       UA_StatusCode (*decodeAndProcessNetworkMessage)(UA_Server *server,
+                                                       void *connection,
+                                                       UA_ByteString *buffer);
+   } UA_TransportLayerContext;
    
    #endif /* UA_ENABLE_PUBSUB */
