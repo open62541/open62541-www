@@ -241,13 +241,13 @@ Add a new PubSub connection to the given server and open it.
 
 .. code-block:: c
 
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addPubSubConnection(UA_Server *server,
                                  const UA_PubSubConnectionConfig *connectionConfig,
                                  UA_NodeId *connectionIdentifier);
    
    /* Returns a deep copy of the config */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_getPubSubConnectionConfig(UA_Server *server,
                                        const UA_NodeId connection,
                                        UA_PubSubConnectionConfig *config);
@@ -321,18 +321,18 @@ functions to add new fields.
        UA_ConfigurationVersionDataType configurationVersion;
    } UA_AddPublishedDataSetResult;
    
-   UA_AddPublishedDataSetResult
+   UA_AddPublishedDataSetResult UA_THREADSAFE
    UA_Server_addPublishedDataSet(UA_Server *server,
                                  const UA_PublishedDataSetConfig *publishedDataSetConfig,
                                  UA_NodeId *pdsIdentifier);
    
    /* Returns a deep copy of the config */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_getPublishedDataSetConfig(UA_Server *server, const UA_NodeId pds,
                                        UA_PublishedDataSetConfig *config);
    
    /* Returns a deep copy of the DataSetMetaData for an specific PDS */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_getPublishedDataSetMetaData(UA_Server *server, const UA_NodeId pds,
                                          UA_DataSetMetaDataType *metaData);
    
@@ -400,7 +400,7 @@ handling process.
                              UA_NodeId *fieldIdentifier);
    
    /* Returns a deep copy of the config */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_getDataSetFieldConfig(UA_Server *server, const UA_NodeId dsf,
                                    UA_DataSetFieldConfig *config);
    
@@ -521,13 +521,13 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    UA_WriterGroupConfig_clear(UA_WriterGroupConfig *writerGroupConfig);
    
    /* Add a new WriterGroup to an existing Connection */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addWriterGroup(UA_Server *server, const UA_NodeId connection,
                             const UA_WriterGroupConfig *writerGroupConfig,
                             UA_NodeId *writerGroupIdentifier);
    
    /* Returns a deep copy of the config */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_getWriterGroupConfig(UA_Server *server, const UA_NodeId writerGroup,
                                   UA_WriterGroupConfig *config);
    
@@ -536,7 +536,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
                                      const UA_WriterGroupConfig *config);
    
    /* Get state of WriterGroup */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_WriterGroup_getState(UA_Server *server, UA_NodeId writerGroupIdentifier,
                                   UA_PubSubState *state);
    
@@ -550,10 +550,10 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    UA_StatusCode UA_THREADSAFE
    UA_Server_removeWriterGroup(UA_Server *server, const UA_NodeId writerGroup);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_freezeWriterGroupConfiguration(UA_Server *server, const UA_NodeId writerGroup);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_unfreezeWriterGroupConfiguration(UA_Server *server, const UA_NodeId writerGroup);
    
    UA_StatusCode UA_THREADSAFE
@@ -564,7 +564,7 @@ WARNING! For hard real time requirements the underlying system must be rt-capabl
    
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
    /* Set the group key for the message encryption */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setWriterGroupEncryptionKeys(UA_Server *server, const UA_NodeId writerGroup,
                                           UA_UInt32 securityTokenId,
                                           const UA_ByteString signingKey,
@@ -612,14 +612,14 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
                               UA_NodeId *writerIdentifier);
    
    /* Returns a deep copy of the config */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_getDataSetWriterConfig(UA_Server *server, const UA_NodeId dsw,
                                     UA_DataSetWriterConfig *config);
    
    /* Get state of DataSetWriter */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_DataSetWriter_getState(UA_Server *server, UA_NodeId dataSetWriterIdentifier,
-                                  UA_PubSubState *state);
+                                    UA_PubSubState *state);
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_removeDataSetWriter(UA_Server *server, const UA_NodeId dsw);
@@ -678,7 +678,7 @@ Subscriber AddressSpace.
    } UA_TargetVariables;
    
    /* Return Status Code after creating TargetVariables in Subscriber AddressSpace */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_DataSetReader_createTargetVariables(UA_Server *server,
                                                  UA_NodeId dataSetReaderIdentifier,
                                                  size_t targetVariablesSize,
@@ -730,18 +730,18 @@ SubscribedDataSet and be contained within a ReaderGroup.
    } UA_DataSetReaderConfig;
    
    /* Update configuration to the dataSetReader */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_DataSetReader_updateConfig(UA_Server *server, UA_NodeId dataSetReaderIdentifier,
                                         UA_NodeId readerGroupIdentifier,
                                         const UA_DataSetReaderConfig *config);
    
    /* Get configuration of the dataSetReader */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_DataSetReader_getConfig(UA_Server *server, UA_NodeId dataSetReaderIdentifier,
                                      UA_DataSetReaderConfig *config);
    
    /* Get state of DataSetReader */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_DataSetReader_getState(UA_Server *server, UA_NodeId dataSetReaderIdentifier,
                                     UA_PubSubState *state);
    
@@ -759,13 +759,13 @@ SubscribedDataSet and be contained within a ReaderGroup.
    void
    UA_StandaloneSubscribedDataSetConfig_clear(UA_StandaloneSubscribedDataSetConfig *sdsConfig);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addStandaloneSubscribedDataSet(UA_Server *server,
                                   const UA_StandaloneSubscribedDataSetConfig *subscribedDataSetConfig,
                                   UA_NodeId *sdsIdentifier);
    
    /* Remove StandaloneSubscribedDataSet, identified by the NodeId. */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removeStandaloneSubscribedDataSet(UA_Server *server, const UA_NodeId sds);
    
 ReaderGroup
@@ -816,13 +816,13 @@ can be configured for a ReaderGroup.
    UA_ReaderGroupConfig_clear(UA_ReaderGroupConfig *readerGroupConfig);
    
    /* Add DataSetReader to the ReaderGroup */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addDataSetReader(UA_Server *server, UA_NodeId readerGroupIdentifier,
                               const UA_DataSetReaderConfig *dataSetReaderConfig,
                               UA_NodeId *readerIdentifier);
    
    /* Remove DataSetReader from ReaderGroup */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_removeDataSetReader(UA_Server *server, UA_NodeId readerIdentifier);
    
    /* To Do: Update Configuration of ReaderGroup
@@ -832,17 +832,17 @@ can be configured for a ReaderGroup.
     */
    
    /* Get configuraiton of ReaderGroup */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_ReaderGroup_getConfig(UA_Server *server, UA_NodeId readerGroupIdentifier,
                                    UA_ReaderGroupConfig *config);
    
    /* Get state of ReaderGroup */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_ReaderGroup_getState(UA_Server *server, UA_NodeId readerGroupIdentifier,
                                   UA_PubSubState *state);
    
    /* Add ReaderGroup to the created connection */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_addReaderGroup(UA_Server *server, UA_NodeId connectionIdentifier,
                             const UA_ReaderGroupConfig *readerGroupConfig,
                             UA_NodeId *readerGroupIdentifier);
@@ -851,21 +851,21 @@ can be configured for a ReaderGroup.
    UA_StatusCode UA_THREADSAFE
    UA_Server_removeReaderGroup(UA_Server *server, UA_NodeId groupIdentifier);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_freezeReaderGroupConfiguration(UA_Server *server, const UA_NodeId readerGroupId);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_unfreezeReaderGroupConfiguration(UA_Server *server, const UA_NodeId readerGroupId);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setReaderGroupOperational(UA_Server *server, const UA_NodeId readerGroupId);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setReaderGroupDisabled(UA_Server *server, const UA_NodeId readerGroupId);
    
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
    /* Set the group key for the message encryption */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Server_setReaderGroupEncryptionKeys(UA_Server *server, UA_NodeId readerGroup,
                                           UA_UInt32 securityTokenId,
                                           UA_ByteString signingKey,
@@ -874,6 +874,7 @@ can be configured for a ReaderGroup.
    #endif
    
    #ifdef UA_ENABLE_PUBSUB_SKS
+   
 SecurityGroup
 -------------
 
