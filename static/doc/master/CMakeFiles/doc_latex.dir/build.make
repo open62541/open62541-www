@@ -104,15 +104,14 @@ doc/CMakeFiles/doc_latex: doc_src/pubsub_nodeset_rt_publisher.rst
 doc/CMakeFiles/doc_latex: doc_src/pubsub_nodeset_rt_subscriber.rst
 doc/CMakeFiles/doc_latex: doc_src/building.rst
 doc/CMakeFiles/doc_latex: doc_src/building_arch.rst
+doc/CMakeFiles/doc_latex: doc_src/core_concepts.rst
 doc/CMakeFiles/doc_latex: doc_src/generated.rst
 doc/CMakeFiles/doc_latex: doc_src/index.rst
-doc/CMakeFiles/doc_latex: doc_src/information_modelling.rst
 doc/CMakeFiles/doc_latex: doc_src/nodeset_compiler.rst
 doc/CMakeFiles/doc_latex: doc_src/nodeset_compiler_pump.png
 doc/CMakeFiles/doc_latex: doc_src/open62541.png
 doc/CMakeFiles/doc_latex: doc_src/open62541_html.png
 doc/CMakeFiles/doc_latex: doc_src/plugin.rst
-doc/CMakeFiles/doc_latex: doc_src/protocol.rst
 doc/CMakeFiles/doc_latex: doc_src/toc.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorials.rst
 doc/CMakeFiles/doc_latex: doc_src/ua-wireshark-pubsub.png
