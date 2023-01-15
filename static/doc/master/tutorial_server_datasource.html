@@ -130,10 +130,6 @@ new value arrives from the underlying process, we can just write into the
 variable.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_config_default.h&gt;</span>
-
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;signal.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
 
 <span class="k">static</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">updateCurrentTime</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -267,26 +263,15 @@ its own memory management.</p>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">sign</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
-
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
-<span class="w">    </span><span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span>
 
 <span class="w">    </span><span class="n">addCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 <span class="w">    </span><span class="n">addValueCallbackToCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 <span class="w">    </span><span class="n">addCurrentTimeDataSourceVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-
 <span class="w">    </span><span class="n">addCurrentTimeExternalDataSource</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>

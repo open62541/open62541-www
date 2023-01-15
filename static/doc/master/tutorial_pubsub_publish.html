@@ -125,9 +125,6 @@ the system preconfiguration and connection can be found in
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_ethernet.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_udp.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_config_default.h&gt;</span>
-
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;signal.h&gt;</span>
 
 <span class="n">UA_NodeId</span><span class="w"> </span><span class="n">connectionIdent</span><span class="p">,</span><span class="w"> </span><span class="n">publishedDataSetIdent</span><span class="p">,</span><span class="w"> </span><span class="n">writerGroupIdent</span><span class="p">;</span>
 
@@ -254,20 +251,10 @@ tutorial.</p>
 the the datagrams, take a look on the <code class="docutils literal notranslate"><span class="pre">ua_network_pubsub_networkmessage.c</span></code>
 which already contains the decoding code for UADP messages.</p>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">sign</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">transportProfile</span><span class="p">,</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">transportProfile</span><span class="p">,</span>
 <span class="w">               </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="o">*</span><span class="n">networkAddressUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
-
 <span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
 <span class="w">    </span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-<span class="w">    </span><span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Details about the connection configuration and handling are located in</span>
 <span class="cm">     * the pubsub connection tutorial */</span>
