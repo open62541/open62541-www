@@ -77,7 +77,6 @@ For more options, run ./bin/examples/pubsub_TSN_publisher -help
    #include <stdio.h>
    #include <stdlib.h>
    #include <linux/types.h>
-   #include <sys/io.h>
    #include <getopt.h>
    
    /* For thread operations */
