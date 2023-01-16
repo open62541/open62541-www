@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
@@ -67,10 +68,8 @@
 <li class="toctree-l2"><a class="reference internal" href="pubsub_nodeset_rt_subscriber.html">Subscriber Realtime example using custom nodes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
@@ -124,18 +123,12 @@ the system preconfiguration and connection can be found in
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_udp.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_config_default.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/types_generated.h&gt;</span>
-
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ua_pubsub.h&quot;</span>
 
 <span class="cp">#if defined (UA_ENABLE_PUBSUB_ETH_UADP)</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_ethernet.h&gt;</span>
 <span class="cp">#endif</span>
 
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;signal.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
 
 <span class="n">UA_NodeId</span><span class="w"> </span><span class="n">connectionIdentifier</span><span class="p">;</span>
 <span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerGroupIdentifier</span><span class="p">;</span>
@@ -360,21 +353,12 @@ and PublishedDataSetFields of Publisher</p>
 </pre></div>
 </div>
 <p>Followed by the main server code, making use of the above definitions</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">sign</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span><span class="w"> </span><span class="kt">int</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span>
 <span class="nf">run</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">transportProfile</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="o">*</span><span class="n">networkAddressUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
 <span class="w">    </span><span class="cm">/* Return value initialized to Status Good */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
 <span class="w">    </span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
-<span class="w">    </span><span class="n">UA_ServerConfig_setMinimal</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="mi">4801</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Add the PubSub network layer implementation to the server config.</span>
 <span class="cm">     * The TransportLayer is acting as factory to create new connections</span>

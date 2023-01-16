@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Client" href="client.html" />
-    <link rel="prev" title="Information Modelling" href="information_modelling.html" /> 
+    <link rel="prev" title="Services" href="services.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,12 +46,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#server-description">Server Description</a></li>
@@ -452,35 +451,65 @@ ModellingRule of their InstanceDeclaration</p>
 </section>
 <section id="server-lifecycle">
 <span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The method UA_Server_new is defined in server_config_default.h. So default</span>
-<span class="cm"> * plugins outside of the core library (for logging, etc) are already available</span>
-<span class="cm"> * during the initialization.</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Create a new server with a default configuration that adds plugins for</span>
+<span class="cm"> * networking, security, logging and so on. See `server_config_default.h` for</span>
+<span class="cm"> * more detailed options.</span>
 <span class="cm"> *</span>
-<span class="cm"> * UA_Server * UA_Server_new(void);</span>
-<span class="cm"> */</span>
+<span class="cm"> * The default configuration can be used as the starting point to adjust the</span>
+<span class="cm"> * server configuration to individual needs. UA_Server_new is implemented in the</span>
+<span class="cm"> * /plugins folder under the CC0 license. Furthermore the server confiugration</span>
+<span class="cm"> * only uses the public server API.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return Returns the configured server or NULL if an error occurs. */</span>
+<span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
 <span class="cm">/* Creates a new server. Moves the config into the server with a shallow copy.</span>
 <span class="cm"> * The config content is cleared together with the server. */</span>
 <span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Server_newWithConfig</span><span class="p">(</span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
+<span class="cm">/* Delete the server. */</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
+<span class="cm">/* Get the configuration. Always succeeds as this simplfy resolves a pointer.</span>
+<span class="cm"> * Attention! Do not adjust the configuration while the server is running! */</span>
 <span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Server_getConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
-<span class="cm">/* Runs the main loop of the server. In each iteration, this calls into the</span>
-<span class="cm"> * networklayers to see if messages have arrived.</span>
+<span class="cm">/* Runs the server until interrupted. On Unix/Windows this registers an</span>
+<span class="cm"> * interrupt for SIGINT (ctrl-c). The method only returns after having received</span>
+<span class="cm"> * the interrupt. The logical sequence is as follows:</span>
+<span class="cm"> *</span>
+<span class="cm"> * - UA_Server_run_startup</span>
+<span class="cm"> * - Loop until interrupt: UA_Server_run_iterate</span>
+<span class="cm"> * - UA_Server_run_shutdown</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
-<span class="cm"> * @param running The loop is run as long as *running is true.</span>
-<span class="cm"> *        Otherwise, the server shuts down.</span>
-<span class="cm"> * @return Returns the statuscode of the UA_Server_run_shutdown method */</span>
+<span class="cm"> * @return Returns a bad statuscode if an error occurred internally. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">running</span><span class="p">);</span>
 
+<span class="cm">/* Runs the server until interrupted. On Unix/Windows this registers an</span>
+<span class="cm"> * interrupt for SIGINT (ctrl-c). The method only returns after having received</span>
+<span class="cm"> * the interrupt or upon an error condition. The logical sequence is as follows:</span>
+<span class="cm"> *</span>
+<span class="cm"> * - Register the interrupt</span>
+<span class="cm"> * - UA_Server_run_startup</span>
+<span class="cm"> * - Loop until interrupt: UA_Server_run_iterate</span>
+<span class="cm"> * - UA_Server_run_shutdown</span>
+<span class="cm"> * - Deregister the interrupt</span>
+<span class="cm"> *</span>
+<span class="cm"> * Attention! This method is implemented individually for the different</span>
+<span class="cm"> * platforms (POSIX/Win32/etc.). The default implementation is in</span>
+<span class="cm"> * /plugins/ua_config_default.c under the CC0 license. Adjust as needed.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @return Returns a bad statuscode if an error occurred internally. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
 <span class="cm">/* The prologue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run) */</span>
+<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt) */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run_startup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
@@ -489,14 +518,14 @@ ModellingRule of their InstanceDeclaration</p>
 <span class="cm"> * @param server The server object.</span>
 <span class="cm"> * @param waitInternal Should we wait for messages in the networklayer?</span>
 <span class="cm"> *        Otherwise, the timouts for the networklayers are set to zero.</span>
-<span class="cm"> *        The default max wait time is 50millisec.</span>
+<span class="cm"> *        The default max wait time is 200ms.</span>
 <span class="cm"> * @return Returns how long we can wait until the next scheduled</span>
 <span class="cm"> *         callback (in ms) */</span>
 <span class="n">UA_UInt16</span>
 <span class="nf">UA_Server_run_iterate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">waitInternal</span><span class="p">);</span>
 
 <span class="cm">/* The epilogue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run) */</span>
+<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt) */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
@@ -1997,7 +2026,7 @@ open.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="information_modelling.html" class="btn btn-neutral float-left" title="Information Modelling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="services.html" class="btn btn-neutral float-left" title="Services" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="client.html" class="btn btn-neutral float-right" title="Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

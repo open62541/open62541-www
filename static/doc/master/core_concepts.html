@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Information Modelling &mdash; open62541 1.3.3-undefined documentation</title>
+  <title>Core Concepts of OPC UA &mdash; open62541 1.3.3-undefined documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Server" href="server.html" />
-    <link rel="prev" title="Services" href="services.html" /> 
+    <link rel="next" title="Building open62541" href="building.html" />
+    <link rel="prev" title="Introduction" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,27 +46,33 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Concepts of OPC UA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#protocol">Protocol</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#structure-of-a-protocol-message">Structure of a protocol message</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#information-modelling">Information Modelling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data-type">Data Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#valuerank">ValueRank</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#array-dimensions">Array Dimensions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objecttypenode">ObjectTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methodnode">MethodNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Information Modelling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#data-type">Data Type</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#valuerank">ValueRank</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#array-dimensions">Array Dimensions</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#objecttypenode">ObjectTypeNode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#methodnode">MethodNode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#viewnode">ViewNode</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
@@ -90,9 +96,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="toc.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Information Modelling</li>
+      <li class="breadcrumb-item active">Core Concepts of OPC UA</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/information_modelling.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/core_concepts.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -100,19 +106,163 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="information-modelling">
-<span id="id1"></span><h1>Information Modelling<a class="headerlink" href="#information-modelling" title="Permalink to this heading">¶</a></h1>
+  <section id="core-concepts-of-opc-ua">
+<span id="introduction"></span><h1>Core Concepts of OPC UA<a class="headerlink" href="#core-concepts-of-opc-ua" title="Permalink to this heading">¶</a></h1>
+<p>In one sentence, OPC UA (ISO 62541) defines a framework for object-oriented
+information models (typically representing a physical device) that live in an
+OPC UA server and a protocol with which a client can interact with the
+information model over the network (read and write variables, call methods,
+instantiate and delete objects, subscribe to change notifications, and so on).</p>
+<p>This Section introduces the core concepts of OPC UA. For the full specification
+see the OPC UA standard at <a class="reference external" href="https://reference.opcfoundation.org/">https://reference.opcfoundation.org/</a>.</p>
+<section id="protocol">
+<span id="id1"></span><h2>Protocol<a class="headerlink" href="#protocol" title="Permalink to this heading">¶</a></h2>
+<p>We focus on the TCP-based binary protocol since it is by far the most common
+transport layer for OPC UA. The general concepts also translate to HTTP and
+SOAP-based communication defined in the standard. Communication in OPC UA is
+best understood by starting with the following key principles:</p>
+<dl class="simple">
+<dt>Request / Response</dt><dd><p>All communication is based on the Request/Response pattern. Only clients can
+send a request to a server. And servers can only send responses to a matching
+request. Often the server is hosted close to a (physical) device, such as a
+sensor or a machine tool.</p>
+</dd>
+<dt>Asynchronous Responses</dt><dd><p>A server does not have to immediately respond to requests and responses may be
+sent in a different order. This keeps the server responsive when it takes time
+until a specific request has been processed (e.g. a method call or when
+reading from a sensor with delay). Subscriptions (push-notifications) are
+implemented via special requests where the response is delayed until a
+notification is published.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><em>OPC UA PubSub</em> (Part 14 of the standard) is an extension for the integration
+of many-to-many communication with OPC UA. PubSub does not use the
+client-server protocol. Rather, OPC UA PubSub integrates with either existing
+broker-based protocols such as MQTT, UDP-multicast or Ethernet-based
+communication. Typically an OPC UA server (accessed via the client-server
+protocol) is used to configured PubSub communication.</p>
+<p>Note that the client-server protocol also supports Subscriptions for
+one-to-one communication and does not depend on PubSub for this feature.</p>
+</div>
+<p>A client-server connection for the OPC UA binary protocol consists of three
+nested levels: The stateful TCP connection, a SecureChannel and the Session. For
+full details, see Part 6 of the OPC UA standard.</p>
+<dl>
+<dt>TCP Connection</dt><dd><p>The TCP connection is opened to the corresponding hostname and port with an
+initial handshake of HEL/ACK messages. The handshake establishes the basic
+settings of the connection, such as the maximum message length. The <em>Reverse
+Connect</em> extension of OPC UA allows the server to initiate the underlying TCP
+connection.</p>
+</dd>
+<dt>SecureChannel</dt><dd><p>SecureChannels are created on top of the raw TCP connection. A SecureChannel
+is established with an <em>OpenSecureChannel</em> request and response message pair.
+<strong>Attention!</strong> Even though a SecureChannel is mandatory, encryption might
+still be disabled. The <em>SecurityMode</em> of a SecureChannel can be either
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">Sign</span></code>, or <code class="docutils literal notranslate"><span class="pre">SignAndEncrypt</span></code>. As of version 0.2 of open62541,
+message signing and encryption is still under ongoing development.</p>
+<p>With message signing or encryption enabled, the <em>OpenSecureChannel</em> messages
+are encrypted using an asymmetric encryption algorithm (public-key
+cryptography) <a class="footnote-reference brackets" href="#key-mgmnt" id="id2">1</a>. As part of the <em>OpenSecureChannel</em> messages,
+client and server establish a common secret over an initially unsecure
+channel. For subsequent messages, the common secret is used for symmetric
+encryption, which has the advantage of being much faster.</p>
+<p>Different <em>SecurityPolicies</em> – defined in part 7 of the OPC UA standard –
+specify the algorithms for asymmetric and symmetric encryption, encryption key
+lengths, hash functions for message signing, and so on. Example
+SecurityPolicies are <code class="docutils literal notranslate"><span class="pre">None</span></code> for transmission of cleartext and
+<code class="docutils literal notranslate"><span class="pre">Basic256Sha256</span></code> which mandates a variant of RSA with SHA256 certificate
+hashing for asymmetric encryption and AES256 for symmetric encryption.</p>
+<p>The possible SecurityPolicies of a server are described with a list of
+<em>Endpoints</em>. An endpoint jointly defines the SecurityMode, SecurityPolicy and
+means for authenticating a session (discussed in the next section) in order to
+connect to a certain server. The <em>GetEndpoints</em> service returns a list of
+available endpoints. This service can usually be invoked without a session and
+from an unencrypted SecureChannel. This allows clients to first discover
+available endpoints and then use an appropriate SecurityPolicy that might be
+required to open a session.</p>
+</dd>
+<dt>Session</dt><dd><p>Sessions are created on top of a SecureChannel. This ensures that users may
+authenticate without sending their credentials, such as username and password,
+in cleartext. Currently defined authentication mechanisms are anonymous login,
+username/password, Kerberos and x509 certificates. The latter requires that
+the request message is accompanied by a signature to prove that the sender is
+in possession of the private key with which the certificate was created.</p>
+<p>There are two message exchanges required to establish a session:
+<em>CreateSession</em> and <em>ActicateSession</em>. The ActivateSession service can be used
+to switch an existing session to a different SecureChannel. This is important,
+for example when the connection broke down and the existing session is
+reused with a new SecureChannel.</p>
+</dd>
+</dl>
+<dl class="footnote brackets">
+<dt class="label" id="key-mgmnt"><span class="brackets"><a class="fn-backref" href="#id2">1</a></span></dt>
+<dd><p>This entails that the client and server exchange so-called
+public keys. The public keys might come with a certificate from a key-signing
+authority or be verified against an external key repository. But we will not
+discuss certificate management in detail in this section.</p>
+</dd>
+</dl>
+<section id="structure-of-a-protocol-message">
+<h3>Structure of a protocol message<a class="headerlink" href="#structure-of-a-protocol-message" title="Permalink to this heading">¶</a></h3>
+<p>Consider the example OPC UA binary conversation in Figure
+<a class="reference internal" href="#ua-wireshark"><span class="std std-numref">Fig. 1</span></a>, recorded and displayed with <a class="reference external" href="https://www.wireshark.org/">Wireshark</a>.</p>
+<figure class="align-default" id="id9" style="width: 100%">
+<span id="ua-wireshark"></span><img alt="OPC UA conversation in Wireshark" src="_images/ua-wireshark.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">OPC UA conversation displayed in Wireshark</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>The top part of the Wireshark window shows the messages from the conversation in
+order. The green line contains the applied filter. Here, we want to see the OPC
+UA protocol messages only. The first messages (from TCP packets 49 to 56) show
+the client opening an unencrypted SecureChannel and retrieving the server’s
+endpoints. Then, starting with packet 63, a new connection and SecureChannel are
+created in conformance with one of the endpoints. On top of this SecureChannel,
+the client can then create and activate a session. The following <em>ReadRequest</em>
+message is selected and covered in more detail in the bottom windows.</p>
+<p>The bottom left window shows the structure of the selected <em>ReadRequest</em>
+message. The purpose of the message is invoking the <em>Read</em> <a class="reference internal" href="services.html#services"><span class="std std-ref">service</span></a>. The message is structured into a header and a message body. Note
+that we do not consider encryption or signing of messages here.</p>
+<dl class="simple">
+<dt>Message Header</dt><dd><p>As stated before, OPC UA defines an asynchronous protocol. So responses may be
+out of order. The message header contains some basic information, such as the
+length of the message, as well as necessary information to relate messages to
+a SecureChannel and each request to the corresponding response. “Chunking”
+refers to the splitting and reassembling of messages that are longer than the
+maximum network packet size.</p>
+</dd>
+<dt>Message Body</dt><dd><p>Every OPC UA <a class="reference internal" href="services.html#services"><span class="std std-ref">service</span></a> has a signature in the form of a
+request and response data structure. These are defined according to the OPC UA
+protocol <a class="reference internal" href="types.html#types"><span class="std std-ref">type system</span></a>. See especially the <a class="reference internal" href="types.html#generated-types"><span class="std std-ref">auto-generated
+type definitions</span></a> for the data types corresponding to service
+requests and responses. The message body begins with the identifier of the
+following data type. Then, the main payload of the message follows.</p>
+</dd>
+</dl>
+<p>The bottom right window shows the binary payload of the selected <em>ReadRequest</em>
+message. The message header is highlighted in light-grey. The message body in
+blue highlighting shows the encoded <em>ReadRequest</em> data structure.</p>
+</section>
+</section>
+<section id="information-modelling">
+<span id="id3"></span><h2>Information Modelling<a class="headerlink" href="#information-modelling" title="Permalink to this heading">¶</a></h2>
 <p>Information modelling in OPC UA combines concepts from object-orientation and
 semantic modelling. At the core, an OPC UA information model is a graph
-consisting of</p>
-<ul class="simple">
-<li><p>Nodes: From eight possible NodeClasses (Variable, VariableType, Object,
-ObjectType, ReferenceType, DataType, Method, View)</p></li>
-<li><p>References between Nodes: Typed and directed relations between two nodes</p></li>
-</ul>
+consisting of Nodes and References between them.</p>
+<dl class="simple">
+<dt>Nodes</dt><dd><p>There are eight possible NodeClasses for Nodes (Variable, VariableType,
+Object, ObjectType, ReferenceType, DataType, Method, View). The NodeClass
+defines the attributes a Node can have.</p>
+</dd>
+<dt>References</dt><dd><p>References are links between Nodes. References are typed (refer to a
+ReferenceType) and directed.</p>
+</dd>
+</dl>
 <p>The original source for the following information is Part 3 of the OPC UA
 specification (<a class="reference external" href="https://reference.opcfoundation.org/Core/Part3/">https://reference.opcfoundation.org/Core/Part3/</a>).</p>
-<p>Every Node is identified by a unique (within the server) <a class="reference internal" href="types.html#nodeid"><span class="std std-ref">NodeId</span></a> and
+<p>Each Node is identified by a unique (within the server) <a class="reference internal" href="types.html#nodeid"><span class="std std-ref">NodeId</span></a> and
 carries different attributes depending on the NodeClass. These attributes can be
 read (and sometimes also written) via the OPC UA protocol. The protocol further
 allows the creation and deletion of Nodes and References at runtime. But this is
@@ -128,8 +278,8 @@ for more details on possible references and their semantics.</p>
 attributes are mandatory (<code class="docutils literal notranslate"><span class="pre">M</span></code>), optional (<code class="docutils literal notranslate"><span class="pre">O</span></code>) or not defined for each
 NodeClass. In open62541 all optional attributes are defined - with sensible
 defaults if users do not change them.</p>
-<table class="docutils align-default" id="id9" style="width: 100%">
-<caption><span class="caption-number">Table 1 </span><span class="caption-text">Node attributes for the different NodeClasses</span><a class="headerlink" href="#id9" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id10" style="width: 100%">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Node attributes for the different NodeClasses</span><a class="headerlink" href="#id10" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 18%" />
 <col style="width: 20%" />
@@ -423,7 +573,7 @@ In particular, see the sections on <a class="reference internal" href="common.ht
 <p>New attributes in the standard that are still unsupported in open62541 are
 RolePermissions, UserRolePermissions, AccessRestrictions and AccessLevelEx.</p>
 <section id="variablenode">
-<h2>VariableNode<a class="headerlink" href="#variablenode" title="Permalink to this heading">¶</a></h2>
+<h3>VariableNode<a class="headerlink" href="#variablenode" title="Permalink to this heading">¶</a></h3>
 <p>Variables store values in a <a class="reference internal" href="types.html#datavalue"><span class="std std-ref">DataValue</span></a> together with
 metadata for introspection. Most notably, the attributes data type, value
 rank and array dimensions constrain the possible values the variable can take
@@ -436,7 +586,7 @@ also datavariables (<code class="docutils literal notranslate"><span class="pre"
 constraining the possible data type, value rank and array dimensions
 attributes.</p>
 <section id="data-type">
-<h3>Data Type<a class="headerlink" href="#data-type" title="Permalink to this heading">¶</a></h3>
+<h4>Data Type<a class="headerlink" href="#data-type" title="Permalink to this heading">¶</a></h4>
 <p>The (scalar) data type of the variable is constrained to be of a specific
 type or one of its children in the type hierarchy. The data type is given as
 a NodeId pointing to a <a class="reference internal" href="#datatypenode"><span class="std std-ref">DataTypeNode</span></a> in the type hierarchy. See the
@@ -450,7 +600,7 @@ of the value attribute may still be <code class="docutils literal notranslate"><
 <a class="reference internal" href="#variabletypenode"><span class="std std-ref">VariableTypeNode</span></a> is ensured.</p>
 </section>
 <section id="valuerank">
-<h3>ValueRank<a class="headerlink" href="#valuerank" title="Permalink to this heading">¶</a></h3>
+<h4>ValueRank<a class="headerlink" href="#valuerank" title="Permalink to this heading">¶</a></h4>
 <p>This attribute indicates whether the value attribute of the variable is an
 array and how many dimensions the array has. It may have the following
 values:</p>
@@ -466,7 +616,7 @@ values:</p>
 <a class="reference internal" href="#variabletypenode"><span class="std std-ref">VariableTypeNode</span></a> is tested within the server.</p>
 </section>
 <section id="array-dimensions">
-<h3>Array Dimensions<a class="headerlink" href="#array-dimensions" title="Permalink to this heading">¶</a></h3>
+<h4>Array Dimensions<a class="headerlink" href="#array-dimensions" title="Permalink to this heading">¶</a></h4>
 <p>If the value rank permits the value to be a (multi-dimensional) array, the
 exact length in each dimensions can be further constrained with this
 attribute.</p>
@@ -485,7 +635,7 @@ dimensions.</p>
 </section>
 </section>
 <section id="variabletypenode">
-<span id="id2"></span><h2>VariableTypeNode<a class="headerlink" href="#variabletypenode" title="Permalink to this heading">¶</a></h2>
+<span id="id4"></span><h3>VariableTypeNode<a class="headerlink" href="#variabletypenode" title="Permalink to this heading">¶</a></h3>
 <p>VariableTypes are used to provide type definitions for variables.
 VariableTypes constrain the data type, value rank and array dimensions
 attributes of variable instances. Furthermore, instantiating from a specific
@@ -494,19 +644,19 @@ variable type may provide semantic information. For example, an instance from
 instantiated from <code class="docutils literal notranslate"><span class="pre">BaseDataVariable</span></code>.</p>
 </section>
 <section id="objectnode">
-<h2>ObjectNode<a class="headerlink" href="#objectnode" title="Permalink to this heading">¶</a></h2>
+<h3>ObjectNode<a class="headerlink" href="#objectnode" title="Permalink to this heading">¶</a></h3>
 <p>Objects are used to represent systems, system components, real-world objects
 and software objects. Objects are instances of an <a class="reference internal" href="#objecttypenode"><span class="std std-ref">object type</span></a>
 and may contain variables, methods and further objects.</p>
 </section>
 <section id="objecttypenode">
-<span id="id3"></span><h2>ObjectTypeNode<a class="headerlink" href="#objecttypenode" title="Permalink to this heading">¶</a></h2>
+<span id="id5"></span><h3>ObjectTypeNode<a class="headerlink" href="#objecttypenode" title="Permalink to this heading">¶</a></h3>
 <p>ObjectTypes provide definitions for Objects. Abstract objects cannot be
 instantiated. See <a class="reference internal" href="plugin_nodestore.html#node-lifecycle"><span class="std std-ref">Node Lifecycle: Constructors, Destructors and Node Contexts</span></a> for the use of constructor and
-destructor callbacks. <a href="#id4"><span class="problematic" id="id5">*</span></a>/</p>
+destructor callbacks.</p>
 </section>
 <section id="referencetypenode">
-<span id="id6"></span><h2>ReferenceTypeNode<a class="headerlink" href="#referencetypenode" title="Permalink to this heading">¶</a></h2>
+<span id="id6"></span><h3>ReferenceTypeNode<a class="headerlink" href="#referencetypenode" title="Permalink to this heading">¶</a></h3>
 <p>Each reference between two nodes is typed with a ReferenceType that gives
 meaning to the relation. The OPC UA standard defines a set of ReferenceTypes
 as a mandatory part of OPC UA information models.</p>
@@ -519,7 +669,7 @@ source and target node</p></li>
 <p>The figure below shows the hierarchy of the standard ReferenceTypes (arrows
 indicate a <code class="docutils literal notranslate"><span class="pre">hasSubType</span></code> relation). Refer to Part 3 of the OPC UA
 specification for the full semantics of each ReferenceType.</p>
-<div class="graphviz"><img src="_images/graphviz-51cbde6bac9c2adf2931af79330a14e0a389bc9a.png" alt="digraph tree {
+<div class="graphviz"><img src="_images/graphviz-5639351174b70f03ad8af4be8fda3f706bb801e9.png" alt="digraph tree {
 
 node [height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
 
@@ -600,7 +750,7 @@ layout of a (physical) system represented in an OPC UA information model
 based on a common understanding of just two custom reference types.</p>
 </section>
 <section id="datatypenode">
-<span id="id7"></span><h2>DataTypeNode<a class="headerlink" href="#datatypenode" title="Permalink to this heading">¶</a></h2>
+<span id="id7"></span><h3>DataTypeNode<a class="headerlink" href="#datatypenode" title="Permalink to this heading">¶</a></h3>
 <p>DataTypes represent simple and structured data types. DataTypes may contain
 arrays. But they always describe the structure of a single instance. In
 open62541, DataTypeNodes in the information model hierarchy are matched to
@@ -610,7 +760,7 @@ They are used to constrain values to possible child DataTypes (e.g.
 <code class="docutils literal notranslate"><span class="pre">UInt32</span></code>).</p>
 </section>
 <section id="methodnode">
-<span id="id8"></span><h2>MethodNode<a class="headerlink" href="#methodnode" title="Permalink to this heading">¶</a></h2>
+<span id="id8"></span><h3>MethodNode<a class="headerlink" href="#methodnode" title="Permalink to this heading">¶</a></h3>
 <p>Methods define callable functions and are invoked using the <a class="reference internal" href="services.html#method-services"><span class="std std-ref">Call</span></a>
 service. MethodNodes may have special properties (variable
 children with a <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code> reference) with the <a class="reference internal" href="types.html#qualifiedname"><span class="std std-ref">QualifiedName</span></a> <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">&quot;InputArguments&quot;)</span></code>
@@ -623,7 +773,7 @@ object types). For this, the NodeId of the method <em>and of the object
 providing context</em> is part of a Call request message.</p>
 </section>
 <section id="viewnode">
-<h2>ViewNode<a class="headerlink" href="#viewnode" title="Permalink to this heading">¶</a></h2>
+<h3>ViewNode<a class="headerlink" href="#viewnode" title="Permalink to this heading">¶</a></h3>
 <p>Each View defines a subset of the Nodes in the AddressSpace. Views can be
 used when browsing an information model to focus on a subset of nodes and
 references only. ViewNodes can be created and be interacted with. But their
@@ -631,13 +781,14 @@ use in the <a class="reference internal" href="services.html#view-services"><spa
 open62541.</p>
 </section>
 </section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="services.html" class="btn btn-neutral float-left" title="Services" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="server.html" class="btn btn-neutral float-right" title="Server" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="building.html" class="btn btn-neutral float-right" title="Building open62541" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
