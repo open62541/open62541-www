@@ -301,12 +301,15 @@ correctness of casting from ``UA_Node`` to a specific node type.
                                   * if the target is remote. */
    } UA_ReferenceTarget;
    
-   typedef struct {
+   typedef struct UA_ReferenceTargetTreeElem {
        UA_ReferenceTarget target;   /* Has to be the first entry */
        UA_UInt32 targetIdHash;      /* Hash of the targetId */
-       struct aa_entry idTreeEntry; /* Binary-Tree for fast lookup */
-       struct aa_entry nameTreeEntry;
+       ZIP_ENTRY(UA_ReferenceTargetTreeElem) idTreeEntry;
+       ZIP_ENTRY(UA_ReferenceTargetTreeElem) nameTreeEntry;
    } UA_ReferenceTargetTreeElem;
+   
+   typedef ZIP_HEAD(UA_ReferenceIdTree, UA_ReferenceTargetTreeElem) UA_ReferenceIdTree;
+   typedef ZIP_HEAD(UA_ReferenceNameTree, UA_ReferenceTargetTreeElem) UA_ReferenceNameTree;
    
    /* List of reference targets with the same reference type and direction. Uses
     * either an array or a tree structure. The SDK will not change the type of
@@ -323,8 +326,8 @@ correctness of casting from ``UA_Node`` to a specific node type.
    
            /* Organize the references in a tree for fast lookup */
            struct {
-               struct aa_entry *idTreeRoot;   /* Fast lookup based on the target id */
-               struct aa_entry *nameTreeRoot; /* Fast lookup based on the target browseName*/
+               UA_ReferenceIdTree idTree;     /* Fast lookup based on the target id */
+               UA_ReferenceNameTree nameTree; /* Fast lookup based on the target browseName*/
            } tree;
        } targets;
        size_t targetsSize;
@@ -333,17 +336,18 @@ correctness of casting from ``UA_Node`` to a specific node type.
        UA_Boolean isInverse;
    } UA_NodeReferenceKind;
    
-   /* Iterate over the references. Assumes that "prev" points to a
-    * NodeReferenceKind. If prev == NULL, the first element is returned. At the end
-    * of the iteration, NULL is returned.
-    *
-    * Do not continue the iteration after the rk was modified. */
-   const UA_ReferenceTarget *
-   UA_NodeReferenceKind_iterate(const UA_NodeReferenceKind *rk,
-                                const UA_ReferenceTarget *prev);
+   /* Iterate over the references. Aborts when the first callback return a non-NULL
+    * pointer and returns that pointer. Do not modify the reference targets during
+    * the iteration. */
+   typedef void *
+   (*UA_NodeReferenceKind_iterateCallback)(void *context, UA_ReferenceTarget *target);
    
-   /* Returns the entry for the targetId or NULL if not found. This can be much
-    * faster than _iterate if the references are in the tree-structure. */
+   void *
+   UA_NodeReferenceKind_iterate(UA_NodeReferenceKind *rk,
+                                UA_NodeReferenceKind_iterateCallback callback,
+                                void *context);
+   
+   /* Returns the entry for the targetId or NULL if not found */
    const UA_ReferenceTarget *
    UA_NodeReferenceKind_findTarget(const UA_NodeReferenceKind *rk,
                                    const UA_ExpandedNodeId *targetId);

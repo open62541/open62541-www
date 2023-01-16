@@ -44,12 +44,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
@@ -107,9 +106,9 @@ C99 standard, there are many more supported architectures.</p>
 <p>In CMake, select freertosLWIP using the variable UA_ARCHITECTURE, enable amalgamation using the UA_ENABLE_AMALGAMATION variable and just select the native compilers. Then try to compile as always. The compilation will fail, but the open62541.h and open62541.c will be generated.</p>
 <p>NOTE: If you are using the memory allocation functions from freeRTOS (pvPortMalloc and family) you will need also to set the variable UA_ARCH_FREERTOS_USE_OWN_MEMORY_FUNCTIONS to true. Many users had to implement pvPortCalloc and pvPortRealloc.</p>
 <p>If using the terminal, the command should look like this</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir build_freeRTOS
-<span class="nb">cd</span> build_freeRTOS
-cmake -DUA_ARCHITECTURE<span class="o">=</span>freertosLWIP -DUA_ENABLE_AMALGAMATION<span class="o">=</span>ON ../
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build_freeRTOS
+<span class="nb">cd</span><span class="w"> </span>build_freeRTOS
+cmake<span class="w"> </span>-DUA_ARCHITECTURE<span class="o">=</span>freertosLWIP<span class="w"> </span>-DUA_ENABLE_AMALGAMATION<span class="o">=</span>ON<span class="w"> </span>../
 make
 </pre></div>
 </div>
@@ -135,66 +134,66 @@ There is no standard way of doing the following across all IDEs, but you need to
 </div>
 <p>Most problems when running the OPC UA server in freeRTOS + LwIP come from the fact that is usually deployed in embedded systems with a limited amount of memory, so these definitions will allow checking if there was a memory problem (will save a lot of effort looking for hidden problems).</p>
 <p>Now, you need to add the task that will start the OPC UA server.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">opcua_thread</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">){</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">opcua_thread</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">){</span>
 
 <span class="w">        </span><span class="c1">//The default 64KB of memory for sending and receicing buffer caused problems to many users. With the code below, they are reduced to ~16KB</span>
 <span class="w">        </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">sendBufferSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16000</span><span class="p">;</span><span class="w">       </span><span class="c1">//64 KB was too much for my platform</span>
 <span class="w">        </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">recvBufferSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16000</span><span class="p">;</span><span class="w">       </span><span class="c1">//64 KB was too much for my platform</span>
-<span class="w">        </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">portNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4840</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">portNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4840</span><span class="p">;</span>
 
-<span class="w">        </span><span class="n">UA_Server</span><span class="o">*</span><span class="w"> </span><span class="n">mUaServer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">uaServerConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_ServerConfig_setMinimal</span><span class="p">(</span><span class="n">uaServerConfig</span><span class="p">,</span><span class="w"> </span><span class="n">portNumber</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">sendBufferSize</span><span class="p">,</span><span class="w"> </span><span class="n">recvBufferSize</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">UA_Server</span><span class="o">*</span><span class="w"> </span><span class="n">mUaServer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
+<span class="w">        </span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">uaServerConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_ServerConfig_setMinimal</span><span class="p">(</span><span class="n">uaServerConfig</span><span class="p">,</span><span class="w"> </span><span class="n">portNumber</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">sendBufferSize</span><span class="p">,</span><span class="w"> </span><span class="n">recvBufferSize</span><span class="p">);</span>
 
 <span class="w">        </span><span class="c1">//VERY IMPORTANT: Set the hostname with your IP before starting the server</span>
-<span class="w">        </span><span class="n">UA_ServerConfig_setCustomHostname</span><span class="p">(</span><span class="n">uaServerConfig</span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;192.168.0.102&quot;</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="n">UA_ServerConfig_setCustomHostname</span><span class="p">(</span><span class="n">uaServerConfig</span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;192.168.0.102&quot;</span><span class="p">));</span>
 
 <span class="w">        </span><span class="c1">//The rest is the same as the example</span>
 
-<span class="w">        </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 
 <span class="w">        </span><span class="c1">// add a variable node to the adresspace</span>
-<span class="w">        </span><span class="n">UA_VariableAttributes</span><span class="w"> </span><span class="n">attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_VariableAttributes_default</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">myInteger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">myInteger</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span><span class="w"></span>
-<span class="w">        </span><span class="n">attr</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span><span class="s">&quot;the answer&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">attr</span><span class="p">.</span><span class="n">displayName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span><span class="s">&quot;the answer&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">myIntegerNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;the.answer&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">myIntegerName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;the answer&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentReferenceNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">,</span><span class="w"> </span><span class="n">myIntegerNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                                                </span><span class="n">parentReferenceNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">myIntegerName</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                                                </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">UA_VariableAttributes</span><span class="w"> </span><span class="n">attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">myInteger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">.</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">myInteger</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">]);</span>
+<span class="w">        </span><span class="n">attr</span><span class="p">.</span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span><span class="s">&quot;the answer&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">attr</span><span class="p">.</span><span class="n">displayName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="s">&quot;en-US&quot;</span><span class="p">,</span><span class="s">&quot;the answer&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">myIntegerNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;the.answer&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">myIntegerName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;the answer&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentReferenceNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NS0ID_ORGANIZES</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">,</span><span class="w"> </span><span class="n">myIntegerNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">                                                                </span><span class="n">parentReferenceNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">myIntegerName</span><span class="p">,</span>
+<span class="w">                                                                </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
 
-<span class="w">        </span><span class="cm">/* allocations on the heap need to be freed */</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_VariableAttributes_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_NodeId_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myIntegerNodeId</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_QualifiedName_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myIntegerName</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* allocations on the heap need to be freed */</span>
+<span class="w">        </span><span class="n">UA_VariableAttributes_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_NodeId_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myIntegerNodeId</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_QualifiedName_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">myIntegerName</span><span class="p">);</span>
 
-<span class="w">        </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_run</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">running</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_run</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">mUaServer</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>In your main function, after you initialize the TCP IP stack and all the hardware, you need to add the task:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">//8000 is the stack size and 8 is priority. This values might need to be changed according to your project</span>
-<span class="k">if</span><span class="p">(</span><span class="nb">NULL</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">sys_thread_new</span><span class="p">(</span><span class="s">&quot;opcua_thread&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">opcua_thread</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">8000</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">))</span><span class="w"></span>
-<span class="w">        </span><span class="n">LWIP_ASSERT</span><span class="p">(</span><span class="s">&quot;opcua(): Task creation failed.&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="p">(</span><span class="nb">NULL</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">sys_thread_new</span><span class="p">(</span><span class="s">&quot;opcua_thread&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">opcua_thread</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">8000</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">))</span>
+<span class="w">        </span><span class="n">LWIP_ASSERT</span><span class="p">(</span><span class="s">&quot;opcua(): Task creation failed.&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>And lastly, in the same file (or any actually) add:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">vApplicationMallocFailedHook</span><span class="p">(){</span><span class="w"></span>
-<span class="w">        </span><span class="k">for</span><span class="p">(;;){</span><span class="w"></span>
-<span class="w">                </span><span class="n">vTaskDelay</span><span class="p">(</span><span class="n">pdMS_TO_TICKS</span><span class="p">(</span><span class="mi">1000</span><span class="p">));</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">vApplicationMallocFailedHook</span><span class="p">(){</span>
+<span class="w">        </span><span class="k">for</span><span class="p">(;;){</span>
+<span class="w">                </span><span class="n">vTaskDelay</span><span class="p">(</span><span class="n">pdMS_TO_TICKS</span><span class="p">(</span><span class="mi">1000</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"> </span><span class="nf">vApplicationStackOverflowHook</span><span class="p">(</span><span class="w"> </span><span class="n">TaskHandle_t</span><span class="w"> </span><span class="n">xTask</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pcTaskName</span><span class="w"> </span><span class="p">){</span><span class="w"></span>
-<span class="w">        </span><span class="k">for</span><span class="p">(;;){</span><span class="w"></span>
-<span class="w">                </span><span class="n">vTaskDelay</span><span class="p">(</span><span class="n">pdMS_TO_TICKS</span><span class="p">(</span><span class="mi">1000</span><span class="p">));</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">vApplicationStackOverflowHook</span><span class="p">(</span><span class="w"> </span><span class="n">TaskHandle_t</span><span class="w"> </span><span class="n">xTask</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pcTaskName</span><span class="w"> </span><span class="p">){</span>
+<span class="w">        </span><span class="k">for</span><span class="p">(;;){</span>
+<span class="w">                </span><span class="n">vTaskDelay</span><span class="p">(</span><span class="n">pdMS_TO_TICKS</span><span class="p">(</span><span class="mi">1000</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>And put a breakpoint in each of the vTaskDelay. These functions are called when there’s a problem in the heap or the stack. If the program gets here, you have a memory problem.</p>

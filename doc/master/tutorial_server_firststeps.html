@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
@@ -71,10 +72,8 @@
 <li class="toctree-l2"><a class="reference internal" href="pubsub_nodeset_rt_subscriber.html">Subscriber Realtime example using custom nodes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
@@ -122,50 +121,32 @@ examine the information model of any OPC UA server.</p>
 <a class="reference external" href="http://open62541.org">http://open62541.org</a> or generate it according to the <a class="reference internal" href="building.html#building"><span class="std std-ref">build instructions</span></a> with the “amalgamation” option enabled. From now on, we assume
 you have the <code class="docutils literal notranslate"><span class="pre">open62541.c/.h</span></code> files in the current folder. Now create a new
 C source-file called <code class="docutils literal notranslate"><span class="pre">myServer.c</span></code> with the following content:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_config_default.h&gt;</span><span class="cp"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
-
-<span class="k">static</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">sig</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span><span class="w"></span>
-
-<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span><span class="w"></span>
-
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">running</span><span class="p">);</span><span class="w"></span>
-
-<span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This is all that is needed for a simple OPC UA server. With the GCC compiler,
 the following command produces an executable:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myServer.c -o myServer
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>gcc<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>myServer.c<span class="w"> </span>-lopen62541<span class="w"> </span>-o<span class="w"> </span>myServer
 </pre></div>
 </div>
 <p>In a MinGW environment, the Winsock library must be added.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ gcc -std<span class="o">=</span>c99 open62541.c myServer.c -lws2_32 -o myServer.exe
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>gcc<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>myServer.c<span class="w"> </span>-lopen62541<span class="w"> </span>-lws2_32<span class="w"> </span>-o<span class="w"> </span>myServer.exe
 </pre></div>
 </div>
 <p>Now start the server (stop with ctrl-c):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ./myServer
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./myServer
 </pre></div>
 </div>
 <p>You have now compiled and run your first OPC UA server. You can go ahead and
 browse the information model with client. The server is listening on
-<code class="docutils literal notranslate"><span class="pre">opc.tcp://localhost:4840</span></code>. In the next two sections, we will continue to
-explain the different parts of the code in detail.</p>
+<code class="docutils literal notranslate"><span class="pre">opc.tcp://localhost:4840</span></code>.</p>
 <section id="server-configuration-and-plugins">
 <h2>Server Configuration and Plugins<a class="headerlink" href="#server-configuration-and-plugins" title="Permalink to this heading">¶</a></h2>
 <p><em>open62541</em> provides a flexible framework for building OPC UA servers and
@@ -185,22 +166,13 @@ add a single TCP network layer that is listerning on port 4840.</p>
 <p>The code in this example shows the three parts for server lifecycle
 management: Creating a server, running the server, and deleting the server.
 Creating and deleting a server is trivial once the configuration is set up.
-The server is started with <code class="docutils literal notranslate"><span class="pre">UA_Server_run</span></code>. Internally, the server then
-uses timeouts to schedule regular tasks. Between the timeouts, the server
-listens on the network layer for incoming messages.</p>
-<p>You might ask how the server knows when to stop running. For this, we have
-created a global variable <code class="docutils literal notranslate"><span class="pre">running</span></code>. Furthermore, we have registered the
-method <code class="docutils literal notranslate"><span class="pre">stopHandler</span></code> that catches the signal (interrupt) the program
-receives when the operating systems tries to close it. This happens for
-example when you press ctrl-c in a terminal program. The signal handler then
-sets the variable <code class="docutils literal notranslate"><span class="pre">running</span></code> to false and the server shuts down once it
-takes back control.</p>
+The server is started with <code class="docutils literal notranslate"><span class="pre">UA_Server_run</span></code>. Internally, the server
+schedules regular tasks. Between the timeouts, the server listens on the
+network layer for incoming messages.</p>
 <p>In order to integrate OPC UA in a single-threaded application with its own
 mainloop (for example provided by a GUI toolkit), one can alternatively drive
 the server manually. See the section of the server documentation on
 <a class="reference internal" href="server.html#server-lifecycle"><span class="std std-ref">Server Lifecycle</span></a> for details.</p>
-<p>The server configuration and lifecycle management is needed for all servers.
-We will use it in the following tutorials without further comment.</p>
 </section>
 </section>
 

@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
@@ -67,10 +68,8 @@
 <li class="toctree-l2"><a class="reference internal" href="pubsub_nodeset_rt_subscriber.html">Subscriber Realtime example using custom nodes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
-<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
@@ -117,55 +116,41 @@ queue are regularly sent to the client.</p>
 <p>The local user can add MonitoredItems as well. Locally, the MonitoredItems do
 not go via a Subscription and each have an individual callback method and a
 context pointer.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/client_subscriptions.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_config_default.h&gt;</span><span class="cp"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/client_subscriptions.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">dataChangeNotificationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">,</span>
+<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeId</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Received Notification&quot;</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="nf">dataChangeNotificationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeId</span><span class="p">,</span><span class="w"></span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Received Notification&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="nf">addMonitoredItemToCurrentTimeVariable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">currentTimeNodeId</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NS0ID_SERVER_SERVERSTATUS_CURRENTTIME</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_MonitoredItemCreateRequest</span><span class="w"> </span><span class="n">monRequest</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">        </span><span class="n">UA_MonitoredItemCreateRequest_default</span><span class="p">(</span><span class="n">currentTimeNodeId</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">monRequest</span><span class="p">.</span><span class="n">requestedParameters</span><span class="p">.</span><span class="n">samplingInterval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">100.0</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 100 ms interval */</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_Server_createDataChangeMonitoredItem</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TIMESTAMPSTORETURN_SOURCE</span><span class="p">,</span><span class="w"></span>
-<span class="w">                                            </span><span class="n">monRequest</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">dataChangeNotificationCallback</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">addMonitoredItemToCurrentTimeVariable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">currentTimeNodeId</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NS0ID_SERVER_SERVERSTATUS_CURRENTTIME</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_MonitoredItemCreateRequest</span><span class="w"> </span><span class="n">monRequest</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">UA_MonitoredItemCreateRequest_default</span><span class="p">(</span><span class="n">currentTimeNodeId</span><span class="p">);</span>
+<span class="w">    </span><span class="n">monRequest</span><span class="p">.</span><span class="n">requestedParameters</span><span class="p">.</span><span class="n">samplingInterval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">100.0</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 100 ms interval */</span>
+<span class="w">    </span><span class="n">UA_Server_createDataChangeMonitoredItem</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TIMESTAMPSTORETURN_SOURCE</span><span class="p">,</span>
+<span class="w">                                            </span><span class="n">monRequest</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">dataChangeNotificationCallback</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>It follows the main server code, making use of the above definitions.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">sign</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
 
-<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">addMonitoredItemToCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_ServerConfig_setDefault</span><span class="p">(</span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">addMonitoredItemToCurrentTimeVariable</span><span class="p">(</span><span class="n">server</span><span class="p">);</span><span class="w"></span>
-
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">running</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span><span class="w"></span>
-
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>

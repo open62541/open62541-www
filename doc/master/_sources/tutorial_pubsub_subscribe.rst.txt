@@ -29,18 +29,12 @@ the system preconfiguration and connection can be found in
    #include <open62541/plugin/log_stdout.h>
    #include <open62541/plugin/pubsub_udp.h>
    #include <open62541/server.h>
-   #include <open62541/server_config_default.h>
-   #include <open62541/types_generated.h>
-   
-   #include "ua_pubsub.h"
    
    #if defined (UA_ENABLE_PUBSUB_ETH_UADP)
    #include <open62541/plugin/pubsub_ethernet.h>
    #endif
    
    #include <stdio.h>
-   #include <signal.h>
-   #include <stdlib.h>
    
    UA_NodeId connectionIdentifier;
    UA_NodeId readerGroupIdentifier;
@@ -282,21 +276,13 @@ Followed by the main server code, making use of the above definitions
 
 .. code-block:: c
 
-   UA_Boolean running = true;
-   static void stopHandler(int sign) {
-       UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "received ctrl-c");
-       running = false;
-   }
    
    static int
    run(UA_String *transportProfile, UA_NetworkAddressUrlDataType *networkAddressUrl) {
-       signal(SIGINT, stopHandler);
-       signal(SIGTERM, stopHandler);
        /* Return value initialized to Status Good */
        UA_StatusCode retval = UA_STATUSCODE_GOOD;
        UA_Server *server = UA_Server_new();
        UA_ServerConfig *config = UA_Server_getConfig(server);
-       UA_ServerConfig_setMinimal(config, 4801, NULL);
    
        /* Add the PubSub network layer implementation to the server config.
         * The TransportLayer is acting as factory to create new connections
