@@ -37,4 +37,6 @@ The lifecycle of the plugin is attached to a server or client config. The
    
        /* Delete the certificate verification context */
        void (*clear)(UA_CertificateVerification *cv);
+   
+       const UA_Logger *logger;
    };
