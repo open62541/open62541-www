@@ -166,6 +166,32 @@ Advanced Client Configuration
        size_t sessionLocaleIdsSize;
    } UA_ClientConfig;
    
+@brief It makes a partial deep copy of the clientconfig. It makes a shallow
+copies of the plugins (logger, eventloop, securitypolicy).
+
+NOTE: It makes a shallow copy of all the plugins from source to destination.
+Therefore calling _clear on the dst object will also delete the plugins in src
+object.
+
+.. code-block:: c
+
+   UA_StatusCode
+   UA_ClientConfig_copy(UA_ClientConfig const *src, UA_ClientConfig *dst);
+   
+@brief It cleans the client config and frees the pointer.
+
+.. code-block:: c
+
+   void
+   UA_ClientConfig_delete(UA_ClientConfig *config);
+   
+@brief It cleans the client config and deletes the plugins, whereas
+_copy makes a shallow copy of the plugins.
+
+.. code-block:: c
+
+   void
+   UA_ClientConfig_clear(UA_ClientConfig *config);
 Client Lifecycle
 ----------------
 

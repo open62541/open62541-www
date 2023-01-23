@@ -992,6 +992,45 @@ associated with the SecurityGroup from the server.</p>
 &#64;return UA_StatusCode The returned status code.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removeSecurityGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">securityGroup</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>&#64;brief This is a repeated callback which is triggered on each iteration of SKS Pull request.
+The server uses this callback to notify user about the status of current Pull request iteration.
+The period is calculated based on the KeylifeTime of specified in the SecurityGroup object node on
+the SKS server.</p>
+<p>&#64;param server The server instance managing the publisher/subscriber.
+&#64;param sksPullRequestStatus The current status of sks pull request.
+&#64;param context The pointer to user defined data passed to this callback.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_Server_sksPullRequestCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">sksPullRequestStatus</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">context</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>&#64;brief Sets the SKS client config used to call the GetSecurityKeys Method on SKS and get the
+initial set of keys for a SecurityGroupId and adds timedCallback for the next GetSecurityKeys
+method Call. This uses async Client API for SKS Pull request. The SKS Client instance is created and destroyed at
+runtime on each iteration of SKS Pull request by the server. The key Rollover mechanism will check if the new
+keys are needed then it will call the getSecurityKeys Method on SKS Server. At the end of SKS Pull request
+iteration, the sks client will be deleted by a delayed callback (in next server iteration).</p>
+<p>&#64;note It is be called before setting Reader/Writer Group into Operational because this also allocates
+a channel context for the pubsub security policy.</p>
+<p>&#64;note the stateCallback of sksClientConfig will be overwritten by an internal callback.</p>
+<p>&#64;param server the server instance
+&#64;param clientConfig holds the required configuration to make encrypted connection with
+SKS Server. The input client config takes the lifecycle as long as SKS request are made.
+It is deleted with its plugins when the server is deleted or the last Reader/Writer
+Group of the securityGroupId is deleted. The input config is copied to an internal
+config object and the content of input config object will be reset to zero.
+&#64;param endpointUrl holds the endpointUrl of the SKS server
+&#64;param securityGroupId the SecurityGroupId of the securityGroup on SKS and
+reader/writergroups
+&#64;param callback the user defined callback to notify the user about the status of SKS
+Pull request.
+&#64;param context passed to the callback function
+&#64;return UA_StatusCode the retuned status</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setSksClient</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">clientConfig</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">UA_Server_sksPullRequestCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_SKS */</span>
 
