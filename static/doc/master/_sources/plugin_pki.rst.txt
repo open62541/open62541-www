@@ -23,11 +23,11 @@ The lifecycle of the plugin is attached to a server or client config. The
        void *context;
    
        /* Verify the certificate against the configured policies and trust chain. */
-       UA_StatusCode (*verifyCertificate)(void *verificationContext,
+       UA_StatusCode (*verifyCertificate)(const UA_CertificateVerification *cv,
                                           const UA_ByteString *certificate);
    
        /* Verify that the certificate has the applicationURI in the subject name. */
-       UA_StatusCode (*verifyApplicationURI)(void *verificationContext,
+       UA_StatusCode (*verifyApplicationURI)(const UA_CertificateVerification *cv,
                                              const UA_ByteString *certificate,
                                              const UA_String *applicationURI);
    
@@ -38,5 +38,8 @@ The lifecycle of the plugin is attached to a server or client config. The
        /* Delete the certificate verification context */
        void (*clear)(UA_CertificateVerification *cv);
    
-       const UA_Logger *logger;
+       /* Pointer to logging pointer in the server/client configuration.
+          If the logging pointer is changed outside of the plugin, the new
+          logger is used automatically*/
+       UA_Logger **logging;
    };
