@@ -451,6 +451,7 @@ The following methods are a shorthand for creating NodeIds.
                 UA_NODEID_NUMERIC(UA_UInt16 nsIndex,
                                   UA_UInt32 identifier), {
        UA_NodeId id;
+       memset(&id, 0, sizeof(UA_NodeId));
        id.namespaceIndex = nsIndex;
        id.identifierType = UA_NODEIDTYPE_NUMERIC;
        id.identifier.numeric = identifier;
@@ -460,6 +461,7 @@ The following methods are a shorthand for creating NodeIds.
    UA_INLINABLE(UA_NodeId
                 UA_NODEID_STRING(UA_UInt16 nsIndex, char *chars), {
        UA_NodeId id;
+       memset(&id, 0, sizeof(UA_NodeId));
        id.namespaceIndex = nsIndex;
        id.identifierType = UA_NODEIDTYPE_STRING;
        id.identifier.string = UA_STRING(chars);
@@ -470,6 +472,7 @@ The following methods are a shorthand for creating NodeIds.
                 UA_NODEID_STRING_ALLOC(UA_UInt16 nsIndex,
                                        const char *chars), {
        UA_NodeId id;
+       memset(&id, 0, sizeof(UA_NodeId));
        id.namespaceIndex = nsIndex;
        id.identifierType = UA_NODEIDTYPE_STRING;
        id.identifier.string = UA_STRING_ALLOC(chars);
@@ -479,6 +482,7 @@ The following methods are a shorthand for creating NodeIds.
    UA_INLINABLE(UA_NodeId
                 UA_NODEID_GUID(UA_UInt16 nsIndex, UA_Guid guid), {
        UA_NodeId id;
+       memset(&id, 0, sizeof(UA_NodeId));
        id.namespaceIndex = nsIndex;
        id.identifierType = UA_NODEIDTYPE_GUID;
        id.identifier.guid = guid;
@@ -488,6 +492,7 @@ The following methods are a shorthand for creating NodeIds.
    UA_INLINABLE(UA_NodeId
                 UA_NODEID_BYTESTRING(UA_UInt16 nsIndex, char *chars), {
        UA_NodeId id;
+       memset(&id, 0, sizeof(UA_NodeId));
        id.namespaceIndex = nsIndex;
        id.identifierType = UA_NODEIDTYPE_BYTESTRING;
        id.identifier.byteString = UA_BYTESTRING(chars);
@@ -498,6 +503,7 @@ The following methods are a shorthand for creating NodeIds.
                 UA_NODEID_BYTESTRING_ALLOC(UA_UInt16 nsIndex,
                                            const char *chars), {
        UA_NodeId id;
+       memset(&id, 0, sizeof(UA_NodeId));
        id.namespaceIndex = nsIndex;
        id.identifierType = UA_NODEIDTYPE_BYTESTRING;
        id.identifier.byteString = UA_BYTESTRING_ALLOC(chars);
