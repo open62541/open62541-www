@@ -11,5 +11,5 @@ title = "BasysKom"
 
 basysKom GmbH
 
-Web: https://www.basyskom.de/
+Web: https://www.basyskom.de/en/technologies/
 
