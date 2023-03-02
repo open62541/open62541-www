@@ -11,4 +11,4 @@ title = "BasysKom"
 
 basysKom GmbH
 
-Web: https://www.basyskom.de/en/technologies/
+Web: https://www.basyskom.de/en/technologies/#opc
