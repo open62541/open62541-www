@@ -4,7 +4,7 @@ binary encoding, ...).
 
 .. code-block:: c
 
-   #define UA_TYPES_COUNT 191
+   #define UA_TYPES_COUNT 192
    extern const UA_DataType UA_TYPES[UA_TYPES_COUNT];
    
 Boolean
@@ -182,6 +182,21 @@ DiagnosticInfo
 
    #define UA_TYPES_DIAGNOSTICINFO 24
    
+NamingRuleType
+^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef enum {
+       UA_NAMINGRULETYPE_MANDATORY = 1,
+       UA_NAMINGRULETYPE_OPTIONAL = 2,
+       UA_NAMINGRULETYPE_CONSTRAINT = 3,
+       __UA_NAMINGRULETYPE_FORCE32BIT = 0x7fffffff
+   } UA_NamingRuleType;
+   UA_STATIC_ASSERT(sizeof(UA_NamingRuleType) == sizeof(UA_Int32), enum_must_be_32bit);
+   
+   #define UA_TYPES_NAMINGRULETYPE 25
+   
 KeyValuePair
 ^^^^^^^^^^^^
 
@@ -192,7 +207,7 @@ KeyValuePair
        UA_Variant value;
    } UA_KeyValuePair;
    
-   #define UA_TYPES_KEYVALUEPAIR 25
+   #define UA_TYPES_KEYVALUEPAIR 26
    
 NodeClass
 ^^^^^^^^^
@@ -213,7 +228,7 @@ NodeClass
    } UA_NodeClass;
    UA_STATIC_ASSERT(sizeof(UA_NodeClass) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_NODECLASS 26
+   #define UA_TYPES_NODECLASS 27
    
 StructureType
 ^^^^^^^^^^^^^
@@ -230,7 +245,7 @@ StructureType
    } UA_StructureType;
    UA_STATIC_ASSERT(sizeof(UA_StructureType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_STRUCTURETYPE 27
+   #define UA_TYPES_STRUCTURETYPE 28
    
 StructureField
 ^^^^^^^^^^^^^^
@@ -248,7 +263,7 @@ StructureField
        UA_Boolean isOptional;
    } UA_StructureField;
    
-   #define UA_TYPES_STRUCTUREFIELD 28
+   #define UA_TYPES_STRUCTUREFIELD 29
    
 StructureDefinition
 ^^^^^^^^^^^^^^^^^^^
@@ -263,7 +278,7 @@ StructureDefinition
        UA_StructureField *fields;
    } UA_StructureDefinition;
    
-   #define UA_TYPES_STRUCTUREDEFINITION 29
+   #define UA_TYPES_STRUCTUREDEFINITION 30
    
 Argument
 ^^^^^^^^
@@ -279,7 +294,7 @@ Argument
        UA_LocalizedText description;
    } UA_Argument;
    
-   #define UA_TYPES_ARGUMENT 30
+   #define UA_TYPES_ARGUMENT 31
    
 EnumValueType
 ^^^^^^^^^^^^^
@@ -292,7 +307,7 @@ EnumValueType
        UA_LocalizedText description;
    } UA_EnumValueType;
    
-   #define UA_TYPES_ENUMVALUETYPE 31
+   #define UA_TYPES_ENUMVALUETYPE 32
    
 EnumField
 ^^^^^^^^^
@@ -306,7 +321,7 @@ EnumField
        UA_String name;
    } UA_EnumField;
    
-   #define UA_TYPES_ENUMFIELD 32
+   #define UA_TYPES_ENUMFIELD 33
    
 Duration
 ^^^^^^^^
@@ -315,7 +330,7 @@ Duration
 
    typedef UA_Double UA_Duration;
    
-   #define UA_TYPES_DURATION 33
+   #define UA_TYPES_DURATION 34
    
 UtcTime
 ^^^^^^^
@@ -324,7 +339,7 @@ UtcTime
 
    typedef UA_DateTime UA_UtcTime;
    
-   #define UA_TYPES_UTCTIME 34
+   #define UA_TYPES_UTCTIME 35
    
 LocaleId
 ^^^^^^^^
@@ -333,7 +348,7 @@ LocaleId
 
    typedef UA_String UA_LocaleId;
    
-   #define UA_TYPES_LOCALEID 35
+   #define UA_TYPES_LOCALEID 36
    
 TimeZoneDataType
 ^^^^^^^^^^^^^^^^
@@ -345,7 +360,7 @@ TimeZoneDataType
        UA_Boolean daylightSavingInOffset;
    } UA_TimeZoneDataType;
    
-   #define UA_TYPES_TIMEZONEDATATYPE 36
+   #define UA_TYPES_TIMEZONEDATATYPE 37
    
 ApplicationType
 ^^^^^^^^^^^^^^^
@@ -361,7 +376,7 @@ ApplicationType
    } UA_ApplicationType;
    UA_STATIC_ASSERT(sizeof(UA_ApplicationType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_APPLICATIONTYPE 37
+   #define UA_TYPES_APPLICATIONTYPE 38
    
 ApplicationDescription
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -379,7 +394,7 @@ ApplicationDescription
        UA_String *discoveryUrls;
    } UA_ApplicationDescription;
    
-   #define UA_TYPES_APPLICATIONDESCRIPTION 38
+   #define UA_TYPES_APPLICATIONDESCRIPTION 39
    
 RequestHeader
 ^^^^^^^^^^^^^
@@ -396,7 +411,7 @@ RequestHeader
        UA_ExtensionObject additionalHeader;
    } UA_RequestHeader;
    
-   #define UA_TYPES_REQUESTHEADER 39
+   #define UA_TYPES_REQUESTHEADER 40
    
 ResponseHeader
 ^^^^^^^^^^^^^^
@@ -413,7 +428,7 @@ ResponseHeader
        UA_ExtensionObject additionalHeader;
    } UA_ResponseHeader;
    
-   #define UA_TYPES_RESPONSEHEADER 40
+   #define UA_TYPES_RESPONSEHEADER 41
    
 ServiceFault
 ^^^^^^^^^^^^
@@ -424,7 +439,7 @@ ServiceFault
        UA_ResponseHeader responseHeader;
    } UA_ServiceFault;
    
-   #define UA_TYPES_SERVICEFAULT 41
+   #define UA_TYPES_SERVICEFAULT 42
    
 FindServersRequest
 ^^^^^^^^^^^^^^^^^^
@@ -440,7 +455,7 @@ FindServersRequest
        UA_String *serverUris;
    } UA_FindServersRequest;
    
-   #define UA_TYPES_FINDSERVERSREQUEST 42
+   #define UA_TYPES_FINDSERVERSREQUEST 43
    
 FindServersResponse
 ^^^^^^^^^^^^^^^^^^^
@@ -453,7 +468,7 @@ FindServersResponse
        UA_ApplicationDescription *servers;
    } UA_FindServersResponse;
    
-   #define UA_TYPES_FINDSERVERSRESPONSE 43
+   #define UA_TYPES_FINDSERVERSRESPONSE 44
    
 MessageSecurityMode
 ^^^^^^^^^^^^^^^^^^^
@@ -469,7 +484,7 @@ MessageSecurityMode
    } UA_MessageSecurityMode;
    UA_STATIC_ASSERT(sizeof(UA_MessageSecurityMode) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_MESSAGESECURITYMODE 44
+   #define UA_TYPES_MESSAGESECURITYMODE 45
    
 UserTokenType
 ^^^^^^^^^^^^^
@@ -485,7 +500,7 @@ UserTokenType
    } UA_UserTokenType;
    UA_STATIC_ASSERT(sizeof(UA_UserTokenType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_USERTOKENTYPE 45
+   #define UA_TYPES_USERTOKENTYPE 46
    
 UserTokenPolicy
 ^^^^^^^^^^^^^^^
@@ -500,7 +515,7 @@ UserTokenPolicy
        UA_String securityPolicyUri;
    } UA_UserTokenPolicy;
    
-   #define UA_TYPES_USERTOKENPOLICY 46
+   #define UA_TYPES_USERTOKENPOLICY 47
    
 EndpointDescription
 ^^^^^^^^^^^^^^^^^^^
@@ -519,7 +534,7 @@ EndpointDescription
        UA_Byte securityLevel;
    } UA_EndpointDescription;
    
-   #define UA_TYPES_ENDPOINTDESCRIPTION 47
+   #define UA_TYPES_ENDPOINTDESCRIPTION 48
    
 GetEndpointsRequest
 ^^^^^^^^^^^^^^^^^^^
@@ -535,7 +550,7 @@ GetEndpointsRequest
        UA_String *profileUris;
    } UA_GetEndpointsRequest;
    
-   #define UA_TYPES_GETENDPOINTSREQUEST 48
+   #define UA_TYPES_GETENDPOINTSREQUEST 49
    
 GetEndpointsResponse
 ^^^^^^^^^^^^^^^^^^^^
@@ -548,7 +563,7 @@ GetEndpointsResponse
        UA_EndpointDescription *endpoints;
    } UA_GetEndpointsResponse;
    
-   #define UA_TYPES_GETENDPOINTSRESPONSE 49
+   #define UA_TYPES_GETENDPOINTSRESPONSE 50
    
 SecurityTokenRequestType
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -562,7 +577,7 @@ SecurityTokenRequestType
    } UA_SecurityTokenRequestType;
    UA_STATIC_ASSERT(sizeof(UA_SecurityTokenRequestType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_SECURITYTOKENREQUESTTYPE 50
+   #define UA_TYPES_SECURITYTOKENREQUESTTYPE 51
    
 ChannelSecurityToken
 ^^^^^^^^^^^^^^^^^^^^
@@ -576,7 +591,7 @@ ChannelSecurityToken
        UA_UInt32 revisedLifetime;
    } UA_ChannelSecurityToken;
    
-   #define UA_TYPES_CHANNELSECURITYTOKEN 51
+   #define UA_TYPES_CHANNELSECURITYTOKEN 52
    
 OpenSecureChannelRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -592,7 +607,7 @@ OpenSecureChannelRequest
        UA_UInt32 requestedLifetime;
    } UA_OpenSecureChannelRequest;
    
-   #define UA_TYPES_OPENSECURECHANNELREQUEST 52
+   #define UA_TYPES_OPENSECURECHANNELREQUEST 53
    
 OpenSecureChannelResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -606,7 +621,7 @@ OpenSecureChannelResponse
        UA_ByteString serverNonce;
    } UA_OpenSecureChannelResponse;
    
-   #define UA_TYPES_OPENSECURECHANNELRESPONSE 53
+   #define UA_TYPES_OPENSECURECHANNELRESPONSE 54
    
 CloseSecureChannelRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -617,7 +632,7 @@ CloseSecureChannelRequest
        UA_RequestHeader requestHeader;
    } UA_CloseSecureChannelRequest;
    
-   #define UA_TYPES_CLOSESECURECHANNELREQUEST 54
+   #define UA_TYPES_CLOSESECURECHANNELREQUEST 55
    
 CloseSecureChannelResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -628,7 +643,7 @@ CloseSecureChannelResponse
        UA_ResponseHeader responseHeader;
    } UA_CloseSecureChannelResponse;
    
-   #define UA_TYPES_CLOSESECURECHANNELRESPONSE 55
+   #define UA_TYPES_CLOSESECURECHANNELRESPONSE 56
    
 SignedSoftwareCertificate
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -640,7 +655,7 @@ SignedSoftwareCertificate
        UA_ByteString signature;
    } UA_SignedSoftwareCertificate;
    
-   #define UA_TYPES_SIGNEDSOFTWARECERTIFICATE 56
+   #define UA_TYPES_SIGNEDSOFTWARECERTIFICATE 57
    
 SignatureData
 ^^^^^^^^^^^^^
@@ -652,7 +667,7 @@ SignatureData
        UA_ByteString signature;
    } UA_SignatureData;
    
-   #define UA_TYPES_SIGNATUREDATA 57
+   #define UA_TYPES_SIGNATUREDATA 58
    
 CreateSessionRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -671,7 +686,7 @@ CreateSessionRequest
        UA_UInt32 maxResponseMessageSize;
    } UA_CreateSessionRequest;
    
-   #define UA_TYPES_CREATESESSIONREQUEST 58
+   #define UA_TYPES_CREATESESSIONREQUEST 59
    
 CreateSessionResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -693,7 +708,7 @@ CreateSessionResponse
        UA_UInt32 maxRequestMessageSize;
    } UA_CreateSessionResponse;
    
-   #define UA_TYPES_CREATESESSIONRESPONSE 59
+   #define UA_TYPES_CREATESESSIONRESPONSE 60
    
 UserIdentityToken
 ^^^^^^^^^^^^^^^^^
@@ -704,7 +719,7 @@ UserIdentityToken
        UA_String policyId;
    } UA_UserIdentityToken;
    
-   #define UA_TYPES_USERIDENTITYTOKEN 60
+   #define UA_TYPES_USERIDENTITYTOKEN 61
    
 AnonymousIdentityToken
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -715,7 +730,7 @@ AnonymousIdentityToken
        UA_String policyId;
    } UA_AnonymousIdentityToken;
    
-   #define UA_TYPES_ANONYMOUSIDENTITYTOKEN 61
+   #define UA_TYPES_ANONYMOUSIDENTITYTOKEN 62
    
 UserNameIdentityToken
 ^^^^^^^^^^^^^^^^^^^^^
@@ -729,7 +744,7 @@ UserNameIdentityToken
        UA_String encryptionAlgorithm;
    } UA_UserNameIdentityToken;
    
-   #define UA_TYPES_USERNAMEIDENTITYTOKEN 62
+   #define UA_TYPES_USERNAMEIDENTITYTOKEN 63
    
 X509IdentityToken
 ^^^^^^^^^^^^^^^^^
@@ -741,7 +756,7 @@ X509IdentityToken
        UA_ByteString certificateData;
    } UA_X509IdentityToken;
    
-   #define UA_TYPES_X509IDENTITYTOKEN 63
+   #define UA_TYPES_X509IDENTITYTOKEN 64
    
 IssuedIdentityToken
 ^^^^^^^^^^^^^^^^^^^
@@ -754,7 +769,7 @@ IssuedIdentityToken
        UA_String encryptionAlgorithm;
    } UA_IssuedIdentityToken;
    
-   #define UA_TYPES_ISSUEDIDENTITYTOKEN 64
+   #define UA_TYPES_ISSUEDIDENTITYTOKEN 65
    
 ActivateSessionRequest
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -772,7 +787,7 @@ ActivateSessionRequest
        UA_SignatureData userTokenSignature;
    } UA_ActivateSessionRequest;
    
-   #define UA_TYPES_ACTIVATESESSIONREQUEST 65
+   #define UA_TYPES_ACTIVATESESSIONREQUEST 66
    
 ActivateSessionResponse
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -788,7 +803,7 @@ ActivateSessionResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_ActivateSessionResponse;
    
-   #define UA_TYPES_ACTIVATESESSIONRESPONSE 66
+   #define UA_TYPES_ACTIVATESESSIONRESPONSE 67
    
 CloseSessionRequest
 ^^^^^^^^^^^^^^^^^^^
@@ -800,7 +815,7 @@ CloseSessionRequest
        UA_Boolean deleteSubscriptions;
    } UA_CloseSessionRequest;
    
-   #define UA_TYPES_CLOSESESSIONREQUEST 67
+   #define UA_TYPES_CLOSESESSIONREQUEST 68
    
 CloseSessionResponse
 ^^^^^^^^^^^^^^^^^^^^
@@ -811,7 +826,7 @@ CloseSessionResponse
        UA_ResponseHeader responseHeader;
    } UA_CloseSessionResponse;
    
-   #define UA_TYPES_CLOSESESSIONRESPONSE 68
+   #define UA_TYPES_CLOSESESSIONRESPONSE 69
    
 NodeAttributesMask
 ^^^^^^^^^^^^^^^^^^
@@ -858,7 +873,7 @@ NodeAttributesMask
    } UA_NodeAttributesMask;
    UA_STATIC_ASSERT(sizeof(UA_NodeAttributesMask) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_NODEATTRIBUTESMASK 69
+   #define UA_TYPES_NODEATTRIBUTESMASK 70
    
 NodeAttributes
 ^^^^^^^^^^^^^^
@@ -873,7 +888,7 @@ NodeAttributes
        UA_UInt32 userWriteMask;
    } UA_NodeAttributes;
    
-   #define UA_TYPES_NODEATTRIBUTES 70
+   #define UA_TYPES_NODEATTRIBUTES 71
    
 ObjectAttributes
 ^^^^^^^^^^^^^^^^
@@ -889,7 +904,7 @@ ObjectAttributes
        UA_Byte eventNotifier;
    } UA_ObjectAttributes;
    
-   #define UA_TYPES_OBJECTATTRIBUTES 71
+   #define UA_TYPES_OBJECTATTRIBUTES 72
    
 VariableAttributes
 ^^^^^^^^^^^^^^^^^^
@@ -913,7 +928,7 @@ VariableAttributes
        UA_Boolean historizing;
    } UA_VariableAttributes;
    
-   #define UA_TYPES_VARIABLEATTRIBUTES 72
+   #define UA_TYPES_VARIABLEATTRIBUTES 73
    
 MethodAttributes
 ^^^^^^^^^^^^^^^^
@@ -930,7 +945,7 @@ MethodAttributes
        UA_Boolean userExecutable;
    } UA_MethodAttributes;
    
-   #define UA_TYPES_METHODATTRIBUTES 73
+   #define UA_TYPES_METHODATTRIBUTES 74
    
 ObjectTypeAttributes
 ^^^^^^^^^^^^^^^^^^^^
@@ -946,7 +961,7 @@ ObjectTypeAttributes
        UA_Boolean isAbstract;
    } UA_ObjectTypeAttributes;
    
-   #define UA_TYPES_OBJECTTYPEATTRIBUTES 74
+   #define UA_TYPES_OBJECTTYPEATTRIBUTES 75
    
 VariableTypeAttributes
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -967,7 +982,7 @@ VariableTypeAttributes
        UA_Boolean isAbstract;
    } UA_VariableTypeAttributes;
    
-   #define UA_TYPES_VARIABLETYPEATTRIBUTES 75
+   #define UA_TYPES_VARIABLETYPEATTRIBUTES 76
    
 ReferenceTypeAttributes
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -985,7 +1000,7 @@ ReferenceTypeAttributes
        UA_LocalizedText inverseName;
    } UA_ReferenceTypeAttributes;
    
-   #define UA_TYPES_REFERENCETYPEATTRIBUTES 76
+   #define UA_TYPES_REFERENCETYPEATTRIBUTES 77
    
 DataTypeAttributes
 ^^^^^^^^^^^^^^^^^^
@@ -1001,7 +1016,7 @@ DataTypeAttributes
        UA_Boolean isAbstract;
    } UA_DataTypeAttributes;
    
-   #define UA_TYPES_DATATYPEATTRIBUTES 77
+   #define UA_TYPES_DATATYPEATTRIBUTES 78
    
 ViewAttributes
 ^^^^^^^^^^^^^^
@@ -1018,7 +1033,7 @@ ViewAttributes
        UA_Byte eventNotifier;
    } UA_ViewAttributes;
    
-   #define UA_TYPES_VIEWATTRIBUTES 78
+   #define UA_TYPES_VIEWATTRIBUTES 79
    
 AddNodesItem
 ^^^^^^^^^^^^
@@ -1035,7 +1050,7 @@ AddNodesItem
        UA_ExpandedNodeId typeDefinition;
    } UA_AddNodesItem;
    
-   #define UA_TYPES_ADDNODESITEM 79
+   #define UA_TYPES_ADDNODESITEM 80
    
 AddNodesResult
 ^^^^^^^^^^^^^^
@@ -1047,7 +1062,7 @@ AddNodesResult
        UA_NodeId addedNodeId;
    } UA_AddNodesResult;
    
-   #define UA_TYPES_ADDNODESRESULT 80
+   #define UA_TYPES_ADDNODESRESULT 81
    
 AddNodesRequest
 ^^^^^^^^^^^^^^^
@@ -1060,7 +1075,7 @@ AddNodesRequest
        UA_AddNodesItem *nodesToAdd;
    } UA_AddNodesRequest;
    
-   #define UA_TYPES_ADDNODESREQUEST 81
+   #define UA_TYPES_ADDNODESREQUEST 82
    
 AddNodesResponse
 ^^^^^^^^^^^^^^^^
@@ -1075,7 +1090,7 @@ AddNodesResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_AddNodesResponse;
    
-   #define UA_TYPES_ADDNODESRESPONSE 82
+   #define UA_TYPES_ADDNODESRESPONSE 83
    
 AddReferencesItem
 ^^^^^^^^^^^^^^^^^
@@ -1091,7 +1106,7 @@ AddReferencesItem
        UA_NodeClass targetNodeClass;
    } UA_AddReferencesItem;
    
-   #define UA_TYPES_ADDREFERENCESITEM 83
+   #define UA_TYPES_ADDREFERENCESITEM 84
    
 AddReferencesRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -1104,7 +1119,7 @@ AddReferencesRequest
        UA_AddReferencesItem *referencesToAdd;
    } UA_AddReferencesRequest;
    
-   #define UA_TYPES_ADDREFERENCESREQUEST 84
+   #define UA_TYPES_ADDREFERENCESREQUEST 85
    
 AddReferencesResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1119,7 +1134,7 @@ AddReferencesResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_AddReferencesResponse;
    
-   #define UA_TYPES_ADDREFERENCESRESPONSE 85
+   #define UA_TYPES_ADDREFERENCESRESPONSE 86
    
 DeleteNodesItem
 ^^^^^^^^^^^^^^^
@@ -1131,7 +1146,7 @@ DeleteNodesItem
        UA_Boolean deleteTargetReferences;
    } UA_DeleteNodesItem;
    
-   #define UA_TYPES_DELETENODESITEM 86
+   #define UA_TYPES_DELETENODESITEM 87
    
 DeleteNodesRequest
 ^^^^^^^^^^^^^^^^^^
@@ -1144,7 +1159,7 @@ DeleteNodesRequest
        UA_DeleteNodesItem *nodesToDelete;
    } UA_DeleteNodesRequest;
    
-   #define UA_TYPES_DELETENODESREQUEST 87
+   #define UA_TYPES_DELETENODESREQUEST 88
    
 DeleteNodesResponse
 ^^^^^^^^^^^^^^^^^^^
@@ -1159,7 +1174,7 @@ DeleteNodesResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DeleteNodesResponse;
    
-   #define UA_TYPES_DELETENODESRESPONSE 88
+   #define UA_TYPES_DELETENODESRESPONSE 89
    
 DeleteReferencesItem
 ^^^^^^^^^^^^^^^^^^^^
@@ -1174,7 +1189,7 @@ DeleteReferencesItem
        UA_Boolean deleteBidirectional;
    } UA_DeleteReferencesItem;
    
-   #define UA_TYPES_DELETEREFERENCESITEM 89
+   #define UA_TYPES_DELETEREFERENCESITEM 90
    
 DeleteReferencesRequest
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1187,7 +1202,7 @@ DeleteReferencesRequest
        UA_DeleteReferencesItem *referencesToDelete;
    } UA_DeleteReferencesRequest;
    
-   #define UA_TYPES_DELETEREFERENCESREQUEST 90
+   #define UA_TYPES_DELETEREFERENCESREQUEST 91
    
 DeleteReferencesResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1202,7 +1217,7 @@ DeleteReferencesResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DeleteReferencesResponse;
    
-   #define UA_TYPES_DELETEREFERENCESRESPONSE 91
+   #define UA_TYPES_DELETEREFERENCESRESPONSE 92
    
 BrowseDirection
 ^^^^^^^^^^^^^^^
@@ -1218,7 +1233,7 @@ BrowseDirection
    } UA_BrowseDirection;
    UA_STATIC_ASSERT(sizeof(UA_BrowseDirection) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_BROWSEDIRECTION 92
+   #define UA_TYPES_BROWSEDIRECTION 93
    
 ViewDescription
 ^^^^^^^^^^^^^^^
@@ -1231,7 +1246,7 @@ ViewDescription
        UA_UInt32 viewVersion;
    } UA_ViewDescription;
    
-   #define UA_TYPES_VIEWDESCRIPTION 93
+   #define UA_TYPES_VIEWDESCRIPTION 94
    
 BrowseDescription
 ^^^^^^^^^^^^^^^^^
@@ -1247,7 +1262,7 @@ BrowseDescription
        UA_UInt32 resultMask;
    } UA_BrowseDescription;
    
-   #define UA_TYPES_BROWSEDESCRIPTION 94
+   #define UA_TYPES_BROWSEDESCRIPTION 95
    
 BrowseResultMask
 ^^^^^^^^^^^^^^^^
@@ -1269,7 +1284,7 @@ BrowseResultMask
    } UA_BrowseResultMask;
    UA_STATIC_ASSERT(sizeof(UA_BrowseResultMask) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_BROWSERESULTMASK 95
+   #define UA_TYPES_BROWSERESULTMASK 96
    
 ReferenceDescription
 ^^^^^^^^^^^^^^^^^^^^
@@ -1286,7 +1301,7 @@ ReferenceDescription
        UA_ExpandedNodeId typeDefinition;
    } UA_ReferenceDescription;
    
-   #define UA_TYPES_REFERENCEDESCRIPTION 96
+   #define UA_TYPES_REFERENCEDESCRIPTION 97
    
 BrowseResult
 ^^^^^^^^^^^^
@@ -1300,7 +1315,7 @@ BrowseResult
        UA_ReferenceDescription *references;
    } UA_BrowseResult;
    
-   #define UA_TYPES_BROWSERESULT 97
+   #define UA_TYPES_BROWSERESULT 98
    
 BrowseRequest
 ^^^^^^^^^^^^^
@@ -1315,7 +1330,7 @@ BrowseRequest
        UA_BrowseDescription *nodesToBrowse;
    } UA_BrowseRequest;
    
-   #define UA_TYPES_BROWSEREQUEST 98
+   #define UA_TYPES_BROWSEREQUEST 99
    
 BrowseResponse
 ^^^^^^^^^^^^^^
@@ -1330,7 +1345,7 @@ BrowseResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_BrowseResponse;
    
-   #define UA_TYPES_BROWSERESPONSE 99
+   #define UA_TYPES_BROWSERESPONSE 100
    
 BrowseNextRequest
 ^^^^^^^^^^^^^^^^^
@@ -1344,7 +1359,7 @@ BrowseNextRequest
        UA_ByteString *continuationPoints;
    } UA_BrowseNextRequest;
    
-   #define UA_TYPES_BROWSENEXTREQUEST 100
+   #define UA_TYPES_BROWSENEXTREQUEST 101
    
 BrowseNextResponse
 ^^^^^^^^^^^^^^^^^^
@@ -1359,7 +1374,7 @@ BrowseNextResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_BrowseNextResponse;
    
-   #define UA_TYPES_BROWSENEXTRESPONSE 101
+   #define UA_TYPES_BROWSENEXTRESPONSE 102
    
 RelativePathElement
 ^^^^^^^^^^^^^^^^^^^
@@ -1373,7 +1388,7 @@ RelativePathElement
        UA_QualifiedName targetName;
    } UA_RelativePathElement;
    
-   #define UA_TYPES_RELATIVEPATHELEMENT 102
+   #define UA_TYPES_RELATIVEPATHELEMENT 103
    
 RelativePath
 ^^^^^^^^^^^^
@@ -1385,7 +1400,7 @@ RelativePath
        UA_RelativePathElement *elements;
    } UA_RelativePath;
    
-   #define UA_TYPES_RELATIVEPATH 103
+   #define UA_TYPES_RELATIVEPATH 104
    
 BrowsePath
 ^^^^^^^^^^
@@ -1397,7 +1412,7 @@ BrowsePath
        UA_RelativePath relativePath;
    } UA_BrowsePath;
    
-   #define UA_TYPES_BROWSEPATH 104
+   #define UA_TYPES_BROWSEPATH 105
    
 BrowsePathTarget
 ^^^^^^^^^^^^^^^^
@@ -1409,7 +1424,7 @@ BrowsePathTarget
        UA_UInt32 remainingPathIndex;
    } UA_BrowsePathTarget;
    
-   #define UA_TYPES_BROWSEPATHTARGET 105
+   #define UA_TYPES_BROWSEPATHTARGET 106
    
 BrowsePathResult
 ^^^^^^^^^^^^^^^^
@@ -1422,7 +1437,7 @@ BrowsePathResult
        UA_BrowsePathTarget *targets;
    } UA_BrowsePathResult;
    
-   #define UA_TYPES_BROWSEPATHRESULT 106
+   #define UA_TYPES_BROWSEPATHRESULT 107
    
 TranslateBrowsePathsToNodeIdsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1435,7 +1450,7 @@ TranslateBrowsePathsToNodeIdsRequest
        UA_BrowsePath *browsePaths;
    } UA_TranslateBrowsePathsToNodeIdsRequest;
    
-   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST 107
+   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST 108
    
 TranslateBrowsePathsToNodeIdsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1450,7 +1465,7 @@ TranslateBrowsePathsToNodeIdsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_TranslateBrowsePathsToNodeIdsResponse;
    
-   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE 108
+   #define UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE 109
    
 RegisterNodesRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -1463,7 +1478,7 @@ RegisterNodesRequest
        UA_NodeId *nodesToRegister;
    } UA_RegisterNodesRequest;
    
-   #define UA_TYPES_REGISTERNODESREQUEST 109
+   #define UA_TYPES_REGISTERNODESREQUEST 110
    
 RegisterNodesResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1476,7 +1491,7 @@ RegisterNodesResponse
        UA_NodeId *registeredNodeIds;
    } UA_RegisterNodesResponse;
    
-   #define UA_TYPES_REGISTERNODESRESPONSE 110
+   #define UA_TYPES_REGISTERNODESRESPONSE 111
    
 UnregisterNodesRequest
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1489,7 +1504,7 @@ UnregisterNodesRequest
        UA_NodeId *nodesToUnregister;
    } UA_UnregisterNodesRequest;
    
-   #define UA_TYPES_UNREGISTERNODESREQUEST 111
+   #define UA_TYPES_UNREGISTERNODESREQUEST 112
    
 UnregisterNodesResponse
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1500,7 +1515,7 @@ UnregisterNodesResponse
        UA_ResponseHeader responseHeader;
    } UA_UnregisterNodesResponse;
    
-   #define UA_TYPES_UNREGISTERNODESRESPONSE 112
+   #define UA_TYPES_UNREGISTERNODESRESPONSE 113
    
 FilterOperator
 ^^^^^^^^^^^^^^
@@ -1530,7 +1545,7 @@ FilterOperator
    } UA_FilterOperator;
    UA_STATIC_ASSERT(sizeof(UA_FilterOperator) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_FILTEROPERATOR 113
+   #define UA_TYPES_FILTEROPERATOR 114
    
 ContentFilterElement
 ^^^^^^^^^^^^^^^^^^^^
@@ -1543,7 +1558,7 @@ ContentFilterElement
        UA_ExtensionObject *filterOperands;
    } UA_ContentFilterElement;
    
-   #define UA_TYPES_CONTENTFILTERELEMENT 114
+   #define UA_TYPES_CONTENTFILTERELEMENT 115
    
 ContentFilter
 ^^^^^^^^^^^^^
@@ -1555,7 +1570,7 @@ ContentFilter
        UA_ContentFilterElement *elements;
    } UA_ContentFilter;
    
-   #define UA_TYPES_CONTENTFILTER 115
+   #define UA_TYPES_CONTENTFILTER 116
    
 ElementOperand
 ^^^^^^^^^^^^^^
@@ -1566,7 +1581,7 @@ ElementOperand
        UA_UInt32 index;
    } UA_ElementOperand;
    
-   #define UA_TYPES_ELEMENTOPERAND 116
+   #define UA_TYPES_ELEMENTOPERAND 117
    
 LiteralOperand
 ^^^^^^^^^^^^^^
@@ -1577,7 +1592,7 @@ LiteralOperand
        UA_Variant value;
    } UA_LiteralOperand;
    
-   #define UA_TYPES_LITERALOPERAND 117
+   #define UA_TYPES_LITERALOPERAND 118
    
 AttributeOperand
 ^^^^^^^^^^^^^^^^
@@ -1592,7 +1607,7 @@ AttributeOperand
        UA_String indexRange;
    } UA_AttributeOperand;
    
-   #define UA_TYPES_ATTRIBUTEOPERAND 118
+   #define UA_TYPES_ATTRIBUTEOPERAND 119
    
 SimpleAttributeOperand
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1607,7 +1622,7 @@ SimpleAttributeOperand
        UA_String indexRange;
    } UA_SimpleAttributeOperand;
    
-   #define UA_TYPES_SIMPLEATTRIBUTEOPERAND 119
+   #define UA_TYPES_SIMPLEATTRIBUTEOPERAND 120
    
 ContentFilterElementResult
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1622,7 +1637,7 @@ ContentFilterElementResult
        UA_DiagnosticInfo *operandDiagnosticInfos;
    } UA_ContentFilterElementResult;
    
-   #define UA_TYPES_CONTENTFILTERELEMENTRESULT 120
+   #define UA_TYPES_CONTENTFILTERELEMENTRESULT 121
    
 ContentFilterResult
 ^^^^^^^^^^^^^^^^^^^
@@ -1636,7 +1651,7 @@ ContentFilterResult
        UA_DiagnosticInfo *elementDiagnosticInfos;
    } UA_ContentFilterResult;
    
-   #define UA_TYPES_CONTENTFILTERRESULT 121
+   #define UA_TYPES_CONTENTFILTERRESULT 122
    
 TimestampsToReturn
 ^^^^^^^^^^^^^^^^^^
@@ -1653,7 +1668,7 @@ TimestampsToReturn
    } UA_TimestampsToReturn;
    UA_STATIC_ASSERT(sizeof(UA_TimestampsToReturn) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_TIMESTAMPSTORETURN 122
+   #define UA_TYPES_TIMESTAMPSTORETURN 123
    
 ReadValueId
 ^^^^^^^^^^^
@@ -1667,7 +1682,7 @@ ReadValueId
        UA_QualifiedName dataEncoding;
    } UA_ReadValueId;
    
-   #define UA_TYPES_READVALUEID 123
+   #define UA_TYPES_READVALUEID 124
    
 ReadRequest
 ^^^^^^^^^^^
@@ -1682,7 +1697,7 @@ ReadRequest
        UA_ReadValueId *nodesToRead;
    } UA_ReadRequest;
    
-   #define UA_TYPES_READREQUEST 124
+   #define UA_TYPES_READREQUEST 125
    
 ReadResponse
 ^^^^^^^^^^^^
@@ -1697,7 +1712,7 @@ ReadResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_ReadResponse;
    
-   #define UA_TYPES_READRESPONSE 125
+   #define UA_TYPES_READRESPONSE 126
    
 WriteValue
 ^^^^^^^^^^
@@ -1711,7 +1726,7 @@ WriteValue
        UA_DataValue value;
    } UA_WriteValue;
    
-   #define UA_TYPES_WRITEVALUE 126
+   #define UA_TYPES_WRITEVALUE 127
    
 WriteRequest
 ^^^^^^^^^^^^
@@ -1724,7 +1739,7 @@ WriteRequest
        UA_WriteValue *nodesToWrite;
    } UA_WriteRequest;
    
-   #define UA_TYPES_WRITEREQUEST 127
+   #define UA_TYPES_WRITEREQUEST 128
    
 WriteResponse
 ^^^^^^^^^^^^^
@@ -1739,7 +1754,7 @@ WriteResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_WriteResponse;
    
-   #define UA_TYPES_WRITERESPONSE 128
+   #define UA_TYPES_WRITERESPONSE 129
    
 CallMethodRequest
 ^^^^^^^^^^^^^^^^^
@@ -1753,7 +1768,7 @@ CallMethodRequest
        UA_Variant *inputArguments;
    } UA_CallMethodRequest;
    
-   #define UA_TYPES_CALLMETHODREQUEST 129
+   #define UA_TYPES_CALLMETHODREQUEST 130
    
 CallMethodResult
 ^^^^^^^^^^^^^^^^
@@ -1770,7 +1785,7 @@ CallMethodResult
        UA_Variant *outputArguments;
    } UA_CallMethodResult;
    
-   #define UA_TYPES_CALLMETHODRESULT 130
+   #define UA_TYPES_CALLMETHODRESULT 131
    
 CallRequest
 ^^^^^^^^^^^
@@ -1783,7 +1798,7 @@ CallRequest
        UA_CallMethodRequest *methodsToCall;
    } UA_CallRequest;
    
-   #define UA_TYPES_CALLREQUEST 131
+   #define UA_TYPES_CALLREQUEST 132
    
 CallResponse
 ^^^^^^^^^^^^
@@ -1798,7 +1813,7 @@ CallResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_CallResponse;
    
-   #define UA_TYPES_CALLRESPONSE 132
+   #define UA_TYPES_CALLRESPONSE 133
    
 MonitoringMode
 ^^^^^^^^^^^^^^
@@ -1813,7 +1828,7 @@ MonitoringMode
    } UA_MonitoringMode;
    UA_STATIC_ASSERT(sizeof(UA_MonitoringMode) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_MONITORINGMODE 133
+   #define UA_TYPES_MONITORINGMODE 134
    
 DataChangeTrigger
 ^^^^^^^^^^^^^^^^^
@@ -1828,7 +1843,7 @@ DataChangeTrigger
    } UA_DataChangeTrigger;
    UA_STATIC_ASSERT(sizeof(UA_DataChangeTrigger) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_DATACHANGETRIGGER 134
+   #define UA_TYPES_DATACHANGETRIGGER 135
    
 DeadbandType
 ^^^^^^^^^^^^
@@ -1843,7 +1858,7 @@ DeadbandType
    } UA_DeadbandType;
    UA_STATIC_ASSERT(sizeof(UA_DeadbandType) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_DEADBANDTYPE 135
+   #define UA_TYPES_DEADBANDTYPE 136
    
 DataChangeFilter
 ^^^^^^^^^^^^^^^^
@@ -1856,7 +1871,7 @@ DataChangeFilter
        UA_Double deadbandValue;
    } UA_DataChangeFilter;
    
-   #define UA_TYPES_DATACHANGEFILTER 136
+   #define UA_TYPES_DATACHANGEFILTER 137
    
 EventFilter
 ^^^^^^^^^^^
@@ -1869,7 +1884,7 @@ EventFilter
        UA_ContentFilter whereClause;
    } UA_EventFilter;
    
-   #define UA_TYPES_EVENTFILTER 137
+   #define UA_TYPES_EVENTFILTER 138
    
 AggregateConfiguration
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1884,7 +1899,7 @@ AggregateConfiguration
        UA_Boolean useSlopedExtrapolation;
    } UA_AggregateConfiguration;
    
-   #define UA_TYPES_AGGREGATECONFIGURATION 138
+   #define UA_TYPES_AGGREGATECONFIGURATION 139
    
 AggregateFilter
 ^^^^^^^^^^^^^^^
@@ -1898,7 +1913,7 @@ AggregateFilter
        UA_AggregateConfiguration aggregateConfiguration;
    } UA_AggregateFilter;
    
-   #define UA_TYPES_AGGREGATEFILTER 139
+   #define UA_TYPES_AGGREGATEFILTER 140
    
 EventFilterResult
 ^^^^^^^^^^^^^^^^^
@@ -1913,7 +1928,7 @@ EventFilterResult
        UA_ContentFilterResult whereClauseResult;
    } UA_EventFilterResult;
    
-   #define UA_TYPES_EVENTFILTERRESULT 140
+   #define UA_TYPES_EVENTFILTERRESULT 141
    
 MonitoringParameters
 ^^^^^^^^^^^^^^^^^^^^
@@ -1928,7 +1943,7 @@ MonitoringParameters
        UA_Boolean discardOldest;
    } UA_MonitoringParameters;
    
-   #define UA_TYPES_MONITORINGPARAMETERS 141
+   #define UA_TYPES_MONITORINGPARAMETERS 142
    
 MonitoredItemCreateRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1941,7 +1956,7 @@ MonitoredItemCreateRequest
        UA_MonitoringParameters requestedParameters;
    } UA_MonitoredItemCreateRequest;
    
-   #define UA_TYPES_MONITOREDITEMCREATEREQUEST 142
+   #define UA_TYPES_MONITOREDITEMCREATEREQUEST 143
    
 MonitoredItemCreateResult
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1956,7 +1971,7 @@ MonitoredItemCreateResult
        UA_ExtensionObject filterResult;
    } UA_MonitoredItemCreateResult;
    
-   #define UA_TYPES_MONITOREDITEMCREATERESULT 143
+   #define UA_TYPES_MONITOREDITEMCREATERESULT 144
    
 CreateMonitoredItemsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1971,7 +1986,7 @@ CreateMonitoredItemsRequest
        UA_MonitoredItemCreateRequest *itemsToCreate;
    } UA_CreateMonitoredItemsRequest;
    
-   #define UA_TYPES_CREATEMONITOREDITEMSREQUEST 144
+   #define UA_TYPES_CREATEMONITOREDITEMSREQUEST 145
    
 CreateMonitoredItemsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1986,7 +2001,7 @@ CreateMonitoredItemsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_CreateMonitoredItemsResponse;
    
-   #define UA_TYPES_CREATEMONITOREDITEMSRESPONSE 145
+   #define UA_TYPES_CREATEMONITOREDITEMSRESPONSE 146
    
 MonitoredItemModifyRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1998,7 +2013,7 @@ MonitoredItemModifyRequest
        UA_MonitoringParameters requestedParameters;
    } UA_MonitoredItemModifyRequest;
    
-   #define UA_TYPES_MONITOREDITEMMODIFYREQUEST 146
+   #define UA_TYPES_MONITOREDITEMMODIFYREQUEST 147
    
 MonitoredItemModifyResult
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2012,7 +2027,7 @@ MonitoredItemModifyResult
        UA_ExtensionObject filterResult;
    } UA_MonitoredItemModifyResult;
    
-   #define UA_TYPES_MONITOREDITEMMODIFYRESULT 147
+   #define UA_TYPES_MONITOREDITEMMODIFYRESULT 148
    
 ModifyMonitoredItemsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2027,7 +2042,7 @@ ModifyMonitoredItemsRequest
        UA_MonitoredItemModifyRequest *itemsToModify;
    } UA_ModifyMonitoredItemsRequest;
    
-   #define UA_TYPES_MODIFYMONITOREDITEMSREQUEST 148
+   #define UA_TYPES_MODIFYMONITOREDITEMSREQUEST 149
    
 ModifyMonitoredItemsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2042,7 +2057,7 @@ ModifyMonitoredItemsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_ModifyMonitoredItemsResponse;
    
-   #define UA_TYPES_MODIFYMONITOREDITEMSRESPONSE 149
+   #define UA_TYPES_MODIFYMONITOREDITEMSRESPONSE 150
    
 SetMonitoringModeRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2057,7 +2072,7 @@ SetMonitoringModeRequest
        UA_UInt32 *monitoredItemIds;
    } UA_SetMonitoringModeRequest;
    
-   #define UA_TYPES_SETMONITORINGMODEREQUEST 150
+   #define UA_TYPES_SETMONITORINGMODEREQUEST 151
    
 SetMonitoringModeResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2072,7 +2087,7 @@ SetMonitoringModeResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_SetMonitoringModeResponse;
    
-   #define UA_TYPES_SETMONITORINGMODERESPONSE 151
+   #define UA_TYPES_SETMONITORINGMODERESPONSE 152
    
 SetTriggeringRequest
 ^^^^^^^^^^^^^^^^^^^^
@@ -2089,7 +2104,7 @@ SetTriggeringRequest
        UA_UInt32 *linksToRemove;
    } UA_SetTriggeringRequest;
    
-   #define UA_TYPES_SETTRIGGERINGREQUEST 152
+   #define UA_TYPES_SETTRIGGERINGREQUEST 153
    
 SetTriggeringResponse
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2108,7 +2123,7 @@ SetTriggeringResponse
        UA_DiagnosticInfo *removeDiagnosticInfos;
    } UA_SetTriggeringResponse;
    
-   #define UA_TYPES_SETTRIGGERINGRESPONSE 153
+   #define UA_TYPES_SETTRIGGERINGRESPONSE 154
    
 DeleteMonitoredItemsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2122,7 +2137,7 @@ DeleteMonitoredItemsRequest
        UA_UInt32 *monitoredItemIds;
    } UA_DeleteMonitoredItemsRequest;
    
-   #define UA_TYPES_DELETEMONITOREDITEMSREQUEST 154
+   #define UA_TYPES_DELETEMONITOREDITEMSREQUEST 155
    
 DeleteMonitoredItemsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2137,7 +2152,7 @@ DeleteMonitoredItemsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DeleteMonitoredItemsResponse;
    
-   #define UA_TYPES_DELETEMONITOREDITEMSRESPONSE 155
+   #define UA_TYPES_DELETEMONITOREDITEMSRESPONSE 156
    
 CreateSubscriptionRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2154,7 +2169,7 @@ CreateSubscriptionRequest
        UA_Byte priority;
    } UA_CreateSubscriptionRequest;
    
-   #define UA_TYPES_CREATESUBSCRIPTIONREQUEST 156
+   #define UA_TYPES_CREATESUBSCRIPTIONREQUEST 157
    
 CreateSubscriptionResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2169,7 +2184,7 @@ CreateSubscriptionResponse
        UA_UInt32 revisedMaxKeepAliveCount;
    } UA_CreateSubscriptionResponse;
    
-   #define UA_TYPES_CREATESUBSCRIPTIONRESPONSE 157
+   #define UA_TYPES_CREATESUBSCRIPTIONRESPONSE 158
    
 ModifySubscriptionRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2186,7 +2201,7 @@ ModifySubscriptionRequest
        UA_Byte priority;
    } UA_ModifySubscriptionRequest;
    
-   #define UA_TYPES_MODIFYSUBSCRIPTIONREQUEST 158
+   #define UA_TYPES_MODIFYSUBSCRIPTIONREQUEST 159
    
 ModifySubscriptionResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2200,7 +2215,7 @@ ModifySubscriptionResponse
        UA_UInt32 revisedMaxKeepAliveCount;
    } UA_ModifySubscriptionResponse;
    
-   #define UA_TYPES_MODIFYSUBSCRIPTIONRESPONSE 159
+   #define UA_TYPES_MODIFYSUBSCRIPTIONRESPONSE 160
    
 SetPublishingModeRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2214,7 +2229,7 @@ SetPublishingModeRequest
        UA_UInt32 *subscriptionIds;
    } UA_SetPublishingModeRequest;
    
-   #define UA_TYPES_SETPUBLISHINGMODEREQUEST 160
+   #define UA_TYPES_SETPUBLISHINGMODEREQUEST 161
    
 SetPublishingModeResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2229,7 +2244,7 @@ SetPublishingModeResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_SetPublishingModeResponse;
    
-   #define UA_TYPES_SETPUBLISHINGMODERESPONSE 161
+   #define UA_TYPES_SETPUBLISHINGMODERESPONSE 162
    
 NotificationMessage
 ^^^^^^^^^^^^^^^^^^^
@@ -2243,7 +2258,7 @@ NotificationMessage
        UA_ExtensionObject *notificationData;
    } UA_NotificationMessage;
    
-   #define UA_TYPES_NOTIFICATIONMESSAGE 162
+   #define UA_TYPES_NOTIFICATIONMESSAGE 163
    
 MonitoredItemNotification
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2255,7 +2270,7 @@ MonitoredItemNotification
        UA_DataValue value;
    } UA_MonitoredItemNotification;
    
-   #define UA_TYPES_MONITOREDITEMNOTIFICATION 163
+   #define UA_TYPES_MONITOREDITEMNOTIFICATION 164
    
 EventFieldList
 ^^^^^^^^^^^^^^
@@ -2268,7 +2283,7 @@ EventFieldList
        UA_Variant *eventFields;
    } UA_EventFieldList;
    
-   #define UA_TYPES_EVENTFIELDLIST 164
+   #define UA_TYPES_EVENTFIELDLIST 165
    
 StatusChangeNotification
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2280,7 +2295,7 @@ StatusChangeNotification
        UA_DiagnosticInfo diagnosticInfo;
    } UA_StatusChangeNotification;
    
-   #define UA_TYPES_STATUSCHANGENOTIFICATION 165
+   #define UA_TYPES_STATUSCHANGENOTIFICATION 166
    
 SubscriptionAcknowledgement
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2292,7 +2307,7 @@ SubscriptionAcknowledgement
        UA_UInt32 sequenceNumber;
    } UA_SubscriptionAcknowledgement;
    
-   #define UA_TYPES_SUBSCRIPTIONACKNOWLEDGEMENT 166
+   #define UA_TYPES_SUBSCRIPTIONACKNOWLEDGEMENT 167
    
 PublishRequest
 ^^^^^^^^^^^^^^
@@ -2305,7 +2320,7 @@ PublishRequest
        UA_SubscriptionAcknowledgement *subscriptionAcknowledgements;
    } UA_PublishRequest;
    
-   #define UA_TYPES_PUBLISHREQUEST 167
+   #define UA_TYPES_PUBLISHREQUEST 168
    
 PublishResponse
 ^^^^^^^^^^^^^^^
@@ -2325,7 +2340,7 @@ PublishResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_PublishResponse;
    
-   #define UA_TYPES_PUBLISHRESPONSE 168
+   #define UA_TYPES_PUBLISHRESPONSE 169
    
 RepublishRequest
 ^^^^^^^^^^^^^^^^
@@ -2338,7 +2353,7 @@ RepublishRequest
        UA_UInt32 retransmitSequenceNumber;
    } UA_RepublishRequest;
    
-   #define UA_TYPES_REPUBLISHREQUEST 169
+   #define UA_TYPES_REPUBLISHREQUEST 170
    
 RepublishResponse
 ^^^^^^^^^^^^^^^^^
@@ -2350,7 +2365,7 @@ RepublishResponse
        UA_NotificationMessage notificationMessage;
    } UA_RepublishResponse;
    
-   #define UA_TYPES_REPUBLISHRESPONSE 170
+   #define UA_TYPES_REPUBLISHRESPONSE 171
    
 TransferResult
 ^^^^^^^^^^^^^^
@@ -2363,7 +2378,7 @@ TransferResult
        UA_UInt32 *availableSequenceNumbers;
    } UA_TransferResult;
    
-   #define UA_TYPES_TRANSFERRESULT 171
+   #define UA_TYPES_TRANSFERRESULT 172
    
 TransferSubscriptionsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2377,7 +2392,7 @@ TransferSubscriptionsRequest
        UA_Boolean sendInitialValues;
    } UA_TransferSubscriptionsRequest;
    
-   #define UA_TYPES_TRANSFERSUBSCRIPTIONSREQUEST 172
+   #define UA_TYPES_TRANSFERSUBSCRIPTIONSREQUEST 173
    
 TransferSubscriptionsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2392,7 +2407,7 @@ TransferSubscriptionsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_TransferSubscriptionsResponse;
    
-   #define UA_TYPES_TRANSFERSUBSCRIPTIONSRESPONSE 173
+   #define UA_TYPES_TRANSFERSUBSCRIPTIONSRESPONSE 174
    
 DeleteSubscriptionsRequest
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2405,7 +2420,7 @@ DeleteSubscriptionsRequest
        UA_UInt32 *subscriptionIds;
    } UA_DeleteSubscriptionsRequest;
    
-   #define UA_TYPES_DELETESUBSCRIPTIONSREQUEST 174
+   #define UA_TYPES_DELETESUBSCRIPTIONSREQUEST 175
    
 DeleteSubscriptionsResponse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2420,7 +2435,7 @@ DeleteSubscriptionsResponse
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DeleteSubscriptionsResponse;
    
-   #define UA_TYPES_DELETESUBSCRIPTIONSRESPONSE 175
+   #define UA_TYPES_DELETESUBSCRIPTIONSRESPONSE 176
    
 BuildInfo
 ^^^^^^^^^
@@ -2436,7 +2451,7 @@ BuildInfo
        UA_DateTime buildDate;
    } UA_BuildInfo;
    
-   #define UA_TYPES_BUILDINFO 176
+   #define UA_TYPES_BUILDINFO 177
    
 RedundancySupport
 ^^^^^^^^^^^^^^^^^
@@ -2454,7 +2469,7 @@ RedundancySupport
    } UA_RedundancySupport;
    UA_STATIC_ASSERT(sizeof(UA_RedundancySupport) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_REDUNDANCYSUPPORT 177
+   #define UA_TYPES_REDUNDANCYSUPPORT 178
    
 ServerState
 ^^^^^^^^^^^
@@ -2474,7 +2489,7 @@ ServerState
    } UA_ServerState;
    UA_STATIC_ASSERT(sizeof(UA_ServerState) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_SERVERSTATE 178
+   #define UA_TYPES_SERVERSTATE 179
    
 ServerDiagnosticsSummaryDataType
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2496,7 +2511,7 @@ ServerDiagnosticsSummaryDataType
        UA_UInt32 rejectedRequestsCount;
    } UA_ServerDiagnosticsSummaryDataType;
    
-   #define UA_TYPES_SERVERDIAGNOSTICSSUMMARYDATATYPE 179
+   #define UA_TYPES_SERVERDIAGNOSTICSSUMMARYDATATYPE 180
    
 ServerStatusDataType
 ^^^^^^^^^^^^^^^^^^^^
@@ -2512,7 +2527,7 @@ ServerStatusDataType
        UA_LocalizedText shutdownReason;
    } UA_ServerStatusDataType;
    
-   #define UA_TYPES_SERVERSTATUSDATATYPE 180
+   #define UA_TYPES_SERVERSTATUSDATATYPE 181
    
 Range
 ^^^^^
@@ -2524,7 +2539,7 @@ Range
        UA_Double high;
    } UA_Range;
    
-   #define UA_TYPES_RANGE 181
+   #define UA_TYPES_RANGE 182
    
 EUInformation
 ^^^^^^^^^^^^^
@@ -2538,7 +2553,7 @@ EUInformation
        UA_LocalizedText description;
    } UA_EUInformation;
    
-   #define UA_TYPES_EUINFORMATION 182
+   #define UA_TYPES_EUINFORMATION 183
    
 AxisScaleEnumeration
 ^^^^^^^^^^^^^^^^^^^^
@@ -2553,7 +2568,7 @@ AxisScaleEnumeration
    } UA_AxisScaleEnumeration;
    UA_STATIC_ASSERT(sizeof(UA_AxisScaleEnumeration) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_AXISSCALEENUMERATION 183
+   #define UA_TYPES_AXISSCALEENUMERATION 184
    
 ComplexNumberType
 ^^^^^^^^^^^^^^^^^
@@ -2565,7 +2580,7 @@ ComplexNumberType
        UA_Float imaginary;
    } UA_ComplexNumberType;
    
-   #define UA_TYPES_COMPLEXNUMBERTYPE 184
+   #define UA_TYPES_COMPLEXNUMBERTYPE 185
    
 DoubleComplexNumberType
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2577,7 +2592,7 @@ DoubleComplexNumberType
        UA_Double imaginary;
    } UA_DoubleComplexNumberType;
    
-   #define UA_TYPES_DOUBLECOMPLEXNUMBERTYPE 185
+   #define UA_TYPES_DOUBLECOMPLEXNUMBERTYPE 186
    
 AxisInformation
 ^^^^^^^^^^^^^^^
@@ -2593,7 +2608,7 @@ AxisInformation
        UA_Double *axisSteps;
    } UA_AxisInformation;
    
-   #define UA_TYPES_AXISINFORMATION 186
+   #define UA_TYPES_AXISINFORMATION 187
    
 XVType
 ^^^^^^
@@ -2605,7 +2620,7 @@ XVType
        UA_Float value;
    } UA_XVType;
    
-   #define UA_TYPES_XVTYPE 187
+   #define UA_TYPES_XVTYPE 188
    
 EnumDefinition
 ^^^^^^^^^^^^^^
@@ -2617,7 +2632,7 @@ EnumDefinition
        UA_EnumField *fields;
    } UA_EnumDefinition;
    
-   #define UA_TYPES_ENUMDEFINITION 188
+   #define UA_TYPES_ENUMDEFINITION 189
    
 DataChangeNotification
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -2631,7 +2646,7 @@ DataChangeNotification
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DataChangeNotification;
    
-   #define UA_TYPES_DATACHANGENOTIFICATION 189
+   #define UA_TYPES_DATACHANGENOTIFICATION 190
    
 EventNotificationList
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2643,4 +2658,4 @@ EventNotificationList
        UA_EventFieldList *events;
    } UA_EventNotificationList;
    
-   #define UA_TYPES_EVENTNOTIFICATIONLIST 190
+   #define UA_TYPES_EVENTNOTIFICATIONLIST 191
