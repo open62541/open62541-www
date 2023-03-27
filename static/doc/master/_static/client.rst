@@ -93,6 +93,16 @@ when the SecureChannel was broken.
        UA_EndpointDescription endpoint;
        UA_UserTokenPolicy userTokenPolicy;
    
+If the EndpointDescription has not been defined, the ApplicationURI
+constrains the servers considered in the FindServers service and the
+Endpoints considered in the GetEndpoints service.
+
+If empty the applicationURI is not used to filter.
+
+.. code-block:: c
+
+       UA_String applicationUri;
+   
 Custom Data Types
 ~~~~~~~~~~~~~~~~~
 The following is a linked list of arrays with custom data types. All data
@@ -751,4 +761,5 @@ Client Utility Functions
 .. toctree::
 
    client_highlevel
+   client_highlevel_async
    client_subscriptions
