@@ -402,12 +402,16 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_ReferenceTarget</span><span class="w"> </span><span class="n">target</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Has to be the first entry */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">targetIdHash</span><span class="p">;</span><span class="w">      </span><span class="cm">/* Hash of the targetId */</span>
-<span class="w">    </span><span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">)</span><span class="w"> </span><span class="n">idTreeEntry</span><span class="p">;</span>
-<span class="w">    </span><span class="n">ZIP_ENTRY</span><span class="p">(</span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">)</span><span class="w"> </span><span class="n">nameTreeEntry</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="o">*</span><span class="n">left</span><span class="p">;</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="o">*</span><span class="n">right</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">idTreeEntry</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="o">*</span><span class="n">left</span><span class="p">;</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="o">*</span><span class="n">right</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">nameTreeEntry</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">;</span>
 
-<span class="k">typedef</span><span class="w"> </span><span class="n">ZIP_HEAD</span><span class="p">(</span><span class="n">UA_ReferenceIdTree</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">)</span><span class="w"> </span><span class="n">UA_ReferenceIdTree</span><span class="p">;</span>
-<span class="k">typedef</span><span class="w"> </span><span class="n">ZIP_HEAD</span><span class="p">(</span><span class="n">UA_ReferenceNameTree</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">)</span><span class="w"> </span><span class="n">UA_ReferenceNameTree</span><span class="p">;</span>
 
 <span class="cm">/* List of reference targets with the same reference type and direction. Uses</span>
 <span class="cm"> * either an array or a tree structure. The SDK will not change the type of</span>
@@ -422,10 +426,14 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="cm">         * known to be small. */</span>
 <span class="w">        </span><span class="n">UA_ReferenceTarget</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">;</span>
 
-<span class="w">        </span><span class="cm">/* Organize the references in a tree for fast lookup */</span>
+<span class="w">        </span><span class="cm">/* Organize the references in a tree for fast lookup. Use</span>
+<span class="cm">         * UA_Node_addReference and UA_Node_deleteReference to modify the</span>
+<span class="cm">         * tree-structure. The binary tree implementation (and absolute ordering</span>
+<span class="cm">         * / duplicate browseNames are allowed) are not exposed otherwise in the</span>
+<span class="cm">         * public API. */</span>
 <span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">UA_ReferenceIdTree</span><span class="w"> </span><span class="n">idTree</span><span class="p">;</span><span class="w">     </span><span class="cm">/* Fast lookup based on the target id */</span>
-<span class="w">            </span><span class="n">UA_ReferenceNameTree</span><span class="w"> </span><span class="n">nameTree</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Fast lookup based on the target browseName*/</span>
+<span class="w">            </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="o">*</span><span class="n">idRoot</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Lookup based on target id */</span>
+<span class="w">            </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="w"> </span><span class="o">*</span><span class="n">nameRoot</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Lookup based on browseName*/</span>
 <span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="n">tree</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">targets</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">targetsSize</span><span class="p">;</span>
