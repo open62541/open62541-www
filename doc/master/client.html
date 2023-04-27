@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 1.3.3-undefined documentation</title>
+  <title>Client &mdash; open62541 1.3.5-undefined documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -68,6 +68,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#client-utility-functions">Client Utility Functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html">Async Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#asynchronous-operations">Asynchronous Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#read-attribute">Read Attribute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#write-attribute">Write Attribute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#method-calling">Method Calling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#node-management">Node Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#misc-functionalities">Misc Functionalities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
 </ul>
@@ -179,6 +186,13 @@ selected Endpoint and UserTokenPolicy during GetEndpoints.</p>
 when the SecureChannel was broken.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="n">endpoint</span><span class="p">;</span>
 <span class="n">UA_UserTokenPolicy</span><span class="w"> </span><span class="n">userTokenPolicy</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>If the EndpointDescription has not been defined, the ApplicationURI
+constrains the servers considered in the FindServers service and the
+Endpoints considered in the GetEndpoints service.</p>
+<p>If empty the applicationURI is not used to filter.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_String</span><span class="w"> </span><span class="n">applicationUri</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -379,6 +393,22 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="w">    </span><span class="cm">/* Silence a false-positive deprecated warning */</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">);</span>
 <span class="p">}</span>
+
+<span class="cm">/* Sets up a listening socket for incoming reverse connect requests by OPC UA servers.</span>
+<span class="cm"> * After the first server has connected, the listening socket is removed.</span>
+<span class="cm"> * The client state callback is also used for reverse connect. An implementation could</span>
+<span class="cm"> * for example issue a new call to UA_Client_startListeningForReverseConnect after the</span>
+<span class="cm"> * server has closed the connection. If the client is connected to any server while</span>
+<span class="cm"> * UA_Client_startListeningForReverseConnect is called, the connection will be closed.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The reverse connect is closed by calling the standard disconnect functions like</span>
+<span class="cm"> * for a &quot;normal&quot; connection that was initiated by the client. Calling one of the connect</span>
+<span class="cm"> * methods will also close the listening socket and the connection to the remote server.</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_startListeningForReverseConnect</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">listenHostnames</span><span class="p">,</span>
+<span class="w">                                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">listenHostnamesLength</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">port</span><span class="p">);</span>
 
 <span class="cm">/* Disconnect and close a connection to the selected server. Disconnection is</span>
 <span class="cm"> * always performed async (without blocking). */</span>
@@ -664,7 +694,7 @@ This is especially true for the periodic renewal of a SecureChannel’s
 SecurityToken which is designed to have a limited lifetime and will
 invalidate the connection if not renewed.</p>
 <p>Use the typed wrappers instead of <cite>__UA_Client_AsyncService</cite> directly. See
-<span class="xref std std-ref">client_async</span>. However, the general mechanism of async service calls is
+<a class="reference internal" href="client_highlevel_async.html#client-async"><span class="std std-ref">Async Services</span></a>. However, the general mechanism of async service calls is
 explained here.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* We say that an async service call has been dispatched once</span>
 <span class="cm"> * __UA_Client_AsyncService returns UA_STATUSCODE_GOOD. If there is an error</span>
@@ -798,6 +828,13 @@ defined interval.</p>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html">Async Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#asynchronous-operations">Asynchronous Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#read-attribute">Read Attribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#write-attribute">Write Attribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#method-calling">Method Calling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#node-management">Node Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#misc-functionalities">Misc Functionalities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
 </ul>

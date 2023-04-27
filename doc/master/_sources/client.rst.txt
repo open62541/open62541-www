@@ -93,6 +93,16 @@ when the SecureChannel was broken.
        UA_EndpointDescription endpoint;
        UA_UserTokenPolicy userTokenPolicy;
    
+If the EndpointDescription has not been defined, the ApplicationURI
+constrains the servers considered in the FindServers service and the
+Endpoints considered in the GetEndpoints service.
+
+If empty the applicationURI is not used to filter.
+
+.. code-block:: c
+
+       UA_String applicationUri;
+   
 Custom Data Types
 ~~~~~~~~~~~~~~~~~
 The following is a linked list of arrays with custom data types. All data
@@ -308,6 +318,22 @@ error), the client is no longer usable. Create a new client if required.
        /* Silence a false-positive deprecated warning */
        return UA_Client_connect(client, endpointUrl);
    }
+   
+   /* Sets up a listening socket for incoming reverse connect requests by OPC UA servers.
+    * After the first server has connected, the listening socket is removed.
+    * The client state callback is also used for reverse connect. An implementation could
+    * for example issue a new call to UA_Client_startListeningForReverseConnect after the
+    * server has closed the connection. If the client is connected to any server while
+    * UA_Client_startListeningForReverseConnect is called, the connection will be closed.
+    *
+    * The reverse connect is closed by calling the standard disconnect functions like
+    * for a "normal" connection that was initiated by the client. Calling one of the connect
+    * methods will also close the listening socket and the connection to the remote server.
+    */
+   UA_StatusCode
+   UA_Client_startListeningForReverseConnect(UA_Client *client, const UA_String *listenHostnames,
+                                             size_t listenHostnamesLength,
+                                             UA_UInt16 port);
    
    /* Disconnect and close a connection to the selected server. Disconnection is
     * always performed async (without blocking). */
@@ -735,4 +761,5 @@ Client Utility Functions
 .. toctree::
 
    client_highlevel
+   client_highlevel_async
    client_subscriptions

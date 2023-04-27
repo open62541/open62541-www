@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 1.3.3-undefined documentation</title>
+  <title>Server &mdash; open62541 1.3.5-undefined documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -55,7 +55,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#server-description">Server Description</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#timeouts-and-delays">Timeouts and Delays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rule-handling">Rule Handling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#custom-data-types">Custom Data Types</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#eventloop">EventLoop</a></li>
@@ -71,12 +71,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#reverse-connect">Reverse Connect</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Server Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#session-handling">Session Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reading-and-writing-node-attributes">Reading and Writing Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#browsing">Browsing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4">Discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">Discovery</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#information-model-callbacks">Information Model Callbacks</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#local-monitoreditems">Local MonitoredItems</a></li>
@@ -89,9 +89,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#update-the-server-certificate-at-runtime">Update the Server Certificate at Runtime</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id7">Async Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">Async Operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id9">Reverse Connect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">Reverse Connect</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -164,11 +164,16 @@ certificate.</p>
 </pre></div>
 </div>
 </section>
-<section id="timeouts-and-delays">
-<h3>Timeouts and Delays<a class="headerlink" href="#timeouts-and-delays" title="Permalink to this heading">¶</a></h3>
+<section id="server-lifecycle">
+<h3>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Delay in ms from the shutdown signal (ctrl-c) until the actual shutdown.</span>
 <span class="cm"> * Clients need to be able to get a notification ahead of time. */</span>
 <span class="n">UA_Double</span><span class="w"> </span><span class="n">shutdownDelay</span><span class="p">;</span>
+
+<span class="cm">/* If an asynchronous server shutdown is used, this callback notifies about</span>
+<span class="cm"> * the current lifecycle state (notably the STOPPING -&gt; STOPPED</span>
+<span class="cm"> * transition). */</span>
+<span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">notifyLifecycleState</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LifecycleState</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -322,7 +327,7 @@ ModellingRule of their InstanceDeclaration</p>
 </section>
 <section id="async-operations">
 <h3>Async Operations<a class="headerlink" href="#async-operations" title="Permalink to this heading">¶</a></h3>
-<p>See the section for <a class="reference internal" href="#id7"><span class="std std-ref">async operations</span></a>.</p>
+<p>See the section for <a class="reference internal" href="#id8"><span class="std std-ref">async operations</span></a>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
 <span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">asyncOperationTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in ms, 0 =&gt; unlimited */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
@@ -452,8 +457,8 @@ ModellingRule of their InstanceDeclaration</p>
 </div>
 </section>
 </section>
-<section id="server-lifecycle">
-<span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this heading">¶</a></h2>
+<section id="id3">
+<span id="id4"></span><h2>Server Lifecycle<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Create a new server with a default configuration that adds plugins for</span>
 <span class="cm"> * networking, security, logging and so on. See `server_config_default.h` for</span>
 <span class="cm"> * more detailed options.</span>
@@ -464,7 +469,8 @@ ModellingRule of their InstanceDeclaration</p>
 <span class="cm"> * only uses the public server API.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @return Returns the configured server or NULL if an error occurs. */</span>
-<span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
 <span class="cm">/* Creates a new server. Moves the config into the server with a shallow copy.</span>
 <span class="cm"> * The config content is cleared together with the server. */</span>
@@ -472,12 +478,17 @@ ModellingRule of their InstanceDeclaration</p>
 <span class="nf">UA_Server_newWithConfig</span><span class="p">(</span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="cm">/* Delete the server. */</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* Get the configuration. Always succeeds as this simplfy resolves a pointer.</span>
 <span class="cm"> * Attention! Do not adjust the configuration while the server is running! */</span>
 <span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Server_getConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="cm">/* Get the current server lifecycle state */</span>
+<span class="n">UA_LifecycleState</span>
+<span class="nf">UA_Server_getLifecycleState</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* Runs the server until interrupted. On Unix/Windows this registers an</span>
 <span class="cm"> * interrupt for SIGINT (ctrl-c). The method only returns after having received</span>
@@ -1031,8 +1042,8 @@ sourceTimestamp, serverTimestamp and statusCode.</p>
 </pre></div>
 </div>
 </section>
-<section id="id4">
-<h2>Discovery<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<section id="id5">
+<h2>Discovery<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Register the given server instance at the discovery server.</span>
 <span class="cm"> * This should be called periodically.</span>
 <span class="cm"> * The semaphoreFilePath is optional. If the given file is deleted,</span>
@@ -1198,7 +1209,7 @@ be set to a null-pointer.</p>
 </div>
 </section>
 <section id="local-monitoreditems">
-<span id="id5"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this heading">¶</a></h3>
+<span id="id6"></span><h3>Local MonitoredItems<a class="headerlink" href="#local-monitoreditems" title="Permalink to this heading">¶</a></h3>
 <p>MonitoredItems are used with the Subscription mechanism of OPC UA to
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
@@ -1598,7 +1609,7 @@ arguments which are added in the finish step (if not yet already there)</p>
 </div>
 </section>
 <section id="events">
-<span id="id6"></span><h2>Events<a class="headerlink" href="#events" title="Permalink to this heading">¶</a></h2>
+<span id="id7"></span><h2>Events<a class="headerlink" href="#events" title="Permalink to this heading">¶</a></h2>
 <p>The method <code class="docutils literal notranslate"><span class="pre">UA_Server_createEvent</span></code> creates an event and represents it as
 node. The node receives a unique <cite>EventId</cite> which is automatically added to
 the node. The method returns a <cite>NodeId</cite> to the object node which represents
@@ -1893,8 +1904,8 @@ source to the condition instance</p></li>
 </pre></div>
 </div>
 </section>
-<section id="id7">
-<span id="id8"></span><h2>Async Operations<a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h2>
+<section id="id8">
+<span id="id9"></span><h2>Async Operations<a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h2>
 <p>Some operations (such as reading out a sensor that needs to warm up) can take
 quite some time. In order not to block the server during such an operation, it
 can be “outsourced” to a worker thread.</p>
@@ -1979,8 +1990,8 @@ are structured per OPC UA communication layer.</p>
 </pre></div>
 </div>
 </section>
-<section id="id9">
-<h2>Reverse Connect<a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h2>
+<section id="id10">
+<h2>Reverse Connect<a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h2>
 <p>The reverse connect feature of OPC UA permits the server instead of the client to
 establish the connection.
 The client must expose the listening port so the server is able to reach it.</p>

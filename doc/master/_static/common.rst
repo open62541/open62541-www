@@ -171,8 +171,10 @@ Connection State
    
    typedef enum {
        UA_SECURECHANNELSTATE_FRESH = 0,
+       UA_SECURECHANNELSTATE_REVERSE_LISTENING,
        UA_SECURECHANNELSTATE_CONNECTING,
        UA_SECURECHANNELSTATE_CONNECTED,
+       UA_SECURECHANNELSTATE_REVERSE_CONNECTED,
        UA_SECURECHANNELSTATE_RHE_SENT,
        UA_SECURECHANNELSTATE_HEL_SENT,
        UA_SECURECHANNELSTATE_HEL_RECEIVED,
@@ -223,6 +225,22 @@ but are harmonized with the Session layer counters if possible.
        size_t sessionTimeoutCount;          /* only used by servers */
        size_t sessionAbortCount;            /* only used by servers */
    } UA_SessionStatistics;
+   
+Lifecycle States
+----------------
+
+Generic lifecycle states. The STOPPING state indicates that the lifecycle is
+being terminated. But it might take time to (asynchronously) perform a
+graceful shutdown.
+
+.. code-block:: c
+
+   
+   typedef enum {
+       UA_LIFECYCLESTATE_STOPPED = 0,
+       UA_LIFECYCLESTATE_STARTED,
+       UA_LIFECYCLESTATE_STOPPING
+   } UA_LifecycleState;
    
 Forward Declarations
 --------------------

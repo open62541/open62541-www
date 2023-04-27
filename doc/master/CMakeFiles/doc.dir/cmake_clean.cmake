@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "../doc_src/client.rst"
   "../doc_src/client_highlevel.rst"
+  "../doc_src/client_highlevel_async.rst"
   "../doc_src/client_subscriptions.rst"
   "../doc_src/common.rst"
   "../doc_src/plugin_accesscontrol.rst"

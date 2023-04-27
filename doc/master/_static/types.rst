@@ -1179,6 +1179,13 @@ following method to retrieve the data type description.
    const UA_DataType *
    UA_findDataType(const UA_NodeId *typeId);
    
+   /*
+    * Add custom data types to the search scope of UA_findDataType. */
+   
+   const UA_DataType *
+   UA_findDataTypeWithCustom(const UA_NodeId *typeId,
+                             const UA_DataTypeArray *customTypes);
+   
 The following functions are used for generic handling of data types.
 
 .. code-block:: c

@@ -11,8 +11,6 @@ creating a server. Copy the following into a file `myClient.c`:
    #include <open62541/client_highlevel.h>
    #include <open62541/plugin/log_stdout.h>
    
-   #include <stdlib.h>
-   
    int main(void) {
        UA_Client *client = UA_Client_new();
        UA_ClientConfig_setDefault(UA_Client_getConfig(client));
@@ -22,7 +20,7 @@ creating a server. Copy the following into a file `myClient.c`:
                        "The connection failed with status code %s",
                        UA_StatusCode_name(retval));
            UA_Client_delete(client);
-           return EXIT_FAILURE;
+           return 0;
        }
    
        /* Read the value attribute of the node. UA_Client_readValueAttribute is a
@@ -52,7 +50,7 @@ creating a server. Copy the following into a file `myClient.c`:
        /* Clean up */
        UA_Variant_clear(&value);
        UA_Client_delete(client); /* Disconnects the client internally */
-       return EXIT_SUCCESS;
+       return 0;
    }
    
 Compilation is similar to the server example.
