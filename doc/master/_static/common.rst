@@ -170,7 +170,7 @@ Connection State
 
    
    typedef enum {
-       UA_SECURECHANNELSTATE_FRESH = 0,
+       UA_SECURECHANNELSTATE_CLOSED = 0,
        UA_SECURECHANNELSTATE_REVERSE_LISTENING,
        UA_SECURECHANNELSTATE_CONNECTING,
        UA_SECURECHANNELSTATE_CONNECTED,
@@ -183,11 +183,10 @@ Connection State
        UA_SECURECHANNELSTATE_OPN_SENT,
        UA_SECURECHANNELSTATE_OPEN,
        UA_SECURECHANNELSTATE_CLOSING,
-       UA_SECURECHANNELSTATE_CLOSED
    } UA_SecureChannelState;
    
    typedef enum {
-       UA_SESSIONSTATE_CLOSED,
+       UA_SESSIONSTATE_CLOSED = 0,
        UA_SESSIONSTATE_CREATE_REQUESTED,
        UA_SESSIONSTATE_CREATED,
        UA_SESSIONSTATE_ACTIVATE_REQUESTED,
@@ -207,6 +206,15 @@ but are harmonized with the Session layer counters if possible.
 
 .. code-block:: c
 
+   
+   typedef enum {
+       UA_SHUTDOWNREASON_CLOSE = 0,
+       UA_SHUTDOWNREASON_REJECT,
+       UA_SHUTDOWNREASON_SECURITYREJECT,
+       UA_SHUTDOWNREASON_TIMEOUT,
+       UA_SHUTDOWNREASON_ABORT,
+       UA_SHUTDOWNREASON_PURGE
+   } UA_ShutdownReason;
    
    typedef struct {
        size_t currentChannelCount;

@@ -4,7 +4,7 @@ binary encoding, ...).
 
 .. code-block:: c
 
-   #define UA_TYPES_COUNT 192
+   #define UA_TYPES_COUNT 196
    extern const UA_DataType UA_TYPES[UA_TYPES_COUNT];
    
 Boolean
@@ -2529,6 +2529,79 @@ ServerStatusDataType
    
    #define UA_TYPES_SERVERSTATUSDATATYPE 181
    
+SessionSecurityDiagnosticsDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_NodeId sessionId;
+       UA_String clientUserIdOfSession;
+       size_t clientUserIdHistorySize;
+       UA_String *clientUserIdHistory;
+       UA_String authenticationMechanism;
+       UA_String encoding;
+       UA_String transportProtocol;
+       UA_MessageSecurityMode securityMode;
+       UA_String securityPolicyUri;
+       UA_ByteString clientCertificate;
+   } UA_SessionSecurityDiagnosticsDataType;
+   
+   #define UA_TYPES_SESSIONSECURITYDIAGNOSTICSDATATYPE 182
+   
+ServiceCounterDataType
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_UInt32 totalCount;
+       UA_UInt32 errorCount;
+   } UA_ServiceCounterDataType;
+   
+   #define UA_TYPES_SERVICECOUNTERDATATYPE 183
+   
+SubscriptionDiagnosticsDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_NodeId sessionId;
+       UA_UInt32 subscriptionId;
+       UA_Byte priority;
+       UA_Double publishingInterval;
+       UA_UInt32 maxKeepAliveCount;
+       UA_UInt32 maxLifetimeCount;
+       UA_UInt32 maxNotificationsPerPublish;
+       UA_Boolean publishingEnabled;
+       UA_UInt32 modifyCount;
+       UA_UInt32 enableCount;
+       UA_UInt32 disableCount;
+       UA_UInt32 republishRequestCount;
+       UA_UInt32 republishMessageRequestCount;
+       UA_UInt32 republishMessageCount;
+       UA_UInt32 transferRequestCount;
+       UA_UInt32 transferredToAltClientCount;
+       UA_UInt32 transferredToSameClientCount;
+       UA_UInt32 publishRequestCount;
+       UA_UInt32 dataChangeNotificationsCount;
+       UA_UInt32 eventNotificationsCount;
+       UA_UInt32 notificationsCount;
+       UA_UInt32 latePublishRequestCount;
+       UA_UInt32 currentKeepAliveCount;
+       UA_UInt32 currentLifetimeCount;
+       UA_UInt32 unacknowledgedMessageCount;
+       UA_UInt32 discardedMessageCount;
+       UA_UInt32 monitoredItemCount;
+       UA_UInt32 disabledMonitoredItemCount;
+       UA_UInt32 monitoringQueueOverflowCount;
+       UA_UInt32 nextSequenceNumber;
+       UA_UInt32 eventQueueOverFlowCount;
+   } UA_SubscriptionDiagnosticsDataType;
+   
+   #define UA_TYPES_SUBSCRIPTIONDIAGNOSTICSDATATYPE 184
+   
 Range
 ^^^^^
 
@@ -2539,7 +2612,7 @@ Range
        UA_Double high;
    } UA_Range;
    
-   #define UA_TYPES_RANGE 182
+   #define UA_TYPES_RANGE 185
    
 EUInformation
 ^^^^^^^^^^^^^
@@ -2553,7 +2626,7 @@ EUInformation
        UA_LocalizedText description;
    } UA_EUInformation;
    
-   #define UA_TYPES_EUINFORMATION 183
+   #define UA_TYPES_EUINFORMATION 186
    
 AxisScaleEnumeration
 ^^^^^^^^^^^^^^^^^^^^
@@ -2568,7 +2641,7 @@ AxisScaleEnumeration
    } UA_AxisScaleEnumeration;
    UA_STATIC_ASSERT(sizeof(UA_AxisScaleEnumeration) == sizeof(UA_Int32), enum_must_be_32bit);
    
-   #define UA_TYPES_AXISSCALEENUMERATION 184
+   #define UA_TYPES_AXISSCALEENUMERATION 187
    
 ComplexNumberType
 ^^^^^^^^^^^^^^^^^
@@ -2580,7 +2653,7 @@ ComplexNumberType
        UA_Float imaginary;
    } UA_ComplexNumberType;
    
-   #define UA_TYPES_COMPLEXNUMBERTYPE 185
+   #define UA_TYPES_COMPLEXNUMBERTYPE 188
    
 DoubleComplexNumberType
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2592,7 +2665,7 @@ DoubleComplexNumberType
        UA_Double imaginary;
    } UA_DoubleComplexNumberType;
    
-   #define UA_TYPES_DOUBLECOMPLEXNUMBERTYPE 186
+   #define UA_TYPES_DOUBLECOMPLEXNUMBERTYPE 189
    
 AxisInformation
 ^^^^^^^^^^^^^^^
@@ -2608,7 +2681,7 @@ AxisInformation
        UA_Double *axisSteps;
    } UA_AxisInformation;
    
-   #define UA_TYPES_AXISINFORMATION 187
+   #define UA_TYPES_AXISINFORMATION 190
    
 XVType
 ^^^^^^
@@ -2620,7 +2693,7 @@ XVType
        UA_Float value;
    } UA_XVType;
    
-   #define UA_TYPES_XVTYPE 188
+   #define UA_TYPES_XVTYPE 191
    
 EnumDefinition
 ^^^^^^^^^^^^^^
@@ -2632,7 +2705,7 @@ EnumDefinition
        UA_EnumField *fields;
    } UA_EnumDefinition;
    
-   #define UA_TYPES_ENUMDEFINITION 189
+   #define UA_TYPES_ENUMDEFINITION 192
    
 DataChangeNotification
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -2646,7 +2719,7 @@ DataChangeNotification
        UA_DiagnosticInfo *diagnosticInfos;
    } UA_DataChangeNotification;
    
-   #define UA_TYPES_DATACHANGENOTIFICATION 190
+   #define UA_TYPES_DATACHANGENOTIFICATION 193
    
 EventNotificationList
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2658,4 +2731,58 @@ EventNotificationList
        UA_EventFieldList *events;
    } UA_EventNotificationList;
    
-   #define UA_TYPES_EVENTNOTIFICATIONLIST 191
+   #define UA_TYPES_EVENTNOTIFICATIONLIST 194
+   
+SessionDiagnosticsDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+   typedef struct {
+       UA_NodeId sessionId;
+       UA_String sessionName;
+       UA_ApplicationDescription clientDescription;
+       UA_String serverUri;
+       UA_String endpointUrl;
+       size_t localeIdsSize;
+       UA_String *localeIds;
+       UA_Double actualSessionTimeout;
+       UA_UInt32 maxResponseMessageSize;
+       UA_DateTime clientConnectionTime;
+       UA_DateTime clientLastContactTime;
+       UA_UInt32 currentSubscriptionsCount;
+       UA_UInt32 currentMonitoredItemsCount;
+       UA_UInt32 currentPublishRequestsInQueue;
+       UA_ServiceCounterDataType totalRequestCount;
+       UA_UInt32 unauthorizedRequestCount;
+       UA_ServiceCounterDataType readCount;
+       UA_ServiceCounterDataType historyReadCount;
+       UA_ServiceCounterDataType writeCount;
+       UA_ServiceCounterDataType historyUpdateCount;
+       UA_ServiceCounterDataType callCount;
+       UA_ServiceCounterDataType createMonitoredItemsCount;
+       UA_ServiceCounterDataType modifyMonitoredItemsCount;
+       UA_ServiceCounterDataType setMonitoringModeCount;
+       UA_ServiceCounterDataType setTriggeringCount;
+       UA_ServiceCounterDataType deleteMonitoredItemsCount;
+       UA_ServiceCounterDataType createSubscriptionCount;
+       UA_ServiceCounterDataType modifySubscriptionCount;
+       UA_ServiceCounterDataType setPublishingModeCount;
+       UA_ServiceCounterDataType publishCount;
+       UA_ServiceCounterDataType republishCount;
+       UA_ServiceCounterDataType transferSubscriptionsCount;
+       UA_ServiceCounterDataType deleteSubscriptionsCount;
+       UA_ServiceCounterDataType addNodesCount;
+       UA_ServiceCounterDataType addReferencesCount;
+       UA_ServiceCounterDataType deleteNodesCount;
+       UA_ServiceCounterDataType deleteReferencesCount;
+       UA_ServiceCounterDataType browseCount;
+       UA_ServiceCounterDataType browseNextCount;
+       UA_ServiceCounterDataType translateBrowsePathsToNodeIdsCount;
+       UA_ServiceCounterDataType queryFirstCount;
+       UA_ServiceCounterDataType queryNextCount;
+       UA_ServiceCounterDataType registerNodesCount;
+       UA_ServiceCounterDataType unregisterNodesCount;
+   } UA_SessionDiagnosticsDataType;
+   
+   #define UA_TYPES_SESSIONDIAGNOSTICSDATATYPE 195
