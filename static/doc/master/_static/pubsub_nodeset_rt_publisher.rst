@@ -686,7 +686,8 @@ The main function contains publisher threads running
        if (!interface) {
            UA_LOG_ERROR(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "Need a network interface to run");
            usage(progname);
-           return -1;
+           UA_Server_delete(server);
+           return 0;
        }
    
        networkAddressUrlPub.networkInterface = UA_STRING(interface);
