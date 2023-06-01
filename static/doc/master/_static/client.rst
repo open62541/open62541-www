@@ -57,6 +57,10 @@ The :ref:`tutorials` provide a good starting point for this.
         *   URI set in the certificate */
        UA_ApplicationDescription clientDescription;
    
+       /* The endpoint for the client to connect to.
+        * Such as "opc.tcp://host:port". */
+       UA_String endpointUrl;
+   
 Connection configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -75,6 +79,13 @@ message.
        UA_String securityPolicyUri; /* SecurityPolicy for the SecureChannel. An
                                      * empty string indicates the client to select
                                      * any matching SecurityPolicy. */
+   
+       UA_Boolean noSession;   /* Only open a SecureChannel, but no Session */
+       UA_Boolean noReconnect; /* Don't reconnect SecureChannel when the connection
+                                * is lost without explicitly closing. */
+       UA_Boolean noNewSession; /* Don't automatically create a new Session when
+                                 * the intial one is lost. Instead abort the
+                                 * connection when the Session is lost. */
    
 If either endpoint or userTokenPolicy has been set (at least one non-zero
 byte in either structure), then the selected Endpoint and UserTokenPolicy
@@ -210,6 +221,27 @@ _copy makes a shallow copy of the plugins.
 
    void
    UA_ClientConfig_clear(UA_ClientConfig *config);
+   
+   /* Configure Username/Password for the Session authentication. Also see
+    * UA_ClientConfig_setAuthenticationCert for x509-based authentication, which is
+    * implemented as a plugin (as it can be based on different crypto
+    * libraries). */
+   static UA_INLINE UA_StatusCode
+   UA_ClientConfig_setAuthenticationUsername(UA_ClientConfig *config,
+                                             const char *username,
+                                             const char *password) {
+       UA_UserNameIdentityToken* identityToken = UA_UserNameIdentityToken_new();
+       if(!identityToken)
+           return UA_STATUSCODE_BADOUTOFMEMORY;
+       identityToken->userName = UA_STRING_ALLOC(username);
+       identityToken->password = UA_STRING_ALLOC(password);
+   
+       UA_ExtensionObject_clear(&config->userIdentityToken);
+       UA_ExtensionObject_setValue(&config->userIdentityToken, identityToken,
+                                   &UA_TYPES[UA_TYPES_USERNAMEIDENTITYTOKEN]);
+       return UA_STATUSCODE_GOOD;
+   }
+   
 Client Lifecycle
 ----------------
 
@@ -269,6 +301,12 @@ error), the client is no longer usable. Create a new client if required.
 .. code-block:: c
 
    
+   /* Connect with the client configuration. For the async connection, finish
+    * connecting via UA_Client_run_iterate (or manually running a configured
+    * external EventLoop). */
+   UA_StatusCode UA_THREADSAFE
+   __UA_Client_connect(UA_Client *client, UA_Boolean async);
+   
    /* Connect to the server. First a SecureChannel is opened, then a Session. The
     * client configuration restricts the SecureChannel selection and contains the
     * UserIdentityToken for the Session.
@@ -276,28 +314,64 @@ error), the client is no longer usable. Create a new client if required.
     * @param client to use
     * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
     * @return Indicates whether the operation succeeded or returns an error code */
-   UA_StatusCode UA_THREADSAFE
-   UA_Client_connect(UA_Client *client, const char *endpointUrl);
+   static UA_INLINE UA_StatusCode
+   UA_Client_connect(UA_Client *client, const char *endpointUrl) {
+       /* Update the configuration */
+       UA_ClientConfig *cc = UA_Client_getConfig(client);
+       cc->noSession = false; /* Open a Session */
+       UA_String_clear(&cc->endpointUrl);
+       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
+   
+       /* Connect */
+       return __UA_Client_connect(client, false);
+   }
    
    /* Connect async (non-blocking) to the server. After initiating the connection,
     * call UA_Client_run_iterate repeatedly until the connection is fully
     * established. You can set a callback to client->config.stateCallback to be
     * notified when the connection status changes. Or use UA_Client_getState to get
     * the state manually. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Client_connectAsync(UA_Client *client, const char *endpointUrl);
+   static UA_INLINE UA_StatusCode
+   UA_Client_connectAsync(UA_Client *client, const char *endpointUrl) {
+       /* Update the configuration */
+       UA_ClientConfig *cc = UA_Client_getConfig(client);
+       cc->noSession = false; /* Open a Session */
+       UA_String_clear(&cc->endpointUrl);
+       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
+   
+       /* Connect */
+       return __UA_Client_connect(client, true);
+   }
    
    /* Connect to the server without creating a session
     *
     * @param client to use
     * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
     * @return Indicates whether the operation succeeded or returns an error code */
-   UA_StatusCode UA_THREADSAFE
-   UA_Client_connectSecureChannel(UA_Client *client, const char *endpointUrl);
+   static UA_INLINE UA_StatusCode
+   UA_Client_connectSecureChannel(UA_Client *client, const char *endpointUrl) {
+       /* Update the configuration */
+       UA_ClientConfig *cc = UA_Client_getConfig(client);
+       cc->noSession = true; /* Don't open a Session */
+       UA_String_clear(&cc->endpointUrl);
+       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
+   
+       /* Connect */
+       return __UA_Client_connect(client, false);
+   }
    
    /* Connect async (non-blocking) only the SecureChannel */
-   UA_StatusCode UA_THREADSAFE
-   UA_Client_connectSecureChannelAsync(UA_Client *client, const char *endpointUrl);
+   static UA_INLINE UA_StatusCode
+   UA_Client_connectSecureChannelAsync(UA_Client *client, const char *endpointUrl) {
+       /* Update the configuration */
+       UA_ClientConfig *cc = UA_Client_getConfig(client);
+       cc->noSession = true; /* Don't open a Session */
+       UA_String_clear(&cc->endpointUrl);
+       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
+   
+       /* Connect */
+       return __UA_Client_connect(client, false);
+   }
    
    /* Connect to the server and create+activate a Session with the given username
     * and password. This first set the UserIdentityToken in the client config and
@@ -305,17 +379,14 @@ error), the client is no longer usable. Create a new client if required.
    static UA_INLINE UA_StatusCode
    UA_Client_connectUsername(UA_Client *client, const char *endpointUrl,
                              const char *username, const char *password) {
-       UA_UserNameIdentityToken* identityToken = UA_UserNameIdentityToken_new();
-       if(!identityToken)
-           return UA_STATUSCODE_BADOUTOFMEMORY;
-       identityToken->userName = UA_STRING_ALLOC(username);
-       identityToken->password = UA_STRING_ALLOC(password);
+       /* Set the user identity token */
        UA_ClientConfig *cc = UA_Client_getConfig(client);
-       UA_ExtensionObject_clear(&cc->userIdentityToken);
-       cc->userIdentityToken.encoding = UA_EXTENSIONOBJECT_DECODED;
-       cc->userIdentityToken.content.decoded.type = &UA_TYPES[UA_TYPES_USERNAMEIDENTITYTOKEN];
-       cc->userIdentityToken.content.decoded.data = identityToken;
-       /* Silence a false-positive deprecated warning */
+       UA_StatusCode res =
+           UA_ClientConfig_setAuthenticationUsername(cc, username, password);
+       if(res != UA_STATUSCODE_GOOD)
+           return res;
+   
+       /* Connect */
        return UA_Client_connect(client, endpointUrl);
    }
    
@@ -345,10 +416,52 @@ error), the client is no longer usable. Create a new client if required.
    UA_StatusCode UA_THREADSAFE
    UA_Client_disconnectAsync(UA_Client *client);
    
-   /* Disconnect the SecureChannel but keep the Session intact (if it exists).
-    * This is always an async (non-blocking) operation. */
+   /* Disconnect the SecureChannel but keep the Session intact (if it exists). */
    UA_StatusCode UA_THREADSAFE
    UA_Client_disconnectSecureChannel(UA_Client *client);
+   
+   /* Disconnect the SecureChannel but keep the Session intact (if it exists). This
+    * is an async operation. Iterate the client until the SecureChannel was fully
+    * cleaned up. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_disconnectSecureChannelAsync(UA_Client *client);
+   
+   /* Get the AuthenticationToken and ServerNonce required to activate the current
+    * Session on a different SecureChannel. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_getSessionAuthenticationToken(UA_Client *client, UA_NodeId *authenticationToken,
+                                           UA_ByteString *serverNonce);
+   
+   /* Re-activate the current session. A change of prefered locales can be done by
+    * updating the client configuration. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_activateCurrentSession(UA_Client *client);
+   
+   /* Async version of UA_Client_activateCurrentSession */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_activateCurrentSessionAsync(UA_Client *client);
+   
+   /* Activate an already created Session. This allows a Session to be transferred
+    * from a different client instance. The AuthenticationToken and ServerNonce
+    * must be provided for this. Both can be retrieved for an activated Session
+    * with UA_Client_getSessionAuthenticationToken.
+    *
+    * The UserIdentityToken used for authentication must be identical to the
+    * original activation of the Session. The UserIdentityToken is set in the
+    * client configuration.
+    *
+    * Note the noNewSession option if there should not be a new Session
+    * automatically created when this one closes. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_activateSession(UA_Client *client,
+                             const UA_NodeId authenticationToken,
+                             const UA_ByteString serverNonce);
+   
+   /* Async version of UA_Client_activateSession */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_activateSessionAsync(UA_Client *client,
+                                  const UA_NodeId authenticationToken,
+                                  const UA_ByteString serverNonce);
    
 Discovery
 ---------
