@@ -1,11 +1,5 @@
 .. _pubsub-subscribe-tutorial:
 
-**IMPORTANT ANNOUNCEMENT**
-
-The PubSub Subscriber API is currently not finished. This Tutorial will be
-continuously extended during the next PubSub batches. More details about the
-PubSub extension and corresponding open62541 API are located here: :ref:`pubsub`.
-
 Subscribing Fields
 ^^^^^^^^^^^^^^^^^^
 The PubSub subscribe example demonstrates the simplest way to receive
@@ -13,26 +7,12 @@ information over two transport layers such as UDP and Ethernet, that are
 published by tutorial_pubsub_publish example and update values in the
 TargetVariables of Subscriber Information Model.
 
-Run step of the application is as mentioned below:
-
-./bin/examples/tutorial_pubsub_subscribe
-
-**Connection handling**
-
-PubSubConnections can be created and deleted on runtime. More details about
-the system preconfiguration and connection can be found in
-``tutorial_pubsub_connection.c``.
-
 .. code-block:: c
 
    
    #include <open62541/plugin/log_stdout.h>
-   #include <open62541/plugin/pubsub_udp.h>
    #include <open62541/server.h>
-   
-   #if defined (UA_ENABLE_PUBSUB_ETH_UADP)
-   #include <open62541/plugin/pubsub_ethernet.h>
-   #endif
+   #include <open62541/server_pubsub.h>
    
    #include <stdio.h>
    
@@ -282,10 +262,66 @@ Followed by the main server code, making use of the above definitions
        /* Return value initialized to Status Good */
        UA_StatusCode retval = UA_STATUSCODE_GOOD;
        UA_Server *server = UA_Server_new();
-       UA_ServerConfig *config = UA_Server_getConfig(server);
    
-       /* Add the PubSub network layer implementation to the server config.
-        * The TransportLayer is acting as factory to create new connections
-        * on runtime. Details about the PubSubTransportLayer can be found inside the
-        * tutorial_pubsub_connection */
-       UA_ServerConfig_addPubSubTransportLayer(config, UA_PubSubTransportLayerUDPMP());
+       /* API calls */
+       /* Add PubSubConnection */
+       retval |= addPubSubConnection(server, transportProfile, networkAddressUrl);
+       if (retval != UA_STATUSCODE_GOOD)
+           return EXIT_FAILURE;
+   
+       /* Add ReaderGroup to the created PubSubConnection */
+       retval |= addReaderGroup(server);
+       if (retval != UA_STATUSCODE_GOOD)
+           return EXIT_FAILURE;
+   
+       /* Add DataSetReader to the created ReaderGroup */
+       retval |= addDataSetReader(server);
+       if (retval != UA_STATUSCODE_GOOD)
+           return EXIT_FAILURE;
+   
+       /* Add SubscribedVariables to the created DataSetReader */
+       retval |= addSubscribedVariables(server, readerIdentifier);
+       if (retval != UA_STATUSCODE_GOOD)
+           return EXIT_FAILURE;
+   
+       retval = UA_Server_runUntilInterrupt(server);
+   
+       UA_Server_delete(server);
+       return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
+   }
+   
+   static void
+   usage(char *progname) {
+       printf("usage: %s <uri> [device]\n", progname);
+   }
+   
+   int main(int argc, char **argv) {
+       UA_String transportProfile =
+           UA_STRING("http://opcfoundation.org/UA-Profile/Transport/pubsub-udp-uadp");
+       UA_NetworkAddressUrlDataType networkAddressUrl =
+           {UA_STRING_NULL , UA_STRING("opc.udp://224.0.0.22:4840/")};
+       if(argc > 1) {
+           if(strcmp(argv[1], "-h") == 0) {
+               usage(argv[0]);
+               return EXIT_SUCCESS;
+           } else if(strncmp(argv[1], "opc.udp://", 10) == 0) {
+               networkAddressUrl.url = UA_STRING(argv[1]);
+           } else if(strncmp(argv[1], "opc.eth://", 10) == 0) {
+               transportProfile =
+                   UA_STRING("http://opcfoundation.org/UA-Profile/Transport/pubsub-eth-uadp");
+               if(argc < 3) {
+                   printf("Error: UADP/ETH needs an interface name\n");
+                   return EXIT_FAILURE;
+               }
+   
+               networkAddressUrl.networkInterface = UA_STRING(argv[2]);
+               networkAddressUrl.url = UA_STRING(argv[1]);
+           } else {
+               printf ("Error: unknown URI\n");
+               return EXIT_FAILURE;
+           }
+       }
+   
+       return run(&transportProfile, &networkAddressUrl);
+   }
+   
