@@ -25,6 +25,11 @@ url = "https://github.com/open62541/open62541/archive/refs/tags/v1.3.tar.gz"
 color = "primary btn-block"
 #color = "secondary"
 
+[[buttons]]
+text = "Single-File Release open62541.h/open62541.c"
+url = "https://github.com/open62541/open62541/releases/tag/v1.3.6"
+color = "primary btn-block"
+
 #[[buttons]]
 #  text = "Single File Release"
 #  url = "#"
