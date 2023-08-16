@@ -157,6 +157,10 @@ The usual usage is as follows:</p>
 <span class="cm">     * - The ApplicationUri set in the ApplicationDescription must match the</span>
 <span class="cm">     *   URI set in the certificate */</span>
 <span class="w">    </span><span class="n">UA_ApplicationDescription</span><span class="w"> </span><span class="n">clientDescription</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* The endpoint for the client to connect to.</span>
+<span class="cm">     * Such as &quot;opc.tcp://host:port&quot;. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">;</span>
 </pre></div>
 </div>
 <section id="connection-configuration">
@@ -173,6 +177,13 @@ message.</p>
 <span class="n">UA_String</span><span class="w"> </span><span class="n">securityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* SecurityPolicy for the SecureChannel. An</span>
 <span class="cm">                              * empty string indicates the client to select</span>
 <span class="cm">                              * any matching SecurityPolicy. */</span>
+
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noSession</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Only open a SecureChannel, but no Session */</span>
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noReconnect</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t reconnect SecureChannel when the connection</span>
+<span class="cm">                         * is lost without explicitly closing. */</span>
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noNewSession</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t automatically create a new Session when</span>
+<span class="cm">                          * the intial one is lost. Instead abort the</span>
+<span class="cm">                          * connection when the Session is lost. */</span>
 </pre></div>
 </div>
 <p>If either endpoint or userTokenPolicy has been set (at least one non-zero
@@ -290,6 +301,26 @@ object.</p>
 _copy makes a shallow copy of the plugins.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">UA_ClientConfig_clear</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Configure Username/Password for the Session authentication. Also see</span>
+<span class="cm"> * UA_ClientConfig_setAuthenticationCert for x509-based authentication, which is</span>
+<span class="cm"> * implemented as a plugin (as it can be based on different crypto</span>
+<span class="cm"> * libraries). */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_ClientConfig_setAuthenticationUsername</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">username</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_UserNameIdentityToken</span><span class="o">*</span><span class="w"> </span><span class="n">identityToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_UserNameIdentityToken_new</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">identityToken</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_BADOUTOFMEMORY</span><span class="p">;</span>
+<span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">userName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">username</span><span class="p">);</span>
+<span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">password</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_ExtensionObject_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_ExtensionObject_setValue</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">,</span><span class="w"> </span><span class="n">identityToken</span><span class="p">,</span>
+<span class="w">                                </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_USERNAMEIDENTITYTOKEN</span><span class="p">]);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -344,35 +375,77 @@ another server. A new client has to be created for that.</p>
 reconnects if necessary.</p>
 <p>If the connection fails unrecoverably (state-&gt;connectStatus is set to an
 error), the client is no longer usable. Create a new client if required.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Connect to the server. First a SecureChannel is opened, then a Session. The</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Connect with the client configuration. For the async connection, finish</span>
+<span class="cm"> * connecting via UA_Client_run_iterate (or manually running a configured</span>
+<span class="cm"> * external EventLoop). */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">async</span><span class="p">);</span>
+
+<span class="cm">/* Connect to the server. First a SecureChannel is opened, then a Session. The</span>
 <span class="cm"> * client configuration restricts the SecureChannel selection and contains the</span>
 <span class="cm"> * UserIdentityToken for the Session.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param client to use</span>
 <span class="cm"> * @param endpointURL to connect (for example &quot;opc.tcp://localhost:4840&quot;)</span>
 <span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Update the configuration */</span>
+<span class="w">    </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">noSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Open a Session */</span>
+<span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">endpointUrl</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Connect */</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span>
 
 <span class="cm">/* Connect async (non-blocking) to the server. After initiating the connection,</span>
 <span class="cm"> * call UA_Client_run_iterate repeatedly until the connection is fully</span>
 <span class="cm"> * established. You can set a callback to client-&gt;config.stateCallback to be</span>
 <span class="cm"> * notified when the connection status changes. Or use UA_Client_getState to get</span>
 <span class="cm"> * the state manually. */</span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Client_connectAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_connectAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Update the configuration */</span>
+<span class="w">    </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">noSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Open a Session */</span>
+<span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">endpointUrl</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Connect */</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="p">}</span>
 
 <span class="cm">/* Connect to the server without creating a session</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param client to use</span>
 <span class="cm"> * @param endpointURL to connect (for example &quot;opc.tcp://localhost:4840&quot;)</span>
 <span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Client_connectSecureChannel</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_connectSecureChannel</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Update the configuration */</span>
+<span class="w">    </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">noSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t open a Session */</span>
+<span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">endpointUrl</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Connect */</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span>
 
 <span class="cm">/* Connect async (non-blocking) only the SecureChannel */</span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Client_connectSecureChannelAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_connectSecureChannelAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Update the configuration */</span>
+<span class="w">    </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">noSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t open a Session */</span>
+<span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">endpointUrl</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Connect */</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span>
 
 <span class="cm">/* Connect to the server and create+activate a Session with the given username</span>
 <span class="cm"> * and password. This first set the UserIdentityToken in the client config and</span>
@@ -380,17 +453,14 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Client_connectUsername</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_UserNameIdentityToken</span><span class="o">*</span><span class="w"> </span><span class="n">identityToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_UserNameIdentityToken_new</span><span class="p">();</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">identityToken</span><span class="p">)</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_BADOUTOFMEMORY</span><span class="p">;</span>
-<span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">userName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">username</span><span class="p">);</span>
-<span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">password</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* Set the user identity token */</span>
 <span class="w">    </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Client_getConfig</span><span class="p">(</span><span class="n">client</span><span class="p">);</span>
-<span class="w">    </span><span class="n">UA_ExtensionObject_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">);</span>
-<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">.</span><span class="n">encoding</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_EXTENSIONOBJECT_DECODED</span><span class="p">;</span>
-<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_USERNAMEIDENTITYTOKEN</span><span class="p">];</span>
-<span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">identityToken</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* Silence a false-positive deprecated warning */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">UA_ClientConfig_setAuthenticationUsername</span><span class="p">(</span><span class="n">cc</span><span class="p">,</span><span class="w"> </span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">res</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Connect */</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">);</span>
 <span class="p">}</span>
 
@@ -420,10 +490,52 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_disconnectAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
 
-<span class="cm">/* Disconnect the SecureChannel but keep the Session intact (if it exists).</span>
-<span class="cm"> * This is always an async (non-blocking) operation. */</span>
+<span class="cm">/* Disconnect the SecureChannel but keep the Session intact (if it exists). */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_disconnectSecureChannel</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
+
+<span class="cm">/* Disconnect the SecureChannel but keep the Session intact (if it exists). This</span>
+<span class="cm"> * is an async operation. Iterate the client until the SecureChannel was fully</span>
+<span class="cm"> * cleaned up. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_disconnectSecureChannelAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
+
+<span class="cm">/* Get the AuthenticationToken and ServerNonce required to activate the current</span>
+<span class="cm"> * Session on a different SecureChannel. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_getSessionAuthenticationToken</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">authenticationToken</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">serverNonce</span><span class="p">);</span>
+
+<span class="cm">/* Re-activate the current session. A change of prefered locales can be done by</span>
+<span class="cm"> * updating the client configuration. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_activateCurrentSession</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
+
+<span class="cm">/* Async version of UA_Client_activateCurrentSession */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_activateCurrentSessionAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
+
+<span class="cm">/* Activate an already created Session. This allows a Session to be transferred</span>
+<span class="cm"> * from a different client instance. The AuthenticationToken and ServerNonce</span>
+<span class="cm"> * must be provided for this. Both can be retrieved for an activated Session</span>
+<span class="cm"> * with UA_Client_getSessionAuthenticationToken.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The UserIdentityToken used for authentication must be identical to the</span>
+<span class="cm"> * original activation of the Session. The UserIdentityToken is set in the</span>
+<span class="cm"> * client configuration.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Note the noNewSession option if there should not be a new Session</span>
+<span class="cm"> * automatically created when this one closes. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_activateSession</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">authenticationToken</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">serverNonce</span><span class="p">);</span>
+
+<span class="cm">/* Async version of UA_Client_activateSession */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_activateSessionAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">authenticationToken</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">serverNonce</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

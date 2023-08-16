@@ -33,7 +33,6 @@ For more information run ``./bin/examples/pubsub_nodeset_rt_publisher -h``.
    #include <open62541/server_config_default.h>
    #include <open62541/plugin/log_stdout.h>
    #include <open62541/types_generated.h>
-   #include <open62541/plugin/pubsub_ethernet.h>
    
    #include "ua_pubsub.h"
    #include "open62541/namespace_example_publisher_generated.h"
@@ -686,16 +685,12 @@ The main function contains publisher threads running
        if (!interface) {
            UA_LOG_ERROR(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "Need a network interface to run");
            usage(progname);
-           return -1;
+           UA_Server_delete(server);
+           return 0;
        }
    
        networkAddressUrlPub.networkInterface = UA_STRING(interface);
        networkAddressUrlPub.url              = UA_STRING(PUBLISHING_MAC_ADDRESS);
-   
-       /* It is possible to use multiple PubSubTransportLayers on runtime.
-        * The correct factory is selected on runtime by the standard defined
-        * PubSub TransportProfileUri's. */
-       UA_ServerConfig_addPubSubTransportLayer(config, UA_PubSubTransportLayerEthernet());
    
        addPubSubConnection(server, &networkAddressUrlPub);
        addPublishedDataSet(server);

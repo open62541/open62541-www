@@ -81,11 +81,11 @@ For more options, run ./bin/examples/pubsub_TSN_loopback -help
    #include <pthread.h>
    
    #include <open62541/server.h>
+   #include <open62541/server_pubsub.h>
    #include <open62541/server_config_default.h>
    #include <open62541/plugin/log_stdout.h>
    #include <open62541/plugin/log.h>
    #include <open62541/types_generated.h>
-   #include <open62541/plugin/pubsub_ethernet.h>
    
    #include <open62541/plugin/securitypolicy_default.h>
    #include <linux/if_link.h>
@@ -1166,8 +1166,7 @@ subscriber function is the routine used by the subscriber thread.
            /* The Subscriber threads wakes up at the configured subscriber wake up
             * percentage (0%) of each cycle */
            clock_nanosleep(CLOCKID, TIMER_ABSTIME, &nextnanosleeptimeSub, NULL);
-           /* Receive and process the incoming data using the subcallback -
-            *  UA_ReaderGroup_subscribeCallback() */
+           /* Receive and process the incoming data */
            subCallback(server, currentReaderGroup);
            /* Calculation of the next wake up time by adding the interval with the
             * previous wake up time */
@@ -1627,7 +1626,8 @@ parallel.
            UA_LOG_ERROR(UA_Log_Stdout, UA_LOGCATEGORY_SERVER,
                         "Need a network interface to run");
            usage(progname);
-           return -1;
+           UA_Server_delete(server);
+           return 0;
        }
    
        if(cycleTimeInMsec < 0.125) {

@@ -119,9 +119,8 @@ encoding.</p>
 the system preconfiguration and connection can be found in
 <code class="docutils literal notranslate"><span class="pre">tutorial_pubsub_connection.c</span></code>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_ethernet.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_udp.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_pubsub.h&gt;</span>
 
 <span class="n">UA_NodeId</span><span class="w"> </span><span class="n">connectionIdent</span><span class="p">,</span><span class="w"> </span><span class="n">publishedDataSetIdent</span><span class="p">,</span><span class="w"> </span><span class="n">writerGroupIdent</span><span class="p">;</span>
 
@@ -251,11 +250,53 @@ which already contains the decoding code for UADP messages.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">transportProfile</span><span class="p">,</span>
 <span class="w">               </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="o">*</span><span class="n">networkAddressUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
-<span class="w">    </span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Details about the connection configuration and handling are located in</span>
-<span class="cm">     * the pubsub connection tutorial */</span>
-<span class="w">    </span><span class="n">UA_ServerConfig_addPubSubTransportLayer</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">UA_PubSubTransportLayerUDPMP</span><span class="p">());</span>
+<span class="w">    </span><span class="n">addPubSubConnection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">transportProfile</span><span class="p">,</span><span class="w"> </span><span class="n">networkAddressUrl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addPublishedDataSet</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addDataSetField</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addWriterGroup</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addDataSetWriter</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">usage</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">progname</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;usage: %s &lt;uri&gt; [device]</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">progname</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">transportProfile</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;http://opcfoundation.org/UA-Profile/Transport/pubsub-udp-uadp&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="n">networkAddressUrl</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="p">{</span><span class="n">UA_STRING_NULL</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;opc.udp://224.0.0.22:4840/&quot;</span><span class="p">)};</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strcmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;-h&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">usage</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;opc.udp://&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">networkAddressUrl</span><span class="p">.</span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strncmp</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="s">&quot;opc.eth://&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">transportProfile</span><span class="w"> </span><span class="o">=</span>
+<span class="w">                </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;http://opcfoundation.org/UA-Profile/Transport/pubsub-eth-uadp&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Error: UADP/ETH needs an interface name</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">networkAddressUrl</span><span class="p">.</span><span class="n">networkInterface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="w">            </span><span class="n">networkAddressUrl</span><span class="p">.</span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Error: unknown URI</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="o">&amp;</span><span class="n">transportProfile</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">networkAddressUrl</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>

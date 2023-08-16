@@ -23,9 +23,8 @@ the system preconfiguration and connection can be found in
 
    
    #include <open62541/plugin/log_stdout.h>
-   #include <open62541/plugin/pubsub_ethernet.h>
-   #include <open62541/plugin/pubsub_udp.h>
    #include <open62541/server.h>
+   #include <open62541/server_pubsub.h>
    
    UA_NodeId connectionIdent, publishedDataSetIdent, writerGroupIdent;
    
@@ -173,8 +172,50 @@ It follows the main server code, making use of the above definitions.
    static int run(UA_String *transportProfile,
                   UA_NetworkAddressUrlDataType *networkAddressUrl) {
        UA_Server *server = UA_Server_new();
-       UA_ServerConfig *config = UA_Server_getConfig(server);
    
-       /* Details about the connection configuration and handling are located in
-        * the pubsub connection tutorial */
-       UA_ServerConfig_addPubSubTransportLayer(config, UA_PubSubTransportLayerUDPMP());
+       addPubSubConnection(server, transportProfile, networkAddressUrl);
+       addPublishedDataSet(server);
+       addDataSetField(server);
+       addWriterGroup(server);
+       addDataSetWriter(server);
+   
+       UA_StatusCode retval = UA_Server_runUntilInterrupt(server);
+   
+       UA_Server_delete(server);
+       return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
+   }
+   
+   static void
+   usage(char *progname) {
+       printf("usage: %s <uri> [device]\n", progname);
+   }
+   
+   int main(int argc, char **argv) {
+       UA_String transportProfile =
+           UA_STRING("http://opcfoundation.org/UA-Profile/Transport/pubsub-udp-uadp");
+       UA_NetworkAddressUrlDataType networkAddressUrl =
+           {UA_STRING_NULL , UA_STRING("opc.udp://224.0.0.22:4840/")};
+   
+       if (argc > 1) {
+           if (strcmp(argv[1], "-h") == 0) {
+               usage(argv[0]);
+               return EXIT_SUCCESS;
+           } else if (strncmp(argv[1], "opc.udp://", 10) == 0) {
+               networkAddressUrl.url = UA_STRING(argv[1]);
+           } else if (strncmp(argv[1], "opc.eth://", 10) == 0) {
+               transportProfile =
+                   UA_STRING("http://opcfoundation.org/UA-Profile/Transport/pubsub-eth-uadp");
+               if (argc < 3) {
+                   printf("Error: UADP/ETH needs an interface name\n");
+                   return EXIT_FAILURE;
+               }
+               networkAddressUrl.networkInterface = UA_STRING(argv[2]);
+               networkAddressUrl.url = UA_STRING(argv[1]);
+           } else {
+               printf("Error: unknown URI\n");
+               return EXIT_FAILURE;
+           }
+       }
+   
+       return run(&transportProfile, &networkAddressUrl);
+   }

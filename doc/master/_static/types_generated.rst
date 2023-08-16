@@ -5,7 +5,7 @@ binary encoding, ...).
 .. code-block:: c
 
    #define UA_TYPES_COUNT 196
-   extern const UA_DataType UA_TYPES[UA_TYPES_COUNT];
+   extern UA_DataType UA_TYPES[UA_TYPES_COUNT];
    
 Boolean
 ^^^^^^^

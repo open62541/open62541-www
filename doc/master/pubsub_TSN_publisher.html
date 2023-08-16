@@ -160,7 +160,6 @@ Ethernet</p>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/types_generated.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_ethernet.h&gt;</span>
 
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/securitypolicy_default.h&gt;</span>
 
@@ -1180,7 +1179,7 @@ subscriber function is the routine used by the subscriber thread.</p>
 <span class="w">    </span><span class="k">while</span><span class="p">(</span><span class="o">*</span><span class="n">runningSub</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="cm">/* The Subscriber threads wakes up at the configured subscriber wake up percentage (0%) of each cycle */</span>
 <span class="w">        </span><span class="n">clock_nanosleep</span><span class="p">(</span><span class="n">CLOCKID</span><span class="p">,</span><span class="w"> </span><span class="n">TIMER_ABSTIME</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nextnanosleeptimeSub</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
-<span class="w">        </span><span class="cm">/* Receive and process the incoming data using the subcallback - UA_ReaderGroup_subscribeCallback() */</span>
+<span class="w">        </span><span class="cm">/* Receive and process the incoming data */</span>
 <span class="w">        </span><span class="n">subCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">currentReaderGroup</span><span class="p">);</span>
 <span class="w">        </span><span class="cm">/* Calculation of the next wake up time by adding the interval with the previous wake up time */</span>
 <span class="w">        </span><span class="n">nextnanosleeptimeSub</span><span class="p">.</span><span class="n">tv_nsec</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="n">__syscall_slong_t</span><span class="p">)</span><span class="n">subInterval_ns</span><span class="p">;</span>
@@ -1719,7 +1718,8 @@ parallel.</p>
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">interface</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Need a network interface to run&quot;</span><span class="p">);</span>
 <span class="w">        </span><span class="n">usage</span><span class="p">(</span><span class="n">progname</span><span class="p">);</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">cycleTimeInMsec</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.125</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
