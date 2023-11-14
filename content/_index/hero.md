@@ -27,4 +27,10 @@ subtitle = "Open Source OPC UA licensed under the MPL v2.0"
   url = "https://github.com/open62541/open62541"
   color = "info"
 
+[[buttons]]
+    text = "Official Support"
+    url = "doc/open62541_product_sheet_web.pdf"
+    color = "secondary" # primary, secondary, success, danger, warning, info, light, dark, link - default: primary
+
+
 +++
