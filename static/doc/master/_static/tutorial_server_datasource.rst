@@ -176,8 +176,7 @@ It follows the main server code, making use of the above definitions.
        addCurrentTimeDataSourceVariable(server);
        addCurrentTimeExternalDataSource(server);
    
-       UA_StatusCode retval = UA_Server_runUntilInterrupt(server);
-   
+       UA_Server_runUntilInterrupt(server);
        UA_Server_delete(server);
-       return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
+       return 0;
    }

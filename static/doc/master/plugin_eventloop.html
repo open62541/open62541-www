@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event Loop Subsystem &mdash; open62541 1.3.5-undefined documentation</title>
+  <title>Event Loop Subsystem &mdash; open62541 1.3.8-undefined documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -12,14 +12,14 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/documentation_options.js?v=6c9bec22"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Public Key Infrastructure Integration" href="plugin_pki.html" />
-    <link rel="prev" title="PubSub Connection Plugin API" href="plugin_pubsub.html" /> 
+    <link rel="prev" title="Access Control Plugin API" href="plugin_accesscontrol.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,16 +60,14 @@
 <li class="toctree-l1 current"><a class="reference internal" href="plugin.html">Plugin API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin_nodestore.html">Node Store Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">Access Control Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_pubsub.html">PubSub Connection Plugin API</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Event Loop Subsystem</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#timer-policies">Timer Policies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#event-loop">Event Loop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#event-source">Event Source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connection-manager">Connection Manager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#interrupt-manager">Interrupt Manager</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#posix-specific-implementation">POSIX-Specific Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#posix-eventlop-implementation">POSIX EventLop Implementation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tcp-connection-manager">TCP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#udp-connection-manager">UDP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ethernet-connection-manager">Ethernet Connection Manager</a></li>
@@ -113,7 +111,7 @@
            <div itemprop="articleBody">
              
   <section id="event-loop-subsystem">
-<h1>Event Loop Subsystem<a class="headerlink" href="#event-loop-subsystem" title="Permalink to this heading">¶</a></h1>
+<h1>Event Loop Subsystem<a class="headerlink" href="#event-loop-subsystem" title="Link to this heading">¶</a></h1>
 <p>An OPC UA-enabled application can have several clients and servers. And
 server can serve different transport-level protocols for OPC UA. The
 EventLoop is a central module that provides a unified control-flow for all of
@@ -125,7 +123,7 @@ EventLoop plugin implementation must know implementation details of the
 ConnectionManager implementations. So the EventLoop can extract socket
 information, etc. from the ConnectionManagers.</p>
 <section id="timer-policies">
-<h2>Timer Policies<a class="headerlink" href="#timer-policies" title="Permalink to this heading">¶</a></h2>
+<h2>Timer Policies<a class="headerlink" href="#timer-policies" title="Link to this heading">¶</a></h2>
 <p>A timer comes with a cyclic interval in which a callback is executed. If an
 application is congested the interval can be missed. Two different policies
 can be used when this happens. Either schedule the next execution after the
@@ -139,7 +137,7 @@ regular interval with respect to the original basetime.</p>
 </div>
 </section>
 <section id="event-loop">
-<h2>Event Loop<a class="headerlink" href="#event-loop" title="Permalink to this heading">¶</a></h2>
+<h2>Event Loop<a class="headerlink" href="#event-loop" title="Link to this heading">¶</a></h2>
 <p>The EventLoop implementation is part of the selected architecture. For
 example, “Win32/POSIX” stands for a Windows environment with an EventLoop
 that uses the POSIX API. Several EventLoops can be instantiated in parallel.
@@ -169,7 +167,10 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * The configuration should be set before the EventLoop is started */</span>
 
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">;</span><span class="w"> </span><span class="cm">/* See the implementation-specific documentation */</span>
+
+<span class="w">    </span><span class="cm">/* See the implementation-specific documentation for possible parameters.</span>
+<span class="cm">     * The params map is cleaned up when the EventLoop is _free&#39;d. */</span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* EventLoop Lifecycle</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~</span>
@@ -200,18 +201,25 @@ But the globally defined functions are the same everywhere.</p>
 <span class="w">    </span><span class="cm">/* EventLoop Time Domain</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~</span>
 <span class="cm">     * Each EventLoop instance can manage its own time domain. This affects the</span>
-<span class="cm">     * execution of timed/cyclic callbacks and time-based sending of network</span>
-<span class="cm">     * packets (if this is implemented). Managing independent time domains is</span>
-<span class="cm">     * important when different parts of a system a synchronized to different</span>
-<span class="cm">     * external (network-wide) clocks.</span>
+<span class="cm">     * execution of timed callbacks and time-based sending of network packets.</span>
+<span class="cm">     * Managing independent time domains is important when different parts of</span>
+<span class="cm">     * the same system are synchronized to different external master clocks.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Each EventLoop uses a &quot;normal&quot; and a &quot;monotonic&quot; clock. The monotonic</span>
+<span class="cm">     * clock does not (necessarily) conform to the current wallclock date. But</span>
+<span class="cm">     * its time intervals are more precise. So it is used for all internally</span>
+<span class="cm">     * scheduled events of the EventLoop (e.g. timed callbacks and time-based</span>
+<span class="cm">     * sending of network packets). The normal and monotonic clock sources can</span>
+<span class="cm">     * be configured via parameters before starting the EventLoop. See the</span>
+<span class="cm">     * architecture-specific documentation for that.</span>
 <span class="cm">     *</span>
 <span class="cm">     * Note that the logger configured in the EventLoop generates timestamps</span>
-<span class="cm">     * internally as well. If the logger uses a different time domain than the</span>
+<span class="cm">     * independently. If the logger uses a different time domain than the</span>
 <span class="cm">     * EventLoop, discrepancies may appear in the logs.</span>
 <span class="cm">     *</span>
-<span class="cm">     * The time domain of the EventLoop is exposed via the following functons.</span>
-<span class="cm">     * See `open62541/types.h` for the documentation of their equivalent</span>
-<span class="cm">     * globally defined functions. */</span>
+<span class="cm">     * The EventLoop clocks can be read via the following functons. See</span>
+<span class="cm">     * `open62541/types.h` for the documentation of their equivalent globally</span>
+<span class="cm">     * defined functions. */</span>
 
 <span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">dateTime_now</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">dateTime_nowMonotonic</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
@@ -283,7 +291,7 @@ But the globally defined functions are the same everywhere.</p>
 </div>
 </section>
 <section id="event-source">
-<h2>Event Source<a class="headerlink" href="#event-source" title="Permalink to this heading">¶</a></h2>
+<h2>Event Source<a class="headerlink" href="#event-source" title="Link to this heading">¶</a></h2>
 <p>Event Sources are attached to an EventLoop. Typically the event source and
 the EventLoop are developed together and share a private API in the
 background.</p>
@@ -327,7 +335,7 @@ background.</p>
 </div>
 </section>
 <section id="connection-manager">
-<h2>Connection Manager<a class="headerlink" href="#connection-manager" title="Permalink to this heading">¶</a></h2>
+<h2>Connection Manager<a class="headerlink" href="#connection-manager" title="Link to this heading">¶</a></h2>
 <p>Every Connection is created by a ConnectionManager. Every ConnectionManager
 belongs to just one application. A ConnectionManager can act purely as a
 passive “Factory” for Connections. But it can also be stateful. For example,
@@ -449,7 +457,7 @@ connections that are each bound to an MQTT topic.</p>
 </div>
 </section>
 <section id="interrupt-manager">
-<h2>Interrupt Manager<a class="headerlink" href="#interrupt-manager" title="Permalink to this heading">¶</a></h2>
+<h2>Interrupt Manager<a class="headerlink" href="#interrupt-manager" title="Link to this heading">¶</a></h2>
 <p>The Interrupt Manager allows to register to listen for system interrupts.
 Triggering the interrupt calls the callback associated with it.</p>
 <p>The implementations of the interrupt manager for the different platforms
@@ -491,21 +499,27 @@ within the interrupt callback.</p>
 <span class="w">    </span><span class="kt">void</span>
 <span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">deregisterInterrupt</span><span class="p">)(</span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span><span class="n">im</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">interruptHandle</span><span class="p">);</span>
 <span class="p">};</span>
+
+<span class="cp">#if defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32)</span>
 </pre></div>
 </div>
 </section>
-<section id="posix-specific-implementation">
-<h2>POSIX-Specific Implementation<a class="headerlink" href="#posix-specific-implementation" title="Permalink to this heading">¶</a></h2>
-<p>The POSIX compatibility of WIN32 is ‘close enough’. So a joint implementation
+<section id="posix-eventlop-implementation">
+<h2>POSIX EventLop Implementation<a class="headerlink" href="#posix-eventlop-implementation" title="Link to this heading">¶</a></h2>
+<p>The POSIX compatibility of Win32 is ‘close enough’. So a joint implementation
 is provided.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32)</span>
-
-<span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
-<span class="nf">UA_EventLoop_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
-</pre></div>
-</div>
+<p>Configuration parameters (only Linux and BSDs, must be set before start to
+take effect):
+- 0:clock-source [int32]: Clock source (default: CLOCK_REALTIME).
+- 0:clock-source-monotonic [int32]: Clock source used for time intervals. A</p>
+<blockquote>
+<div><p>non-monotonic source can be used as well. But expect accordingly longer
+sleep-times for timed events when the clock is set to the past. See the
+man-page of “clock_gettime” on how to get a clock source id for a
+character-device such as /dev/ptp0. (default: CLOCK_MONOTONIC_RAW)*/</p>
+</div></blockquote>
 <section id="tcp-connection-manager">
-<h3>TCP Connection Manager<a class="headerlink" href="#tcp-connection-manager" title="Permalink to this heading">¶</a></h3>
+<h3>TCP Connection Manager<a class="headerlink" href="#tcp-connection-manager" title="Link to this heading">¶</a></h3>
 <p>Listens on the network and manages TCP connections. This should be available
 for all architectures.</p>
 <p>The <cite>openConnection</cite> callback is used to create both client and server
@@ -517,13 +531,20 @@ device).</p>
 <p>The <cite>connectionCallback</cite> of the server socket and <cite>context</cite> of the server
 socket is reused for each new connection. But the key-value parameters for
 the first callback are different between server and client connections.</p>
-<p>The following list defines the parameters and their type. Note that some
-parameters are only set for the first callback when a new connection opens.</p>
-<p>Configuration parameters for the entire ConnectionManager:
-- 0:recv-bufsize [uint32]: Size of the buffer that is allocated for receiving</p>
+<p>Configuration parameters for the ConnectionManager (set before _start):
+- 0:recv-bufsize [uint32]: Size of the buffer that is statically allocated</p>
 <blockquote>
-<div><p>messages (default 64kB).</p>
+<div><p>for receiving messages (default: 65536).</p>
 </div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>0:send-bufsize [uint32]: Size of the statically allocated buffer for</dt><dd><p>sending messages. This then becomes an upper bound for the message
+size. If undefined a fresh buffer is allocated for every
+<cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+</dd>
+</dl>
+</li>
+</ul>
 <p>Open Connection Parameters:
 - 0:address [string | array of string]: Hostname or IPv4/v6 address for the</p>
 <blockquote>
@@ -534,6 +555,12 @@ for listening (default: listen on all interfaces).</p>
 <ul class="simple">
 <li><p>0:port [uint16]: Port of the target host (required).</p></li>
 <li><p>0:listen [boolean]: Listen-connection or active-connection (default: false)</p></li>
+<li><dl class="simple">
+<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
+provided parameters (default: false)</p>
+</dd>
+</dl>
+</li>
 </ul>
 <p>Connection Callback Parameters (first callback only):
 - Active Connection</p>
@@ -561,25 +588,30 @@ No additional parameters for sending over an established TCP socket defined.</p>
 </div>
 </section>
 <section id="udp-connection-manager">
-<h3>UDP Connection Manager<a class="headerlink" href="#udp-connection-manager" title="Permalink to this heading">¶</a></h3>
+<h3>UDP Connection Manager<a class="headerlink" href="#udp-connection-manager" title="Link to this heading">¶</a></h3>
 <p>Manages UDP connections. This should be available for all architectures.</p>
 <p>The configuration parameters have to set before calling _start to take
 effect.</p>
-<p>Configuration Parameters:</p>
+<p>Configuration parameters for the ConnectionManager (set before _start):
+- 0:recv-bufsize [uint32]: Size of the buffer that is statically allocated</p>
+<blockquote>
+<div><p>for receiving messages (default: 65536).</p>
+</div></blockquote>
 <ul class="simple">
 <li><dl class="simple">
-<dt>0:recv-bufsize [uint32]: Size of the buffer that is allocated for receiving</dt><dd><p>messages (default 64kB).</p>
+<dt>0:send-bufsize [uint32]: Size of the statically allocated buffer for</dt><dd><p>sending messages. This then becomes an upper bound for the message
+size. If undefined a fresh buffer is allocated for every
+<cite>allocNetworkBuffer</cite> (default: no buffer).</p>
 </dd>
 </dl>
 </li>
 </ul>
-<p>Open Connection Parameters:</p>
+<p>Open Connection Parameters:
+- 0:listen [boolean]: Use the connection for listening or for sending</p>
+<blockquote>
+<div><p>(default: false)</p>
+</div></blockquote>
 <ul class="simple">
-<li><dl class="simple">
-<dt>0:listen [boolean]: Use the connection for listening or for sending</dt><dd><p>(default: false)</p>
-</dd>
-</dl>
-</li>
 <li><dl class="simple">
 <dt>0:address [string | string array]: Hostname (or IPv4/v6 address) for</dt><dd><p>sending or receiving. A scalar is required for sending. For listening a
 string array for the list-hostnames is possible as well (default: list
@@ -623,15 +655,9 @@ provided parameters (default: false)</p>
 </dl>
 </li>
 </ul>
-<p>Connection Callback Paramters:</p>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:remote-hostname [string]: When a new connection is opened by listening on</dt><dd><p>a port, the first callback contains the remote
-hostname parameter.</p>
-</dd>
-</dl>
-</li>
-</ul>
+<p>Connection Callback Paramters:
+- 0:remote-address [string]: Contains the remote IP address.
+- 0:remote-port [uint16]: Contains the remote port.</p>
 <p>Send Parameters:
 No additional parameters for sending over an UDP connection defined.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
@@ -640,11 +666,23 @@ No additional parameters for sending over an UDP connection defined.</p>
 </div>
 </section>
 <section id="ethernet-connection-manager">
-<h3>Ethernet Connection Manager<a class="headerlink" href="#ethernet-connection-manager" title="Permalink to this heading">¶</a></h3>
+<h3>Ethernet Connection Manager<a class="headerlink" href="#ethernet-connection-manager" title="Link to this heading">¶</a></h3>
 <p>Listens on the network and manages UDP connections. This should be available
 for all architectures.</p>
-<p>The configuration parameters have to set before calling _start to take
-effect.</p>
+<p>Configuration parameters for the ConnectionManager (set before _start):
+- 0:recv-bufsize [uint32]: Size of the buffer that is statically allocated</p>
+<blockquote>
+<div><p>for receiving messages (default: 65536).</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>0:send-bufsize [uint32]: Size of the statically allocated buffer for</dt><dd><p>sending messages. This then becomes an upper bound for the message
+size. If undefined a fresh buffer is allocated for every
+<cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+</dd>
+</dl>
+</li>
+</ul>
 <p>Open Connection Parameters:
 - 0:listen [bool]: The connection is either for sending or for listening</p>
 <blockquote>
@@ -671,19 +709,59 @@ with different EtherTypes.</p>
 </dd>
 </dl>
 </li>
+<li><p>0:priority [int32]: Set the socket priority for sending (cf. SO_PRIORITY)</p></li>
 <li><p>0:vid [uint16]: 12-bit VLAN identifier (optional for send connections).</p></li>
 <li><p>0:pcp [byte]: 3-bit priority code point (optional for send connections).</p></li>
-<li><p>0:dei [bool]: 1-bit drop eligible indicator (optional for seond connections).</p></li>
+<li><p>0:dei [bool]: 1-bit drop eligible indicator (optional for send connections).</p></li>
+<li><dl class="simple">
+<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
+provided parameters (default: false)</p>
+</dd>
+</dl>
+</li>
 </ul>
-<p>Send Parameters:
-No additional parameters for sending over an Ethernet connection defined.</p>
+<p>Sending with a txtime (for Time-Sensitive Networking) is possible on recent
+Linux kernels, If enabled for the socket, then a txtime parameters can be
+passed to <cite>sendWithConnection</cite>. Note that the clock source for txtime sending
+is the monotonic clock source set for the entire EventLoop. Check the
+EventLoop parameters for how to set that e.g. to a PTP clock source.</p>
+<p>The txtime configuration uses Linux conventions:
+- 0:txtime-enable [bool]: Enable sending with a txtime for the connection</p>
+<blockquote>
+<div><p>(default: false).</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>0:txtime-flags [uint32]: txtime flags set for the socket (default:</dt><dd><p>SOF_TXTIME_REPORT_ERRORS).</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Send Parameters (only with txtime enabled for the connection):
+- 0:txtime [datetime]: Time when the message is sent out (Datetime has 100ns</p>
+<blockquote>
+<div><p>precision) for the “monotonic” clock source of the
+EventLoop.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>0:txtime-pico [uint16]: Picoseconds added to the txtime timestamp</dt><dd><p>(default: 0).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>0:txtime-drop-late [bool]: Drop message if it cannot be sent in time</dt><dd><p>(default: true).</p>
+</dd>
+</dl>
+</li>
+</ul>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_Ethernet</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="mqtt-connection-manager">
-<h3>MQTT Connection Manager<a class="headerlink" href="#mqtt-connection-manager" title="Permalink to this heading">¶</a></h3>
+<h3>MQTT Connection Manager<a class="headerlink" href="#mqtt-connection-manager" title="Link to this heading">¶</a></h3>
 <p>The MQTT ConnectionManager reuses the TCP ConnectionManager that is
 configured in the EventLoop. Hence the MQTT ConnectionManager is platform
 agnostic and does not require porting. An MQTT connection is for a
@@ -706,6 +784,12 @@ separate connections are created for each topic and for each direction
 </dd>
 </dl>
 </li>
+<li><dl class="simple">
+<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
+provided parameters (default: false)</p>
+</dd>
+</dl>
+</li>
 <li><p>0:topic [string]: Topic to which the connection is associated (required).</p></li>
 <li><dl class="simple">
 <dt>0:subscribe [bool]: Subscribe to the topic (default: false).</dt><dd><p>Otherwise it is only possible to publish on the topic.
@@ -723,7 +807,7 @@ Subscribed topics can also be published to.</p>
 </div>
 </section>
 <section id="signal-interrupt-manager">
-<h3>Signal Interrupt Manager<a class="headerlink" href="#signal-interrupt-manager" title="Permalink to this heading">¶</a></h3>
+<h3>Signal Interrupt Manager<a class="headerlink" href="#signal-interrupt-manager" title="Link to this heading">¶</a></h3>
 <p>Create an instance of the interrupt manager that handles POSX signals. This
 interrupt manager takes the numerical interrupt identifiers from &lt;signal.h&gt;
 for the interruptHandle.</p>
@@ -741,7 +825,7 @@ for the interruptHandle.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plugin_pubsub.html" class="btn btn-neutral float-left" title="PubSub Connection Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plugin_accesscontrol.html" class="btn btn-neutral float-left" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="plugin_pki.html" class="btn btn-neutral float-right" title="Public Key Infrastructure Integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

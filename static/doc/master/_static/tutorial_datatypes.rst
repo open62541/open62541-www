@@ -20,6 +20,7 @@ sure to compare with the type definitions in ``types.h``.
    #include <open62541/server_config_default.h>
    
    #include <stdlib.h>
+   #include <stdio.h>
    
    static void
    variables_basic(void) {

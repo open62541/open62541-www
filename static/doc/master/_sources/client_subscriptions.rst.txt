@@ -277,5 +277,3 @@ settings are not stored in the client.
            &UA_TYPES[UA_TYPES_SETTRIGGERINGRESPONSE],
            userdata, requestId);
    }
-   
-   #endif

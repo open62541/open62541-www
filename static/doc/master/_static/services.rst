@@ -112,7 +112,7 @@ Integrity for Message exchange during a Session.
 .. code-block:: c
 
    void Service_OpenSecureChannel(UA_Server *server, UA_SecureChannel* channel,
-                                  const UA_OpenSecureChannelRequest *request,
+                                  UA_OpenSecureChannelRequest *request,
                                   UA_OpenSecureChannelResponse *response);
    
 CloseSecureChannel Service
@@ -173,7 +173,9 @@ requests shall respond with Bad_RequestCancelledByClient.
 
 .. code-block:: c
 
-   /* Not Implemented */
+   void Service_Cancel(UA_Server *server, UA_Session *session,
+                       const UA_CancelRequest *request,
+                       UA_CancelResponse *response);
    
 NodeManagement Service Set
 --------------------------

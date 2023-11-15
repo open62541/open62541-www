@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subscriber Realtime example using custom nodes &mdash; open62541 1.3.5-undefined documentation</title>
+  <title>Subscriber Realtime example using custom nodes &mdash; open62541 1.3.8-undefined documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -12,9 +12,9 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/documentation_options.js?v=6c9bec22"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -84,7 +84,7 @@
            <div itemprop="articleBody">
              
   <section id="subscriber-realtime-example-using-custom-nodes">
-<span id="pubsub-nodeset-subscriber-tutorial"></span><h1>Subscriber Realtime example using custom nodes<a class="headerlink" href="#subscriber-realtime-example-using-custom-nodes" title="Permalink to this heading">¶</a></h1>
+<span id="pubsub-nodeset-subscriber-tutorial"></span><h1>Subscriber Realtime example using custom nodes<a class="headerlink" href="#subscriber-realtime-example-using-custom-nodes" title="Link to this heading">¶</a></h1>
 <p>The purpose of this example file is to use the custom nodes of the XML
 file(subDataModel.xml) for subscriber. This Subscriber example uses the two
 custom nodes (SubscriberCounterVariable and Pressure) created using the XML
@@ -230,48 +230,6 @@ is added to seconds field and nanosecond field is set to zero</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p><strong>Custom callback handling</strong></p>
-<p>Custom callback thread handling overwrites the default timer based
-callback function with the custom (user-specified) callback interval.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a callback for cyclic repetition */</span>
-<span class="k">static</span><span class="w"> </span><span class="n">UA_StatusCode</span>
-<span class="nf">addPubSubApplicationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ServerCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
-<span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">callbackId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Initialize arguments required for the thread to run */</span>
-<span class="w">    </span><span class="n">threadArg</span><span class="w"> </span><span class="o">*</span><span class="n">threadArguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">threadArg</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">UA_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">threadArg</span><span class="p">));</span>
-
-<span class="w">    </span><span class="cm">/* Pass the value required for the threads */</span>
-<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">server</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">server</span><span class="p">;</span>
-<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">data</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
-<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">callback</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
-<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">interval_ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">;</span>
-<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">callbackId</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">callbackId</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* Create the subscriber thread with the required priority and core affinity */</span>
-<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">threadNameSub</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Subscriber&quot;</span><span class="p">;</span>
-<span class="w">    </span><span class="n">subthreadID</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="n">threadCreation</span><span class="p">(</span><span class="n">subPriority</span><span class="p">,</span><span class="w"> </span><span class="n">pubSubCore</span><span class="p">,</span><span class="w"> </span><span class="n">subscriber</span><span class="p">,</span><span class="w"> </span><span class="n">threadNameSub</span><span class="p">,</span><span class="w"> </span><span class="n">threadArguments</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="k">static</span><span class="w"> </span><span class="n">UA_StatusCode</span>
-<span class="nf">changePubSubApplicationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Callback interval need not be modified as it is thread based implementation.</span>
-<span class="cm">     * The thread uses nanosleep for calculating cycle time and modification in</span>
-<span class="cm">     * nanosleep value changes cycle time */</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="cm">/* Remove the callback added for cyclic repetition */</span>
-<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
-<span class="nf">removePubSubApplicationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">callbackId</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">pthread_join</span><span class="p">((</span><span class="n">pthread_t</span><span class="p">)</span><span class="n">callbackId</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
-<span class="w">        </span><span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
-<span class="w">                       </span><span class="s">&quot;Pthread Join Failed thread: %lu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="kt">unsigned</span><span class="p">)</span><span class="n">callbackId</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
 <p><strong>External data source handling</strong></p>
 <p>If the external data source is written over the information model, the
 externalDataWriteCallback will be triggered. The user has to take care and assure
@@ -332,9 +290,7 @@ is removed.</p>
 <span class="w">    </span><span class="n">memset</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">readerGroupConfig</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_ReaderGroupConfig</span><span class="p">));</span>
 <span class="w">    </span><span class="n">readerGroupConfig</span><span class="p">.</span><span class="n">name</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;ReaderGroup1&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="n">readerGroupConfig</span><span class="p">.</span><span class="n">rtLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_PUBSUB_RT_FIXED_SIZE</span><span class="p">;</span>
-<span class="w">    </span><span class="n">readerGroupConfig</span><span class="p">.</span><span class="n">pubsubManagerCallback</span><span class="p">.</span><span class="n">addCustomCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">addPubSubApplicationCallback</span><span class="p">;</span>
-<span class="w">    </span><span class="n">readerGroupConfig</span><span class="p">.</span><span class="n">pubsubManagerCallback</span><span class="p">.</span><span class="n">changeCustomCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">changePubSubApplicationCallback</span><span class="p">;</span>
-<span class="w">    </span><span class="n">readerGroupConfig</span><span class="p">.</span><span class="n">pubsubManagerCallback</span><span class="p">.</span><span class="n">removeCustomCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">removePubSubApplicationCallback</span><span class="p">;</span>
+
 <span class="w">    </span><span class="n">UA_Server_addReaderGroup</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">connectionIdentSubscriber</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">readerGroupConfig</span><span class="p">,</span>
 <span class="w">                             </span><span class="o">&amp;</span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
 <span class="p">}</span>
@@ -694,7 +650,7 @@ created thread.</p>
 <span class="w">    </span><span class="n">addReaderGroup</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 <span class="w">    </span><span class="n">addDataSetReader</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_Server_freezeReaderGroupConfiguration</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
-<span class="w">    </span><span class="n">UA_Server_setReaderGroupOperational</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_enableReaderGroup</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
 <span class="w">    </span><span class="n">serverConfigStruct</span><span class="w"> </span><span class="o">*</span><span class="n">serverConfig</span><span class="p">;</span>
 <span class="w">    </span><span class="n">serverConfig</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">serverConfigStruct</span><span class="o">*</span><span class="p">)</span><span class="n">UA_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">serverConfigStruct</span><span class="p">));</span>
 <span class="w">    </span><span class="n">serverConfig</span><span class="o">-&gt;</span><span class="n">ServerRun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">server</span><span class="p">;</span>

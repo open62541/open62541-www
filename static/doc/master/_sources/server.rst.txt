@@ -27,9 +27,7 @@ The :ref:`tutorials` provide a good starting point for this.
 
    
    struct UA_ServerConfig {
-       UA_Logger logger;   /* logger is deprecated but still supported at this time.
-                              Use logging pointer instead. */
-       UA_Logger *logging; /* If NULL and "logger" is set, make this point to "logger" */
+       const UA_Logger *logging; /* Plugin for log output */
        void *context; /* Used to attach custom data to a server config. This can
                        * then be retrieved e.g. in a callback that forwards a
                        * pointer to the server. */
@@ -44,7 +42,6 @@ certificate.
 
        UA_BuildInfo buildInfo;
        UA_ApplicationDescription applicationDescription;
-       UA_ByteString serverCertificate;
    
 Server Lifecycle
 ^^^^^^^^^^^^^^^^
@@ -139,6 +136,7 @@ The following settings are specific to OPC UA with TCP transport.
 
 .. code-block:: c
 
+       UA_Boolean tcpEnabled;
        UA_UInt32 tcpBufSize;    /* Max length of sent and received chunks (packets)
                                  * (default: 64kB) */
        UA_UInt32 tcpMaxMsgSize; /* Max length of messages
@@ -154,6 +152,10 @@ Security and Encryption
        size_t securityPoliciesSize;
        UA_SecurityPolicy* securityPolicies;
    
+       /* Endpoints with combinations of SecurityPolicy and SecurityMode. If the
+        * UserIdentityToken array of the Endpoint is not set, then it will be
+        * filled by the server for all UserTokenPolicies that are configured in the
+        * AccessControl plugin. */
        size_t endpointsSize;
        UA_EndpointDescription *endpoints;
    
@@ -166,7 +168,9 @@ Security and Encryption
         * securityPolicies list. */
        UA_Boolean securityPolicyNoneDiscoveryOnly;
    
-       UA_CertificateVerification certificateVerification;
+       /* Different sets of certificates are trusted for SecureChannel / Session */
+       UA_CertificateVerification secureChannelPKI;
+       UA_CertificateVerification sessionPKI;
    
 See the section for :ref:`access-control
 handling<access-control>`.
@@ -265,6 +269,7 @@ Subscriptions
 
 .. code-block:: c
 
+       UA_Boolean subscriptionsEnabled;
    #ifdef UA_ENABLE_SUBSCRIPTIONS
        /* Limits for Subscriptions */
        UA_UInt32 maxSubscriptions;
@@ -315,6 +320,7 @@ PubSub
 
 .. code-block:: c
 
+       UA_Boolean pubsubEnabled;
    #ifdef UA_ENABLE_PUBSUB
        UA_PubSubConfiguration pubSubConfig;
    #endif
@@ -324,6 +330,7 @@ Historical Access
 
 .. code-block:: c
 
+       UA_Boolean historizingEnabled;
    #ifdef UA_ENABLE_HISTORIZING
        UA_HistoryDatabase historyDatabase;
    
@@ -439,7 +446,7 @@ Server Lifecycle
     *
     * @param server The server object.
     * @param waitInternal Should we wait for messages in the networklayer?
-    *        Otherwise, the timouts for the networklayers are set to zero.
+    *        Otherwise, the timeouts for the networklayers are set to zero.
     *        The default max wait time is 200ms.
     * @return Returns how long we can wait until the next scheduled
     *         callback (in ms) */
@@ -532,6 +539,7 @@ Always present as session attributes are:
 - 0:localeIds [UA_String]: List of preferred languages (read-only)
 - 0:clientDescription [UA_ApplicationDescription]: Client description (read-only)
 - 0:sessionName [String] Client-defined name of the session (read-only)
+- 0:clientUserId [String] User identifier used to activate the session (read-only)
 
 .. code-block:: c
 
@@ -549,7 +557,7 @@ Always present as session attributes are:
    UA_Server_getSessionAttributeCopy(UA_Server *server, const UA_NodeId *sessionId,
                                      const UA_QualifiedName key, UA_Variant *outValue);
    
-   /* Returns NULL if the parameter is not defined or not a scalar or not of the
+   /* Returns NULL if the attribute is not defined or not a scalar or not of the
     * right datatype. Otherwise a shallow copy of the scalar value is created at
     * the target location of the void pointer. Hence don't use this in a
     * multi-threaded application. */
@@ -604,138 +612,145 @@ has full rights.
    __UA_Server_read(UA_Server *server, const UA_NodeId *nodeId,
                     UA_AttributeId attributeId, void *v);
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readNodeId(UA_Server *server, const UA_NodeId nodeId,
-                        UA_NodeId *outNodeId) {
+                        UA_NodeId *outNodeId) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_NODEID, outNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readNodeClass(UA_Server *server, const UA_NodeId nodeId,
-                           UA_NodeClass *outNodeClass) {
+                           UA_NodeClass *outNodeClass) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_NODECLASS,
                                outNodeClass);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readBrowseName(UA_Server *server, const UA_NodeId nodeId,
-                            UA_QualifiedName *outBrowseName) {
+                            UA_QualifiedName *outBrowseName) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                outBrowseName);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readDisplayName(UA_Server *server, const UA_NodeId nodeId,
-                             UA_LocalizedText *outDisplayName) {
+                             UA_LocalizedText *outDisplayName) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                outDisplayName);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readDescription(UA_Server *server, const UA_NodeId nodeId,
-                             UA_LocalizedText *outDescription) {
+                             UA_LocalizedText *outDescription) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                outDescription);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readWriteMask(UA_Server *server, const UA_NodeId nodeId,
-                           UA_UInt32 *outWriteMask) {
+                           UA_UInt32 *outWriteMask) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                outWriteMask);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readIsAbstract(UA_Server *server, const UA_NodeId nodeId,
-                            UA_Boolean *outIsAbstract) {
+                            UA_Boolean *outIsAbstract) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                outIsAbstract);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readSymmetric(UA_Server *server, const UA_NodeId nodeId,
-                           UA_Boolean *outSymmetric) {
+                           UA_Boolean *outSymmetric) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                                outSymmetric);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readInverseName(UA_Server *server, const UA_NodeId nodeId,
-                             UA_LocalizedText *outInverseName) {
+                             UA_LocalizedText *outInverseName) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                outInverseName);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readContainsNoLoops(UA_Server *server, const UA_NodeId nodeId,
-                                 UA_Boolean *outContainsNoLoops) {
+                                 UA_Boolean *outContainsNoLoops) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_CONTAINSNOLOOPS,
                                outContainsNoLoops);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readEventNotifier(UA_Server *server, const UA_NodeId nodeId,
-                               UA_Byte *outEventNotifier) {
+                               UA_Byte *outEventNotifier) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                outEventNotifier);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readValue(UA_Server *server, const UA_NodeId nodeId,
-                       UA_Variant *outValue) {
+                       UA_Variant *outValue) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_VALUE, outValue);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readDataType(UA_Server *server, const UA_NodeId nodeId,
-                          UA_NodeId *outDataType) {
+                          UA_NodeId *outDataType) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_DATATYPE,
                                outDataType);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readValueRank(UA_Server *server, const UA_NodeId nodeId,
-                           UA_Int32 *outValueRank) {
+                           UA_Int32 *outValueRank) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_VALUERANK,
                                outValueRank);
-   }
+   })
    
    /* Returns a variant with an int32 array */
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readArrayDimensions(UA_Server *server, const UA_NodeId nodeId,
-                                 UA_Variant *outArrayDimensions) {
+                                 UA_Variant *outArrayDimensions) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS,
                                outArrayDimensions);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readAccessLevel(UA_Server *server, const UA_NodeId nodeId,
-                             UA_Byte *outAccessLevel) {
+                             UA_Byte *outAccessLevel) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                outAccessLevel);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
+   UA_Server_readAccessLevelEx(UA_Server *server, const UA_NodeId nodeId,
+                               UA_UInt32 *outAccessLevelEx), {
+       return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVELEX,
+                               outAccessLevelEx);
+   })
+   
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readMinimumSamplingInterval(UA_Server *server, const UA_NodeId nodeId,
-                                         UA_Double *outMinimumSamplingInterval) {
+                                         UA_Double *outMinimumSamplingInterval) ,{
        return __UA_Server_read(server, &nodeId,
                                UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                                outMinimumSamplingInterval);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readHistorizing(UA_Server *server, const UA_NodeId nodeId,
-                             UA_Boolean *outHistorizing) {
+                             UA_Boolean *outHistorizing) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_HISTORIZING,
                                outHistorizing);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_readExecutable(UA_Server *server, const UA_NodeId nodeId,
-                            UA_Boolean *outExecutable) {
+                            UA_Boolean *outExecutable) ,{
        return __UA_Server_read(server, &nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                                outExecutable);
-   }
+   })
    
 The following node attributes cannot be changed once a node has been created:
 
@@ -774,54 +789,54 @@ specific to the different users and set by the access control callback:
                      const UA_AttributeId attributeId,
                      const UA_DataType *attr_type, const void *attr);
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeBrowseName(UA_Server *server, const UA_NodeId nodeId,
-                             const UA_QualifiedName browseName) {
+                             const UA_QualifiedName browseName) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_BROWSENAME,
                                 &UA_TYPES[UA_TYPES_QUALIFIEDNAME], &browseName);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeDisplayName(UA_Server *server, const UA_NodeId nodeId,
-                              const UA_LocalizedText displayName) {
+                              const UA_LocalizedText displayName) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &displayName);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeDescription(UA_Server *server, const UA_NodeId nodeId,
-                              const UA_LocalizedText description) {
+                              const UA_LocalizedText description) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_DESCRIPTION,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &description);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeWriteMask(UA_Server *server, const UA_NodeId nodeId,
-                            const UA_UInt32 writeMask) {
+                            const UA_UInt32 writeMask) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                 &UA_TYPES[UA_TYPES_UINT32], &writeMask);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeIsAbstract(UA_Server *server, const UA_NodeId nodeId,
-                             const UA_Boolean isAbstract) {
+                             const UA_Boolean isAbstract) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                 &UA_TYPES[UA_TYPES_BOOLEAN], &isAbstract);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeInverseName(UA_Server *server, const UA_NodeId nodeId,
-                              const UA_LocalizedText inverseName) {
+                              const UA_LocalizedText inverseName) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_INVERSENAME,
                                 &UA_TYPES[UA_TYPES_LOCALIZEDTEXT], &inverseName);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeEventNotifier(UA_Server *server, const UA_NodeId nodeId,
-                                const UA_Byte eventNotifier) {
+                                const UA_Byte eventNotifier) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                 &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
-   }
+   })
    
 Writes an UA_Variant to a variable/variableType node.
 StatusCode is set to ``UA_STATUSCODE_GOOD``, sourceTimestamp and
@@ -829,12 +844,12 @@ serverTimestamp are set to UA_DateTime_now()
 
 .. code-block:: c
 
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeValue(UA_Server *server, const UA_NodeId nodeId,
-                        const UA_Variant value) {
+                        const UA_Variant value) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_VARIANT], &value);
-   }
+   })
    
 Writes an UA_DataValue to a variable/variableType node.
 In contrast to UA_Server_writeValue, this functions can also write
@@ -842,64 +857,72 @@ sourceTimestamp, serverTimestamp and statusCode.
 
 .. code-block:: c
 
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeDataValue(UA_Server *server, const UA_NodeId nodeId,
-                        const UA_DataValue value) {
+                        const UA_DataValue value) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_VALUE,
                                 &UA_TYPES[UA_TYPES_DATAVALUE], &value);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeDataType(UA_Server *server, const UA_NodeId nodeId,
-                           const UA_NodeId dataType) {
+                           const UA_NodeId dataType) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_DATATYPE,
                                 &UA_TYPES[UA_TYPES_NODEID], &dataType);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeValueRank(UA_Server *server, const UA_NodeId nodeId,
-                            const UA_Int32 valueRank) {
+                            const UA_Int32 valueRank) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_VALUERANK,
                                 &UA_TYPES[UA_TYPES_INT32], &valueRank);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeArrayDimensions(UA_Server *server, const UA_NodeId nodeId,
-                                  const UA_Variant arrayDimensions) {
+                                  const UA_Variant arrayDimensions) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ARRAYDIMENSIONS,
                                 &UA_TYPES[UA_TYPES_VARIANT], &arrayDimensions);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeAccessLevel(UA_Server *server, const UA_NodeId nodeId,
-                              const UA_Byte accessLevel) {
+                              const UA_Byte accessLevel) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                 &UA_TYPES[UA_TYPES_BYTE], &accessLevel);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
+   UA_Server_writeAccessLevelEx(UA_Server *server, const UA_NodeId nodeId,
+                                const UA_UInt32 accessLevelEx), {
+       return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_ACCESSLEVELEX,
+                                &UA_TYPES[UA_TYPES_UINT32], &accessLevelEx);
+   })
+   
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeMinimumSamplingInterval(UA_Server *server, const UA_NodeId nodeId,
-                                          const UA_Double miniumSamplingInterval) {
+                                          const UA_Double miniumSamplingInterval) ,{
        return __UA_Server_write(server, &nodeId,
                                 UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL,
                                 &UA_TYPES[UA_TYPES_DOUBLE],
                                 &miniumSamplingInterval);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeHistorizing(UA_Server *server, const UA_NodeId nodeId,
-                             const UA_Boolean historizing) {
+                             const UA_Boolean historizing) ,{
        return __UA_Server_write(server, &nodeId,
                                 UA_ATTRIBUTEID_HISTORIZING,
                                 &UA_TYPES[UA_TYPES_BOOLEAN],
                                 &historizing);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeExecutable(UA_Server *server, const UA_NodeId nodeId,
-                             const UA_Boolean executable) {
+                             const UA_Boolean executable) ,{
        return __UA_Server_write(server, &nodeId, UA_ATTRIBUTEID_EXECUTABLE,
-                                &UA_TYPES[UA_TYPES_BOOLEAN], &executable); }
+                                &UA_TYPES[UA_TYPES_BOOLEAN], &executable); 
+   })
    
 Browsing
 --------
@@ -967,65 +990,40 @@ Browsing
 Discovery
 ---------
 
+Registering at a Discovery Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. code-block:: c
 
-   /* Register the given server instance at the discovery server.
-    * This should be called periodically.
-    * The semaphoreFilePath is optional. If the given file is deleted,
-    * the server will automatically be unregistered. This could be
-    * for example a pid file which is deleted if the server crashes.
-    *
-    * When the server shuts down you need to call unregister.
-    *
-    * @param server
-    * @param client the client which is used to call the RegisterServer. It must
-    *        already be connected to the correct endpoint
-    * @param semaphoreFilePath optional parameter pointing to semaphore file. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_register_discovery(UA_Server *server, struct UA_Client *client,
-                                const char* semaphoreFilePath);
    
-   /* Unregister the given server instance from the discovery server.
-    * This should only be called when the server is shutting down.
-    * @param server
-    * @param client the client which is used to call the RegisterServer. It must
-    *        already be connected to the correct endpoint */
+   /* Register the given server instance at the discovery server. This should be
+    * called periodically, for example every 10 minutes, depending on the
+    * configuration of the discovery server. You should also call
+    * _unregisterDiscovery when the server shuts down.
+    *
+    * The supplied client configuration is used to create a new client to connect
+    * to the discovery server. The client configuration is moved over to the server
+    * and eventually cleaned up internally. The structure pointed at by `cc` is
+    * zeroed to avoid accessing outdated information.
+    *
+    * The eventloop and logging plugins in the client configuration are replaced by
+    * those configured in the server. */
    UA_StatusCode UA_THREADSAFE
-   UA_Server_unregister_discovery(UA_Server *server, struct UA_Client *client);
+   UA_Server_registerDiscovery(UA_Server *server, UA_ClientConfig *cc,
+                               const UA_String discoveryServerUrl,
+                               const UA_String semaphoreFilePath);
    
-    /* Adds a periodic callback to register the server with the LDS (local
-     * discovery server) periodically. The interval between each register call is
-     * given as second parameter. It should be 10 minutes by default (=
-     * 10*60*1000).
-     *
-     * The delayFirstRegisterMs parameter indicates the delay for the first
-     * register call. If it is 0, the first register call will be after intervalMs
-     * milliseconds, otherwise the server's first register will be after
-     * delayFirstRegisterMs.
-     *
-     * When you manually unregister the server, you also need to cancel the
-     * periodic callback, otherwise it will be automatically be registered again.
-     *
-     * If you call this method multiple times for the same discoveryServerUrl, the
-     * older periodic callback will be removed.
-     *
-     * @param server
-     * @param client the client which is used to call the RegisterServer. It must
-     *         not yet be connected and will be connected for every register call
-     *         to the given discoveryServerUrl.
-     * @param discoveryServerUrl where this server should register itself. The
-     *        string will be copied internally. Therefore you can free it after
-     *        calling this method.
-     * @param intervalMs
-     * @param delayFirstRegisterMs
-     * @param periodicCallbackId */
+   /* Deregister the given server instance from the discovery server.
+    * This should be called when the server is shutting down. */
    UA_StatusCode UA_THREADSAFE
-   UA_Server_addPeriodicServerRegisterCallback(UA_Server *server,
-                                               struct UA_Client *client,
-                                               const char* discoveryServerUrl,
-                                               UA_Double intervalMs,
-                                               UA_Double delayFirstRegisterMs,
-                                               UA_UInt64 *periodicCallbackId);
+   UA_Server_deregisterDiscovery(UA_Server *server, UA_ClientConfig *cc,
+                                 const UA_String discoveryServerUrl);
+   
+Operating a Discovery Server
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
    
    /* Callback for RegisterServer. Data is passed from the register call */
    typedef void
@@ -1326,22 +1324,22 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                        const UA_DataType *attributeType,
                        void *nodeContext, UA_NodeId *outNewNodeId);
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addVariableNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                              const UA_NodeId parentNodeId,
                              const UA_NodeId referenceTypeId,
                              const UA_QualifiedName browseName,
                              const UA_NodeId typeDefinition,
                              const UA_VariableAttributes attr,
-                             void *nodeContext, UA_NodeId *outNewNodeId) {
+                             void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_VARIABLE, &requestedNewNodeId,
                                   &parentNodeId, &referenceTypeId, browseName,
                                   &typeDefinition, (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_VARIABLEATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addVariableTypeNode(UA_Server *server,
                                  const UA_NodeId requestedNewNodeId,
                                  const UA_NodeId parentNodeId,
@@ -1349,88 +1347,88 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                  const UA_QualifiedName browseName,
                                  const UA_NodeId typeDefinition,
                                  const UA_VariableTypeAttributes attr,
-                                 void *nodeContext, UA_NodeId *outNewNodeId) {
+                                 void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_VARIABLETYPE,
                                   &requestedNewNodeId, &parentNodeId, &referenceTypeId,
                                   browseName, &typeDefinition,
                                   (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_VARIABLETYPEATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addObjectNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                            const UA_NodeId parentNodeId,
                            const UA_NodeId referenceTypeId,
                            const UA_QualifiedName browseName,
                            const UA_NodeId typeDefinition,
                            const UA_ObjectAttributes attr,
-                           void *nodeContext, UA_NodeId *outNewNodeId) {
+                           void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_OBJECT, &requestedNewNodeId,
                                   &parentNodeId, &referenceTypeId, browseName,
                                   &typeDefinition, (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_OBJECTATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addObjectTypeNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                                const UA_NodeId parentNodeId,
                                const UA_NodeId referenceTypeId,
                                const UA_QualifiedName browseName,
                                const UA_ObjectTypeAttributes attr,
-                               void *nodeContext, UA_NodeId *outNewNodeId) {
+                               void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_OBJECTTYPE, &requestedNewNodeId,
                                   &parentNodeId, &referenceTypeId, browseName,
                                   &UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_OBJECTTYPEATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addViewNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                          const UA_NodeId parentNodeId,
                          const UA_NodeId referenceTypeId,
                          const UA_QualifiedName browseName,
                          const UA_ViewAttributes attr,
-                         void *nodeContext, UA_NodeId *outNewNodeId) {
+                         void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_VIEW, &requestedNewNodeId,
                                   &parentNodeId, &referenceTypeId, browseName,
                                   &UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_VIEWATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addReferenceTypeNode(UA_Server *server,
                                   const UA_NodeId requestedNewNodeId,
                                   const UA_NodeId parentNodeId,
                                   const UA_NodeId referenceTypeId,
                                   const UA_QualifiedName browseName,
                                   const UA_ReferenceTypeAttributes attr,
-                                  void *nodeContext, UA_NodeId *outNewNodeId) {
+                                  void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_REFERENCETYPE,
                                   &requestedNewNodeId, &parentNodeId, &referenceTypeId,
                                   browseName, &UA_NODEID_NULL,
                                   (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_REFERENCETYPEATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addDataTypeNode(UA_Server *server,
                              const UA_NodeId requestedNewNodeId,
                              const UA_NodeId parentNodeId,
                              const UA_NodeId referenceTypeId,
                              const UA_QualifiedName browseName,
                              const UA_DataTypeAttributes attr,
-                             void *nodeContext, UA_NodeId *outNewNodeId) {
+                             void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return __UA_Server_addNode(server, UA_NODECLASS_DATATYPE, &requestedNewNodeId,
                                   &parentNodeId, &referenceTypeId, browseName,
                                   &UA_NODEID_NULL, (const UA_NodeAttributes*)&attr,
                                   &UA_TYPES[UA_TYPES_DATATYPEATTRIBUTES],
                                   nodeContext, outNewNodeId);
-   }
+   })
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_addDataSourceVariableNode(UA_Server *server,
@@ -1442,6 +1440,13 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                        const UA_VariableAttributes attr,
                                        const UA_DataSource dataSource,
                                        void *nodeContext, UA_NodeId *outNewNodeId);
+   
+   /* VariableNodes that are "dynamic" (default for user-created variables) receive
+    * and store a SourceTimestamp. For non-dynamic VariableNodes the current time
+    * is used for the SourceTimestamp. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_setVariableNodeDynamic(UA_Server *server, const UA_NodeId nodeId,
+                                    UA_Boolean isDynamic);
    
    #ifdef UA_ENABLE_METHODCALLS
    
@@ -1459,14 +1464,14 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                              UA_NodeId *outputArgumentsOutNewNodeId,
                              void *nodeContext, UA_NodeId *outNewNodeId);
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_addMethodNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
                            const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
                            const UA_QualifiedName browseName, const UA_MethodAttributes attr,
                            UA_MethodCallback method,
                            size_t inputArgumentsSize, const UA_Argument *inputArguments,
                            size_t outputArgumentsSize, const UA_Argument *outputArguments,
-                           void *nodeContext, UA_NodeId *outNewNodeId) {
+                           void *nodeContext, UA_NodeId *outNewNodeId) ,{
        return UA_Server_addMethodNodeEx(server, requestedNewNodeId,  parentNodeId,
                                         referenceTypeId, browseName, attr, method,
                                         inputArgumentsSize, inputArguments,
@@ -1474,7 +1479,7 @@ use a :ref:`datasource` or a :ref:`value-callback`.
                                         outputArgumentsSize, outputArguments,
                                         UA_NODEID_NULL, NULL,
                                         nodeContext, outNewNodeId);
-   }
+   })
    
    #endif
    

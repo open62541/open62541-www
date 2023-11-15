@@ -23,17 +23,6 @@ cycle. Buffered Network Message will be used for publishing and subscribing
 in the RT path. Further, DataSetField will be accessed via direct pointer
 access between the user interface and the Information Model.
 
-Another additional feature called the Blocking Socket is employed in the
-Subscriber thread. This feature is optional and can be enabled or disabled
-when running application by using command line argument
-"-enableBlockingSocket". When using Blocking Socket, the Subscriber thread
-remains in "blocking mode" until a message is received from every wake up
-time of the thread. In other words, the timeout is overwritten and the thread
-continuously waits for the message from every wake up time of the thread.
-Once the message is received, the Subscriber thread updates the value in the
-Information Model, sleeps up to wake up time and again waits for the next
-message. This process is repeated until the application is terminated.
-
 To ensure realtime capabilities, Publisher uses ETF(Earliest Tx-time First)
 to publish information at the calculated tranmission time over Ethernet.
 Subscriber can be used with or without XDP(Xpress Data Processing) over
@@ -206,7 +195,6 @@ For more options, run ./bin/examples/pubsub_TSN_publisher -help
    static UA_Boolean enableCsvLog         = false;
    static UA_Boolean enableLatencyCsvLog  = false;
    static UA_Boolean consolePrint         = false;
-   static UA_Boolean enableBlockingSocket = false;
    static UA_Boolean signalTerm           = false;
    static UA_Boolean enableXdpSubscribe   = false;
    
@@ -499,16 +487,6 @@ Subscriber thread.
        readerGroupConfig.name    = UA_STRING("ReaderGroup1");
        readerGroupConfig.rtLevel = UA_PUBSUB_RT_FIXED_SIZE;
    
-       readerGroupConfig.subscribingInterval = cycleTimeInMsec;
-       /* Timeout is modified when blocking socket is enabled, and the default
-        * timeout is used when blocking socket is disabled */
-       if(enableBlockingSocket == false)
-           readerGroupConfig.timeout = 50;  // As we run in 250us cycle time, modify default timeout (1ms) to 50us
-       else {
-           readerGroupConfig.enableBlockingSocket = true;
-           readerGroupConfig.timeout = 0;  //Blocking  socket
-       }
-   
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        /* Encryption settings */
        UA_ServerConfig *config = UA_Server_getConfig(server);
@@ -516,12 +494,9 @@ Subscriber thread.
        readerGroupConfig.securityPolicy = &config->pubSubConfig.securityPolicies[1];
    #endif
    
-       readerGroupConfig.pubsubManagerCallback.addCustomCallback = addPubSubApplicationCallback;
-       readerGroupConfig.pubsubManagerCallback.changeCustomCallback = changePubSubApplicationCallback;
-       readerGroupConfig.pubsubManagerCallback.removeCustomCallback = removePubSubApplicationCallback;
-   
        UA_Server_addReaderGroup(server, connectionIdentSubscriber, &readerGroupConfig,
                                 &readerGroupIdentifier);
+       UA_Server_enableReaderGroup(server, readerGroupIdentifier);
    
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        /* Add the encryption key informaton */
@@ -923,7 +898,7 @@ Publisher thread.
            (UA_UadpNetworkMessageContentMask)UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER);
        writerGroupConfig.messageSettings.content.decoded.data = writerGroupMessage;
        UA_Server_addWriterGroup(server, connectionIdent, &writerGroupConfig, &writerGroupIdent);
-       UA_Server_setWriterGroupOperational(server, writerGroupIdent);
+       UA_Server_enableWriterGroup(server, writerGroupIdent);
        UA_UadpWriterGroupMessageDataType_delete(writerGroupMessage);
    
    #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
@@ -933,6 +908,7 @@ Publisher thread.
        UA_ByteString kn = {UA_AES128CTR_KEYNONCE_LENGTH, keyNoncePub};
        UA_Server_setWriterGroupEncryptionKeys(server, writerGroupIdent, 1, sk, ek, kn);
    #endif
+   
    }
    
    /* DataSetWriter handling */
@@ -1561,8 +1537,6 @@ For more options, use ./bin/examples/pubsub_TSN_publisher -h.
            " -enableCsvLog           Experimental: To log the data in csv files. Support up to 1 million samples\n"
            " -enableLatencyCsvLog    Experimental: To compute and create RTT latency csv. Support up to 1 million samples\n"
            " -enableconsolePrint     Experimental: To print the data in console output. Support for higher cycle time\n"
-           " -enableBlockingSocket   Run application with blocking socket option. While using blocking socket option need to\n"
-           "                         run both the Publisher and Loopback application. Otherwise application will not terminate.\n"
            " -enableXdpSubscribe     Enable XDP feature for subscriber. XDP_COPY and XDP_FLAGS_SKB_MODE is used by default. Not recommended to be enabled along with blocking socket.\n"
            " -xdpQueue        [num]  XDP queue value (default %d)\n"
            " -xdpFlagDrvMode         Use XDP in DRV mode\n"
@@ -1617,7 +1591,6 @@ parallel.
            {"enableCsvLog",         no_argument,       0, 'n'},
            {"enableLatencyCsvLog",  no_argument,       0, 'o'},
            {"enableconsolePrint",   no_argument,       0, 'p'},
-           {"enableBlockingSocket", no_argument,       0, 'q'},
            {"xdpQueue",             required_argument, 0, 'r'},
            {"xdpFlagDrvMode",       no_argument,       0, 's'},
            {"xdpBindFlagZeroCopy",  no_argument,       0, 't'},
@@ -1676,10 +1649,6 @@ parallel.
                case 'p':
                    consolePrint = true;
                    break;
-               case 'q':
-                    /* TODO: Application need to be exited independently */
-                   enableBlockingSocket = true;
-                   break;
                case 'r':
                    xdpQueue = (UA_UInt32)atoi(optarg);
                    break;
@@ -1712,15 +1681,6 @@ parallel.
            UA_LOG_ERROR(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "%f Bad cycle time", cycleTimeInMsec);
            usage(progname);
            return -1;
-       }
-   
-       if(enableBlockingSocket == true) {
-           if(enableXdpSubscribe == true) {
-               UA_LOG_ERROR(UA_Log_Stdout, UA_LOGCATEGORY_SERVER,
-                            "Cannot enable blocking socket and xdp at the same time");
-               usage(progname);
-               return -1;
-           }
        }
    
        if(xdpFlag == XDP_FLAGS_DRV_MODE || xdpBindFlag == XDP_ZEROCOPY) {

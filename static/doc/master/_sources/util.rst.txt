@@ -93,6 +93,22 @@ NULL for that argument and treat it as an empty map.
    UA_StatusCode
    UA_KeyValueMap_merge(UA_KeyValueMap *lhs, const UA_KeyValueMap *rhs);
    
+Binary Connection Config Parameters
+-----------------------------------
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_UInt32 protocolVersion;
+       UA_UInt32 recvBufferSize;
+       UA_UInt32 sendBufferSize;
+       UA_UInt32 localMaxMessageSize;  /* (0 = unbounded) */
+       UA_UInt32 remoteMaxMessageSize; /* (0 = unbounded) */
+       UA_UInt32 localMaxChunkCount;   /* (0 = unbounded) */
+       UA_UInt32 remoteMaxChunkCount;  /* (0 = unbounded) */
+   } UA_ConnectionConfig;
+   
 Endpoint URL Parser
 -------------------
 The endpoint URL parser is generally useful for the implementation of network
