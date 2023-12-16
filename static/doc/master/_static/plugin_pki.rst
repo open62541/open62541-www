@@ -46,3 +46,14 @@ The lifecycle of the plugin is attached to a server or client config. The
         * automatically*/
        const UA_Logger *logging;
    };
+   
+   /* Decrypt a private key in PEM format using a password. The output is the key
+    * in the binary DER format. Also succeeds if the PEM private key does not
+    * require a password or is already in the DER format. The outDerKey memory is
+    * allocated internally.
+    *
+    * Returns UA_STATUSCODE_BADSECURITYCHECKSFAILED if the password is wrong. */
+   UA_StatusCode
+   UA_PKI_decryptPrivateKey(const UA_ByteString privateKey,
+                            const UA_ByteString password,
+                            UA_ByteString *outDerKey);
