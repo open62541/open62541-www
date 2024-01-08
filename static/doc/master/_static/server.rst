@@ -614,6 +614,7 @@ has full rights.
 
 .. code-block:: c
 
+   
    /* Read an attribute of a node. The specialized functions below provide a more
     * concise syntax.
     *
@@ -1102,7 +1103,6 @@ Operating a Discovery Server
    
 Information Model Callbacks
 ---------------------------
-
 There are three places where a callback from an information model to
 user-defined code can happen.
 
@@ -1134,7 +1134,6 @@ user-defined code can happen.
 
 Data Source Callback
 ^^^^^^^^^^^^^^^^^^^^
-
 The server has a unique way of dealing with the content of variables. Instead
 of storing a variant attached to the variable node, the node can point to a
 function with a local data provider. Whenever the value attribute is read,
@@ -1165,7 +1164,6 @@ be set to a null-pointer.
 
 Local MonitoredItems
 ^^^^^^^^^^^^^^^^^^^^
-
 MonitoredItems are used with the Subscription mechanism of OPC UA to
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
@@ -1307,6 +1305,11 @@ node insertion) contain the nodeId of the new node. You may also pass a
 See the Section :ref:`node-lifecycle` on constructors and on attaching
 user-defined data to nodes.
 
+The Section :ref:`default-node-attributes` contains useful starting points
+for defining node attributes. Forgetting to set the ValueRank or the
+AccessLevel leads to errors that can be hard to track down for new users. The
+default attributes have a high likelihood to "do the right thing".
+
 The methods for node addition and deletion take mostly const arguments that
 are not modified. When creating a node, a deep copy of the node identifier,
 node attributes, etc. is created. Therefore, it is possible to call for
@@ -1317,23 +1320,6 @@ use a :ref:`datasource` or a :ref:`value-callback`.
 
 .. code-block:: c
 
-   
-   /* Protect against redundant definitions for server/client */
-   #ifndef UA_DEFAULT_ATTRIBUTES_DEFINED
-   #define UA_DEFAULT_ATTRIBUTES_DEFINED
-   /* The default for variables is "BaseDataType" for the datatype, -2 for the
-    * valuerank and a read-accesslevel. */
-   extern const UA_VariableAttributes UA_VariableAttributes_default;
-   extern const UA_VariableTypeAttributes UA_VariableTypeAttributes_default;
-   /* Methods are executable by default */
-   extern const UA_MethodAttributes UA_MethodAttributes_default;
-   /* The remaining attribute definitions are currently all zeroed out */
-   extern const UA_ObjectAttributes UA_ObjectAttributes_default;
-   extern const UA_ObjectTypeAttributes UA_ObjectTypeAttributes_default;
-   extern const UA_ReferenceTypeAttributes UA_ReferenceTypeAttributes_default;
-   extern const UA_DataTypeAttributes UA_DataTypeAttributes_default;
-   extern const UA_ViewAttributes UA_ViewAttributes_default;
-   #endif
    
    /* Don't use this function. There are typed versions as inline functions. */
    UA_StatusCode UA_THREADSAFE
@@ -1574,6 +1560,7 @@ Reference Management
 
 .. code-block:: c
 
+   
    UA_StatusCode UA_THREADSAFE
    UA_Server_addReference(UA_Server *server, const UA_NodeId sourceId,
                           const UA_NodeId refTypeId,
@@ -1642,6 +1629,12 @@ would cause the node to be deleted.
    
    #endif /* UA_ENABLE_SUBSCRIPTIONS_EVENTS */
    
+Alarms & Conditions (Experimental)
+----------------------------------
+
+.. code-block:: c
+
+   
    #ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS
    typedef enum UA_TwoStateVariableCallbackType {
      UA_ENTERING_ENABLEDSTATE,
@@ -1682,27 +1675,24 @@ would cause the node to be deleted.
                              const UA_NodeId hierarchialReferenceType,
                              UA_NodeId *outConditionId);
    
-The method pair UA_Server_addCondition_begin and _finish splits the
-UA_Server_createCondtion in two parts similiar to the
-UA_Server_addNode_begin / _finish pair. This is useful if the node shall be
-modified before finish the instantiation. For example to add children with
-specific NodeIds.
-For details refer to the UA_Server_addNode_begin / _finish methods.
-
-Additionally to UA_Server_addNode_begin UA_Server_addCondition_begin checks
-if the passed condition type is a subtype of the OPC UA ConditionType.
-
-@param server The server object
-@param conditionId The NodeId of the requested Condition Object. When passing
-       UA_NODEID_NUMERIC(X,0) an unused nodeid in namespace X will be used.
-       E.g. passing UA_NODEID_NULL will result in a NodeId in namespace 0.
-@param conditionType The NodeId of the node representation of the ConditionType
-@param conditionName The name of the condition to be added
-@param outConditionId The NodeId of the added Condition
-@return The StatusCode of the UA_Server_addCondition_begin method
-
-.. code-block:: c
-
+   /* The method pair UA_Server_addCondition_begin and _finish splits the
+    * UA_Server_createCondtion in two parts similiar to the
+    * UA_Server_addNode_begin / _finish pair. This is useful if the node shall be
+    * modified before finish the instantiation. For example to add children with
+    * specific NodeIds.
+    * For details refer to the UA_Server_addNode_begin / _finish methods.
+    *
+    * Additionally to UA_Server_addNode_begin UA_Server_addCondition_begin checks
+    * if the passed condition type is a subtype of the OPC UA ConditionType.
+    *
+    * @param server The server object
+    * @param conditionId The NodeId of the requested Condition Object. When passing
+    *        UA_NODEID_NUMERIC(X,0) an unused nodeid in namespace X will be used.
+    *        E.g. passing UA_NODEID_NULL will result in a NodeId in namespace 0.
+    * @param conditionType The NodeId of the node representation of the ConditionType
+    * @param conditionName The name of the condition to be added
+    * @param outConditionId The NodeId of the added Condition
+    * @return The StatusCode of the UA_Server_addCondition_begin method */
    UA_StatusCode
    UA_Server_addCondition_begin(UA_Server *server,
                                 const UA_NodeId conditionId,
@@ -1710,26 +1700,22 @@ if the passed condition type is a subtype of the OPC UA ConditionType.
                                 const UA_QualifiedName conditionName,
                                 UA_NodeId *outConditionId);
    
-Second call of the UA_Server_addCondition_begin and _finish pair.
-
-Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:
- - checks whether the condition source has HasEventSource reference to its
-   parent. If not, a HasEventSource reference will be created between
-   condition source and server object
- - exposes the condition in the address space if hierarchialReferenceType is
-   not UA_NODEID_NULL by adding a reference of this type from the condition
-   source to the condition instance
- - initializes the standard condition fields and callbacks
-
-@param server The server object
-@param conditionId The NodeId of the unfinished Condition Object
-@param conditionSource The NodeId of the Condition Source (Parent of the Condition)
-@param hierarchialReferenceType The NodeId of Hierarchical ReferenceType
-                                between Condition and its source
-@return The StatusCode of the UA_Server_addCondition_finish method
-
-.. code-block:: c
-
+   /* Second call of the UA_Server_addCondition_begin and _finish pair.
+    * Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:
+    *  - checks whether the condition source has HasEventSource reference to its
+    *    parent. If not, a HasEventSource reference will be created between
+    *    condition source and server object
+    *  - exposes the condition in the address space if hierarchialReferenceType is
+    *    not UA_NODEID_NULL by adding a reference of this type from the condition
+    *    source to the condition instance
+    *  - initializes the standard condition fields and callbacks
+    *
+    * @param server The server object
+    * @param conditionId The NodeId of the unfinished Condition Object
+    * @param conditionSource The NodeId of the Condition Source (Parent of the Condition)
+    * @param hierarchialReferenceType The NodeId of Hierarchical ReferenceType
+    *                                 between Condition and its source
+    * @return The StatusCode of the UA_Server_addCondition_finish method */
    
    UA_StatusCode
    UA_Server_addCondition_finish(UA_Server *server,
@@ -1829,24 +1815,20 @@ Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:
                              const UA_NodeId condition,
                              const UA_NodeId conditionSource);
    
-   /*
-    * Set the LimitState of the LimitAlarmType
+   /* Set the LimitState of the LimitAlarmType
     *
     * @param server The server object
-    * @param conditionId The NodeId of the node representation of the Condition Instance
-    * @param limitValue The value from the trigger node
-    */
+    * @param conditionId NodeId of the node representation of the Condition Instance
+    * @param limitValue The value from the trigger node */
    UA_StatusCode
    UA_Server_setLimitState(UA_Server *server, const UA_NodeId conditionId,
                            UA_Double limitValue);
    
-   /*
-    * Parse the certifcate and set Expiration date
+   /* Parse the certifcate and set Expiration date
     *
     * @param server The server object
-    * @param conditionId The NodeId of the node representation of the Condition Instance
-    * @param cert The certificate for parsing
-    */
+    * @param conditionId NodeId of the node representation of the Condition Instance
+    * @param cert The certificate for parsing */
    UA_StatusCode
    UA_Server_setExpirationDate(UA_Server *server, const UA_NodeId conditionId,
                                UA_ByteString  cert);
@@ -1858,6 +1840,7 @@ Update the Server Certificate at Runtime
 
 .. code-block:: c
 
+   
    UA_StatusCode
    UA_Server_updateCertificate(UA_Server *server,
                                const UA_ByteString *oldCertificate,
@@ -1871,6 +1854,7 @@ Utility Functions
 
 .. code-block:: c
 
+   
    /* Lookup a datatype by its NodeId. Takes the custom types in the server
     * configuration into account. Return NULL if none found. */
    const UA_DataType *
@@ -1970,7 +1954,6 @@ the server config) also when it has been retrieved by the worker.
    
 Statistics
 ----------
-
 Statistic counters keeping track of the current state of the stack. Counters
 are structured per OPC UA communication layer.
 
@@ -1987,54 +1970,47 @@ are structured per OPC UA communication layer.
    
 Reverse Connect
 ---------------
-
-The reverse connect feature of OPC UA permits the server instead of the client to
-establish the connection.
-The client must expose the listening port so the server is able to reach it.
+The reverse connect feature of OPC UA permits the server instead of the
+client to establish the connection. The client must expose the listening port
+so the server is able to reach it.
 
 .. code-block:: c
 
    
-The reverse connect state change callback is called whenever the state of a reverse
-connect is changed by a connection attempt, a successful connection or a connection
-loss.
-
-The reverse connect states reflect the state of the secure channel currently associated
-with a reverse connect. The state will remain UA_SECURECHANNELSTATE_CONNECTING while
-the server attempts repeatedly to establish a connection.
-
-.. code-block:: c
-
-   typedef void (*UA_Server_ReverseConnectStateCallback)(UA_Server *server, UA_UInt64 handle,
+   /* The reverse connect state change callback is called whenever the state of a
+    * reverse connect is changed by a connection attempt, a successful connection
+    * or a connection loss.
+    *
+    * The reverse connect states reflect the state of the secure channel currently
+    * associated with a reverse connect. The state will remain
+    * UA_SECURECHANNELSTATE_CONNECTING while the server attempts repeatedly to
+    * establish a connection. */
+   typedef void (*UA_Server_ReverseConnectStateCallback)(UA_Server *server,
+                                                         UA_UInt64 handle,
                                                          UA_SecureChannelState state,
                                                          void *context);
    
-Registers a reverse connect in the server.
-The server periodically attempts to establish a connection if the initial connect fails
-or if the connection breaks.
-
-@param server The server object
-@param url The URL of the remote client
-@param stateCallback The callback which will be called on state changes
-@param callbackContext The context for the state callback
-@param handle Is set to the handle of the reverse connect if not NULL
-@return Returns UA_STATUSCODE_GOOD if the reverse connect has been registered
-
-.. code-block:: c
-
+   /* Registers a reverse connect in the server. The server periodically attempts
+    * to establish a connection if the initial connect fails or if the connection
+    * breaks.
+    *
+    * @param server The server object
+    * @param url The URL of the remote client
+    * @param stateCallback The callback which will be called on state changes
+    * @param callbackContext The context for the state callback
+    * @param handle Is set to the handle of the reverse connect if not NULL
+    * @return Returns UA_STATUSCODE_GOOD if the reverse connect has been registered */
    UA_StatusCode
    UA_Server_addReverseConnect(UA_Server *server, UA_String url,
-                                             UA_Server_ReverseConnectStateCallback stateCallback,
-                                             void *callbackContext, UA_UInt64 *handle);
+                               UA_Server_ReverseConnectStateCallback stateCallback,
+                               void *callbackContext, UA_UInt64 *handle);
    
-Removes a reverse connect from the server and closes the connection if it is currently
-open.
-
-@param server The server object
-@param handle The handle of the reverse connect to remove
-@return Returns UA_STATUSCODE_GOOD if the reverse connect has been successfully removed
-
-.. code-block:: c
-
+   /* Removes a reverse connect from the server and closes the connection if it is
+    * currently open.
+    *
+    * @param server The server object
+    * @param handle The handle of the reverse connect to remove
+    * @return Returns UA_STATUSCODE_GOOD if the reverse connect has been
+    *         successfully removed */
    UA_StatusCode
    UA_Server_removeReverseConnect(UA_Server *server, UA_UInt64 handle);

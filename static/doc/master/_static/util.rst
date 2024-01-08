@@ -1,3 +1,19 @@
+Range Definition
+----------------
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_UInt32 min;
+       UA_UInt32 max;
+   } UA_UInt32Range;
+   
+   typedef struct {
+       UA_Duration min;
+       UA_Duration max;
+   } UA_DurationRange;
+   
 Random Number Generator
 -----------------------
 If UA_MULTITHREADING is defined, then the seed is stored in thread
@@ -108,6 +124,32 @@ Binary Connection Config Parameters
        UA_UInt32 localMaxChunkCount;   /* (0 = unbounded) */
        UA_UInt32 remoteMaxChunkCount;  /* (0 = unbounded) */
    } UA_ConnectionConfig;
+   
+.. _default-node-attributes:
+
+Default Node Attributes
+-----------------------
+Default node attributes to simplify the use of the AddNodes services. For
+example, Setting the ValueRank and AccessLevel to zero is often an unintended
+setting and leads to errors that are hard to track down.
+
+.. code-block:: c
+
+   
+   /* The default for variables is "BaseDataType" for the datatype, -2 for the
+    * valuerank and a read-accesslevel. */
+   extern const UA_VariableAttributes UA_VariableAttributes_default;
+   extern const UA_VariableTypeAttributes UA_VariableTypeAttributes_default;
+   
+   /* Methods are executable by default */
+   extern const UA_MethodAttributes UA_MethodAttributes_default;
+   
+   /* The remaining attribute definitions are currently all zeroed out */
+   extern const UA_ObjectAttributes UA_ObjectAttributes_default;
+   extern const UA_ObjectTypeAttributes UA_ObjectTypeAttributes_default;
+   extern const UA_ReferenceTypeAttributes UA_ReferenceTypeAttributes_default;
+   extern const UA_DataTypeAttributes UA_DataTypeAttributes_default;
+   extern const UA_ViewAttributes UA_ViewAttributes_default;
    
 Endpoint URL Parser
 -------------------
@@ -251,34 +293,11 @@ Cryptography Helpers
    
    /* Compare memory in constant time to mitigate timing attacks.
     * Returns true if ptr1 and ptr2 are equal for length bytes. */
-   static UA_INLINE UA_Boolean
-   UA_constantTimeEqual(const void *ptr1, const void *ptr2, size_t length) {
-       volatile const UA_Byte *a = (volatile const UA_Byte *)ptr1;
-       volatile const UA_Byte *b = (volatile const UA_Byte *)ptr2;
-       volatile UA_Byte c = 0;
-       for(size_t i = 0; i < length; ++i) {
-           UA_Byte x = a[i], y = b[i];
-           c = c | (x ^ y);
-       }
-       return !c;
-   }
+   UA_Boolean
+   UA_constantTimeEqual(const void *ptr1, const void *ptr2, size_t length);
    
    /* Zero-out memory in a way that is not removed by compiler-optimizations. Use
     * this to ensure cryptographic secrets don't leave traces after the memory was
     * freed. */
-   static UA_INLINE void
-   UA_ByteString_memZero(UA_ByteString *bs) {
-   #if defined(__STDC_LIB_EXT1__)
-      memset_s(bs->data, bs->length, 0, bs->length);
-   #elif defined(_WIN32)
-      SecureZeroMemory(bs->data, bs->length);
-   #else
-      volatile unsigned char *volatile ptr =
-          (volatile unsigned char *)bs->data;
-      size_t i = 0;
-      size_t maxLen = bs->length;
-      while(i < maxLen) {
-          ptr[i++] = 0;
-      }
-   #endif
-   }
+   void
+   UA_ByteString_memZero(UA_ByteString *bs);
