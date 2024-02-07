@@ -75,9 +75,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#binary-connection-config-parameters">Binary Connection Config Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#default-node-attributes">Default Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#endpoint-url-parser">Endpoint URL Parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#and-escaping-of-strings">And-Escaping of Strings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parse-relativepath-expressions">Parse RelativePath Expressions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#example-relativepaths">Example RelativePaths</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#extension-referencetypenodeids">Extension: ReferenceTypeNodeIds</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#convenience-macros-for-complex-types">Convenience macros for complex types</a></li>
@@ -557,30 +557,50 @@ layer plugins.</p>
 </pre></div>
 </div>
 </section>
+<section id="and-escaping-of-strings">
+<h2>And-Escaping of Strings<a class="headerlink" href="#and-escaping-of-strings" title="Link to this heading">¶</a></h2>
+<p>The “and-escaping” of strings for is described in Part 4, A2. The <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>
+character is used to escape the reserved characters <code class="docutils literal notranslate"><span class="pre">/.&lt;&gt;:#!&amp;</span></code>.
+So the string <code class="docutils literal notranslate"><span class="pre">My.String</span></code> becomes <code class="docutils literal notranslate"><span class="pre">My&amp;.String</span></code>.</p>
+<p>In addition to the standard we define “extended-and-escaping” where
+additionaly commas, square brackets and whitespace characters are escaped.
+This improves the parsing in a larger context, as a lexer can find the end of
+the escaped string. The reserved characters for the extended escaping (in
+addition to the above escape-characters) are <code class="docutils literal notranslate"><span class="pre">,[]</span> <span class="pre">\t\n\v\f\r</span></code>.</p>
+<p>This documentation always states whether “and-escaping” or the
+“extended-and-escaping is used.</p>
+</section>
 <section id="parse-relativepath-expressions">
 <h2>Parse RelativePath Expressions<a class="headerlink" href="#parse-relativepath-expressions" title="Link to this heading">¶</a></h2>
 <p>Parse a RelativePath according to the format defined in Part 4, A2. This is
-used e.g. for the BrowsePath structure. For now, only the standard
-ReferenceTypes from Namespace 0 are recognized (see Part 3).</p>
+used e.g. for the BrowsePath structure.</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">RelativePath</span> <span class="pre">:=</span> <span class="pre">(</span> <span class="pre">ReferenceType</span> <span class="pre">BrowseName</span> <span class="pre">)+</span></code></p>
 </div></blockquote>
-<p>The ReferenceTypes have either of the following formats:</p>
-<ul class="simple">
+<p>The ReferenceType has one of the following formats:</p>
+<ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">/</span></code>: <em>HierarchicalReferences</em> and subtypes</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.</span></code>: <em>Aggregates</em> ReferenceTypes and subtypes</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">[!#]*</span> <span class="pre">BrowseName</span> <span class="pre">&gt;</span></code>: The ReferenceType is indicated by its BrowseName
-(a QualifiedName). Prefixed modifiers can be as follows:
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">[!#]*</span> <span class="pre">BrowseName</span> <span class="pre">&gt;</span></code>: The ReferenceType is indicated by its BrowseName.
+Reserved characters in the BrowseName are and-escaped. The following
+prefix-modifiers are defined for the ReferenceType.
 - <code class="docutils literal notranslate"><span class="pre">!</span></code> switches to inverse References
-- <code class="docutils literal notranslate"><span class="pre">#</span></code> excludes subtypes of the ReferenceType.</p></li>
-</ul>
-<p>QualifiedNames consist of an optional NamespaceIndex and the name itself:</p>
+- <code class="docutils literal notranslate"><span class="pre">#</span></code> excludes subtypes of the ReferenceType.
+- As a non-standard extension we allow the ReferenceType in angle-brackets</p>
 <blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">QualifiedName</span> <span class="pre">:=</span> <span class="pre">[0-9]+</span> <span class="pre">&quot;:&quot;</span> <span class="pre">Name</span></code></p>
+<div><p>as a NodeId. For example <code class="docutils literal notranslate"><span class="pre">&lt;ns=1;i=345&gt;</span></code>. If a string NodeId is used,
+the string identifier is and-escaped.</p>
 </div></blockquote>
-<p>The QualifiedName representation for RelativePaths uses <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> as the escape
-character. Occurences of the characters <code class="docutils literal notranslate"><span class="pre">/.&lt;&gt;:#!&amp;</span></code> in a QualifiedName have
-to be escaped (prefixed with <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>).</p>
+</li>
+</ul>
+<p>The BrowseName is a QualifiedName. It consist of an optional NamespaceIndex
+and the name itself. The NamespaceIndex can be left out for the default
+Namespace zero. The name component is and-escaped (see above).</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">BrowseName</span> <span class="pre">:=</span> <span class="pre">([0-9]+</span> <span class="pre">&quot;:&quot;)?</span> <span class="pre">Name</span></code></p>
+</div></blockquote>
+<p>The last BrowseName in a RelativePath can be omitted. This acts as a wildcard
+that matches any BrowseName.</p>
 <section id="example-relativepaths">
 <h3>Example RelativePaths<a class="headerlink" href="#example-relativepaths" title="Link to this heading">¶</a></h3>
 <ul class="simple">
@@ -592,11 +612,6 @@ to be escaped (prefixed with <code class="docutils literal notranslate"><span cl
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;!HasChild&gt;Truck</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;HasChild&gt;</span></code></p></li>
 </ul>
-</section>
-<section id="extension-referencetypenodeids">
-<h3>Extension: ReferenceTypeNodeIds<a class="headerlink" href="#extension-referencetypenodeids" title="Link to this heading">¶</a></h3>
-<p>As a non-standard extension we allow the ReferenceType in angle-brackets to
-be defined as a NodeId. For example <code class="docutils literal notranslate"><span class="pre">/1:Boiler&lt;ns=1;i=345&gt;1:HeatSensor</span></code>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_RelativePath_parse</span><span class="p">(</span><span class="n">UA_RelativePath</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
@@ -607,6 +622,11 @@ be defined as a NodeId. For example <code class="docutils literal notranslate"><
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_RelativePath_parseWithServer</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_RelativePath</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
+
+<span class="cm">/* The out-string can be pre-allocated. Then the size is adjusted or an error</span>
+<span class="cm"> * returned. If the out-string is NULL, then memory is allocated for it. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_RelativePath_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_RelativePath</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
 <span class="cp">#endif</span>
 </pre></div>
 </div>
