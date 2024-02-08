@@ -293,15 +293,15 @@ layer plugins.</p>
 character is used to escape the reserved characters <code class="docutils literal notranslate"><span class="pre">/.&lt;&gt;:#!&amp;</span></code>.
 So the string <code class="docutils literal notranslate"><span class="pre">My.String</span></code> becomes <code class="docutils literal notranslate"><span class="pre">My&amp;.String</span></code>.</p>
 <p>In addition to the standard we define “extended-and-escaping” where
-additionaly commas, square brackets and whitespace characters are escaped.
-This improves the parsing in a larger context, as a lexer can find the end of
-the escaped string. The reserved characters for the extended escaping (in
-addition to the above escape-characters) are <code class="docutils literal notranslate"><span class="pre">,[]</span> <span class="pre">\t\n\v\f\r</span></code>.</p>
+additionaly commas, semicolons, brackets and whitespace characters are
+escaped. This improves the parsing in a larger context, as a lexer can find
+the end of the escaped string. The additionally reserved characters for the
+extended escaping are <code class="docutils literal notranslate"><span class="pre">,()[]</span> <span class="pre">\t\n\v\f\r</span></code>.</p>
 <p>This documentation always states whether “and-escaping” or the
 “extended-and-escaping is used.</p>
 </section>
-<section id="parse-relativepath-expressions">
-<h1>Parse RelativePath Expressions<a class="headerlink" href="#parse-relativepath-expressions" title="Link to this heading">¶</a></h1>
+<section id="print-and-parse-relativepath-expressions">
+<h1>Print and Parse RelativePath Expressions<a class="headerlink" href="#print-and-parse-relativepath-expressions" title="Link to this heading">¶</a></h1>
 <p>Parse a RelativePath according to the format defined in Part 4, A2. This is
 used e.g. for the BrowsePath structure.</p>
 <blockquote>
@@ -357,6 +357,49 @@ that matches any BrowseName.</p>
 <span class="cm"> * returned. If the out-string is NULL, then memory is allocated for it. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_RelativePath_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_RelativePath</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="print-and-parse-simpleattributeoperand-expression">
+<h1>Print and Parse SimpleAttributeOperand Expression<a class="headerlink" href="#print-and-parse-simpleattributeoperand-expression" title="Link to this heading">¶</a></h1>
+<p>The SimpleAttributeOperand is used to specify the location of up values.
+SimpleAttributeOperands are used for example in EventFilters to select the
+values reported for each event instance.</p>
+<p>The TypeDefinitionId is a NodeId and restricts the starting point for the
+lookup to instances of the TypeDefinitionNode or one of its subtypes. The
+NodeId defaults to the wildcard ns=0;i=0. The NodeId is extended-and-escaped.</p>
+<p>The BrowsePath is a list of BrowseNames (QualifiedName expression with
+extended-and-escaping) to be followed from the TypeDefinitionNode instance.
+The implied ReferenceTypeIds (cf. the RelativePath expressions) are always
+the HierarchicalReferences and their subtypes. So the <code class="docutils literal notranslate"><span class="pre">/</span></code> separator is
+mandatory here. The BrowsePath for the SimpleAttributeOperand is defined to
+only follow into Variable- and ObjectNodes. If the BrowsePath is empty, the
+value is taken from the instance of the TypeDefinition itself.</p>
+<p>The attribute is the textual name of the possible node attributes.
+For the index range, see the section on <a class="reference internal" href="types.html#numericrange"><span class="std std-ref">NumericRange</span></a>.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>SimpleAttributeOperand :=
+  TypeDefinitionId? SimpleBrowsePath (&quot;#&quot; Attribute)? (&quot;[&quot; IndexRange &quot;]&quot;)?
+
+SimpleBrowsePath := (&quot;/&quot; BrowseName)*
+</pre></div>
+</div>
+<section id="example-simpleattributeoperands">
+<h2>Example SimpleAttributeOperands<a class="headerlink" href="#example-simpleattributeoperands" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ns=2;s=TruckEventType/3:Truck/5:Wheel#Value[1:3]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/3:Truck/5:Wheel</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#BrowseName</span></code></p></li>
+<li><p>Empty String: No NodeId, BrowsePath, Attribute and NumericRange. This
+indicates the value attribute of the event instance.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_PARSING</span>
+<span class="cm">/* The out-string can be pre-allocated. Then the size is adjusted or an error</span>
+<span class="cm"> * returned. If the out-string is NULL, then memory is allocated for it. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_SimpleAttributeOperand_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SimpleAttributeOperand</span><span class="w"> </span><span class="o">*</span><span class="n">sao</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
 <span class="cp">#endif</span>
 </pre></div>
 </div>

@@ -221,16 +221,16 @@ character is used to escape the reserved characters ``/.<>:#!&``.
 So the string ``My.String`` becomes ``My&.String``.
 
 In addition to the standard we define "extended-and-escaping" where
-additionaly commas, square brackets and whitespace characters are escaped.
-This improves the parsing in a larger context, as a lexer can find the end of
-the escaped string. The reserved characters for the extended escaping (in
-addition to the above escape-characters) are ``,[] \t\n\v\f\r``.
+additionaly commas, semicolons, brackets and whitespace characters are
+escaped. This improves the parsing in a larger context, as a lexer can find
+the end of the escaped string. The additionally reserved characters for the
+extended escaping are ``,()[] \t\n\v\f\r``.
 
 This documentation always states whether "and-escaping" or the
 "extended-and-escaping is used.
 
-Parse RelativePath Expressions
-------------------------------
+Print and Parse RelativePath Expressions
+----------------------------------------
 Parse a RelativePath according to the format defined in Part 4, A2. This is
 used e.g. for the BrowsePath structure.
 
@@ -240,7 +240,6 @@ The ReferenceType has one of the following formats:
 
 - ``/``: *HierarchicalReferences* and subtypes
 - ``.``: *Aggregates* ReferenceTypes and subtypes
-
 - ``< [!#]* BrowseName >``: The ReferenceType is indicated by its BrowseName.
   Reserved characters in the BrowseName are and-escaped. The following
   prefix-modifiers are defined for the ReferenceType.
@@ -287,6 +286,51 @@ Example RelativePaths
     * returned. If the out-string is NULL, then memory is allocated for it. */
    UA_StatusCode
    UA_RelativePath_print(const UA_RelativePath *rp, UA_String *out);
+   #endif
+   
+Print and Parse SimpleAttributeOperand Expression
+-------------------------------------------------
+The SimpleAttributeOperand is used to specify the location of up values.
+SimpleAttributeOperands are used for example in EventFilters to select the
+values reported for each event instance.
+
+The TypeDefinitionId is a NodeId and restricts the starting point for the
+lookup to instances of the TypeDefinitionNode or one of its subtypes. The
+NodeId defaults to the wildcard ns=0;i=0. The NodeId is extended-and-escaped.
+
+The BrowsePath is a list of BrowseNames (QualifiedName expression with
+extended-and-escaping) to be followed from the TypeDefinitionNode instance.
+The implied ReferenceTypeIds (cf. the RelativePath expressions) are always
+the HierarchicalReferences and their subtypes. So the ``/`` separator is
+mandatory here. The BrowsePath for the SimpleAttributeOperand is defined to
+only follow into Variable- and ObjectNodes. If the BrowsePath is empty, the
+value is taken from the instance of the TypeDefinition itself.
+
+The attribute is the textual name of the possible node attributes.
+For the index range, see the section on :ref:`numericrange`.::
+
+  SimpleAttributeOperand :=
+    TypeDefinitionId? SimpleBrowsePath ("#" Attribute)? ("[" IndexRange "]")?
+
+  SimpleBrowsePath := ("/" BrowseName)*
+
+Example SimpleAttributeOperands
+```````````````````````````````
+- ``ns=2;s=TruckEventType/3:Truck/5:Wheel#Value[1:3]``
+- ``/3:Truck/5:Wheel``
+- ``#BrowseName``
+- Empty String: No NodeId, BrowsePath, Attribute and NumericRange. This
+  indicates the value attribute of the event instance.
+
+.. code-block:: c
+
+   
+   #ifdef UA_ENABLE_PARSING
+   /* The out-string can be pre-allocated. Then the size is adjusted or an error
+    * returned. If the out-string is NULL, then memory is allocated for it. */
+   UA_StatusCode
+   UA_SimpleAttributeOperand_print(const UA_SimpleAttributeOperand *sao,
+                                   UA_String *out);
    #endif
    
 Convenience macros for complex types

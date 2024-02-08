@@ -14,6 +14,7 @@ the node type. Possible attributes are as follows:
 
    
    typedef enum {
+       UA_ATTRIBUTEID_INVALID                 = 0,
        UA_ATTRIBUTEID_NODEID                  = 1,
        UA_ATTRIBUTEID_NODECLASS               = 2,
        UA_ATTRIBUTEID_BROWSENAME              = 3,
@@ -42,6 +43,11 @@ the node type. Possible attributes are as follows:
        UA_ATTRIBUTEID_ACCESSRESTRICTIONS      = 26,
        UA_ATTRIBUTEID_ACCESSLEVELEX           = 27
    } UA_AttributeId;
+   
+   /* Returns a readable attribute name like "NodeId" or "Invalid" if the attribute
+    * does not exist */
+   const char *
+   UA_AttributeId_name(UA_AttributeId attrId);
    
 .. _access-level-mask:
 
