@@ -29,6 +29,20 @@ part of the response.
    typedef void (*UA_ChannelService)(UA_Server*, UA_SecureChannel*,
                                      const void *request, void *response);
    
+   typedef struct {
+       UA_UInt32 requestTypeId;
+   #ifdef UA_ENABLE_DIAGNOSTICS
+       UA_UInt16 counterOffset;
+   #endif
+       UA_Boolean sessionRequired;
+       UA_Service serviceCallback;
+       const UA_DataType *requestType;
+       const UA_DataType *responseType;
+   } UA_ServiceDescription;
+   
+   /* Returns NULL if none found */
+   UA_ServiceDescription * getServiceDescription(UA_UInt32 requestTypeId);
+   
 Discovery Service Set
 ---------------------
 This Service Set defines Services used to discover the Endpoints implemented
