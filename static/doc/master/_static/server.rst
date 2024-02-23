@@ -85,6 +85,8 @@ See the section :ref:`rule-handling` for the possible settings.
         * zeroed-out value for empty VariableNodes when they are added. */
        UA_RuleHandling allowEmptyVariables;
    
+       UA_RuleHandling allowAllCertificateUris;
+   
 Custom Data Types
 ^^^^^^^^^^^^^^^^^
 The following is a linked list of arrays with custom data types. All data
@@ -177,8 +179,8 @@ Security and Encryption
        UA_Boolean allowNonePolicyPassword;
    
        /* Different sets of certificates are trusted for SecureChannel / Session */
-       UA_CertificateVerification secureChannelPKI;
-       UA_CertificateVerification sessionPKI;
+       UA_CertificateGroup secureChannelPKI;
+       UA_CertificateGroup sessionPKI;
    
 See the section for :ref:`access-control
 handling<access-control>`.

@@ -82,7 +82,7 @@ doc/CMakeFiles/doc: doc_src/plugin_accesscontrol.rst
 doc/CMakeFiles/doc: doc_src/plugin_log.rst
 doc/CMakeFiles/doc: doc_src/plugin_nodestore.rst
 doc/CMakeFiles/doc: doc_src/plugin_eventloop.rst
-doc/CMakeFiles/doc: doc_src/plugin_pki.rst
+doc/CMakeFiles/doc: doc_src/plugin_certificategroup.rst
 doc/CMakeFiles/doc: doc_src/plugin_securitypolicy.rst
 doc/CMakeFiles/doc: doc_src/tutorial_datatypes.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_firststeps.rst
@@ -148,25 +148,25 @@ doc_src/plugin_accesscontrol.rst: /home/runner/work/open62541/open62541/include/
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating ../doc_src/plugin_accesscontrol.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.12.2/x64/bin/python3 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/accesscontrol.h /home/runner/work/open62541/open62541/build/doc_src/plugin_accesscontrol.rst
 
+doc_src/plugin_certificategroup.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
+doc_src/plugin_certificategroup.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/certificategroup.h
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating ../doc_src/plugin_certificategroup.rst"
+	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.12.2/x64/bin/python3 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/certificategroup.h /home/runner/work/open62541/open62541/build/doc_src/plugin_certificategroup.rst
+
 doc_src/plugin_eventloop.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/plugin_eventloop.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/eventloop.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating ../doc_src/plugin_eventloop.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Generating ../doc_src/plugin_eventloop.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.12.2/x64/bin/python3 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/eventloop.h /home/runner/work/open62541/open62541/build/doc_src/plugin_eventloop.rst
 
 doc_src/plugin_log.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/plugin_log.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/log.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Generating ../doc_src/plugin_log.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating ../doc_src/plugin_log.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.12.2/x64/bin/python3 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/log.h /home/runner/work/open62541/open62541/build/doc_src/plugin_log.rst
 
 doc_src/plugin_nodestore.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/plugin_nodestore.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/nodestore.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating ../doc_src/plugin_nodestore.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Generating ../doc_src/plugin_nodestore.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.12.2/x64/bin/python3 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/nodestore.h /home/runner/work/open62541/open62541/build/doc_src/plugin_nodestore.rst
-
-doc_src/plugin_pki.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
-doc_src/plugin_pki.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/pki.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Generating ../doc_src/plugin_pki.rst"
-	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.12.2/x64/bin/python3 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/pki.h /home/runner/work/open62541/open62541/build/doc_src/plugin_pki.rst
 
 doc_src/plugin_securitypolicy.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/plugin_securitypolicy.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/securitypolicy.h
@@ -300,10 +300,10 @@ doc: doc_src/client_highlevel_async.rst
 doc: doc_src/client_subscriptions.rst
 doc: doc_src/common.rst
 doc: doc_src/plugin_accesscontrol.rst
+doc: doc_src/plugin_certificategroup.rst
 doc: doc_src/plugin_eventloop.rst
 doc: doc_src/plugin_log.rst
 doc: doc_src/plugin_nodestore.rst
-doc: doc_src/plugin_pki.rst
 doc: doc_src/plugin_securitypolicy.rst
 doc: doc_src/pubsub.rst
 doc: doc_src/pubsub_TSN_loopback.rst

@@ -148,7 +148,7 @@ Advanced Client Configuration
        UA_SecurityPolicy *securityPolicies;
    
        /* Certificate Verification Plugin */
-       UA_CertificateVerification certificateVerification;
+       UA_CertificateGroup certificateVerification;
    
        /* Available SecurityPolicies for Authentication. The policy defined by the
         * AccessControl is selected. If no policy is defined, the policy of the secure channel
