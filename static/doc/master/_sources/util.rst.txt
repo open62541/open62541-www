@@ -288,6 +288,8 @@ Example RelativePaths
    UA_RelativePath_print(const UA_RelativePath *rp, UA_String *out);
    #endif
    
+.. _parse-sao:
+
 Print and Parse SimpleAttributeOperand Expression
 -------------------------------------------------
 The SimpleAttributeOperand is used to specify the location of up values.

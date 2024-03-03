@@ -1239,47 +1239,113 @@ be set to a null-pointer.</p>
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
 user-defined callback instead of a remote client.</p>
+<p>Local MonitoredItems are delivered asynchronously. That is, the notification
+is inserted as a <em>Delayed Callback</em> for the EventLoop. The callback is then
+triggered when the control flow next returns to the EventLoop.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
+
+<span class="cm">/* Delete a local MonitoredItem. Used for both DataChange- and</span>
+<span class="cm"> * Event-MonitoredItems. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_deleteMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">);</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_Server_DataChangeNotificationCallback</span><span class="p">)</span>
 <span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
 <span class="w">     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeId</span><span class="p">,</span>
 <span class="w">     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_Server_EventNotificationCallback</span><span class="p">)</span>
-<span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monContext</span><span class="p">,</span>
-<span class="w">     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nEventFields</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">eventFields</span><span class="p">);</span>
-
-<span class="cm">/* Create a local MonitoredItem with a sampling interval that detects data</span>
-<span class="cm"> * changes.</span>
+</pre></div>
+</div>
+<p>DataChange MonitoredItem use a sampling interval and filter criteria to
+notify the userland about value changes. Note that the sampling interval can
+also be zero to be notified about changes “right away”. For this we hook the
+MonitoredItem into the observed Node and check the filter after every call of
+the Write-Service.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Create a local MonitoredItem to detect data changes.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server executing the MonitoredItem</span>
-<span class="cm"> * @timestampsToReturn Shall timestamps be added to the value for the callback?</span>
-<span class="cm"> * @item The parameters of the new MonitoredItem. Note that the attribute of the</span>
-<span class="cm"> *       ReadValueId (the node that is monitored) can not be</span>
-<span class="cm"> *       ``UA_ATTRIBUTEID_EVENTNOTIFIER``. A different callback type needs to be</span>
-<span class="cm"> *       registered for event notifications.</span>
-<span class="cm"> * @monitoredItemContext A pointer that is forwarded with the callback</span>
-<span class="cm"> * @callback The callback that is executed on detected data changes</span>
-<span class="cm"> *</span>
+<span class="cm"> * @param timestampsToReturn Shall timestamps be added to the value for the</span>
+<span class="cm"> *        callback?</span>
+<span class="cm"> * @param item The parameters of the new MonitoredItem. Note that the attribute</span>
+<span class="cm"> *        of the ReadValueId (the node that is monitored) can not be</span>
+<span class="cm"> *        ``UA_ATTRIBUTEID_EVENTNOTIFIER``. See below for event notifications.</span>
+<span class="cm"> * @param monitoredItemContext A pointer that is forwarded with the callback</span>
+<span class="cm"> * @param callback The callback that is executed on detected data changes</span>
 <span class="cm"> * @return Returns a description of the created MonitoredItem. The structure</span>
-<span class="cm"> * also contains a StatusCode (in case of an error) and the identifier of the</span>
-<span class="cm"> * new MonitoredItem. */</span>
+<span class="cm"> *         also contains a StatusCode (in case of an error) and the identifier</span>
+<span class="cm"> *         of the new MonitoredItem. */</span>
 <span class="n">UA_MonitoredItemCreateResult</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_createDataChangeMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">          </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span>
 <span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_MonitoredItemCreateRequest</span><span class="w"> </span><span class="n">item</span><span class="p">,</span>
 <span class="w">          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
 <span class="w">          </span><span class="n">UA_Server_DataChangeNotificationCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>See the section on :ref`events` for how to emit events in the server.</p>
+<p>Event-MonitoredItems emit notifications with a list of “fields” (variants).
+The fields are specified as <em>SimpleAttributeOperands</em> in the select-clause of
+the MonitoredItem’s event filter. For the local event callback, instead of
+using a list of variants, we use a key-value map for the event fields. They
+key names are generated with <code class="docutils literal notranslate"><span class="pre">UA_SimpleAttributeOperand_print</span></code> to get a
+human-readable representation.</p>
+<p>The received event-fields map could look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="p">:</span><span class="o">/</span><span class="n">Severity</span>   <span class="o">=&gt;</span> <span class="n">UInt16</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="mi">0</span><span class="p">:</span><span class="o">/</span><span class="n">Message</span>    <span class="o">=&gt;</span> <span class="n">LocalizedText</span><span class="p">(</span><span class="s2">&quot;en-US&quot;</span><span class="p">,</span> <span class="s2">&quot;My Event Message&quot;</span><span class="p">)</span>
+<span class="mi">0</span><span class="p">:</span><span class="o">/</span><span class="n">EventType</span>  <span class="o">=&gt;</span> <span class="n">NodeId</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">50831</span><span class="p">)</span>
+<span class="mi">0</span><span class="p">:</span><span class="o">/</span><span class="n">SourceNode</span> <span class="o">=&gt;</span> <span class="n">NodeId</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">2253</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The order of the keys is identical to the order of SimpleAttributeOperands in
+the select-clause. This feature requires the build flag <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_PARSING</span></code>
+enabled. Otherwise the key-value map uses empty keys (the order of fields is
+still the same as the specified select-clauses).</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
 
-<span class="cm">/* UA_MonitoredItemCreateResult */</span>
-<span class="cm">/* UA_Server_createEventMonitoredItem(UA_Server *server, */</span>
-<span class="cm">/*           UA_TimestampsToReturn timestampsToReturn, */</span>
-<span class="cm">/*           const UA_MonitoredItemCreateRequest item, void *context, */</span>
-<span class="cm">/*           UA_Server_EventNotificationCallback callback); */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_Server_EventNotificationCallback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
+<span class="w">     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">eventFields</span><span class="p">);</span>
 
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_deleteMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">);</span>
+<span class="cm">/* Create a local MonitoredItem for Events. The API is simplifed compared to a</span>
+<span class="cm"> * UA_MonitoredItemCreateRequest. The unavailable options are not relevant for</span>
+<span class="cm"> * local MonitoredItems (e.g. the queue size) or not relevant for Event</span>
+<span class="cm"> * MonitoredItems (e.g. the sampling interval).</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server executing the MonitoredItem</span>
+<span class="cm"> * @param nodeId The node where events are collected. Note that events &quot;bubble</span>
+<span class="cm"> *        up&quot; to their parents (via hierarchical references).</span>
+<span class="cm"> * @param filter The filter defined which event fields are selected (select</span>
+<span class="cm"> *        clauses) and which events are considered for this particular</span>
+<span class="cm"> *        MonitoredItem (where clause).</span>
+<span class="cm"> * @param monitoredItemContext A pointer that is forwarded with the callback</span>
+<span class="cm"> * @param callback The callback that is executed for each event</span>
+<span class="cm"> * @return Returns a description of the created MonitoredItem. The structure</span>
+<span class="cm"> *         also contains a StatusCode (in case of an error) and the identifier</span>
+<span class="cm"> *         of the new MonitoredItem. */</span>
+<span class="n">UA_MonitoredItemCreateResult</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_createEventMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EventFilter</span><span class="w"> </span><span class="n">filter</span><span class="p">,</span>
+<span class="w">                                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_Server_EventNotificationCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">);</span>
+
+<span class="cm">/* Extended version UA_Server_createEventMonitoredItem that allows setting of</span>
+<span class="cm"> * uncommon parameters (for local MonitoredItems) like the MonitoringMode and</span>
+<span class="cm"> * queue sizes.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server executing the MonitoredItem</span>
+<span class="cm"> * @param item The description of the MonitoredItem. Must use</span>
+<span class="cm"> *        UA_ATTRIBUTEID_EVENTNOTIFIER and an EventFilter.</span>
+<span class="cm"> * @param monitoredItemContext A pointer that is forwarded with the callback</span>
+<span class="cm"> * @param callback The callback that is executed for each event</span>
+<span class="cm"> * @return Returns a description of the created MonitoredItem. The structure</span>
+<span class="cm"> *         also contains a StatusCode (in case of an error) and the identifier</span>
+<span class="cm"> *         of the new MonitoredItem. */</span>
+<span class="n">UA_MonitoredItemCreateResult</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_createEventMonitoredItemEx</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_MonitoredItemCreateRequest</span><span class="w"> </span><span class="n">item</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">UA_Server_EventNotificationCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">);</span>
+
+<span class="cp">#endif</span>
 
 <span class="cp">#endif</span>
 </pre></div>
