@@ -236,6 +236,14 @@ Add a new PubSub connection to the given server and open it.
                                  const UA_PubSubConnectionConfig *connectionConfig,
                                  UA_NodeId *connectionId);
    
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_enablePubSubConnection(UA_Server *server,
+                                    const UA_NodeId connectionId);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_disablePubSubConnection(UA_Server *server,
+                                     const UA_NodeId connectionId);
+   
    /* Returns a deep copy of the config */
    UA_StatusCode UA_THREADSAFE
    UA_Server_getPubSubConnectionConfig(UA_Server *server,
