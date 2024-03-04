@@ -104,6 +104,7 @@ doc/CMakeFiles/doc: doc_src/pubsub_nodeset_rt_subscriber.rst
 doc/CMakeFiles/doc: doc_src/building.rst
 doc/CMakeFiles/doc: doc_src/building_arch.rst
 doc/CMakeFiles/doc: doc_src/core_concepts.rst
+doc/CMakeFiles/doc: doc_src/eventfilter_query
 doc/CMakeFiles/doc: doc_src/generated.rst
 doc/CMakeFiles/doc: doc_src/index.rst
 doc/CMakeFiles/doc: doc_src/nodeset_compiler.rst

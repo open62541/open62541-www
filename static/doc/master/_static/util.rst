@@ -14,6 +14,20 @@ Range Definition
        UA_Duration max;
    } UA_DurationRange;
    
+Query Language Eventfilter
+@param content eventfilter query
+@param filter generated eventfilter
+
+.. code-block:: c
+
+   #ifdef UA_ENABLE_PARSING
+   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+   UA_StatusCode
+   UA_EventFilter_parse(UA_EventFilter *filter, UA_ByteString *content);
+   #endif
+   #endif
+   
+   
 Random Number Generator
 -----------------------
 If UA_MULTITHREADING is defined, then the seed is stored in thread
