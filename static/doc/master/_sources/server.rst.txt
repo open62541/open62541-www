@@ -27,10 +27,10 @@ The :ref:`tutorials` provide a good starting point for this.
 
    
    struct UA_ServerConfig {
-       const UA_Logger *logging; /* Plugin for log output */
        void *context; /* Used to attach custom data to a server config. This can
                        * then be retrieved e.g. in a callback that forwards a
                        * pointer to the server. */
+       UA_Logger *logging; /* Plugin for log output */
    
 Server Description
 ^^^^^^^^^^^^^^^^^^

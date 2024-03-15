@@ -463,10 +463,12 @@ connections that are each bound to an MQTT topic.</p>
 Triggering the interrupt calls the callback associated with it.</p>
 <p>The implementations of the interrupt manager for the different platforms
 shall be designed such that:</p>
-<p>Registered interrupts are only intercepted from within the running EventLoop</p>
-<p>Processing an interrupt in the EventLoop is handled similarly to handling a
+<ul class="simple">
+<li><p>Registered interrupts are only intercepted from within the running EventLoop</p></li>
+<li><p>Processing an interrupt in the EventLoop is handled similarly to handling a
 network event: all methods and also memory allocation are available from
-within the interrupt callback.</p>
+within the interrupt callback.</p></li>
+</ul>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Interrupts can have additional key-value &#39;instanceInfos&#39; for each individual</span>
 <span class="cm"> * triggering. See the architecture-specific documentation. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
@@ -532,57 +534,46 @@ device).</p>
 <p>The <cite>connectionCallback</cite> of the server socket and <cite>context</cite> of the server
 socket is reused for each new connection. But the key-value parameters for
 the first callback are different between server and client connections.</p>
-<p>Configuration parameters for the ConnectionManager (set before _start):
-- 0:recv-bufsize [uint32]: Size of the buffer that is statically allocated</p>
-<blockquote>
-<div><p>for receiving messages (default: 65536).</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:send-bufsize [uint32]: Size of the statically allocated buffer for</dt><dd><p>sending messages. This then becomes an upper bound for the message
-size. If undefined a fresh buffer is allocated for every
-<cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<p><strong>Configuration parameters for the ConnectionManager (set before start)</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
+(default 64kB).</p>
+</dd>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
+becomes an upper bound for the message size. If undefined a fresh buffer
+is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
 </dd>
 </dl>
-</li>
-</ul>
-<p>Open Connection Parameters:
-- 0:address [string | array of string]: Hostname or IPv4/v6 address for the</p>
-<blockquote>
-<div><p>connection (scalar parameter required for active connections).
-For listen-connections the address implies the network interfaces
-for listening (default: listen on all interfaces).</p>
-</div></blockquote>
-<ul class="simple">
-<li><p>0:port [uint16]: Port of the target host (required).</p></li>
-<li><p>0:listen [boolean]: Listen-connection or active-connection (default: false)</p></li>
-<li><dl class="simple">
-<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
-provided parameters (default: false)</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string | array of string]</dt><dd><p>Hostname or IPv4/v6 address for the connection (scalar parameter required
+for active connections). For listen-connections the address implies the
+network interfaces for listening (default: listen on all interfaces).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port of the target host (required).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Listen-connection or active-connection (default: false)</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
 </dd>
 </dl>
-</li>
-</ul>
-<p>Connection Callback Parameters (first callback only):
-- Active Connection</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>0:remote-address [string]: Address of the remote side (hostname or IP address).</p></li>
-</ul>
-</div></blockquote>
-<ul>
-<li><p>Listen Connection
-- 0:listen-address [string]: Local address for that particular</p>
-<blockquote>
-<div><p>listen-connection.</p>
-</div></blockquote>
-<ul class="simple">
-<li><p>0:listen-port [uint16]: Port on which the connection listens.</p></li>
-</ul>
-</li>
-</ul>
-<p>Send Parameters:
-No additional parameters for sending over an established TCP socket defined.</p>
+<p><strong>Active Connection Connection Callback Parameters (first callback only):</strong></p>
+<dl class="simple">
+<dt>0:remote-address [string]</dt><dd><p>Address of the remote side (hostname or IP address).</p>
+</dd>
+</dl>
+<p><strong>Listen Connection Connection Callback Parameters (first callback only):</strong></p>
+<dl class="simple">
+<dt>0:listen-address [string]</dt><dd><p>Local address for that particular listen-connection.</p>
+</dd>
+<dt>0:listen-port [uint16]</dt><dd><p>Port on which the connection listens.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an established TCP socket
+defined.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
@@ -590,77 +581,59 @@ No additional parameters for sending over an established TCP socket defined.</p>
 </section>
 <section id="udp-connection-manager">
 <h3>UDP Connection Manager<a class="headerlink" href="#udp-connection-manager" title="Link to this heading">¶</a></h3>
-<p>Manages UDP connections. This should be available for all architectures.</p>
-<p>The configuration parameters have to set before calling _start to take
-effect.</p>
-<p>Configuration parameters for the ConnectionManager (set before _start):
-- 0:recv-bufsize [uint32]: Size of the buffer that is statically allocated</p>
-<blockquote>
-<div><p>for receiving messages (default: 65536).</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:send-bufsize [uint32]: Size of the statically allocated buffer for</dt><dd><p>sending messages. This then becomes an upper bound for the message
-size. If undefined a fresh buffer is allocated for every
-<cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<p>Manages UDP connections. This should be available for all architectures. The
+configuration parameters have to set before calling _start to take effect.</p>
+<p><strong>Configuration parameters for the ConnectionManager (set before start)</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
+(default 64kB).</p>
+</dd>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
+becomes an upper bound for the message size. If undefined a fresh buffer
+is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
 </dd>
 </dl>
-</li>
-</ul>
-<p>Open Connection Parameters:
-- 0:listen [boolean]: Use the connection for listening or for sending</p>
-<blockquote>
-<div><p>(default: false)</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:address [string | string array]: Hostname (or IPv4/v6 address) for</dt><dd><p>sending or receiving. A scalar is required for sending. For listening a
-string array for the list-hostnames is possible as well (default: list
-on all hostnames).</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:listen [boolean]</dt><dd><p>Use the connection for listening or for sending (default: false)</p>
+</dd>
+<dt>0:address [string | string array]</dt><dd><p>Hostname (or IPv4/v6 address) for sending or receiving. A scalar is
+required for sending. For listening a string array for the list-hostnames
+is possible as well (default: list on all hostnames).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port for sending or listening (required).</p>
+</dd>
+<dt>0:interface [string]</dt><dd><p>Network interface for listening or sending (e.g. when using multicast
+addresses)</p>
+</dd>
+<dt>0:ttl [uint32]</dt><dd><p>Multicast time to live, (optional, default: 1 - meaning multicast is
+available only to the local subnet).</p>
+</dd>
+<dt>0:loopback [boolean]</dt><dd><p>Whether or not to use multicast loopback, enabling local interfaces
+belonging to the multicast group to receive packages. (default: enabled).</p>
+</dd>
+<dt>0:reuse [boolean]</dt><dd><p>Enables sharing of the same listening address on different sockets
+(default: disabled).</p>
+</dd>
+<dt>0:sockpriority [uint32]</dt><dd><p>The socket priority (optional) - only available on linux. packets with a
+higher priority may be processed first depending on the selected device
+queueing discipline. Setting a priority outside the range 0 to 6 requires
+the CAP_NET_ADMIN capability (on Linux).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
 </dd>
 </dl>
-</li>
-<li><p>0:port [uint16]: Port for sending or listening (required).</p></li>
-<li><dl class="simple">
-<dt>0:interface [string]: Network interface for listening or sending (e.g. when</dt><dd><p>using multicast addresses)</p>
+<p><strong>Connection Callback Paramters:</strong></p>
+<dl class="simple">
+<dt>0:remote-address [string]</dt><dd><p>Contains the remote IP address.</p>
+</dd>
+<dt>0:remote-port [uint16]</dt><dd><p>Contains the remote port.</p>
 </dd>
 </dl>
-</li>
-<li><dl class="simple">
-<dt>0:ttl [uint32]: Multicast time to live, (optional, default: 1 - meaning</dt><dd><p>multicast is available only to the local subnet).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>0:loopback [boolean]: Whether or not to use multicast loopback, enabling</dt><dd><p>local interfaces belonging to the multicast group to receive packages.
-(default: enabled).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>0:reuse [boolean]: Enables sharing of the same listening address on</dt><dd><p>different sockets (default: disabled).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>0:sockpriority [uint32]: The socket priority (optional) - only available on</dt><dd><p>linux. packets with a higher priority may be processed first depending
-on the selected device queueing discipline. Setting a priority outside
-the range 0 to 6 requires the CAP_NET_ADMIN capability (on Linux).</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
-provided parameters (default: false)</p>
-</dd>
-</dl>
-</li>
-</ul>
-<p>Connection Callback Paramters:
-- 0:remote-address [string]: Contains the remote IP address.
-- 0:remote-port [uint16]: Contains the remote port.</p>
-<p>Send Parameters:
-No additional parameters for sending over an UDP connection defined.</p>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an UDP connection defined.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_UDP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
@@ -669,93 +642,70 @@ No additional parameters for sending over an UDP connection defined.</p>
 <section id="ethernet-connection-manager">
 <h3>Ethernet Connection Manager<a class="headerlink" href="#ethernet-connection-manager" title="Link to this heading">¶</a></h3>
 <p>Listens on the network and manages UDP connections. This should be available
-for all architectures.</p>
-<p>Configuration parameters for the ConnectionManager (set before _start):
-- 0:recv-bufsize [uint32]: Size of the buffer that is statically allocated</p>
-<blockquote>
-<div><p>for receiving messages (default: 65536).</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:send-bufsize [uint32]: Size of the statically allocated buffer for</dt><dd><p>sending messages. This then becomes an upper bound for the message
-size. If undefined a fresh buffer is allocated for every
-<cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+for all architectures. The configuration parameters have to set before
+calling _start to take effect.</p>
+<p><strong>Configuration parameters for the ConnectionManager (set before start)</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
+(default 64kB).</p>
+</dd>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
+becomes an upper bound for the message size. If undefined a fresh buffer
+is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
 </dd>
 </dl>
-</li>
-</ul>
-<p>Open Connection Parameters:
-- 0:listen [bool]: The connection is either for sending or for listening</p>
-<blockquote>
-<div><p>(default: false).</p>
-</div></blockquote>
-<ul class="simple">
-<li><p>0:interface [string]: The name of the Ethernet interface to use (required).</p></li>
-<li><dl class="simple">
-<dt>0:address [string]: MAC target address consisting of six groups of</dt><dd><p>hexadecimal digits separated by hyphens such as
-01-23-45-67-89-ab. For sending this is a required
-parameter. For listening this is a multicast address
-that the connections tries to register for.</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:listen [bool]</dt><dd><p>The connection is either for sending or for listening (default: false).</p>
+</dd>
+<dt>0:interface [string]</dt><dd><p>The name of the Ethernet interface to use (required).</p>
+</dd>
+<dt>0:address [string]</dt><dd><p>MAC target address consisting of six groups of hexadecimal digits
+separated by hyphens such as 01-23-45-67-89-ab. For sending this is a
+required parameter. For listening this is a multicast address that the
+connections tries to register for.</p>
+</dd>
+<dt>0:priority [int32]</dt><dd><p>Set the socket priority for sending (cf. SO_PRIORITY)</p>
+</dd>
+<dt>0:ethertype [uint16]</dt><dd><p>EtherType for sending and receiving frames (optional). For listening
+connections, this filters out all frames with different EtherTypes.</p>
+</dd>
+<dt>0:promiscuous [bool]</dt><dd><p>Receive frames also for different target addresses. Defined only for
+listening connections (default: false).</p>
+</dd>
+<dt>0:vid [uint16]</dt><dd><p>12-bit VLAN identifier (optional for send connections).</p>
+</dd>
+<dt>0:pcp [byte]</dt><dd><p>3-bit priority code point (optional for send connections).</p>
+</dd>
+<dt>0:dei [bool]</dt><dd><p>1-bit drop eligible indicator (optional for send connections).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
 </dd>
 </dl>
-</li>
-<li><dl class="simple">
-<dt>0:ethertype [uint16]: EtherType for sending and receiving frames (optional).</dt><dd><p>For listening connections, this filters out all frames
-with different EtherTypes.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>0:promiscuous [bool]: Receive frames also for different target addresses.</dt><dd><p>Defined only for listening connections (default: false).</p>
-</dd>
-</dl>
-</li>
-<li><p>0:priority [int32]: Set the socket priority for sending (cf. SO_PRIORITY)</p></li>
-<li><p>0:vid [uint16]: 12-bit VLAN identifier (optional for send connections).</p></li>
-<li><p>0:pcp [byte]: 3-bit priority code point (optional for send connections).</p></li>
-<li><p>0:dei [bool]: 1-bit drop eligible indicator (optional for send connections).</p></li>
-<li><dl class="simple">
-<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
-provided parameters (default: false)</p>
-</dd>
-</dl>
-</li>
-</ul>
 <p>Sending with a txtime (for Time-Sensitive Networking) is possible on recent
 Linux kernels, If enabled for the socket, then a txtime parameters can be
 passed to <cite>sendWithConnection</cite>. Note that the clock source for txtime sending
 is the monotonic clock source set for the entire EventLoop. Check the
-EventLoop parameters for how to set that e.g. to a PTP clock source.</p>
-<p>The txtime configuration uses Linux conventions:
-- 0:txtime-enable [bool]: Enable sending with a txtime for the connection</p>
-<blockquote>
-<div><p>(default: false).</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:txtime-flags [uint32]: txtime flags set for the socket (default:</dt><dd><p>SOF_TXTIME_REPORT_ERRORS).</p>
+EventLoop parameters for how to set that e.g. to a PTP clock source. The
+txtime parameters uses Linux conventions.</p>
+<dl class="simple">
+<dt>0:txtime-enable [bool]</dt><dd><p>Enable sending with a txtime for the connection (default: false).</p>
+</dd>
+<dt>0:txtime-flags [uint32]</dt><dd><p>txtime flags set for the socket (default: SOF_TXTIME_REPORT_ERRORS).</p>
 </dd>
 </dl>
-</li>
-</ul>
-<p>Send Parameters (only with txtime enabled for the connection):
-- 0:txtime [datetime]: Time when the message is sent out (Datetime has 100ns</p>
-<blockquote>
-<div><p>precision) for the “monotonic” clock source of the
-EventLoop.</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>0:txtime-pico [uint16]: Picoseconds added to the txtime timestamp</dt><dd><p>(default: 0).</p>
+<p><strong>Send Parameters (only with txtime enabled for the connection)</strong></p>
+<dl class="simple">
+<dt>0:txtime [datetime]</dt><dd><p>Time when the message is sent out (Datetime has 100ns precision) for the
+“monotonic” clock source of the EventLoop.</p>
+</dd>
+<dt>0:txtime-pico [uint16]</dt><dd><p>Picoseconds added to the txtime timestamp (default: 0).</p>
+</dd>
+<dt>0:txtime-drop-late [bool]</dt><dd><p>Drop message if it cannot be sent in time (default: true).</p>
 </dd>
 </dl>
-</li>
-<li><dl class="simple">
-<dt>0:txtime-drop-late [bool]: Drop message if it cannot be sent in time</dt><dd><p>(default: true).</p>
-</dd>
-</dl>
-</li>
-</ul>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_Ethernet</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
@@ -771,37 +721,37 @@ connections to the same broker in the background. Hence adding multiple
 connections for the same broker is “cheap”. To have individual control,
 separate connections are created for each topic and for each direction
 (publishing / subscribing).</p>
-<p>Open Connection Parameters:
-- 0:address [string]: Hostname or IPv4/v6 address of the MQTT broker</p>
-<blockquote>
-<div><p>(required).</p>
-</div></blockquote>
-<ul class="simple">
-<li><p>0:port [uint16]: Port of the MQTT broker (default: 1883).</p></li>
-<li><p>0:username [string]: Username to use (default: none)</p></li>
-<li><p>0:password [string]: Password to use (default: none)</p></li>
-<li><dl class="simple">
-<dt>0:keep-alive [uint16]: Number of seconds for the keep-alive (ping)</dt><dd><p>(default: 400).</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string]</dt><dd><p>Hostname or IPv4/v6 address of the MQTT broker (required).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port of the MQTT broker (default: 1883).</p>
+</dd>
+<dt>0:username [string]</dt><dd><p>Username to use (default: none)</p>
+</dd>
+<dt>0:password [string]</dt><dd><p>Password to use (default: none)</p>
+</dd>
+<dt>0:keep-alive [uint16]</dt><dd><p>Number of seconds for the keep-alive (ping) (default: 400).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+<dt>0:topic [string]</dt><dd><p>Topic to which the connection is associated (required).</p>
+</dd>
+<dt>0:subscribe [bool]</dt><dd><p>Subscribe to the topic (default: false). Otherwise it is only possible to
+publish on the topic. Subscribed topics can also be published to.</p>
 </dd>
 </dl>
-</li>
-<li><dl class="simple">
-<dt>0:validate [boolean]: If true, the connection setup will act as a dry-run</dt><dd><p>without actually creating any connection but solely validating the
-provided parameters (default: false)</p>
+<p><strong>Connection Callback Parameters:</strong></p>
+<dl class="simple">
+<dt>0:topic [string]</dt><dd><p>The value set during connect.</p>
+</dd>
+<dt>0:subscribe [bool]</dt><dd><p>The value set during connect.</p>
 </dd>
 </dl>
-</li>
-<li><p>0:topic [string]: Topic to which the connection is associated (required).</p></li>
-<li><dl class="simple">
-<dt>0:subscribe [bool]: Subscribe to the topic (default: false).</dt><dd><p>Otherwise it is only possible to publish on the topic.
-Subscribed topics can also be published to.</p>
-</dd>
-</dl>
-</li>
-</ul>
-<p>Connection Callback Parameters:
-- 0:topic [string]: The value set during connect.
-- 0:subscribe [bool]: The value set during connect.</p>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an Ethernet connection defined.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_MQTT</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>

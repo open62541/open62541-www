@@ -1,3 +1,5 @@
+.. _logging:
+
 Logging Plugin API
 ==================
 
@@ -37,7 +39,7 @@ logger.
        UA_LOGCATEGORY_DISCOVERY
    } UA_LogCategory;
    
-   typedef struct {
+   typedef struct UA_Logger {
        /* Log a message. The message string and following varargs are formatted
         * according to the rules of the printf command. Use the convenience macros
         * below that take the minimum log level defined in ua_config.h into
@@ -47,7 +49,7 @@ logger.
    
        void *context; /* Logger state */
    
-       void (*clear)(void *context); /* Clean up the logger plugin */
+       void (*clear)(struct UA_Logger *logger); /* Clean up the logger plugin */
    } UA_Logger;
    
    static UA_INLINE UA_FORMAT(3,4) void

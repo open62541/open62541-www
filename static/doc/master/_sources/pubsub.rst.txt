@@ -221,16 +221,13 @@ different transport protocols at runtime.
    #endif
    };
    
-Add a new PubSub connection to the given server and open it.
-@param[in] server the server to add the connection to
-@param[in] connectionConfig the configuration for the newly added connection
-@param[out] connectionIdentifier if not NULL will be set to the identifier of the
-                                 newly added connection
-@return UA_STATUSCODE_GOOD if connection was successfully added, otherwise an
-        error code.
-
-.. code-block:: c
-
+   /* Add a new PubSub connection to the given server and open it.
+    * @param server The server to add the connection to.
+    * @param connectionConfig The configuration for the newly added connection.
+    * @param connectionIdentifier If not NULL will be set to the identifier of the
+    *        newly added connection.
+    * @return UA_STATUSCODE_GOOD if connection was successfully added, otherwise an
+    *         error code. */
    UA_StatusCode UA_THREADSAFE
    UA_Server_addPubSubConnection(UA_Server *server,
                                  const UA_PubSubConnectionConfig *connectionConfig,
