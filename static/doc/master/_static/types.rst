@@ -1533,21 +1533,13 @@ length 0 but a data pointer ``UA_EMPTY_ARRAY_SENTINEL``.
 Generated Data Type Definitions
 -------------------------------
 
-The OPC UA standard defines many data types that are combinations of the 25
-builtin data types. See the section on :ref:`generated-definitions` for the
-list of data types that are integrated for this build of the open62541
-library.
+The following standard-defined datatypes are auto-generated from XML files
+that are part of the OPC UA standard. All datatypes are built up from the 25
+builtin-in datatypes from the :ref:`types` section.
+
+.. include:: types_generated.rst
 
 .. code-block:: c
 
    
-   /* Helper used to exclude type names in the definition of UA_DataType structures
-    * if the feature is disabled. */
-   #ifdef UA_ENABLE_TYPEDESCRIPTION
-   # define UA_TYPENAME(name) name,
-   #else
-   # define UA_TYPENAME(name)
-   #endif
-   
-   #include <open62541/types_generated.h>
-   #include <open62541/types_generated_handling.h>
+   /* stop-doc-generation */

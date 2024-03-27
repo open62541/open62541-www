@@ -111,6 +111,12 @@ If empty the applicationURI is not used to filter.
 
        UA_String applicationUri;
    
+The following settings are specific to OPC UA with TCP transport.
+
+.. code-block:: c
+
+       UA_Boolean tcpReuseAddr;
+   
 Custom Data Types
 ~~~~~~~~~~~~~~~~~
 The following is a linked list of arrays with custom data types. All data
@@ -151,8 +157,8 @@ Advanced Client Configuration
        UA_CertificateGroup certificateVerification;
    
        /* Available SecurityPolicies for Authentication. The policy defined by the
-        * AccessControl is selected. If no policy is defined, the policy of the secure channel
-        * is selected.*/
+        * AccessControl is selected. If no policy is defined, the policy of the
+        * secure channel is selected.*/
        size_t authSecurityPoliciesSize;
        UA_SecurityPolicy *authSecurityPolicies;
        /* SecurityPolicyUri for the Authentication. */
@@ -436,21 +442,23 @@ error), the client is no longer usable. Create a new client if required.
        return UA_Client_connect(client, endpointUrl);
    })
    
-   /* Sets up a listening socket for incoming reverse connect requests by OPC UA servers.
-    * After the first server has connected, the listening socket is removed.
-    * The client state callback is also used for reverse connect. An implementation could
-    * for example issue a new call to UA_Client_startListeningForReverseConnect after the
-    * server has closed the connection. If the client is connected to any server while
-    * UA_Client_startListeningForReverseConnect is called, the connection will be closed.
+   /* Sets up a listening socket for incoming reverse connect requests by OPC UA
+    * servers. After the first server has connected, the listening socket is
+    * removed. The client state callback is also used for reverse connect. An
+    * implementation could for example issue a new call to
+    * UA_Client_startListeningForReverseConnect after the server has closed the
+    * connection. If the client is connected to any server while
+    * UA_Client_startListeningForReverseConnect is called, the connection will be
+    * closed.
     *
-    * The reverse connect is closed by calling the standard disconnect functions like
-    * for a "normal" connection that was initiated by the client. Calling one of the connect
-    * methods will also close the listening socket and the connection to the remote server.
-    */
+    * The reverse connect is closed by calling the standard disconnect functions
+    * like for a "normal" connection that was initiated by the client. Calling one
+    * of the connect methods will also close the listening socket and the
+    * connection to the remote server. */
    UA_StatusCode
-   UA_Client_startListeningForReverseConnect(UA_Client *client, const UA_String *listenHostnames,
-                                             size_t listenHostnamesLength,
-                                             UA_UInt16 port);
+   UA_Client_startListeningForReverseConnect(
+       UA_Client *client, const UA_String *listenHostnames,
+       size_t listenHostnamesLength, UA_UInt16 port);
    
    /* Disconnect and close a connection to the selected server. Disconnection is
     * always performed async (without blocking). */
@@ -475,8 +483,8 @@ error), the client is no longer usable. Create a new client if required.
    /* Get the AuthenticationToken and ServerNonce required to activate the current
     * Session on a different SecureChannel. */
    UA_StatusCode UA_THREADSAFE
-   UA_Client_getSessionAuthenticationToken(UA_Client *client, UA_NodeId *authenticationToken,
-                                           UA_ByteString *serverNonce);
+   UA_Client_getSessionAuthenticationToken(
+       UA_Client *client, UA_NodeId *authenticationToken, UA_ByteString *serverNonce);
    
    /* Re-activate the current session. A change of prefered locales can be done by
     * updating the client configuration. */
@@ -531,13 +539,13 @@ Discovery
    
    /* Gets a list of all registered servers at the given server.
     *
-    * You can pass an optional filter for serverUris. If the given server is not registered,
-    * an empty array will be returned. If the server is registered, only that application
-    * description will be returned.
+    * You can pass an optional filter for serverUris. If the given server is not
+    * registered, an empty array will be returned. If the server is registered,
+    * only that application description will be returned.
     *
-    * Additionally you can optionally indicate which locale you want for the server name
-    * in the returned application description. The array indicates the order of preference.
-    * A server may have localized names.
+    * Additionally you can optionally indicate which locale you want for the server
+    * name in the returned application description. The array indicates the order
+    * of preference. A server may have localized names.
     *
     * @param client to use. Must be connected to the same endpoint given in
     *        serverUrl or otherwise in disconnected state.
@@ -546,7 +554,8 @@ Discovery
     * @param serverUris Optional filter for specific server uris
     * @param localeIdsSize Optional indication which locale you prefer
     * @param localeIds Optional indication which locale you prefer
-    * @param registeredServersSize size of returned array, i.e., number of found/registered servers
+    * @param registeredServersSize size of returned array, i.e., number of
+    *        found/registered servers
     * @param registeredServers array containing found/registered servers
     * @return Indicates whether the operation succeeded or returns an error code */
    UA_StatusCode UA_THREADSAFE
@@ -623,17 +632,21 @@ that wrap the raw services.
    * Historical Access Service Set
    * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
    UA_INLINABLE( UA_THREADSAFE UA_HistoryReadResponse
-   UA_Client_Service_historyRead(UA_Client *client, const UA_HistoryReadRequest request) ,{
+   UA_Client_Service_historyRead(UA_Client *client,
+                                 const UA_HistoryReadRequest request) ,{
        UA_HistoryReadResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_HISTORYREADREQUEST],
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_HISTORYREADREQUEST],
            &response, &UA_TYPES[UA_TYPES_HISTORYREADRESPONSE]);
        return response;
    })
    
    UA_INLINABLE( UA_THREADSAFE UA_HistoryUpdateResponse
-   UA_Client_Service_historyUpdate(UA_Client *client, const UA_HistoryUpdateRequest request) ,{
+   UA_Client_Service_historyUpdate(UA_Client *client,
+                                   const UA_HistoryUpdateRequest request) ,{
        UA_HistoryUpdateResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_HISTORYUPDATEREQUEST],
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_HISTORYUPDATEREQUEST],
            &response, &UA_TYPES[UA_TYPES_HISTORYUPDATERESPONSE]);
        return response;
    })
@@ -642,10 +655,12 @@ that wrap the raw services.
     * Method Service Set
     * ^^^^^^^^^^^^^^^^^^ */
    UA_INLINABLE( UA_THREADSAFE UA_CallResponse
-   UA_Client_Service_call(UA_Client *client, const UA_CallRequest request) ,{
+   UA_Client_Service_call(UA_Client *client,
+                          const UA_CallRequest request) ,{
        UA_CallResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_CALLREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_CALLRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_CALLREQUEST],
+           &response, &UA_TYPES[UA_TYPES_CALLRESPONSE]);
        return response;
    })
    
@@ -653,10 +668,12 @@ that wrap the raw services.
     * NodeManagement Service Set
     * ^^^^^^^^^^^^^^^^^^^^^^^^^^ */
    UA_INLINABLE( UA_THREADSAFE UA_AddNodesResponse
-   UA_Client_Service_addNodes(UA_Client *client, const UA_AddNodesRequest request) ,{
+   UA_Client_Service_addNodes(UA_Client *client,
+                              const UA_AddNodesRequest request) ,{
        UA_AddNodesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_ADDNODESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_ADDNODESRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_ADDNODESREQUEST],
+           &response, &UA_TYPES[UA_TYPES_ADDNODESRESPONSE]);
        return response;
    })
    
@@ -664,8 +681,9 @@ that wrap the raw services.
    UA_Client_Service_addReferences(UA_Client *client,
                                    const UA_AddReferencesRequest request) ,{
        UA_AddReferencesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_ADDREFERENCESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_ADDREFERENCESRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_ADDREFERENCESREQUEST],
+           &response, &UA_TYPES[UA_TYPES_ADDREFERENCESRESPONSE]);
        return response;
    })
    
@@ -673,17 +691,19 @@ that wrap the raw services.
    UA_Client_Service_deleteNodes(UA_Client *client,
                                  const UA_DeleteNodesRequest request) ,{
        UA_DeleteNodesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_DELETENODESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_DELETENODESRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_DELETENODESREQUEST],
+           &response, &UA_TYPES[UA_TYPES_DELETENODESRESPONSE]);
        return response;
    })
    
    UA_INLINABLE( UA_THREADSAFE UA_DeleteReferencesResponse
-   UA_Client_Service_deleteReferences(UA_Client *client,
-                                      const UA_DeleteReferencesRequest request) ,{
+   UA_Client_Service_deleteReferences(
+       UA_Client *client, const UA_DeleteReferencesRequest request) ,{
        UA_DeleteReferencesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_DELETEREFERENCESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_DELETEREFERENCESRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_DELETEREFERENCESREQUEST],
+           &response, &UA_TYPES[UA_TYPES_DELETEREFERENCESRESPONSE]);
        return response;
    })
    
@@ -691,10 +711,12 @@ that wrap the raw services.
     * View Service Set
     * ^^^^^^^^^^^^^^^^ */
    UA_INLINABLE( UA_THREADSAFE UA_BrowseResponse
-   UA_Client_Service_browse(UA_Client *client, const UA_BrowseRequest request) ,{
+   UA_Client_Service_browse(UA_Client *client,
+                            const UA_BrowseRequest request) ,{
        UA_BrowseResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_BROWSEREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_BROWSERESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_BROWSEREQUEST],
+           &response, &UA_TYPES[UA_TYPES_BROWSERESPONSE]);
        return response;
    })
    
@@ -702,38 +724,42 @@ that wrap the raw services.
    UA_Client_Service_browseNext(UA_Client *client,
                                 const UA_BrowseNextRequest request) ,{
        UA_BrowseNextResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_BROWSENEXTREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_BROWSENEXTRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_BROWSENEXTREQUEST],
+           &response, &UA_TYPES[UA_TYPES_BROWSENEXTRESPONSE]);
        return response;
    })
    
    UA_INLINABLE( UA_THREADSAFE UA_TranslateBrowsePathsToNodeIdsResponse
-   UA_Client_Service_translateBrowsePathsToNodeIds(UA_Client *client,
-                           const UA_TranslateBrowsePathsToNodeIdsRequest request) ,{
+   UA_Client_Service_translateBrowsePathsToNodeIds(
+       UA_Client *client,
+       const UA_TranslateBrowsePathsToNodeIdsRequest request) ,{
        UA_TranslateBrowsePathsToNodeIdsResponse response;
-       __UA_Client_Service(client, &request,
-                           &UA_TYPES[UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST],
-                           &response,
-                           &UA_TYPES[UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE]);
+       __UA_Client_Service(
+           client, &request,
+           &UA_TYPES[UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST],
+           &response,
+           &UA_TYPES[UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE]);
        return response;
    })
    
    UA_INLINABLE( UA_THREADSAFE UA_RegisterNodesResponse
-   UA_Client_Service_registerNodes(UA_Client *client,
-                                   const UA_RegisterNodesRequest request) ,{
+   UA_Client_Service_registerNodes(
+       UA_Client *client, const UA_RegisterNodesRequest request) ,{
        UA_RegisterNodesResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_REGISTERNODESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_REGISTERNODESRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_REGISTERNODESREQUEST],
+           &response, &UA_TYPES[UA_TYPES_REGISTERNODESRESPONSE]);
        return response;
    })
    
    UA_INLINABLE( UA_THREADSAFE UA_UnregisterNodesResponse
-   UA_Client_Service_unregisterNodes(UA_Client *client,
-                                     const UA_UnregisterNodesRequest request) ,{
+   UA_Client_Service_unregisterNodes(
+       UA_Client *client, const UA_UnregisterNodesRequest request) ,{
        UA_UnregisterNodesResponse response;
-       __UA_Client_Service(client, &request,
-                           &UA_TYPES[UA_TYPES_UNREGISTERNODESREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_UNREGISTERNODESRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_UNREGISTERNODESREQUEST],
+           &response, &UA_TYPES[UA_TYPES_UNREGISTERNODESRESPONSE]);
        return response;
    })
    
@@ -746,8 +772,9 @@ that wrap the raw services.
    UA_Client_Service_queryFirst(UA_Client *client,
                                 const UA_QueryFirstRequest request) ,{
        UA_QueryFirstResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
+           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
        return response;
    })
    
@@ -755,8 +782,9 @@ that wrap the raw services.
    UA_Client_Service_queryNext(UA_Client *client,
                                const UA_QueryNextRequest request) ,{
        UA_QueryNextResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
+       __UA_Client_Service(
+           client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
+           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
        return response;
    })
    
@@ -803,8 +831,9 @@ in the requestHeader to avoid clashes.
 .. code-block:: c
 
    
-   typedef void (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
-                                                 UA_UInt32 requestId, void *response);
+   typedef void
+   (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
+                                    UA_UInt32 requestId, void *response);
    
    UA_StatusCode UA_THREADSAFE
    __UA_Client_AsyncService(UA_Client *client, const void *request,

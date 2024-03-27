@@ -147,6 +147,7 @@ The following settings are specific to OPC UA with TCP transport.
                                  * (default: 0 -> unbounded) */
        UA_UInt32 tcpMaxChunks;  /* Max number of chunks per message
                                  * (default: 0 -> unbounded) */
+       UA_Boolean tcpReuseAddr;
    
 Security and Encryption
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -2008,12 +2009,14 @@ the server config) also when it has been retrieved by the worker.
     *        be set in UA_Server_setAsyncOperationResult in any case.
     * @return false if queue is empty, true else */
    UA_Boolean
-   UA_Server_getAsyncOperationNonBlocking(UA_Server *server, UA_AsyncOperationType *type,
+   UA_Server_getAsyncOperationNonBlocking(UA_Server *server,
+                                          UA_AsyncOperationType *type,
                                           const UA_AsyncOperationRequest **request,
                                           void **context, UA_DateTime *timeout);
    
    /* UA_Boolean */
-   /* UA_Server_getAsyncOperationBlocking(UA_Server *server, UA_AsyncOperationType *type, */
+   /* UA_Server_getAsyncOperationBlocking(UA_Server *server, */
+   /*                                     UA_AsyncOperationType *type, */
    /*                                     const UA_AsyncOperationRequest **request, */
    /*                                     void **context, UA_DateTime *timeout); */
    

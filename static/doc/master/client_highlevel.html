@@ -51,9 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="client.html">Client</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="client.html#client-configuration">Client Configuration</a></li>
@@ -80,7 +78,6 @@
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#write-attribute">Write Attribute</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#method-calling">Method Calling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#node-management">Node Management</a></li>
-<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#misc-functionalities">Misc Functionalities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
 </ul>
@@ -88,10 +85,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated.html">Generated Definitions</a></li>
 </ul>
 
         </div>
@@ -319,52 +317,50 @@ the regular service to read several attributes at once.</p>
 <p>The following functions can be used to read a single node historically.
 Use the regular service to read several nodes at once.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">UA_Boolean</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_HistoricalIteratorCallback</span><span class="p">)(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                 </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">moreDataAvailable</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_HistoricalIteratorCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">moreDataAvailable</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryRead_events</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoricalIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTime</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_String</span><span class="w"> </span><span class="n">indexRange</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EventFilter</span><span class="w"> </span><span class="n">filter</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numValuesPerNode</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryRead_events</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoricalIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTime</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">indexRange</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EventFilter</span><span class="w"> </span><span class="n">filter</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numValuesPerNode</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryRead_raw</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoricalIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTime</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_String</span><span class="w"> </span><span class="n">indexRange</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">returnBounds</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numValuesPerNode</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryRead_raw</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoricalIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTime</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">indexRange</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">returnBounds</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numValuesPerNode</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryRead_modified</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoricalIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
-<span class="w">                                  </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTime</span><span class="p">,</span>
-<span class="w">                                  </span><span class="n">UA_String</span><span class="w"> </span><span class="n">indexRange</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">returnBounds</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numValuesPerNode</span><span class="p">,</span>
-<span class="w">                                  </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryRead_modified</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoricalIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTime</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">indexRange</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">returnBounds</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">numValuesPerNode</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">callbackContext</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryUpdate_insert</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryUpdate_insert</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryUpdate_replace</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryUpdate_replace</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryUpdate_update</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryUpdate_update</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_HistoryUpdate_deleteRaw</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                  </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTimestamp</span><span class="p">,</span>
-<span class="w">                                  </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTimestamp</span><span class="p">);</span>
+<span class="nf">UA_Client_HistoryUpdate_deleteRaw</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">startTimestamp</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">endTimestamp</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -574,8 +570,9 @@ time. Use the regular write service to write several attributes at once.</p>
 <section id="method-calling">
 <h2>Method Calling<a class="headerlink" href="#method-calling" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_call</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">objectId</span><span class="p">,</span>
-<span class="w">               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">methodId</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
+<span class="nf">UA_Client_call</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">methodId</span><span class="p">,</span>
+<span class="w">               </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
 <span class="w">               </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outputSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">**</span><span class="n">output</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -742,14 +739,16 @@ time. Use the regular write service to write several attributes at once.</p>
 <span class="cp">#ifndef HAVE_NODEITER_CALLBACK</span>
 <span class="cp">#define HAVE_NODEITER_CALLBACK</span>
 <span class="cm">/* Iterate over all nodes referenced by parentNodeId by calling the callback</span>
-<span class="cm">   function for each child node */</span>
-<span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">childId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isInverse</span><span class="p">,</span>
-<span class="w">                                                 </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="cm"> * function for each child node */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">childId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isInverse</span><span class="p">,</span>
+<span class="w">                           </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
 <span class="cp">#endif</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Client_forEachChildNodeCall</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_NodeIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="nf">UA_Client_forEachChildNodeCall</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

@@ -51,9 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Client</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a><ul>
@@ -77,7 +75,6 @@
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#write-attribute">Write Attribute</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#method-calling">Method Calling</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#node-management">Node Management</a></li>
-<li class="toctree-l3"><a class="reference internal" href="client_highlevel_async.html#misc-functionalities">Misc Functionalities</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
 </ul>
@@ -85,10 +82,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generated.html">Generated Definitions</a></li>
 </ul>
 
         </div>
@@ -206,6 +204,10 @@ Endpoints considered in the GetEndpoints service.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_String</span><span class="w"> </span><span class="n">applicationUri</span><span class="p">;</span>
 </pre></div>
 </div>
+<p>The following settings are specific to OPC UA with TCP transport.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpReuseAddr</span><span class="p">;</span>
+</pre></div>
+</div>
 </section>
 <section id="custom-data-types">
 <h3>Custom Data Types<a class="headerlink" href="#custom-data-types" title="Link to this heading">¶</a></h3>
@@ -241,8 +243,8 @@ data types are provided in <code class="docutils literal notranslate"><span clas
 <span class="w">    </span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="n">certificateVerification</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Available SecurityPolicies for Authentication. The policy defined by the</span>
-<span class="cm">     * AccessControl is selected. If no policy is defined, the policy of the secure channel</span>
-<span class="cm">     * is selected.*/</span>
+<span class="cm">     * AccessControl is selected. If no policy is defined, the policy of the</span>
+<span class="cm">     * secure channel is selected.*/</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
 <span class="w">    </span><span class="cm">/* SecurityPolicyUri for the Authentication. */</span>
@@ -510,21 +512,23 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">);</span>
 <span class="p">})</span>
 
-<span class="cm">/* Sets up a listening socket for incoming reverse connect requests by OPC UA servers.</span>
-<span class="cm"> * After the first server has connected, the listening socket is removed.</span>
-<span class="cm"> * The client state callback is also used for reverse connect. An implementation could</span>
-<span class="cm"> * for example issue a new call to UA_Client_startListeningForReverseConnect after the</span>
-<span class="cm"> * server has closed the connection. If the client is connected to any server while</span>
-<span class="cm"> * UA_Client_startListeningForReverseConnect is called, the connection will be closed.</span>
+<span class="cm">/* Sets up a listening socket for incoming reverse connect requests by OPC UA</span>
+<span class="cm"> * servers. After the first server has connected, the listening socket is</span>
+<span class="cm"> * removed. The client state callback is also used for reverse connect. An</span>
+<span class="cm"> * implementation could for example issue a new call to</span>
+<span class="cm"> * UA_Client_startListeningForReverseConnect after the server has closed the</span>
+<span class="cm"> * connection. If the client is connected to any server while</span>
+<span class="cm"> * UA_Client_startListeningForReverseConnect is called, the connection will be</span>
+<span class="cm"> * closed.</span>
 <span class="cm"> *</span>
-<span class="cm"> * The reverse connect is closed by calling the standard disconnect functions like</span>
-<span class="cm"> * for a &quot;normal&quot; connection that was initiated by the client. Calling one of the connect</span>
-<span class="cm"> * methods will also close the listening socket and the connection to the remote server.</span>
-<span class="cm"> */</span>
+<span class="cm"> * The reverse connect is closed by calling the standard disconnect functions</span>
+<span class="cm"> * like for a &quot;normal&quot; connection that was initiated by the client. Calling one</span>
+<span class="cm"> * of the connect methods will also close the listening socket and the</span>
+<span class="cm"> * connection to the remote server. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="n">UA_Client_startListeningForReverseConnect</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">listenHostnames</span><span class="p">,</span>
-<span class="w">                                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">listenHostnamesLength</span><span class="p">,</span>
-<span class="w">                                          </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">port</span><span class="p">);</span>
+<span class="n">UA_Client_startListeningForReverseConnect</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">listenHostnames</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">listenHostnamesLength</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">port</span><span class="p">);</span>
 
 <span class="cm">/* Disconnect and close a connection to the selected server. Disconnection is</span>
 <span class="cm"> * always performed async (without blocking). */</span>
@@ -549,8 +553,8 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="cm">/* Get the AuthenticationToken and ServerNonce required to activate the current</span>
 <span class="cm"> * Session on a different SecureChannel. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Client_getSessionAuthenticationToken</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">authenticationToken</span><span class="p">,</span>
-<span class="w">                                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">serverNonce</span><span class="p">);</span>
+<span class="n">UA_Client_getSessionAuthenticationToken</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">authenticationToken</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">serverNonce</span><span class="p">);</span>
 
 <span class="cm">/* Re-activate the current session. A change of prefered locales can be done by</span>
 <span class="cm"> * updating the client configuration. */</span>
@@ -603,13 +607,13 @@ error), the client is no longer usable. Create a new client if required.</p>
 
 <span class="cm">/* Gets a list of all registered servers at the given server.</span>
 <span class="cm"> *</span>
-<span class="cm"> * You can pass an optional filter for serverUris. If the given server is not registered,</span>
-<span class="cm"> * an empty array will be returned. If the server is registered, only that application</span>
-<span class="cm"> * description will be returned.</span>
+<span class="cm"> * You can pass an optional filter for serverUris. If the given server is not</span>
+<span class="cm"> * registered, an empty array will be returned. If the server is registered,</span>
+<span class="cm"> * only that application description will be returned.</span>
 <span class="cm"> *</span>
-<span class="cm"> * Additionally you can optionally indicate which locale you want for the server name</span>
-<span class="cm"> * in the returned application description. The array indicates the order of preference.</span>
-<span class="cm"> * A server may have localized names.</span>
+<span class="cm"> * Additionally you can optionally indicate which locale you want for the server</span>
+<span class="cm"> * name in the returned application description. The array indicates the order</span>
+<span class="cm"> * of preference. A server may have localized names.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param client to use. Must be connected to the same endpoint given in</span>
 <span class="cm"> *        serverUrl or otherwise in disconnected state.</span>
@@ -618,7 +622,8 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="cm"> * @param serverUris Optional filter for specific server uris</span>
 <span class="cm"> * @param localeIdsSize Optional indication which locale you prefer</span>
 <span class="cm"> * @param localeIds Optional indication which locale you prefer</span>
-<span class="cm"> * @param registeredServersSize size of returned array, i.e., number of found/registered servers</span>
+<span class="cm"> * @param registeredServersSize size of returned array, i.e., number of</span>
+<span class="cm"> *        found/registered servers</span>
 <span class="cm"> * @param registeredServers array containing found/registered servers</span>
 <span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
@@ -691,17 +696,21 @@ that wrap the raw services.</p>
 <span class="cm">* Historical Access Service Set</span>
 <span class="cm">* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */</span>
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_HistoryReadResponse</span>
-<span class="n">UA_Client_Service_historyRead</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoryReadRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_historyRead</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoryReadRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_HistoryReadResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_HISTORYREADREQUEST</span><span class="p">],</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_HISTORYREADREQUEST</span><span class="p">],</span>
 <span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_HISTORYREADRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_HistoryUpdateResponse</span>
-<span class="n">UA_Client_Service_historyUpdate</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoryUpdateRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_historyUpdate</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_HistoryUpdateRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_HistoryUpdateResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_HISTORYUPDATEREQUEST</span><span class="p">],</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_HISTORYUPDATEREQUEST</span><span class="p">],</span>
 <span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_HISTORYUPDATERESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
@@ -710,10 +719,12 @@ that wrap the raw services.</p>
 <span class="cm"> * Method Service Set</span>
 <span class="cm"> * ^^^^^^^^^^^^^^^^^^ */</span>
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_CallResponse</span>
-<span class="n">UA_Client_Service_call</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_call</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_CallResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CALLREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CALLRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CALLREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_CALLRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -721,10 +732,12 @@ that wrap the raw services.</p>
 <span class="cm"> * NodeManagement Service Set</span>
 <span class="cm"> * ^^^^^^^^^^^^^^^^^^^^^^^^^^ */</span>
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_AddNodesResponse</span>
-<span class="n">UA_Client_Service_addNodes</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AddNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_addNodes</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AddNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_AddNodesResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDNODESREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDNODESRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDNODESREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDNODESRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -732,8 +745,9 @@ that wrap the raw services.</p>
 <span class="n">UA_Client_Service_addReferences</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AddReferencesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_AddReferencesResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDREFERENCESREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDREFERENCESRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDREFERENCESREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_ADDREFERENCESRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -741,17 +755,19 @@ that wrap the raw services.</p>
 <span class="n">UA_Client_Service_deleteNodes</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DeleteNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_DeleteNodesResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETENODESREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETENODESRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETENODESREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETENODESRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_DeleteReferencesResponse</span>
-<span class="n">UA_Client_Service_deleteReferences</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DeleteReferencesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_deleteReferences</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DeleteReferencesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_DeleteReferencesResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETEREFERENCESREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETEREFERENCESRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETEREFERENCESREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DELETEREFERENCESRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -759,10 +775,12 @@ that wrap the raw services.</p>
 <span class="cm"> * View Service Set</span>
 <span class="cm"> * ^^^^^^^^^^^^^^^^ */</span>
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_BrowseResponse</span>
-<span class="n">UA_Client_Service_browse</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_BrowseRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_browse</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_BrowseRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_BrowseResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSEREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSERESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSEREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSERESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -770,38 +788,42 @@ that wrap the raw services.</p>
 <span class="n">UA_Client_Service_browseNext</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_BrowseNextRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_BrowseNextResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSENEXTREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSENEXTRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSENEXTREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSENEXTRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_TranslateBrowsePathsToNodeIdsResponse</span>
-<span class="n">UA_Client_Service_translateBrowsePathsToNodeIds</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_TranslateBrowsePathsToNodeIdsRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_translateBrowsePathsToNodeIds</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_TranslateBrowsePathsToNodeIdsRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_TranslateBrowsePathsToNodeIdsResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_RegisterNodesResponse</span>
-<span class="n">UA_Client_Service_registerNodes</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_RegisterNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_registerNodes</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_RegisterNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_RegisterNodesResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REGISTERNODESREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REGISTERNODESRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REGISTERNODESREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REGISTERNODESRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_UnregisterNodesResponse</span>
-<span class="n">UA_Client_Service_unregisterNodes</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
-<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_UnregisterNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
+<span class="n">UA_Client_Service_unregisterNodes</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_UnregisterNodesRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_UnregisterNodesResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UNREGISTERNODESREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UNREGISTERNODESRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UNREGISTERNODESREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UNREGISTERNODESRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -814,8 +836,9 @@ that wrap the raw services.</p>
 <span class="n">UA_Client_Service_queryFirst</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QueryFirstRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_QueryFirstResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -823,8 +846,9 @@ that wrap the raw services.</p>
 <span class="n">UA_Client_Service_queryNext</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QueryNextRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">,{</span>
 <span class="w">    </span><span class="n">UA_QueryNextResponse</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
-<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTREQUEST</span><span class="p">],</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">__UA_Client_Service</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUERYFIRSTRESPONSE</span><span class="p">]);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">response</span><span class="p">;</span>
 <span class="p">})</span>
 
@@ -863,8 +887,9 @@ service call. This can be used to cancel all outstanding requests using that
 handle together. Note that the client will auto-generate a requestHandle
 &gt;100,000 if none is defined. Avoid these when manually setting a requetHandle
 in the requestHeader to avoid clashes.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
-<span class="w">                                              </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">response</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">__UA_Client_AsyncService</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">request</span><span class="p">,</span>
@@ -998,7 +1023,6 @@ defined interval.</p>
 <li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#write-attribute">Write Attribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#method-calling">Method Calling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#node-management">Node Management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="client_highlevel_async.html#misc-functionalities">Misc Functionalities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
 </ul>

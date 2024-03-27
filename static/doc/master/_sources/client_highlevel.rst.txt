@@ -209,52 +209,50 @@ Use the regular service to read several nodes at once.
 
    
    typedef UA_Boolean
-   (*UA_HistoricalIteratorCallback)(UA_Client *client,
-                                    const UA_NodeId *nodeId,
-                                    UA_Boolean moreDataAvailable,
-                                    const UA_ExtensionObject *data, void *callbackContext);
+   (*UA_HistoricalIteratorCallback)(
+       UA_Client *client, const UA_NodeId *nodeId, UA_Boolean moreDataAvailable,
+       const UA_ExtensionObject *data, void *callbackContext);
    
    UA_StatusCode
-   UA_Client_HistoryRead_events(UA_Client *client, const UA_NodeId *nodeId,
-                                   const UA_HistoricalIteratorCallback callback,
-                                   UA_DateTime startTime, UA_DateTime endTime,
-                                   UA_String indexRange, const UA_EventFilter filter, UA_UInt32 numValuesPerNode,
-                                   UA_TimestampsToReturn timestampsToReturn, void *callbackContext);
+   UA_Client_HistoryRead_events(
+       UA_Client *client, const UA_NodeId *nodeId,
+       const UA_HistoricalIteratorCallback callback, UA_DateTime startTime,
+       UA_DateTime endTime, UA_String indexRange, const UA_EventFilter filter,
+       UA_UInt32 numValuesPerNode, UA_TimestampsToReturn timestampsToReturn,
+       void *callbackContext);
    
    UA_StatusCode
-   UA_Client_HistoryRead_raw(UA_Client *client, const UA_NodeId *nodeId,
-                                const UA_HistoricalIteratorCallback callback,
-                                UA_DateTime startTime, UA_DateTime endTime,
-                                UA_String indexRange, UA_Boolean returnBounds, UA_UInt32 numValuesPerNode,
-                                UA_TimestampsToReturn timestampsToReturn, void *callbackContext);
+   UA_Client_HistoryRead_raw(
+       UA_Client *client, const UA_NodeId *nodeId,
+       const UA_HistoricalIteratorCallback callback, UA_DateTime startTime,
+       UA_DateTime endTime, UA_String indexRange, UA_Boolean returnBounds,
+       UA_UInt32 numValuesPerNode, UA_TimestampsToReturn timestampsToReturn,
+       void *callbackContext);
    
    UA_StatusCode
-   UA_Client_HistoryRead_modified(UA_Client *client, const UA_NodeId *nodeId,
-                                     const UA_HistoricalIteratorCallback callback,
-                                     UA_DateTime startTime, UA_DateTime endTime,
-                                     UA_String indexRange, UA_Boolean returnBounds, UA_UInt32 numValuesPerNode,
-                                     UA_TimestampsToReturn timestampsToReturn, void *callbackContext);
+   UA_Client_HistoryRead_modified(
+       UA_Client *client, const UA_NodeId *nodeId,
+       const UA_HistoricalIteratorCallback callback, UA_DateTime startTime,
+       UA_DateTime endTime, UA_String indexRange, UA_Boolean returnBounds,
+       UA_UInt32 numValuesPerNode, UA_TimestampsToReturn timestampsToReturn,
+       void *callbackContext);
    
    UA_StatusCode
-   UA_Client_HistoryUpdate_insert(UA_Client *client,
-                                  const UA_NodeId *nodeId,
-                                  UA_DataValue *value);
+   UA_Client_HistoryUpdate_insert(
+       UA_Client *client, const UA_NodeId *nodeId, UA_DataValue *value);
    
    UA_StatusCode
-   UA_Client_HistoryUpdate_replace(UA_Client *client,
-                                   const UA_NodeId *nodeId,
-                                   UA_DataValue *value);
+   UA_Client_HistoryUpdate_replace(
+       UA_Client *client, const UA_NodeId *nodeId, UA_DataValue *value);
    
    UA_StatusCode
-   UA_Client_HistoryUpdate_update(UA_Client *client,
-                                  const UA_NodeId *nodeId,
-                                  UA_DataValue *value);
+   UA_Client_HistoryUpdate_update(
+       UA_Client *client, const UA_NodeId *nodeId, UA_DataValue *value);
    
    UA_StatusCode
-   UA_Client_HistoryUpdate_deleteRaw(UA_Client *client,
-                                     const UA_NodeId *nodeId,
-                                     UA_DateTime startTimestamp,
-                                     UA_DateTime endTimestamp);
+   UA_Client_HistoryUpdate_deleteRaw(
+       UA_Client *client, const UA_NodeId *nodeId,
+       UA_DateTime startTimestamp, UA_DateTime endTimestamp);
    
 Write Attributes
 ^^^^^^^^^^^^^^^^
@@ -469,8 +467,9 @@ Method Calling
 
    
    UA_StatusCode
-   UA_Client_call(UA_Client *client, const UA_NodeId objectId,
-                  const UA_NodeId methodId, size_t inputSize, const UA_Variant *input,
+   UA_Client_call(UA_Client *client,
+                  const UA_NodeId objectId, const UA_NodeId methodId,
+                  size_t inputSize, const UA_Variant *input,
                   size_t *outputSize, UA_Variant **output);
    
 Node Management
@@ -641,11 +640,13 @@ Misc Highlevel Functionality
    #ifndef HAVE_NODEITER_CALLBACK
    #define HAVE_NODEITER_CALLBACK
    /* Iterate over all nodes referenced by parentNodeId by calling the callback
-      function for each child node */
-   typedef UA_StatusCode (*UA_NodeIteratorCallback)(UA_NodeId childId, UA_Boolean isInverse,
-                                                    UA_NodeId referenceTypeId, void *handle);
+    * function for each child node */
+   typedef UA_StatusCode
+   (*UA_NodeIteratorCallback)(UA_NodeId childId, UA_Boolean isInverse,
+                              UA_NodeId referenceTypeId, void *handle);
    #endif
    
    UA_StatusCode
-   UA_Client_forEachChildNodeCall(UA_Client *client, UA_NodeId parentNodeId,
-                                  UA_NodeIteratorCallback callback, void *handle);
+   UA_Client_forEachChildNodeCall(
+       UA_Client *client, UA_NodeId parentNodeId,
+       UA_NodeIteratorCallback callback, void *handle);
