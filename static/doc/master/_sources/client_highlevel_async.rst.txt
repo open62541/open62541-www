@@ -109,7 +109,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_DataValue *attribute);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readAttribute_async(
        UA_Client *client, const UA_ReadValueId *rvi,
        UA_TimestampsToReturn timestampsToReturn,
@@ -122,7 +122,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_DataValue *value);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readValueAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadValueAttributeCallback callback,
@@ -134,7 +134,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_NodeId *dataType);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readDataTypeAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadDataTypeAttributeCallback callback,
@@ -147,7 +147,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Variant *arrayDimensions);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readArrayDimensionsAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientReadArrayDimensionsAttributeCallback callback,
@@ -159,7 +159,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_NodeClass *nodeClass);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readNodeClassAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadNodeClassAttributeCallback callback,
@@ -171,7 +171,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_QualifiedName *browseName);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readBrowseNameAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadBrowseNameAttributeCallback callback,
@@ -183,7 +183,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_LocalizedText *displayName);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readDisplayNameAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadDisplayNameAttributeCallback callback,
@@ -195,7 +195,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_LocalizedText *description);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readDescriptionAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadDescriptionAttributeCallback callback,
@@ -207,7 +207,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_UInt32 *writeMask);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readWriteMaskAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadWriteMaskAttributeCallback callback,
@@ -219,7 +219,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_UInt32 *writeMask);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readUserWriteMaskAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadUserWriteMaskAttributeCallback callback,
@@ -231,7 +231,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Boolean *isAbstract);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readIsAbstractAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadIsAbstractAttributeCallback callback,
@@ -243,7 +243,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Boolean *symmetric);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readSymmetricAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadSymmetricAttributeCallback callback,
@@ -255,7 +255,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_LocalizedText *inverseName);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readInverseNameAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadInverseNameAttributeCallback callback,
@@ -267,7 +267,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Boolean *containsNoLoops);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readContainsNoLoopsAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadContainsNoLoopsAttributeCallback callback,
@@ -279,7 +279,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Byte *eventNotifier);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readEventNotifierAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadEventNotifierAttributeCallback callback,
@@ -291,7 +291,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Int32 *valueRank);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readValueRankAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadValueRankAttributeCallback callback,
@@ -303,7 +303,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Byte *accessLevel);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readAccessLevelAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadAccessLevelAttributeCallback callback,
@@ -315,7 +315,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_UInt32 *accessLevelEx);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readAccessLevelExAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadAccessLevelExAttributeCallback callback,
@@ -327,7 +327,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Byte *userAccessLevel);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readUserAccessLevelAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadUserAccessLevelAttributeCallback callback,
@@ -339,7 +339,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Double *minimumSamplingInterval);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readMinimumSamplingIntervalAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadMinimumSamplingIntervalAttributeCallback callback,
@@ -351,7 +351,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Boolean *historizing);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readHistorizingAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadHistorizingAttributeCallback callback,
@@ -363,7 +363,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Boolean *executable);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readExecutableAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadExecutableAttributeCallback callback,
@@ -375,7 +375,7 @@ the status of the operation is not good.
        UA_Client *client, void *userdata, UA_UInt32 requestId,
        UA_StatusCode status, UA_Boolean *userExecutable);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readUserExecutableAttribute_async(
        UA_Client *client, const UA_NodeId nodeId,
        UA_ClientAsyncReadUserExecutableAttributeCallback callback,
@@ -397,7 +397,7 @@ We generate the methods for the different attributes with a macro.
 .. code-block:: c
 
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Client_writeAttribute_async(
        UA_Client *client, const UA_NodeId *nodeId,
        UA_AttributeId attributeId, const void *in,
@@ -406,7 +406,7 @@ We generate the methods for the different attributes with a macro.
        void *userdata, UA_UInt32 *reqId);
    
    #define UA_CLIENT_ASYNCWRITE(NAME, ATTR_ID, ATTR_TYPE, ATTR_TYPEDESC)   \
-       UA_INLINABLE( UA_StatusCode NAME(                                   \
+       UA_INLINABLE( UA_THREADSAFE UA_StatusCode NAME(                     \
            UA_Client *client, const UA_NodeId nodeId,                      \
            const ATTR_TYPE *attr, UA_ClientAsyncWriteCallback callback,    \
            void *userdata, UA_UInt32 *reqId), {                            \
@@ -460,7 +460,7 @@ Method Calling
 
 .. code-block:: c
 
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Client_call_async(
        UA_Client *client,
        const UA_NodeId objectId, const UA_NodeId methodId,
@@ -473,7 +473,7 @@ Method Calling
        UA_Client *client, void *userdata,
        UA_UInt32 requestId, UA_CallResponse *cr);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_call_async(
        UA_Client *client, const UA_NodeId objectId,
        const UA_NodeId methodId, size_t inputSize,

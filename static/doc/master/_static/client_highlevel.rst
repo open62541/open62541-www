@@ -21,26 +21,26 @@ the regular service to read several attributes at once.
 
    
    /* Don't call this function, use the typed versions */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Client_readAttribute(UA_Client *client, const UA_NodeId *nodeId,
                              UA_AttributeId attributeId, void *out,
                              const UA_DataType *outDataType);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readNodeIdAttribute(UA_Client *client, const UA_NodeId nodeId,
                                  UA_NodeId *outNodeId), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_NODEID,
                                         outNodeId, &UA_TYPES[UA_TYPES_NODEID]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readNodeClassAttribute(UA_Client *client, const UA_NodeId nodeId,
                                     UA_NodeClass *outNodeClass), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_NODECLASS,
                                         outNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readBrowseNameAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      UA_QualifiedName *outBrowseName), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_BROWSENAME,
@@ -48,7 +48,7 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readDisplayNameAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       UA_LocalizedText *outDisplayName), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
@@ -56,7 +56,7 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readDescriptionAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       UA_LocalizedText *outDescription), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_DESCRIPTION,
@@ -64,14 +64,14 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readWriteMaskAttribute(UA_Client *client, const UA_NodeId nodeId,
                                     UA_UInt32 *outWriteMask), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                         outWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readUserWriteMaskAttribute(UA_Client *client, const UA_NodeId nodeId,
                                         UA_UInt32 *outUserWriteMask), {
        return __UA_Client_readAttribute(client, &nodeId,
@@ -80,21 +80,21 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_UINT32]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readIsAbstractAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      UA_Boolean *outIsAbstract), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                         outIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readSymmetricAttribute(UA_Client *client, const UA_NodeId nodeId,
                                     UA_Boolean *outSymmetric), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                                         outSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readInverseNameAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       UA_LocalizedText *outInverseName), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_INVERSENAME,
@@ -102,7 +102,7 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readContainsNoLoopsAttribute(UA_Client *client, const UA_NodeId nodeId,
                                           UA_Boolean *outContainsNoLoops), {
        return __UA_Client_readAttribute(client, &nodeId,
@@ -111,54 +111,54 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readEventNotifierAttribute(UA_Client *client, const UA_NodeId nodeId,
                                         UA_Byte *outEventNotifier), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_EVENTNOTIFIER,
                                         outEventNotifier, &UA_TYPES[UA_TYPES_BYTE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readValueAttribute(UA_Client *client, const UA_NodeId nodeId,
                                 UA_Variant *outValue), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_VALUE,
                                         outValue, &UA_TYPES[UA_TYPES_VARIANT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readDataTypeAttribute(UA_Client *client, const UA_NodeId nodeId,
                                    UA_NodeId *outDataType), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_DATATYPE,
                                         outDataType, &UA_TYPES[UA_TYPES_NODEID]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readValueRankAttribute(UA_Client *client, const UA_NodeId nodeId,
                                     UA_Int32 *outValueRank), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_VALUERANK,
                                         outValueRank, &UA_TYPES[UA_TYPES_INT32]);
    })
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_readArrayDimensionsAttribute(UA_Client *client, const UA_NodeId nodeId,
                                           size_t *outArrayDimensionsSize,
                                           UA_UInt32 **outArrayDimensions);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       UA_Byte *outAccessLevel), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                         outAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readAccessLevelExAttribute(UA_Client *client, const UA_NodeId nodeId,
                                         UA_UInt32 *outAccessLevelEx), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_ACCESSLEVELEX,
                                         outAccessLevelEx, &UA_TYPES[UA_TYPES_UINT32]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readUserAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
                                           UA_Byte *outUserAccessLevel), {
        return __UA_Client_readAttribute(client, &nodeId,
@@ -167,7 +167,7 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_BYTE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readMinimumSamplingIntervalAttribute(UA_Client *client,
                                                   const UA_NodeId nodeId,
                                                   UA_Double *outMinSamplingInterval), {
@@ -177,21 +177,21 @@ the regular service to read several attributes at once.
                                         &UA_TYPES[UA_TYPES_DOUBLE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readHistorizingAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       UA_Boolean *outHistorizing), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_HISTORIZING,
                                         outHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readExecutableAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      UA_Boolean *outExecutable), {
        return __UA_Client_readAttribute(client, &nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                                         outExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_readUserExecutableAttribute(UA_Client *client, const UA_NodeId nodeId,
                                          UA_Boolean *outUserExecutable), {
        return __UA_Client_readAttribute(client, &nodeId,
@@ -264,26 +264,26 @@ time. Use the regular write service to write several attributes at once.
 
    
    /* Don't call this function, use the typed versions */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    __UA_Client_writeAttribute(UA_Client *client, const UA_NodeId *nodeId,
                               UA_AttributeId attributeId, const void *in,
                               const UA_DataType *inDataType);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeNodeIdAttribute(UA_Client *client, const UA_NodeId nodeId,
                                   const UA_NodeId *newNodeId) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_NODEID,
                                          newNodeId, &UA_TYPES[UA_TYPES_NODEID]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeNodeClassAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      const UA_NodeClass *newNodeClass) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_NODECLASS,
                                          newNodeClass, &UA_TYPES[UA_TYPES_NODECLASS]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeBrowseNameAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       const UA_QualifiedName *newBrowseName) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_BROWSENAME,
@@ -291,7 +291,7 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_QUALIFIEDNAME]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeDisplayNameAttribute(UA_Client *client, const UA_NodeId nodeId,
                                        const UA_LocalizedText *newDisplayName) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_DISPLAYNAME,
@@ -299,7 +299,7 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeDescriptionAttribute(UA_Client *client, const UA_NodeId nodeId,
                                        const UA_LocalizedText *newDescription) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_DESCRIPTION,
@@ -307,14 +307,14 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeWriteMaskAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      const UA_UInt32 *newWriteMask) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_WRITEMASK,
                                          newWriteMask, &UA_TYPES[UA_TYPES_UINT32]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeUserWriteMaskAttribute(UA_Client *client, const UA_NodeId nodeId,
                                          const UA_UInt32 *newUserWriteMask) ,{
        return __UA_Client_writeAttribute(client, &nodeId,
@@ -323,21 +323,21 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_UINT32]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeIsAbstractAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       const UA_Boolean *newIsAbstract) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_ISABSTRACT,
                                          newIsAbstract, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeSymmetricAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      const UA_Boolean *newSymmetric) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_SYMMETRIC,
                                          newSymmetric, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeInverseNameAttribute(UA_Client *client, const UA_NodeId nodeId,
                                        const UA_LocalizedText *newInverseName) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_INVERSENAME,
@@ -345,7 +345,7 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_LOCALIZEDTEXT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeContainsNoLoopsAttribute(UA_Client *client, const UA_NodeId nodeId,
                                            const UA_Boolean *newContainsNoLoops) ,{
        return __UA_Client_writeAttribute(client, &nodeId,
@@ -354,7 +354,7 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeEventNotifierAttribute(UA_Client *client, const UA_NodeId nodeId,
                                          const UA_Byte *newEventNotifier) ,{
        return __UA_Client_writeAttribute(client, &nodeId,
@@ -363,14 +363,14 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_BYTE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeValueAttribute(UA_Client *client, const UA_NodeId nodeId,
                                  const UA_Variant *newValue) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_VALUE,
                                          newValue, &UA_TYPES[UA_TYPES_VARIANT]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeValueAttribute_scalar(UA_Client *client, const UA_NodeId nodeId,
                                         const void *newValue,
                                         const UA_DataType *valueType), {
@@ -379,47 +379,47 @@ time. Use the regular write service to write several attributes at once.
    })
    
    /* Write a DataValue that can include timestamps and status codes */
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeValueAttributeEx(UA_Client *client, const UA_NodeId nodeId,
                                    const UA_DataValue *newValue), {
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_VALUE,
                                          newValue, &UA_TYPES[UA_TYPES_DATAVALUE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeDataTypeAttribute(UA_Client *client, const UA_NodeId nodeId,
                                     const UA_NodeId *newDataType), {
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_DATATYPE,
                                          newDataType, &UA_TYPES[UA_TYPES_NODEID]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeValueRankAttribute(UA_Client *client, const UA_NodeId nodeId,
                                      const UA_Int32 *newValueRank) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_VALUERANK,
                                          newValueRank, &UA_TYPES[UA_TYPES_INT32]);
    })
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_writeArrayDimensionsAttribute(UA_Client *client, const UA_NodeId nodeId,
                                            size_t newArrayDimensionsSize,
                                            const UA_UInt32 *newArrayDimensions);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
                                        const UA_Byte *newAccessLevel) ,{
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_ACCESSLEVEL,
                                          newAccessLevel, &UA_TYPES[UA_TYPES_BYTE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeAccessLevelExAttribute(UA_Client *client, const UA_NodeId nodeId,
                                          UA_UInt32 *newAccessLevelEx), {
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_ACCESSLEVELEX,
                                          newAccessLevelEx, &UA_TYPES[UA_TYPES_UINT32]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeUserAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
                                            const UA_Byte *newUserAccessLevel), {
        return __UA_Client_writeAttribute(client, &nodeId,
@@ -428,7 +428,7 @@ time. Use the regular write service to write several attributes at once.
                                          &UA_TYPES[UA_TYPES_BYTE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeMinimumSamplingIntervalAttribute(UA_Client *client,
                                                    const UA_NodeId nodeId,
                                                    const UA_Double *newMinInterval), {
@@ -437,21 +437,21 @@ time. Use the regular write service to write several attributes at once.
                                          newMinInterval, &UA_TYPES[UA_TYPES_DOUBLE]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeHistorizingAttribute(UA_Client *client, const UA_NodeId nodeId,
                                        const UA_Boolean *newHistorizing), {
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_HISTORIZING,
                                          newHistorizing, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeExecutableAttribute(UA_Client *client, const UA_NodeId nodeId,
                                       const UA_Boolean *newExecutable), {
        return __UA_Client_writeAttribute(client, &nodeId, UA_ATTRIBUTEID_EXECUTABLE,
                                          newExecutable, &UA_TYPES[UA_TYPES_BOOLEAN]);
    })
    
-   UA_INLINABLE( UA_StatusCode
+   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Client_writeUserExecutableAttribute(UA_Client *client, const UA_NodeId nodeId,
                                           const UA_Boolean *newUserExecutable), {
        return __UA_Client_writeAttribute(client, &nodeId,
@@ -466,7 +466,7 @@ Method Calling
 .. code-block:: c
 
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_call(UA_Client *client,
                   const UA_NodeId objectId, const UA_NodeId methodId,
                   size_t inputSize, const UA_Variant *input,
@@ -633,7 +633,7 @@ Misc Highlevel Functionality
     * @param namespaceIndex The namespace index of the URI. The value is unchanged
     *        in case of an error
     * @return Indicates whether the operation succeeded or returns an error code */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_NamespaceGetIndex(UA_Client *client, UA_String *namespaceUri,
                                UA_UInt16 *namespaceIndex);
    

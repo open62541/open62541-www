@@ -52,14 +52,14 @@ may be recieved during a synchronous service call or in
        return request;
    }
    
-   UA_CreateSubscriptionResponse
+   UA_CreateSubscriptionResponse UA_THREADSAFE
    UA_Client_Subscriptions_create(UA_Client *client,
        const UA_CreateSubscriptionRequest request,
        void *subscriptionContext,
        UA_Client_StatusChangeNotificationCallback statusChangeCallback,
        UA_Client_DeleteSubscriptionCallback deleteCallback);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_create_async(UA_Client *client,
        const UA_CreateSubscriptionRequest request,
        void *subscriptionContext,
@@ -68,31 +68,31 @@ may be recieved during a synchronous service call or in
        UA_ClientAsyncServiceCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
-   UA_ModifySubscriptionResponse
+   UA_ModifySubscriptionResponse UA_THREADSAFE
    UA_Client_Subscriptions_modify(UA_Client *client,
        const UA_ModifySubscriptionRequest request);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_modify_async(UA_Client *client,
        const UA_ModifySubscriptionRequest request,
        UA_ClientAsyncServiceCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
-   UA_DeleteSubscriptionsResponse
+   UA_DeleteSubscriptionsResponse UA_THREADSAFE
    UA_Client_Subscriptions_delete(UA_Client *client,
        const UA_DeleteSubscriptionsRequest request);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_delete_async(UA_Client *client,
        const UA_DeleteSubscriptionsRequest request,
        UA_ClientAsyncServiceCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
    /* Delete a single subscription */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_deleteSingle(UA_Client *client, UA_UInt32 subscriptionId);
    
-   static UA_INLINE UA_SetPublishingModeResponse
+   static UA_INLINE UA_THREADSAFE UA_SetPublishingModeResponse
    UA_Client_Subscriptions_setPublishingMode(UA_Client *client,
        const UA_SetPublishingModeRequest request) {
        UA_SetPublishingModeResponse response;
@@ -154,13 +154,13 @@ by the client before sending the request to the server.
         size_t nEventFields, UA_Variant *eventFields);
    
    /* Don't use to monitor the EventNotifier attribute */
-   UA_CreateMonitoredItemsResponse
+   UA_CreateMonitoredItemsResponse UA_THREADSAFE
    UA_Client_MonitoredItems_createDataChanges(UA_Client *client,
        const UA_CreateMonitoredItemsRequest request, void **contexts,
        UA_Client_DataChangeNotificationCallback *callbacks,
        UA_Client_DeleteMonitoredItemCallback *deleteCallbacks);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_createDataChanges_async(UA_Client *client,
        const UA_CreateMonitoredItemsRequest request, void **contexts,
        UA_Client_DataChangeNotificationCallback *callbacks,
@@ -168,7 +168,7 @@ by the client before sending the request to the server.
        UA_ClientAsyncServiceCallback createCallback,
        void *userdata, UA_UInt32 *requestId);
    
-   UA_MonitoredItemCreateResult
+   UA_MonitoredItemCreateResult UA_THREADSAFE
    UA_Client_MonitoredItems_createDataChange(UA_Client *client,
        UA_UInt32 subscriptionId,
        UA_TimestampsToReturn timestampsToReturn,
@@ -177,14 +177,14 @@ by the client before sending the request to the server.
        UA_Client_DeleteMonitoredItemCallback deleteCallback);
    
    /* Monitor the EventNotifier attribute only */
-   UA_CreateMonitoredItemsResponse
+   UA_CreateMonitoredItemsResponse UA_THREADSAFE
    UA_Client_MonitoredItems_createEvents(UA_Client *client,
        const UA_CreateMonitoredItemsRequest request, void **contexts,
        UA_Client_EventNotificationCallback *callback,
        UA_Client_DeleteMonitoredItemCallback *deleteCallback);
    
    /* Monitor the EventNotifier attribute only */
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_createEvents_async(UA_Client *client,
        const UA_CreateMonitoredItemsRequest request, void **contexts,
        UA_Client_EventNotificationCallback *callbacks,
@@ -192,7 +192,7 @@ by the client before sending the request to the server.
        UA_ClientAsyncServiceCallback createCallback,
        void *userdata, UA_UInt32 *requestId);
    
-   UA_MonitoredItemCreateResult
+   UA_MonitoredItemCreateResult UA_THREADSAFE
    UA_Client_MonitoredItems_createEvent(UA_Client *client,
        UA_UInt32 subscriptionId,
        UA_TimestampsToReturn timestampsToReturn,
@@ -200,26 +200,26 @@ by the client before sending the request to the server.
        void *context, UA_Client_EventNotificationCallback callback,
        UA_Client_DeleteMonitoredItemCallback deleteCallback);
    
-   UA_DeleteMonitoredItemsResponse
+   UA_DeleteMonitoredItemsResponse UA_THREADSAFE
    UA_Client_MonitoredItems_delete(UA_Client *client,
        const UA_DeleteMonitoredItemsRequest);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_delete_async(UA_Client *client,
        const UA_DeleteMonitoredItemsRequest request,
        UA_ClientAsyncServiceCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_deleteSingle(UA_Client *client,
        UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId);
    
    /* The clientHandle parameter will be filled automatically */
-   UA_ModifyMonitoredItemsResponse
+   UA_ModifyMonitoredItemsResponse UA_THREADSAFE
    UA_Client_MonitoredItems_modify(UA_Client *client,
        const UA_ModifyMonitoredItemsRequest request);
    
-   UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_modify_async(UA_Client *client,
        const UA_ModifyMonitoredItemsRequest request,
        UA_ClientAsyncServiceCallback callback,
@@ -231,7 +231,7 @@ settings are not stored in the client.
 .. code-block:: c
 
    
-   static UA_INLINE UA_SetMonitoringModeResponse
+   static UA_INLINE UA_THREADSAFE UA_SetMonitoringModeResponse
    UA_Client_MonitoredItems_setMonitoringMode(UA_Client *client,
        const UA_SetMonitoringModeRequest request) {
        UA_SetMonitoringModeResponse response;
@@ -241,7 +241,7 @@ settings are not stored in the client.
        return response;
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Client_MonitoredItems_setMonitoringMode_async(UA_Client *client,
        const UA_SetMonitoringModeRequest request,
        UA_ClientAsyncServiceCallback callback,
@@ -252,7 +252,7 @@ settings are not stored in the client.
            userdata, requestId);
    }
    
-   static UA_INLINE UA_SetTriggeringResponse
+   static UA_INLINE UA_THREADSAFE UA_SetTriggeringResponse
    UA_Client_MonitoredItems_setTriggering(UA_Client *client,
        const UA_SetTriggeringRequest request) {
        UA_SetTriggeringResponse response;
@@ -262,7 +262,7 @@ settings are not stored in the client.
        return response;
    }
    
-   static UA_INLINE UA_StatusCode
+   static UA_INLINE UA_THREADSAFE UA_StatusCode
    UA_Client_MonitoredItems_setTriggering_async(UA_Client *client,
        const UA_SetTriggeringRequest request,
        UA_ClientAsyncServiceCallback callback,
