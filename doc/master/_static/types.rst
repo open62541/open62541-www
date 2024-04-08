@@ -199,9 +199,6 @@ A sequence of Unicode characters. Strings are just an array of UA_Byte.
    UA_String_fromChars(const char *src);
    
    UA_Boolean
-   UA_String_equal(const UA_String *s1, const UA_String *s2);
-   
-   UA_Boolean
    UA_String_isEmpty(const UA_String *s);
    
    extern const UA_String UA_STRING_NULL;
@@ -311,9 +308,6 @@ A 16 byte value that can be used as a globally unique identifier.
    
    extern const UA_Guid UA_GUID_NULL;
    
-   UA_Boolean
-   UA_Guid_equal(const UA_Guid *g1, const UA_Guid *g2);
-   
    /* Print a Guid in the human-readable format defined in Part 6, 5.1.3
     *
     * Format: C496578A-0DFE-4B8F-870A-745238C6AEAE
@@ -365,8 +359,6 @@ A sequence of octets.
    
    #define UA_BYTESTRING(chars) UA_STRING(chars)
    #define UA_BYTESTRING_ALLOC(chars) UA_STRING_ALLOC(chars)
-   
-   #define UA_ByteString_equal(s1, s2) UA_String_equal(s1, s2)
    
    /* Returns a non-cryptographic hash of a bytestring */
    UA_UInt32
@@ -514,12 +506,6 @@ The following methods are a shorthand for creating NodeIds.
    UA_Order
    UA_NodeId_order(const UA_NodeId *n1, const UA_NodeId *n2);
    
-   /* Check for equality */
-   UA_INLINABLE(UA_Boolean
-                UA_NodeId_equal(const UA_NodeId *n1, const UA_NodeId *n2), {
-       return (UA_NodeId_order(n1, n2) == UA_ORDER_EQ);
-   })
-   
    /* Returns a non-cryptographic hash for NodeId */
    UA_UInt32 UA_NodeId_hash(const UA_NodeId *n);
    
@@ -624,13 +610,6 @@ The following functions are shorthand for creating ExpandedNodeIds.
    UA_ExpandedNodeId_order(const UA_ExpandedNodeId *n1,
                            const UA_ExpandedNodeId *n2);
    
-   /* Check for equality */
-   UA_INLINABLE(UA_Boolean
-                UA_ExpandedNodeId_equal(const UA_ExpandedNodeId *n1,
-                                        const UA_ExpandedNodeId *n2), {
-       return (UA_ExpandedNodeId_order(n1, n2) == UA_ORDER_EQ);
-   })
-   
    /* Returns a non-cryptographic hash for ExpandedNodeId. The hash of an
     * ExpandedNodeId is identical to the hash of the embedded (simple) NodeId if
     * the ServerIndex is zero and no NamespaceUri is set. */
@@ -674,10 +653,6 @@ A name qualified by a namespace.
        qn.name = UA_STRING_ALLOC(chars);
        return qn;
    })
-   
-   UA_Boolean
-   UA_QualifiedName_equal(const UA_QualifiedName *qn1,
-                          const UA_QualifiedName *qn2);
    
 LocalizedText
 ^^^^^^^^^^^^^
@@ -1058,6 +1033,9 @@ generic operations that work on all types:
   of the data type and perform a ``T_init`` to reset the type.
 - ``void T_delete(T *ptr)``: Delete the content of the data type and the
   memory for the data type itself.
+- ``void T_equal(T *p1, T *p2)``: Compare whether ``p1`` and ``p2`` have
+  identical content. You can use ``UA_order`` if an absolute ordering
+  is required.
 
 Specializations, such as ``UA_Int32_new()`` are derived from the generic
 type operations as static inline functions.
@@ -1251,8 +1229,7 @@ The following functions are used for generic handling of data types.
    UA_print(const void *p, const UA_DataType *type, UA_String *output);
    #endif
    
-   /* Compare two variables and return their order. This can also be used to test
-    * for equality of two values.
+   /* Compare two values and return their order.
     *
     * For numerical types (including StatusCodes and Enums), their natural order is
     * used. NaN is the "smallest" value for floating point values. Different bit
@@ -1273,6 +1250,12 @@ The following functions are used for generic handling of data types.
     * @param type The datatype description of both values */
    UA_Order
    UA_order(const void *p1, const void *p2, const UA_DataType *type);
+   
+   /* Compare if two values have identical content. */
+   UA_INLINABLE(UA_Boolean
+                UA_equal(const void *p1, const void *p2, const UA_DataType *type), {
+       return (UA_order(p1, p2, type) == UA_ORDER_EQ);
+   })
    
 Binary Encoding/Decoding
 ------------------------
@@ -1380,6 +1363,10 @@ formats that also include data in the OPC UA type system.
        size_t serverUrisSize;
        const UA_DataTypeArray *customTypes; /* Begin of a linked list with custom
                                              * datatype definitions */
+       size_t *decodedLength; /* If non-NULL, the length of the decoded input is
+                               * stored to the pointer. When this is set, decoding
+                               * succeeds also if there is more content after the
+                               * first JSON element in the input string. */
    } UA_DecodeJsonOptions;
    
    /* Decodes a scalar value described by type from json encoding.
@@ -1390,7 +1377,7 @@ formats that also include data in the OPC UA type system.
     *        decoding fails, members are deleted and the value is reset (zeroed)
     *        again.
     * @param type The value type. Must not be NULL.
-    * @param options The options struct for decoding, currently unused
+    * @param options The options struct for decoding.
     * @return Returns a statuscode whether decoding succeeded. */
    UA_StatusCode
    UA_decodeJson(const UA_ByteString *src, void *dst, const UA_DataType *type,
@@ -1550,21 +1537,13 @@ length 0 but a data pointer ``UA_EMPTY_ARRAY_SENTINEL``.
 Generated Data Type Definitions
 -------------------------------
 
-The OPC UA standard defines many data types that are combinations of the 25
-builtin data types. See the section on :ref:`generated-definitions` for the
-list of data types that are integrated for this build of the open62541
-library.
+The following standard-defined datatypes are auto-generated from XML files
+that are part of the OPC UA standard. All datatypes are built up from the 25
+builtin-in datatypes from the :ref:`types` section.
+
+.. include:: types_generated.rst
 
 .. code-block:: c
 
    
-   /* Helper used to exclude type names in the definition of UA_DataType structures
-    * if the feature is disabled. */
-   #ifdef UA_ENABLE_TYPEDESCRIPTION
-   # define UA_TYPENAME(name) name,
-   #else
-   # define UA_TYPENAME(name)
-   #endif
-   
-   #include <open62541/types_generated.h>
-   #include <open62541/types_generated_handling.h>
+   /* stop-doc-generation */

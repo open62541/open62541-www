@@ -14,6 +14,7 @@ the node type. Possible attributes are as follows:
 
    
    typedef enum {
+       UA_ATTRIBUTEID_INVALID                 = 0,
        UA_ATTRIBUTEID_NODEID                  = 1,
        UA_ATTRIBUTEID_NODECLASS               = 2,
        UA_ATTRIBUTEID_BROWSENAME              = 3,
@@ -42,6 +43,11 @@ the node type. Possible attributes are as follows:
        UA_ATTRIBUTEID_ACCESSRESTRICTIONS      = 26,
        UA_ATTRIBUTEID_ACCESSLEVELEX           = 27
    } UA_AttributeId;
+   
+   /* Returns a readable attribute name like "NodeId" or "Invalid" if the attribute
+    * does not exist */
+   const char *
+   UA_AttributeId_name(UA_AttributeId attrId);
    
 .. _access-level-mask:
 
@@ -93,6 +99,7 @@ are ANDed for the overall write mask. Part 3: 5.2.7 Table 2
    #define UA_WRITEMASK_VALUERANK               (0x01u << 19u)
    #define UA_WRITEMASK_WRITEMASK               (0x01u << 20u)
    #define UA_WRITEMASK_VALUEFORVARIABLETYPE    (0x01u << 21u)
+   #define UA_WRITEMASK_ACCESSLEVELEX           (0x01u << 25u)
    
 .. _valuerank-defines:
 
@@ -168,6 +175,17 @@ Connection State
 
 .. code-block:: c
 
+   
+   typedef enum {
+       UA_CONNECTIONSTATE_CLOSED,     /* The socket has been closed and the connection
+                                       * will be deleted */
+       UA_CONNECTIONSTATE_OPENING,    /* The socket is open, but the connection not yet
+                                         fully established */
+       UA_CONNECTIONSTATE_ESTABLISHED,/* The socket is open and the connection
+                                       * configured */
+       UA_CONNECTIONSTATE_CLOSING     /* The socket is closing down */
+   } UA_ConnectionState;
+   
    
    typedef enum {
        UA_SECURECHANNELSTATE_CLOSED = 0,

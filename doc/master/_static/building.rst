@@ -244,6 +244,11 @@ Main Build Options
    - 200: Debug
    - 100: Trace
 
+   This compilation flag defines which log levels get compiled into the code. In
+   addition, the implementations of :ref:`logging` allow to set a filter for the
+   logging level at runtime. So the logging level can be changed in the
+   configuration without recompiling.
+
 **UA_MULTITHREADING**
    Level of multi-threading support. The supported levels are currently as follows:
 
@@ -378,11 +383,6 @@ PubSub Build Options
    be changed by the application to satisfy realtime requirements. Disabled by
    default.
 
-**UA_ENABLE_PUBSUB_ETH_UADP**
-   Enable the OPC UA Ethernet PubSub support to transport UADP NetworkMessages
-   as payload of Ethernet II frame without IP or UDP headers. This option will
-   include Publish and Subscribe based on EtherType B62C. Disabled by default.
-
 Debug Build Options
 ^^^^^^^^^^^^^^^^^^^
 
@@ -487,4 +487,3 @@ the shared library.
    cp /path-to/examples/tutorial_server_firststeps.c . # copy the example server
    gcc -std=c99 -o server tutorial_server_firststeps.c -lopen62541
 
-.. include:: building_arch.rst

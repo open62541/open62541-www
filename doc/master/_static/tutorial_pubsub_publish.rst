@@ -26,6 +26,9 @@ the system preconfiguration and connection can be found in
    #include <open62541/server.h>
    #include <open62541/server_pubsub.h>
    
+   #include <stdio.h>
+   #include <stdlib.h>
+   
    UA_NodeId connectionIdent, publishedDataSetIdent, writerGroupIdent;
    
    static void
@@ -125,7 +128,7 @@ configuration parameters for the message creation.
                                                                  (UA_UadpNetworkMessageContentMask)UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER);
        writerGroupConfig.messageSettings.content.decoded.data = writerGroupMessage;
        UA_Server_addWriterGroup(server, connectionIdent, &writerGroupConfig, &writerGroupIdent);
-       UA_Server_setWriterGroupOperational(server, writerGroupIdent);
+       UA_Server_enableWriterGroup(server, writerGroupIdent);
        UA_UadpWriterGroupMessageDataType_delete(writerGroupMessage);
    }
    
@@ -209,12 +212,14 @@ It follows the main server code, making use of the above definitions.
                    printf("Error: UADP/ETH needs an interface name\n");
                    return EXIT_FAILURE;
                }
-               networkAddressUrl.networkInterface = UA_STRING(argv[2]);
                networkAddressUrl.url = UA_STRING(argv[1]);
            } else {
                printf("Error: unknown URI\n");
                return EXIT_FAILURE;
            }
+       }
+       if (argc > 2) {
+           networkAddressUrl.networkInterface = UA_STRING(argv[2]);
        }
    
        return run(&transportProfile, &networkAddressUrl);

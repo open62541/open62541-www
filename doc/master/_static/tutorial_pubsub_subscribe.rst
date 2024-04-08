@@ -15,6 +15,7 @@ TargetVariables of Subscriber Information Model.
    #include <open62541/server_pubsub.h>
    
    #include <stdio.h>
+   #include <stdlib.h>
    
    UA_NodeId connectionIdentifier;
    UA_NodeId readerGroupIdentifier;
@@ -73,7 +74,8 @@ is removed. All network message related filters are only available in the DataSe
        readerGroupConfig.name = UA_STRING("ReaderGroup1");
        retval |= UA_Server_addReaderGroup(server, connectionIdentifier, &readerGroupConfig,
                                           &readerGroupIdentifier);
-       UA_Server_setReaderGroupOperational(server, readerGroupIdentifier);
+       UA_Server_enableReaderGroup(server, readerGroupIdentifier);
+   
        return retval;
    }
    
@@ -314,12 +316,14 @@ Followed by the main server code, making use of the above definitions
                    return EXIT_FAILURE;
                }
    
-               networkAddressUrl.networkInterface = UA_STRING(argv[2]);
                networkAddressUrl.url = UA_STRING(argv[1]);
            } else {
                printf ("Error: unknown URI\n");
                return EXIT_FAILURE;
            }
+       }
+       if (argc > 2) {
+           networkAddressUrl.networkInterface = UA_STRING(argv[2]);
        }
    
        return run(&transportProfile, &networkAddressUrl);

@@ -1,3 +1,33 @@
+Range Definition
+----------------
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_UInt32 min;
+       UA_UInt32 max;
+   } UA_UInt32Range;
+   
+   typedef struct {
+       UA_Duration min;
+       UA_Duration max;
+   } UA_DurationRange;
+   
+Query Language Eventfilter
+@param content eventfilter query
+@param filter generated eventfilter
+
+.. code-block:: c
+
+   #ifdef UA_ENABLE_PARSING
+   #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
+   UA_StatusCode
+   UA_EventFilter_parse(UA_EventFilter *filter, UA_ByteString *content);
+   #endif
+   #endif
+   
+   
 Random Number Generator
 -----------------------
 If UA_MULTITHREADING is defined, then the seed is stored in thread
@@ -93,6 +123,48 @@ NULL for that argument and treat it as an empty map.
    UA_StatusCode
    UA_KeyValueMap_merge(UA_KeyValueMap *lhs, const UA_KeyValueMap *rhs);
    
+Binary Connection Config Parameters
+-----------------------------------
+
+.. code-block:: c
+
+   
+   typedef struct {
+       UA_UInt32 protocolVersion;
+       UA_UInt32 recvBufferSize;
+       UA_UInt32 sendBufferSize;
+       UA_UInt32 localMaxMessageSize;  /* (0 = unbounded) */
+       UA_UInt32 remoteMaxMessageSize; /* (0 = unbounded) */
+       UA_UInt32 localMaxChunkCount;   /* (0 = unbounded) */
+       UA_UInt32 remoteMaxChunkCount;  /* (0 = unbounded) */
+   } UA_ConnectionConfig;
+   
+.. _default-node-attributes:
+
+Default Node Attributes
+-----------------------
+Default node attributes to simplify the use of the AddNodes services. For
+example, Setting the ValueRank and AccessLevel to zero is often an unintended
+setting and leads to errors that are hard to track down.
+
+.. code-block:: c
+
+   
+   /* The default for variables is "BaseDataType" for the datatype, -2 for the
+    * valuerank and a read-accesslevel. */
+   extern const UA_VariableAttributes UA_VariableAttributes_default;
+   extern const UA_VariableTypeAttributes UA_VariableTypeAttributes_default;
+   
+   /* Methods are executable by default */
+   extern const UA_MethodAttributes UA_MethodAttributes_default;
+   
+   /* The remaining attribute definitions are currently all zeroed out */
+   extern const UA_ObjectAttributes UA_ObjectAttributes_default;
+   extern const UA_ObjectTypeAttributes UA_ObjectTypeAttributes_default;
+   extern const UA_ReferenceTypeAttributes UA_ReferenceTypeAttributes_default;
+   extern const UA_DataTypeAttributes UA_DataTypeAttributes_default;
+   extern const UA_ViewAttributes UA_ViewAttributes_default;
+   
 Endpoint URL Parser
 -------------------
 The endpoint URL parser is generally useful for the implementation of network
@@ -156,34 +228,52 @@ layer plugins.
    #define UA_MAX(A, B) ((A) > (B) ? (A) : (B))
    #endif
    
-Parse RelativePath Expressions
-------------------------------
+And-Escaping of Strings
+-----------------------
+The "and-escaping" of strings for is described in Part 4, A2. The ``&``
+character is used to escape the reserved characters ``/.<>:#!&``.
+So the string ``My.String`` becomes ``My&.String``.
 
+In addition to the standard we define "extended-and-escaping" where
+additionaly commas, semicolons, brackets and whitespace characters are
+escaped. This improves the parsing in a larger context, as a lexer can find
+the end of the escaped string. The additionally reserved characters for the
+extended escaping are ``,()[] \t\n\v\f\r``.
+
+This documentation always states whether "and-escaping" or the
+"extended-and-escaping is used.
+
+Print and Parse RelativePath Expressions
+----------------------------------------
 Parse a RelativePath according to the format defined in Part 4, A2. This is
-used e.g. for the BrowsePath structure. For now, only the standard
-ReferenceTypes from Namespace 0 are recognized (see Part 3).
+used e.g. for the BrowsePath structure.
 
-  ``RelativePath := ( ReferenceType [BrowseName]? )*``
+  ``RelativePath := ( ReferenceType BrowseName )+``
 
-The ReferenceTypes have either of the following formats:
+The ReferenceType has one of the following formats:
 
 - ``/``: *HierarchicalReferences* and subtypes
-- ``.``: *Aggregates* ReferenceTypesand subtypes
-- ``< [!#]* BrowseName >``: The ReferenceType is indicated by its BrowseName
-  (a QualifiedName). Prefixed modifiers can be as follows: ``!`` switches to
-  inverse References. ``#`` excludes subtypes of the ReferenceType.
+- ``.``: *Aggregates* ReferenceTypes and subtypes
+- ``< [!#]* BrowseName >``: The ReferenceType is indicated by its BrowseName.
+  Reserved characters in the BrowseName are and-escaped. The following
+  prefix-modifiers are defined for the ReferenceType.
+  - ``!`` switches to inverse References
+  - ``#`` excludes subtypes of the ReferenceType.
+  - As a non-standard extension we allow the ReferenceType in angle-brackets
+    as a NodeId. For example ``<ns=1;i=345>``. If a string NodeId is used,
+    the string identifier is and-escaped.
 
-QualifiedNames consist of an optional NamespaceIndex and the nameitself:
+The BrowseName is a QualifiedName. It consist of an optional NamespaceIndex
+and the name itself. The NamespaceIndex can be left out for the default
+Namespace zero. The name component is and-escaped (see above).
 
-  ``QualifiedName := ([0-9]+ ":")? Name``
+  ``BrowseName := ([0-9]+ ":")? Name``
 
-The QualifiedName representation for RelativePaths uses ``&`` as the escape
-character. Occurences of the characters ``/.<>:#!&`` in a QualifiedName have
-to be escaped (prefixed with ``&``).
+The last BrowseName in a RelativePath can be omitted. This acts as a wildcard
+that matches any BrowseName.
 
 Example RelativePaths
 `````````````````````
-
 - ``/2:Block&.Output``
 - ``/3:Truck.0:NodeVersion``
 - ``<0:HasProperty>1:Boiler/1:HeatSensor``
@@ -194,9 +284,76 @@ Example RelativePaths
 
 .. code-block:: c
 
+   
    #ifdef UA_ENABLE_PARSING
    UA_StatusCode
    UA_RelativePath_parse(UA_RelativePath *rp, const UA_String str);
+   
+   /* Supports the lookup of non-standard ReferenceTypes by their browse name in
+    * the information model of a server. The first matching result in the
+    * ReferenceType hierarchy is used. */
+   UA_StatusCode
+   UA_RelativePath_parseWithServer(UA_Server *server, UA_RelativePath *rp,
+                                   const UA_String str);
+   
+   /* The out-string can be pre-allocated. Then the size is adjusted or an error
+    * returned. If the out-string is NULL, then memory is allocated for it. */
+   UA_StatusCode
+   UA_RelativePath_print(const UA_RelativePath *rp, UA_String *out);
+   #endif
+   
+.. _parse-sao:
+
+Print and Parse SimpleAttributeOperand Expression
+-------------------------------------------------
+The SimpleAttributeOperand is used to specify the location of up values.
+SimpleAttributeOperands are used for example in EventFilters to select the
+values reported for each event instance.
+
+The TypeDefinitionId is a NodeId and restricts the starting point for the
+lookup to instances of the TypeDefinitionNode or one of its subtypes. If not
+defined, the NodeId defaults to the BaseEventType. The NodeId is
+extended-and-escaped.
+
+The BrowsePath is a list of BrowseNames (QualifiedName expression with
+extended-and-escaping of the name) to be followed from the TypeDefinitionNode
+instance. The implied ReferenceTypeIds (cf. the RelativePath expressions) are
+always the HierarchicalReferences and their subtypes. So the ``/`` separator
+is mandatory here. The BrowsePath for the SimpleAttributeOperand is defined
+to only follow into Variable- and ObjectNodes. If the BrowsePath is empty,
+the value is taken from the instance of the TypeDefinition itself.
+
+The attribute is the textual name of the selected node attribute.
+If undefined, the attribute defaults to the Value attribute.
+For the index range, see the section on :ref:`numericrange`.
+The BNF definition of the SimpleAttributeOperand is as follows::
+
+  SimpleAttributeOperand :=
+    TypeDefinitionId? SimpleBrowsePath ("#" Attribute)? ("[" IndexRange "]")?
+
+  SimpleBrowsePath := ("/" BrowseName)*
+
+Example SimpleAttributeOperands
+```````````````````````````````
+- ``ns=2;s=TruckEventType/3:Truck/5:Wheel#Value[1:3]``
+- ``/3:Truck/5:Wheel``
+- ``#BrowseName``
+- Empty String: No NodeId, BrowsePath, Attribute and NumericRange. This
+  indicates the value attribute of the event instance.
+
+.. code-block:: c
+
+   
+   #ifdef UA_ENABLE_PARSING
+   UA_StatusCode
+   UA_SimpleAttributeOperand_parse(UA_SimpleAttributeOperand *sao,
+                                   const UA_String str);
+   
+   /* The out-string can be pre-allocated. Then the size is adjusted or an error
+    * returned. If the out-string is NULL, then memory is allocated for it. */
+   UA_StatusCode
+   UA_SimpleAttributeOperand_print(const UA_SimpleAttributeOperand *sao,
+                                   UA_String *out);
    #endif
    
 Convenience macros for complex types
@@ -213,22 +370,19 @@ Convenience macros for complex types
    #define UA_PRINTF_STRING_FORMAT "\"%.*s\""
    #define UA_PRINTF_STRING_DATA(STRING) (int)(STRING).length, (STRING).data
    
-Helper functions for converting data types
-------------------------------------------
+Cryptography Helpers
+--------------------
 
 .. code-block:: c
 
    
    /* Compare memory in constant time to mitigate timing attacks.
     * Returns true if ptr1 and ptr2 are equal for length bytes. */
-   static UA_INLINE UA_Boolean
-   UA_constantTimeEqual(const void *ptr1, const void *ptr2, size_t length) {
-       volatile const UA_Byte *a = (volatile const UA_Byte *)ptr1;
-       volatile const UA_Byte *b = (volatile const UA_Byte *)ptr2;
-       volatile UA_Byte c = 0;
-       for(size_t i = 0; i < length; ++i) {
-           UA_Byte x = a[i], y = b[i];
-           c = c | (x ^ y);
-       }
-       return !c;
-   }
+   UA_Boolean
+   UA_constantTimeEqual(const void *ptr1, const void *ptr2, size_t length);
+   
+   /* Zero-out memory in a way that is not removed by compiler-optimizations. Use
+    * this to ensure cryptographic secrets don't leave traces after the memory was
+    * freed. */
+   void
+   UA_ByteString_memZero(UA_ByteString *bs);
