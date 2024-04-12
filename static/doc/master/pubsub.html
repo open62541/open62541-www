@@ -135,58 +135,51 @@ implementations like UDP-Multicasting.</p>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubComponentEnumType</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>The open62541 PubSub API uses the following scheme:</p>
-<ol class="arabic simple">
-<li><p>Create a configuration for the needed PubSub element.</p></li>
-<li><p>Call the add[element] function and pass in the configuration.</p></li>
-<li><p>The add[element] function returns the unique nodeId of the internally created element.</p></li>
-</ol>
-<p>Take a look on the PubSub Tutorials for more details about the API usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------+</span>
-<span class="o">|</span> <span class="n">UA_Server</span> <span class="o">|</span>
-<span class="o">+-----------+</span>
- <span class="o">|</span>    <span class="o">|</span>
- <span class="o">|</span>    <span class="o">|</span>
- <span class="o">|</span>    <span class="o">|</span>
- <span class="o">|</span>    <span class="o">|</span>  <span class="o">+----------------------+</span>
- <span class="o">|</span>    <span class="o">+--&gt;</span> <span class="n">UA_PubSubConnection</span>  <span class="o">|</span>  <span class="n">UA_Server_addPubSubConnection</span>
- <span class="o">|</span>       <span class="o">+----------------------+</span>
- <span class="o">|</span>        <span class="o">|</span>    <span class="o">|</span>
- <span class="o">|</span>        <span class="o">|</span>    <span class="o">|</span>    <span class="o">+----------------+</span>
- <span class="o">|</span>        <span class="o">|</span>    <span class="o">+----&gt;</span> <span class="n">UA_WriterGroup</span> <span class="o">|</span>  <span class="n">UA_PubSubConnection_addWriterGroup</span>
- <span class="o">|</span>        <span class="o">|</span>         <span class="o">+----------------+</span>
- <span class="o">|</span>        <span class="o">|</span>              <span class="o">|</span>
- <span class="o">|</span>        <span class="o">|</span>              <span class="o">|</span>    <span class="o">+------------------+</span>
- <span class="o">|</span>        <span class="o">|</span>              <span class="o">+----&gt;</span> <span class="n">UA_DataSetWriter</span> <span class="o">|</span>  <span class="n">UA_WriterGroup_addDataSetWriter</span>     <span class="o">+-+</span>
- <span class="o">|</span>        <span class="o">|</span>                   <span class="o">+------------------+</span>                                        <span class="o">|</span>
- <span class="o">|</span>        <span class="o">|</span>                                                                               <span class="o">|</span>
- <span class="o">|</span>        <span class="o">|</span>         <span class="o">+----------------+</span>                                                    <span class="o">|</span> <span class="n">r</span>
- <span class="o">|</span>        <span class="o">+---------&gt;</span> <span class="n">UA_ReaderGroup</span> <span class="o">|</span>    <span class="n">UA_PubSubConnection_addReaderGroup</span>              <span class="o">|</span> <span class="n">e</span>
- <span class="o">|</span>                  <span class="o">+----------------+</span>                                                    <span class="o">|</span> <span class="n">f</span>
- <span class="o">|</span>                       <span class="o">|</span>                                                                <span class="o">|</span>
- <span class="o">|</span>                       <span class="o">|</span>    <span class="o">+------------------+</span>                                        <span class="o">|</span>
- <span class="o">|</span>                       <span class="o">+----&gt;</span> <span class="n">UA_DataSetReader</span> <span class="o">|</span>  <span class="n">UA_ReaderGroup_addDataSetReader</span>       <span class="o">|</span>
- <span class="o">|</span>                            <span class="o">+------------------+</span>                                        <span class="o">|</span>
- <span class="o">|</span>                                 <span class="o">|</span>                                                      <span class="o">|</span>
- <span class="o">|</span>                                 <span class="o">|</span>    <span class="o">+----------------------+</span>                          <span class="o">|</span>
- <span class="o">|</span>                                 <span class="o">+----&gt;</span> <span class="n">UA_SubscribedDataSet</span> <span class="o">|</span>                          <span class="o">|</span>
- <span class="o">|</span>                                      <span class="o">+----------------------+</span>                          <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">|</span>                                            <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">|</span>    <span class="o">+----------------------------+</span>          <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">+----&gt;</span> <span class="n">UA_TargetVariablesDataType</span> <span class="o">|</span>          <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">|</span>    <span class="o">+----------------------------+</span>          <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">|</span>                                            <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">|</span>    <span class="o">+------------------------------------+</span>  <span class="o">|</span>
- <span class="o">|</span>                                           <span class="o">+----&gt;</span> <span class="n">UA_SubscribedDataSetMirrorDataType</span> <span class="o">|</span>  <span class="o">|</span>
- <span class="o">|</span>                                                <span class="o">+------------------------------------+</span>  <span class="o">|</span>
- <span class="o">|</span>                                                                                        <span class="o">|</span>
- <span class="o">|</span>       <span class="o">+---------------------------+</span>                                                    <span class="o">|</span>
- <span class="o">+-------&gt;</span> <span class="n">UA_PubSubPublishedDataSet</span> <span class="o">|</span>  <span class="n">UA_Server_addPublishedDataSet</span>                   <span class="o">&lt;-+</span>
-         <span class="o">+---------------------------+</span>
-               <span class="o">|</span>
-               <span class="o">|</span>    <span class="o">+-----------------+</span>
-               <span class="o">+----&gt;</span> <span class="n">UA_DataSetField</span> <span class="o">|</span>  <span class="n">UA_PublishedDataSet_addDataSetField</span>
-                    <span class="o">+-----------------+</span>
+<p>The following figure shows how the PubSub components are related.
+The PubSub Tutorials have more examples about the API usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+--------+</span>
+<span class="o">|</span> <span class="n">Server</span> <span class="o">|</span>
+<span class="o">+--------+</span>
+  <span class="o">|</span>  <span class="o">|</span>
+  <span class="o">|</span>  <span class="o">|</span>  <span class="o">+------------------------+</span>
+  <span class="o">|</span>  <span class="o">+--&gt;</span> <span class="n">PubSubPublishedDataSet</span> <span class="o">&lt;----------+</span>
+  <span class="o">|</span>     <span class="o">+------------------------+</span>          <span class="o">|</span>
+  <span class="o">|</span>       <span class="o">|</span>                                 <span class="o">|</span>
+  <span class="o">|</span>       <span class="o">|</span>    <span class="o">+--------------+</span>             <span class="o">|</span>
+  <span class="o">|</span>       <span class="o">+----&gt;</span> <span class="n">DataSetField</span> <span class="o">|</span>             <span class="o">|</span>
+  <span class="o">|</span>            <span class="o">+--------------+</span>             <span class="o">|</span>
+  <span class="o">|</span>                                         <span class="o">|</span>
+  <span class="o">|</span>     <span class="o">+------------------+</span>                <span class="o">|</span>
+  <span class="o">+-----&gt;</span> <span class="n">PubSubConnection</span> <span class="o">|</span>                <span class="o">|</span>
+        <span class="o">+------------------+</span>                <span class="o">|</span>
+          <span class="o">|</span>  <span class="o">|</span>                              <span class="o">|</span>
+          <span class="o">|</span>  <span class="o">|</span>    <span class="o">+-------------+</span>           <span class="o">|</span>
+          <span class="o">|</span>  <span class="o">+----&gt;</span> <span class="n">WriterGroup</span> <span class="o">|</span>           <span class="o">|</span>
+          <span class="o">|</span>       <span class="o">+-------------+</span>           <span class="o">|</span>
+          <span class="o">|</span>         <span class="o">|</span>                       <span class="o">|</span>
+          <span class="o">|</span>         <span class="o">|</span>    <span class="o">+---------------+</span>  <span class="o">|</span>
+          <span class="o">|</span>         <span class="o">+----&gt;</span> <span class="n">DataSetWriter</span> <span class="o">&lt;--+</span>
+          <span class="o">|</span>              <span class="o">+---------------+</span>
+          <span class="o">|</span>
+          <span class="o">|</span>       <span class="o">+-------------+</span>
+          <span class="o">+-------&gt;</span> <span class="n">ReaderGroup</span> <span class="o">|</span>
+                  <span class="o">+-------------+</span>
+                    <span class="o">|</span>
+                    <span class="o">|</span>    <span class="o">+---------------+</span>
+                    <span class="o">+----&gt;</span> <span class="n">DataSetReader</span> <span class="o">|</span>
+                         <span class="o">+---------------+</span>
+                           <span class="o">|</span>
+                           <span class="o">|</span>    <span class="o">+-------------------+</span>
+                           <span class="o">+----&gt;</span> <span class="n">SubscribedDataSet</span> <span class="o">|</span>
+                                <span class="o">+-------------------+</span>
+                                  <span class="o">|</span>
+                                  <span class="o">|</span>    <span class="o">+-------------------------+</span>
+                                  <span class="o">+----&gt;</span> <span class="n">TargetVariablesDataType</span> <span class="o">|</span>
+                                  <span class="o">|</span>    <span class="o">+-------------------------+</span>
+                                  <span class="o">|</span>
+                                  <span class="o">|</span>    <span class="o">+---------------------------------+</span>
+                                  <span class="o">+----&gt;</span> <span class="n">SubscribedDataSetMirrorDataType</span> <span class="o">|</span>
+                                       <span class="o">+---------------------------------+</span>
 </pre></div>
 </div>
 <section id="pubsub-information-model-representation">
