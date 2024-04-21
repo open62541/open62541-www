@@ -198,7 +198,15 @@ UA_ENABLE_PUBSUB_INFORMATIONMODEL option.</p>
 <p>The PubSub connections are the abstraction between the concrete transport protocol
 and the PubSub functionality. It is possible to create multiple connections with
 different transport protocols at runtime.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Valid PublisherId types from Part 14 */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Valid PublisherId types are defined in Part 14, 7.2.2.2.2 NetworkMessage</span>
+<span class="cm"> * Layout (bit range 0-2).</span>
+<span class="cm"> *</span>
+<span class="cm"> * - 000 Byte (default value if ExtendedFlags1 is omitted)</span>
+<span class="cm"> * - 001 UInt16</span>
+<span class="cm"> * - 010 UInt32</span>
+<span class="cm"> * - 011 UInt64</span>
+<span class="cm"> * - 100 String */</span>
+
 <span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_BYTE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_UINT16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
@@ -207,28 +215,34 @@ different transport protocols at runtime.</p>
 <span class="w">    </span><span class="n">UA_PUBLISHERIDTYPE_STRING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PublisherIdType</span><span class="p">;</span>
 
-<span class="cm">/* Publisher Id</span>
-<span class="cm">    Valid types are defined in Part 14, 7.2.2.2.2 NetworkMessage Layout:</span>
-
-<span class="cm">    Bit range 0-2: PublisherId Type</span>
-<span class="cm">    000 The PublisherId is of DataType Byte This is the default value if ExtendedFlags1 is omitted</span>
-<span class="cm">    001 The PublisherId is of DataType UInt16</span>
-<span class="cm">    010 The PublisherId is of DataType UInt32</span>
-<span class="cm">    011 The PublisherId is of DataType UInt64</span>
-<span class="cm">    100 The PublisherId is of DataType String</span>
-<span class="cm">*/</span>
-<span class="k">typedef</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">byte</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">uint16</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">uint32</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">uint64</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">string</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_PublisherIdType</span><span class="w"> </span><span class="n">idType</span><span class="p">;</span>
+<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">byte</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">uint16</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">uint32</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">uint64</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_String</span><span class="w"> </span><span class="n">string</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PublisherId</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_PublisherId_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_PublisherId_clear</span><span class="p">(</span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">);</span>
+
+<span class="cm">/* The variant must contain a scalar of the five possible identifier types */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_PublisherId_fromVariant</span><span class="p">(</span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">);</span>
+
+<span class="cm">/* Makes a shallow copy (no malloc) in the variant */</span>
+<span class="kt">void</span>
+<span class="nf">UA_PublisherId_toVariant</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">enabled</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_PublisherIdType</span><span class="w"> </span><span class="n">publisherIdType</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">transportProfileUri</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
@@ -773,7 +787,7 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="cm">/* Parameters for PubSub DataSetReader Configuration */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">writerGroupId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="n">dataSetMetaData</span><span class="p">;</span>

@@ -112,7 +112,15 @@ different transport protocols at runtime.
 .. code-block:: c
 
    
-   /* Valid PublisherId types from Part 14 */
+   /* Valid PublisherId types are defined in Part 14, 7.2.2.2.2 NetworkMessage
+    * Layout (bit range 0-2).
+    *
+    * - 000 Byte (default value if ExtendedFlags1 is omitted)
+    * - 001 UInt16
+    * - 010 UInt32
+    * - 011 UInt64
+    * - 100 String */
+   
    typedef enum {
        UA_PUBLISHERIDTYPE_BYTE   = 0,
        UA_PUBLISHERIDTYPE_UINT16 = 1,
@@ -121,28 +129,34 @@ different transport protocols at runtime.
        UA_PUBLISHERIDTYPE_STRING = 4
    } UA_PublisherIdType;
    
-   /* Publisher Id
-       Valid types are defined in Part 14, 7.2.2.2.2 NetworkMessage Layout:
-   
-       Bit range 0-2: PublisherId Type
-       000 The PublisherId is of DataType Byte This is the default value if ExtendedFlags1 is omitted
-       001 The PublisherId is of DataType UInt16
-       010 The PublisherId is of DataType UInt32
-       011 The PublisherId is of DataType UInt64
-       100 The PublisherId is of DataType String
-   */
-   typedef union {
-       UA_Byte byte;
-       UA_UInt16 uint16;
-       UA_UInt32 uint32;
-       UA_UInt64 uint64;
-       UA_String string;
+   typedef struct {
+       UA_PublisherIdType idType;
+       union {
+           UA_Byte byte;
+           UA_UInt16 uint16;
+           UA_UInt32 uint32;
+           UA_UInt64 uint64;
+           UA_String string;
+       } id;
    } UA_PublisherId;
+   
+   UA_StatusCode
+   UA_PublisherId_copy(const UA_PublisherId *src, UA_PublisherId *dst);
+   
+   void
+   UA_PublisherId_clear(UA_PublisherId *p);
+   
+   /* The variant must contain a scalar of the five possible identifier types */
+   UA_StatusCode
+   UA_PublisherId_fromVariant(UA_PublisherId *p, const UA_Variant *src);
+   
+   /* Makes a shallow copy (no malloc) in the variant */
+   void
+   UA_PublisherId_toVariant(const UA_PublisherId *p, UA_Variant *dst);
    
    typedef struct {
        UA_String name;
        UA_Boolean enabled;
-       UA_PublisherIdType publisherIdType;
        UA_PublisherId publisherId;
        UA_String transportProfileUri;
        UA_Variant address;
@@ -707,7 +721,7 @@ SubscribedDataSet and be contained within a ReaderGroup.
    /* Parameters for PubSub DataSetReader Configuration */
    typedef struct {
        UA_String name;
-       UA_Variant publisherId;
+       UA_PublisherId publisherId;
        UA_UInt16 writerGroupId;
        UA_UInt16 dataSetWriterId;
        UA_DataSetMetaDataType dataSetMetaData;
