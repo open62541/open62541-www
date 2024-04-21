@@ -7,7 +7,7 @@
   <title>Event Loop Subsystem &mdash; open62541 1.4.0-rc2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
 
   
   <!--[if lt IE 9]>
@@ -15,7 +15,7 @@
   <![endif]-->
   
         <script src="_static/documentation_options.js?v=f751e407"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -130,8 +130,10 @@ can be used when this happens. Either schedule the next execution after the
 interval has elapsed again from the current time onwards or stay within the
 regular interval with respect to the original basetime.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_TIMER_HANDLE_CYCLEMISS_WITH_CURRENTTIME</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_TIMER_HANDLE_CYCLEMISS_WITH_BASETIME</span>
+<span class="w">    </span><span class="n">UA_TIMER_HANDLE_CYCLEMISS_WITH_CURRENTTIME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="cm">/* deprecated */</span>
+<span class="w">    </span><span class="n">UA_TIMER_HANDLE_CYCLEMISS_WITH_BASETIME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">    </span><span class="cm">/* deprecated */</span>
+<span class="w">    </span><span class="n">UA_TIMERPOLICY_CURRENTTIME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_TIMERPOLICY_BASETIME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_TimerPolicy</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -189,14 +191,19 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * iterations of the main-loop to succeed. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">stop</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Process events for at most &quot;timeout&quot; ms or until an unrecoverable error</span>
-<span class="cm">     * occurs. If timeout==0, then only already received events are</span>
-<span class="cm">     * processed. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">run</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
-
 <span class="w">    </span><span class="cm">/* Clean up the EventLoop and free allocated memory. Can fail if the</span>
 <span class="cm">     * EventLoop is not stopped. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Wait for events and processs them for at most &quot;timeout&quot; ms or until an</span>
+<span class="cm">     * unrecoverable error occurs. If timeout==0, then only already received</span>
+<span class="cm">     * events are processed. Returns immediately after processing the first</span>
+<span class="cm">     * (batch of) event(s). */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">run</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* The &quot;run&quot; method is blocking and waits for events during a timeout</span>
+<span class="cm">     * period. This cancels the &quot;run&quot; method to return immediately. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">cancel</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* EventLoop Time Domain</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~</span>
@@ -263,7 +270,10 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * The delayed callbacks are processed in each of the cycle of the EventLoop</span>
 <span class="cm">     * between the handling of timed cyclic callbacks and polling for (network)</span>
 <span class="cm">     * events. The memory for the delayed callback is *NOT* automatically freed</span>
-<span class="cm">     * after the execution. */</span>
+<span class="cm">     * after the execution.</span>
+<span class="cm">     *</span>
+<span class="cm">     * addDelayedCallback is non-blocking and can be called from an interrupt</span>
+<span class="cm">     * context. removeDelayedCallback can take a mutex and is blocking. */</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addDelayedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">);</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeDelayedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">);</span>
@@ -509,17 +519,23 @@ within the interrupt callback.</p></li>
 <section id="posix-eventlop-implementation">
 <h2>POSIX EventLop Implementation<a class="headerlink" href="#posix-eventlop-implementation" title="Link to this heading">¶</a></h2>
 <p>The POSIX compatibility of Win32 is ‘close enough’. So a joint implementation
-is provided.</p>
-<p>Configuration parameters (only Linux and BSDs, must be set before start to
-take effect):
-- 0:clock-source [int32]: Clock source (default: CLOCK_REALTIME).
-- 0:clock-source-monotonic [int32]: Clock source used for time intervals. A</p>
-<blockquote>
-<div><p>non-monotonic source can be used as well. But expect accordingly longer
-sleep-times for timed events when the clock is set to the past. See the
-man-page of “clock_gettime” on how to get a clock source id for a
-character-device such as /dev/ptp0. (default: CLOCK_MONOTONIC_RAW)*/</p>
-</div></blockquote>
+is provided. The configuration paramaters must be set before starting the
+EventLoop.</p>
+<p><strong>Clock configuration (Linux and BSDs only)</strong></p>
+<dl class="simple">
+<dt>0:clock-source [int32]</dt><dd><p>Clock source (default: CLOCK_REALTIME).</p>
+</dd>
+<dt>0:clock-source-monotonic [int32]:</dt><dd><p>Clock source used for time intervals. A non-monotonic source can be used as
+well. But expect accordingly longer sleep-times for timed events when the
+clock is set to the past. See the man-page of “clock_gettime” on how to get
+a clock source id for a character-device such as /dev/ptp0. (default:
+CLOCK_MONOTONIC_RAW)</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
+</pre></div>
+</div>
 <section id="tcp-connection-manager">
 <h3>TCP Connection Manager<a class="headerlink" href="#tcp-connection-manager" title="Link to this heading">¶</a></h3>
 <p>Listens on the network and manages TCP connections. This should be available
