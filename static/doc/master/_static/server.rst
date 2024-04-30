@@ -390,7 +390,12 @@ Certificate Password Callback
    };
    
    void
-   UA_ServerConfig_clean(UA_ServerConfig *config);
+   UA_ServerConfig_clear(UA_ServerConfig *config);
+   
+   UA_DEPRECATED static UA_INLINE void
+   UA_ServerConfig_clean(UA_ServerConfig *config) {
+   	UA_ServerConfig_clear(config);
+   }
    
 .. _server-lifecycle:
 
