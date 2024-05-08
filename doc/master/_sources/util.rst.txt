@@ -14,16 +14,22 @@ Range Definition
        UA_Duration max;
    } UA_DurationRange;
    
+   typedef struct {
+       const UA_Logger *logger;
+   } UA_EventFilterParserOptions;
+   
 Query Language Eventfilter
 @param content eventfilter query
 @param filter generated eventfilter
+@param options Can be NULL.
 
 .. code-block:: c
 
    #ifdef UA_ENABLE_PARSING
    #ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS
    UA_StatusCode
-   UA_EventFilter_parse(UA_EventFilter *filter, UA_ByteString *content);
+   UA_EventFilter_parse(UA_EventFilter *filter, UA_ByteString content,
+                        UA_EventFilterParserOptions *options);
    #endif
    #endif
    

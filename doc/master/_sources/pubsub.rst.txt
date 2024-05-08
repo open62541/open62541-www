@@ -43,61 +43,52 @@ The configuration model for PubSub uses the following components:
        UA_PUBSUB_COMPONENT_DATASETREADER
    } UA_PubSubComponentEnumType;
    
-The open62541 PubSub API uses the following scheme:
+The following figure shows how the PubSub components are related.
+The PubSub Tutorials have more examples about the API usage::
 
-1. Create a configuration for the needed PubSub element.
-
-2. Call the add[element] function and pass in the configuration.
-
-3. The add[element] function returns the unique nodeId of the internally created element.
-
-Take a look on the PubSub Tutorials for more details about the API usage::
-
- +-----------+
- | UA_Server |
- +-----------+
-  |    |
-  |    |
-  |    |
-  |    |  +----------------------+
-  |    +--> UA_PubSubConnection  |  UA_Server_addPubSubConnection
-  |       +----------------------+
-  |        |    |
-  |        |    |    +----------------+
-  |        |    +----> UA_WriterGroup |  UA_PubSubConnection_addWriterGroup
-  |        |         +----------------+
-  |        |              |
-  |        |              |    +------------------+
-  |        |              +----> UA_DataSetWriter |  UA_WriterGroup_addDataSetWriter     +-+
-  |        |                   +------------------+                                        |
-  |        |                                                                               |
-  |        |         +----------------+                                                    | r
-  |        +---------> UA_ReaderGroup |    UA_PubSubConnection_addReaderGroup              | e
-  |                  +----------------+                                                    | f
-  |                       |                                                                |
-  |                       |    +------------------+                                        |
-  |                       +----> UA_DataSetReader |  UA_ReaderGroup_addDataSetReader       |
-  |                            +------------------+                                        |
-  |                                 |                                                      |
-  |                                 |    +----------------------+                          |
-  |                                 +----> UA_SubscribedDataSet |                          |
-  |                                      +----------------------+                          |
-  |                                           |                                            |
-  |                                           |    +----------------------------+          |
-  |                                           +----> UA_TargetVariablesDataType |          |
-  |                                           |    +----------------------------+          |
-  |                                           |                                            |
-  |                                           |    +------------------------------------+  |
-  |                                           +----> UA_SubscribedDataSetMirrorDataType |  |
-  |                                                +------------------------------------+  |
-  |                                                                                        |
-  |       +---------------------------+                                                    |
-  +-------> UA_PubSubPublishedDataSet |  UA_Server_addPublishedDataSet                   <-+
-          +---------------------------+
-                |
-                |    +-----------------+
-                +----> UA_DataSetField |  UA_PublishedDataSet_addDataSetField
-                     +-----------------+
+ +--------+
+ | Server |
+ +--------+
+   |  |
+   |  |  +------------------------+
+   |  +--> PubSubPublishedDataSet <----------+
+   |     +------------------------+          |
+   |       |                                 |
+   |       |    +--------------+             |
+   |       +----> DataSetField |             |
+   |            +--------------+             |
+   |                                         |
+   |     +------------------+                |
+   +-----> PubSubConnection |                |
+         +------------------+                |
+           |  |                              |
+           |  |    +-------------+           |
+           |  +----> WriterGroup |           |
+           |       +-------------+           |
+           |         |                       |
+           |         |    +---------------+  |
+           |         +----> DataSetWriter <--+
+           |              +---------------+
+           |
+           |       +-------------+
+           +-------> ReaderGroup |
+                   +-------------+
+                     |
+                     |    +---------------+
+                     +----> DataSetReader |
+                          +---------------+
+                            |
+                            |    +-------------------+
+                            +----> SubscribedDataSet |
+                                 +-------------------+
+                                   |
+                                   |    +-------------------------+
+                                   +----> TargetVariablesDataType |
+                                   |    +-------------------------+
+                                   |
+                                   |    +---------------------------------+
+                                   +----> SubscribedDataSetMirrorDataType |
+                                        +---------------------------------+
 
 PubSub Information Model Representation
 ---------------------------------------
@@ -121,7 +112,15 @@ different transport protocols at runtime.
 .. code-block:: c
 
    
-   /* Valid PublisherId types from Part 14 */
+   /* Valid PublisherId types are defined in Part 14, 7.2.2.2.2 NetworkMessage
+    * Layout (bit range 0-2).
+    *
+    * - 000 Byte (default value if ExtendedFlags1 is omitted)
+    * - 001 UInt16
+    * - 010 UInt32
+    * - 011 UInt64
+    * - 100 String */
+   
    typedef enum {
        UA_PUBLISHERIDTYPE_BYTE   = 0,
        UA_PUBLISHERIDTYPE_UINT16 = 1,
@@ -130,28 +129,34 @@ different transport protocols at runtime.
        UA_PUBLISHERIDTYPE_STRING = 4
    } UA_PublisherIdType;
    
-   /* Publisher Id
-       Valid types are defined in Part 14, 7.2.2.2.2 NetworkMessage Layout:
-   
-       Bit range 0-2: PublisherId Type
-       000 The PublisherId is of DataType Byte This is the default value if ExtendedFlags1 is omitted
-       001 The PublisherId is of DataType UInt16
-       010 The PublisherId is of DataType UInt32
-       011 The PublisherId is of DataType UInt64
-       100 The PublisherId is of DataType String
-   */
-   typedef union {
-       UA_Byte byte;
-       UA_UInt16 uint16;
-       UA_UInt32 uint32;
-       UA_UInt64 uint64;
-       UA_String string;
+   typedef struct {
+       UA_PublisherIdType idType;
+       union {
+           UA_Byte byte;
+           UA_UInt16 uint16;
+           UA_UInt32 uint32;
+           UA_UInt64 uint64;
+           UA_String string;
+       } id;
    } UA_PublisherId;
+   
+   UA_StatusCode
+   UA_PublisherId_copy(const UA_PublisherId *src, UA_PublisherId *dst);
+   
+   void
+   UA_PublisherId_clear(UA_PublisherId *p);
+   
+   /* The variant must contain a scalar of the five possible identifier types */
+   UA_StatusCode
+   UA_PublisherId_fromVariant(UA_PublisherId *p, const UA_Variant *src);
+   
+   /* Makes a shallow copy (no malloc) in the variant */
+   void
+   UA_PublisherId_toVariant(const UA_PublisherId *p, UA_Variant *dst);
    
    typedef struct {
        UA_String name;
        UA_Boolean enabled;
-       UA_PublisherIdType publisherIdType;
        UA_PublisherId publisherId;
        UA_String transportProfileUri;
        UA_Variant address;
@@ -716,7 +721,7 @@ SubscribedDataSet and be contained within a ReaderGroup.
    /* Parameters for PubSub DataSetReader Configuration */
    typedef struct {
        UA_String name;
-       UA_Variant publisherId;
+       UA_PublisherId publisherId;
        UA_UInt16 writerGroupId;
        UA_UInt16 dataSetWriterId;
        UA_DataSetMetaDataType dataSetMetaData;
