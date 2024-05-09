@@ -36,6 +36,392 @@ TrustListDataType
         UA_ByteString *issuerCrls;
     } UA_TrustListDataType;
 
+SimpleTypeDescription
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_NodeId dataTypeId;
+        UA_QualifiedName name;
+        UA_NodeId baseDataType;
+        UA_Byte builtInType;
+    } UA_SimpleTypeDescription;
+
+PubSubState
+^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef enum {
+        UA_PUBSUBSTATE_DISABLED = 0,
+        UA_PUBSUBSTATE_PAUSED = 1,
+        UA_PUBSUBSTATE_OPERATIONAL = 2,
+        UA_PUBSUBSTATE_ERROR = 3,
+        UA_PUBSUBSTATE_PREOPERATIONAL = 4
+    } UA_PubSubState;
+
+DataSetFieldFlags
+^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt16 UA_DataSetFieldFlags;
+    
+    #define UA_DATASETFIELDFLAGS_NONE 0
+    #define UA_DATASETFIELDFLAGS_PROMOTEDFIELD 1
+
+ConfigurationVersionDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_UInt32 majorVersion;
+        UA_UInt32 minorVersion;
+    } UA_ConfigurationVersionDataType;
+
+PublishedVariableDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_NodeId publishedVariable;
+        UA_UInt32 attributeId;
+        UA_Double samplingIntervalHint;
+        UA_UInt32 deadbandType;
+        UA_Double deadbandValue;
+        UA_String indexRange;
+        UA_Variant substituteValue;
+        size_t metaDataPropertiesSize;
+        UA_QualifiedName *metaDataProperties;
+    } UA_PublishedVariableDataType;
+
+PublishedDataItemsDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        size_t publishedDataSize;
+        UA_PublishedVariableDataType *publishedData;
+    } UA_PublishedDataItemsDataType;
+
+DataSetFieldContentMask
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_DataSetFieldContentMask;
+    
+    #define UA_DATASETFIELDCONTENTMASK_NONE 0
+    #define UA_DATASETFIELDCONTENTMASK_STATUSCODE 1
+    #define UA_DATASETFIELDCONTENTMASK_SOURCETIMESTAMP 2
+    #define UA_DATASETFIELDCONTENTMASK_SERVERTIMESTAMP 4
+    #define UA_DATASETFIELDCONTENTMASK_SOURCEPICOSECONDS 8
+    #define UA_DATASETFIELDCONTENTMASK_SERVERPICOSECONDS 16
+    #define UA_DATASETFIELDCONTENTMASK_RAWDATA 32
+
+DataSetWriterDataType
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        UA_Boolean enabled;
+        UA_UInt16 dataSetWriterId;
+        UA_DataSetFieldContentMask dataSetFieldContentMask;
+        UA_UInt32 keyFrameCount;
+        UA_String dataSetName;
+        size_t dataSetWriterPropertiesSize;
+        UA_KeyValuePair *dataSetWriterProperties;
+        UA_ExtensionObject transportSettings;
+        UA_ExtensionObject messageSettings;
+    } UA_DataSetWriterDataType;
+
+NetworkAddressUrlDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String networkInterface;
+        UA_String url;
+    } UA_NetworkAddressUrlDataType;
+
+OverrideValueHandling
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef enum {
+        UA_OVERRIDEVALUEHANDLING_DISABLED = 0,
+        UA_OVERRIDEVALUEHANDLING_LASTUSABLEVALUE = 1,
+        UA_OVERRIDEVALUEHANDLING_OVERRIDEVALUE = 2
+    } UA_OverrideValueHandling;
+
+DataSetOrderingType
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef enum {
+        UA_DATASETORDERINGTYPE_UNDEFINED = 0,
+        UA_DATASETORDERINGTYPE_ASCENDINGWRITERID = 1,
+        UA_DATASETORDERINGTYPE_ASCENDINGWRITERIDSINGLE = 2
+    } UA_DataSetOrderingType;
+
+UadpNetworkMessageContentMask
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_UadpNetworkMessageContentMask;
+    
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_NONE 0
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_PUBLISHERID 1
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_GROUPHEADER 2
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_WRITERGROUPID 4
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_GROUPVERSION 8
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_NETWORKMESSAGENUMBER 16
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_SEQUENCENUMBER 32
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER 64
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_TIMESTAMP 128
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_PICOSECONDS 256
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_DATASETCLASSID 512
+    #define UA_UADPNETWORKMESSAGECONTENTMASK_PROMOTEDFIELDS 1024
+
+UadpWriterGroupMessageDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_UInt32 groupVersion;
+        UA_DataSetOrderingType dataSetOrdering;
+        UA_UadpNetworkMessageContentMask networkMessageContentMask;
+        UA_Double samplingOffset;
+        size_t publishingOffsetSize;
+        UA_Double *publishingOffset;
+    } UA_UadpWriterGroupMessageDataType;
+
+UadpDataSetMessageContentMask
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_UadpDataSetMessageContentMask;
+    
+    #define UA_UADPDATASETMESSAGECONTENTMASK_NONE 0
+    #define UA_UADPDATASETMESSAGECONTENTMASK_TIMESTAMP 1
+    #define UA_UADPDATASETMESSAGECONTENTMASK_PICOSECONDS 2
+    #define UA_UADPDATASETMESSAGECONTENTMASK_STATUS 4
+    #define UA_UADPDATASETMESSAGECONTENTMASK_MAJORVERSION 8
+    #define UA_UADPDATASETMESSAGECONTENTMASK_MINORVERSION 16
+    #define UA_UADPDATASETMESSAGECONTENTMASK_SEQUENCENUMBER 32
+
+UadpDataSetWriterMessageDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_UadpDataSetMessageContentMask dataSetMessageContentMask;
+        UA_UInt16 configuredSize;
+        UA_UInt16 networkMessageNumber;
+        UA_UInt16 dataSetOffset;
+    } UA_UadpDataSetWriterMessageDataType;
+
+UadpDataSetReaderMessageDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_UInt32 groupVersion;
+        UA_UInt16 networkMessageNumber;
+        UA_UInt16 dataSetOffset;
+        UA_Guid dataSetClassId;
+        UA_UadpNetworkMessageContentMask networkMessageContentMask;
+        UA_UadpDataSetMessageContentMask dataSetMessageContentMask;
+        UA_Double publishingInterval;
+        UA_Double receiveOffset;
+        UA_Double processingOffset;
+    } UA_UadpDataSetReaderMessageDataType;
+
+JsonNetworkMessageContentMask
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_JsonNetworkMessageContentMask;
+    
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_NONE 0
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_NETWORKMESSAGEHEADER 1
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_DATASETMESSAGEHEADER 2
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_SINGLEDATASETMESSAGE 4
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_PUBLISHERID 8
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_DATASETCLASSID 16
+    #define UA_JSONNETWORKMESSAGECONTENTMASK_REPLYTO 32
+
+JsonWriterGroupMessageDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_JsonNetworkMessageContentMask networkMessageContentMask;
+    } UA_JsonWriterGroupMessageDataType;
+
+JsonDataSetMessageContentMask
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_JsonDataSetMessageContentMask;
+    
+    #define UA_JSONDATASETMESSAGECONTENTMASK_NONE 0
+    #define UA_JSONDATASETMESSAGECONTENTMASK_DATASETWRITERID 1
+    #define UA_JSONDATASETMESSAGECONTENTMASK_METADATAVERSION 2
+    #define UA_JSONDATASETMESSAGECONTENTMASK_SEQUENCENUMBER 4
+    #define UA_JSONDATASETMESSAGECONTENTMASK_TIMESTAMP 8
+    #define UA_JSONDATASETMESSAGECONTENTMASK_STATUS 16
+    #define UA_JSONDATASETMESSAGECONTENTMASK_MESSAGETYPE 32
+    #define UA_JSONDATASETMESSAGECONTENTMASK_DATASETWRITERNAME 64
+    #define UA_JSONDATASETMESSAGECONTENTMASK_REVERSIBLEFIELDENCODING 128
+
+JsonDataSetWriterMessageDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_JsonDataSetMessageContentMask dataSetMessageContentMask;
+    } UA_JsonDataSetWriterMessageDataType;
+
+JsonDataSetReaderMessageDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_JsonNetworkMessageContentMask networkMessageContentMask;
+        UA_JsonDataSetMessageContentMask dataSetMessageContentMask;
+    } UA_JsonDataSetReaderMessageDataType;
+
+DatagramConnectionTransportDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_ExtensionObject discoveryAddress;
+    } UA_DatagramConnectionTransportDataType;
+
+DatagramConnectionTransport2DataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_ExtensionObject discoveryAddress;
+        UA_UInt32 discoveryAnnounceRate;
+        UA_UInt32 discoveryMaxMessageSize;
+        UA_String qosCategory;
+        size_t datagramQosSize;
+        UA_ExtensionObject *datagramQos;
+    } UA_DatagramConnectionTransport2DataType;
+
+DatagramWriterGroupTransportDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_Byte messageRepeatCount;
+        UA_Double messageRepeatDelay;
+    } UA_DatagramWriterGroupTransportDataType;
+
+DatagramWriterGroupTransport2DataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_Byte messageRepeatCount;
+        UA_Double messageRepeatDelay;
+        UA_ExtensionObject address;
+        UA_String qosCategory;
+        size_t datagramQosSize;
+        UA_ExtensionObject *datagramQos;
+        UA_UInt32 discoveryAnnounceRate;
+        UA_String topic;
+    } UA_DatagramWriterGroupTransport2DataType;
+
+BrokerConnectionTransportDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String resourceUri;
+        UA_String authenticationProfileUri;
+    } UA_BrokerConnectionTransportDataType;
+
+BrokerTransportQualityOfService
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef enum {
+        UA_BROKERTRANSPORTQUALITYOFSERVICE_NOTSPECIFIED = 0,
+        UA_BROKERTRANSPORTQUALITYOFSERVICE_BESTEFFORT = 1,
+        UA_BROKERTRANSPORTQUALITYOFSERVICE_ATLEASTONCE = 2,
+        UA_BROKERTRANSPORTQUALITYOFSERVICE_ATMOSTONCE = 3,
+        UA_BROKERTRANSPORTQUALITYOFSERVICE_EXACTLYONCE = 4
+    } UA_BrokerTransportQualityOfService;
+
+BrokerWriterGroupTransportDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String queueName;
+        UA_String resourceUri;
+        UA_String authenticationProfileUri;
+        UA_BrokerTransportQualityOfService requestedDeliveryGuarantee;
+    } UA_BrokerWriterGroupTransportDataType;
+
+BrokerDataSetWriterTransportDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String queueName;
+        UA_String resourceUri;
+        UA_String authenticationProfileUri;
+        UA_BrokerTransportQualityOfService requestedDeliveryGuarantee;
+        UA_String metaDataQueueName;
+        UA_Double metaDataUpdateTime;
+    } UA_BrokerDataSetWriterTransportDataType;
+
+BrokerDataSetReaderTransportDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String queueName;
+        UA_String resourceUri;
+        UA_String authenticationProfileUri;
+        UA_BrokerTransportQualityOfService requestedDeliveryGuarantee;
+        UA_String metaDataQueueName;
+    } UA_BrokerDataSetReaderTransportDataType;
+
 NodeClass
 ^^^^^^^^^
 
@@ -52,6 +438,42 @@ NodeClass
         UA_NODECLASS_DATATYPE = 64,
         UA_NODECLASS_VIEW = 128
     } UA_NodeClass;
+
+PermissionType
+^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_PermissionType;
+    
+    #define UA_PERMISSIONTYPE_NONE 0
+    #define UA_PERMISSIONTYPE_BROWSE 1
+    #define UA_PERMISSIONTYPE_READROLEPERMISSIONS 2
+    #define UA_PERMISSIONTYPE_WRITEATTRIBUTE 4
+    #define UA_PERMISSIONTYPE_WRITEROLEPERMISSIONS 8
+    #define UA_PERMISSIONTYPE_WRITEHISTORIZING 16
+    #define UA_PERMISSIONTYPE_READ 32
+    #define UA_PERMISSIONTYPE_WRITE 64
+    #define UA_PERMISSIONTYPE_READHISTORY 128
+    #define UA_PERMISSIONTYPE_INSERTHISTORY 256
+    #define UA_PERMISSIONTYPE_MODIFYHISTORY 512
+    #define UA_PERMISSIONTYPE_DELETEHISTORY 1024
+    #define UA_PERMISSIONTYPE_RECEIVEEVENTS 2048
+    #define UA_PERMISSIONTYPE_CALL 4096
+    #define UA_PERMISSIONTYPE_ADDREFERENCE 8192
+    #define UA_PERMISSIONTYPE_REMOVEREFERENCE 16384
+    #define UA_PERMISSIONTYPE_DELETENODE 32768
+    #define UA_PERMISSIONTYPE_ADDNODE 65536
+
+RolePermissionType
+^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_NodeId roleId;
+        UA_PermissionType permissions;
+    } UA_RolePermissionType;
 
 StructureType
 ^^^^^^^^^^^^^
@@ -162,6 +584,13 @@ TimeZoneDataType
         UA_Int16 offset;
         UA_Boolean daylightSavingInOffset;
     } UA_TimeZoneDataType;
+
+IntegerId
+^^^^^^^^^
+
+.. code-block:: c
+
+    typedef UA_UInt32 UA_IntegerId;
 
 ApplicationType
 ^^^^^^^^^^^^^^^
@@ -2468,6 +2897,103 @@ XVType
         UA_Float value;
     } UA_XVType;
 
+StructureDescription
+^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_NodeId dataTypeId;
+        UA_QualifiedName name;
+        UA_StructureDefinition structureDefinition;
+    } UA_StructureDescription;
+
+FieldMetaData
+^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        UA_LocalizedText description;
+        UA_DataSetFieldFlags fieldFlags;
+        UA_Byte builtInType;
+        UA_NodeId dataType;
+        UA_Int32 valueRank;
+        size_t arrayDimensionsSize;
+        UA_UInt32 *arrayDimensions;
+        UA_UInt32 maxStringLength;
+        UA_Guid dataSetFieldId;
+        size_t propertiesSize;
+        UA_KeyValuePair *properties;
+    } UA_FieldMetaData;
+
+PublishedEventsDataType
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_NodeId eventNotifier;
+        size_t selectedFieldsSize;
+        UA_SimpleAttributeOperand *selectedFields;
+        UA_ContentFilter filter;
+    } UA_PublishedEventsDataType;
+
+WriterGroupDataType
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        UA_Boolean enabled;
+        UA_MessageSecurityMode securityMode;
+        UA_String securityGroupId;
+        size_t securityKeyServicesSize;
+        UA_EndpointDescription *securityKeyServices;
+        UA_UInt32 maxNetworkMessageSize;
+        size_t groupPropertiesSize;
+        UA_KeyValuePair *groupProperties;
+        UA_UInt16 writerGroupId;
+        UA_Double publishingInterval;
+        UA_Double keepAliveTime;
+        UA_Byte priority;
+        size_t localeIdsSize;
+        UA_String *localeIds;
+        UA_String headerLayoutUri;
+        UA_ExtensionObject transportSettings;
+        UA_ExtensionObject messageSettings;
+        size_t dataSetWritersSize;
+        UA_DataSetWriterDataType *dataSetWriters;
+    } UA_WriterGroupDataType;
+
+FieldTargetDataType
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_Guid dataSetFieldId;
+        UA_String receiverIndexRange;
+        UA_NodeId targetNodeId;
+        UA_UInt32 attributeId;
+        UA_String writeIndexRange;
+        UA_OverrideValueHandling overrideValueHandling;
+        UA_Variant overrideValue;
+    } UA_FieldTargetDataType;
+
+SubscribedDataSetMirrorDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String parentNodeName;
+        size_t rolePermissionsSize;
+        UA_RolePermissionType *rolePermissions;
+    } UA_SubscribedDataSetMirrorDataType;
+
 EnumDefinition
 ^^^^^^^^^^^^^^
 
@@ -2610,4 +3136,164 @@ SessionDiagnosticsDataType
         UA_ServiceCounterDataType registerNodesCount;
         UA_ServiceCounterDataType unregisterNodesCount;
     } UA_SessionDiagnosticsDataType;
+
+EnumDescription
+^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_NodeId dataTypeId;
+        UA_QualifiedName name;
+        UA_EnumDefinition enumDefinition;
+        UA_Byte builtInType;
+    } UA_EnumDescription;
+
+UABinaryFileDataType
+^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        size_t namespacesSize;
+        UA_String *namespaces;
+        size_t structureDataTypesSize;
+        UA_StructureDescription *structureDataTypes;
+        size_t enumDataTypesSize;
+        UA_EnumDescription *enumDataTypes;
+        size_t simpleDataTypesSize;
+        UA_SimpleTypeDescription *simpleDataTypes;
+        UA_String schemaLocation;
+        size_t fileHeaderSize;
+        UA_KeyValuePair *fileHeader;
+        UA_Variant body;
+    } UA_UABinaryFileDataType;
+
+DataSetMetaDataType
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        size_t namespacesSize;
+        UA_String *namespaces;
+        size_t structureDataTypesSize;
+        UA_StructureDescription *structureDataTypes;
+        size_t enumDataTypesSize;
+        UA_EnumDescription *enumDataTypes;
+        size_t simpleDataTypesSize;
+        UA_SimpleTypeDescription *simpleDataTypes;
+        UA_String name;
+        UA_LocalizedText description;
+        size_t fieldsSize;
+        UA_FieldMetaData *fields;
+        UA_Guid dataSetClassId;
+        UA_ConfigurationVersionDataType configurationVersion;
+    } UA_DataSetMetaDataType;
+
+PublishedDataSetDataType
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        size_t dataSetFolderSize;
+        UA_String *dataSetFolder;
+        UA_DataSetMetaDataType dataSetMetaData;
+        size_t extensionFieldsSize;
+        UA_KeyValuePair *extensionFields;
+        UA_ExtensionObject dataSetSource;
+    } UA_PublishedDataSetDataType;
+
+DataSetReaderDataType
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        UA_Boolean enabled;
+        UA_Variant publisherId;
+        UA_UInt16 writerGroupId;
+        UA_UInt16 dataSetWriterId;
+        UA_DataSetMetaDataType dataSetMetaData;
+        UA_DataSetFieldContentMask dataSetFieldContentMask;
+        UA_Double messageReceiveTimeout;
+        UA_UInt32 keyFrameCount;
+        UA_String headerLayoutUri;
+        UA_MessageSecurityMode securityMode;
+        UA_String securityGroupId;
+        size_t securityKeyServicesSize;
+        UA_EndpointDescription *securityKeyServices;
+        size_t dataSetReaderPropertiesSize;
+        UA_KeyValuePair *dataSetReaderProperties;
+        UA_ExtensionObject transportSettings;
+        UA_ExtensionObject messageSettings;
+        UA_ExtensionObject subscribedDataSet;
+    } UA_DataSetReaderDataType;
+
+TargetVariablesDataType
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        size_t targetVariablesSize;
+        UA_FieldTargetDataType *targetVariables;
+    } UA_TargetVariablesDataType;
+
+ReaderGroupDataType
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        UA_Boolean enabled;
+        UA_MessageSecurityMode securityMode;
+        UA_String securityGroupId;
+        size_t securityKeyServicesSize;
+        UA_EndpointDescription *securityKeyServices;
+        UA_UInt32 maxNetworkMessageSize;
+        size_t groupPropertiesSize;
+        UA_KeyValuePair *groupProperties;
+        UA_ExtensionObject transportSettings;
+        UA_ExtensionObject messageSettings;
+        size_t dataSetReadersSize;
+        UA_DataSetReaderDataType *dataSetReaders;
+    } UA_ReaderGroupDataType;
+
+PubSubConnectionDataType
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        UA_String name;
+        UA_Boolean enabled;
+        UA_Variant publisherId;
+        UA_String transportProfileUri;
+        UA_ExtensionObject address;
+        size_t connectionPropertiesSize;
+        UA_KeyValuePair *connectionProperties;
+        UA_ExtensionObject transportSettings;
+        size_t writerGroupsSize;
+        UA_WriterGroupDataType *writerGroups;
+        size_t readerGroupsSize;
+        UA_ReaderGroupDataType *readerGroups;
+    } UA_PubSubConnectionDataType;
+
+PubSubConfigurationDataType
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef struct {
+        size_t publishedDataSetsSize;
+        UA_PublishedDataSetDataType *publishedDataSets;
+        size_t connectionsSize;
+        UA_PubSubConnectionDataType *connections;
+        UA_Boolean enabled;
+    } UA_PubSubConfigurationDataType;
 
