@@ -19,6 +19,20 @@ KeyValuePair
         UA_Variant value;
     } UA_KeyValuePair;
 
+TrustListMasks
+^^^^^^^^^^^^^^
+
+.. code-block:: c
+
+    typedef enum {
+        UA_TRUSTLISTMASKS_NONE = 0,
+        UA_TRUSTLISTMASKS_TRUSTEDCERTIFICATES = 1,
+        UA_TRUSTLISTMASKS_TRUSTEDCRLS = 2,
+        UA_TRUSTLISTMASKS_ISSUERCERTIFICATES = 4,
+        UA_TRUSTLISTMASKS_ISSUERCRLS = 8,
+        UA_TRUSTLISTMASKS_ALL = 15
+    } UA_TrustListMasks;
+
 TrustListDataType
 ^^^^^^^^^^^^^^^^^
 

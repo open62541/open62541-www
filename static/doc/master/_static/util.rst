@@ -392,3 +392,20 @@ Cryptography Helpers
     * freed. */
    void
    UA_ByteString_memZero(UA_ByteString *bs);
+   
+Trustlist Helpers
+--------------------
+
+.. code-block:: c
+
+   
+   UA_StatusCode
+   UA_TrustListDataType_add(const UA_TrustListDataType *src, UA_TrustListDataType *dst);
+   
+   UA_StatusCode
+   UA_TrustListDataType_remove(const UA_TrustListDataType *src, UA_TrustListDataType *dst);
+   
+   UA_Boolean
+   UA_TrustListDataType_contains(const UA_TrustListDataType *trustList,
+                                 const UA_ByteString *certificate,
+                                 UA_TrustListMasks mask);
