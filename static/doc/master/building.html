@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Building open62541 &mdash; open62541 1.4.0-undefined documentation</title>
+  <title>Building open62541 &mdash; open62541 1.4.1-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
@@ -14,7 +14,7 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/documentation_options.js?v=e2e84c5f"></script>
+        <script src="_static/documentation_options.js?v=cebbca66"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -57,7 +57,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#building-on-os-x">Building on OS X</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-on-openbsd">Building on OpenBSD</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#cmake-build-options-and-debian-packaging">CMake Build Options and Debian Packaging</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#build-options">Build Options</a><ul>
@@ -152,7 +151,7 @@ to use open62541 as a shared library (.dll or .so) make sure to activate the
 <code class="docutils literal notranslate"><span class="pre">BUILD_SHARED_LIBS</span></code> CMake option.</p>
 <p>To override the default installation directory use <code class="docutils literal notranslate"><span class="pre">cmake</span>
 <span class="pre">-DCMAKE_INSTALL_PREFIX=/some/path</span></code>. Based on the SDK Features you selected, as
-described in <a class="reference internal" href="#build-options"><span class="std std-ref">Build Options</span></a>, these features will also be included in the
+described in <span class="xref std std-ref">build_options</span>, these features will also be included in the
 installation. Thus we recommend to enable as many non-experimental features as
 possible for the installed binary.</p>
 <p>In your own CMake project you can then include the open62541 library. A simple
@@ -250,71 +249,21 @@ make
 </section>
 <section id="building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">
 <h3>Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian<a class="headerlink" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian" title="Link to this heading">¶</a></h3>
-<p>Here is an example howto build the library as Debian package inside a Docker container</p>
-<ul class="simple">
-<li><p>Download and install</p>
-<ul>
-<li><p>Docker Engine: <a class="reference external" href="https://docs.docker.com/install/linux/docker-ce/debian/">https://docs.docker.com/install/linux/docker-ce/debian/</a></p></li>
-<li><p>docker-deb-builder: <a class="reference external" href="https://github.com/tsaarni/docker-deb-builder.git">https://github.com/tsaarni/docker-deb-builder.git</a></p></li>
-<li><p>open62541: <a class="reference external" href="https://github.com/open62541/open62541.git">https://github.com/open62541/open62541.git</a></p></li>
-</ul>
-</li>
-</ul>
-<p>Install Docker as described at <a class="reference external" href="https://docs.docker.com/install/linux/docker-ce/debian/">https://docs.docker.com/install/linux/docker-ce/debian/</a> .</p>
-<p>Get the docker-deb-builder utility from github and make Docker images for the needed
-Debian and/or Ubuntu relases</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># make and goto local development path (e.g. ~/development)</span>
-mkdir<span class="w"> </span>~/development
-<span class="nb">cd</span><span class="w"> </span>~/development
-
-<span class="c1"># clone docker-deb-builder utility from github and change into builder directory</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/tsaarni/docker-deb-builder.git
-<span class="nb">cd</span><span class="w"> </span>docker-deb-builder
-
-<span class="c1"># make Docker builder images (e.g. Ubuntu 18.04 and 17.04)</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>docker-deb-builder:18.04<span class="w"> </span>-f<span class="w"> </span>Dockerfile-ubuntu-18.04<span class="w"> </span>.
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>docker-deb-builder:17.04<span class="w"> </span>-f<span class="w"> </span>Dockerfile-ubuntu-17.04<span class="w"> </span>.
-</pre></div>
-</div>
-<p>Make a local copy of the open62541 git repo and checkout a pack branch</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># make a local copy of the open62541 git repo (e.g. in the home directory)</span>
-<span class="c1"># and checkout a pack branch (e.g. pack/1.0)</span>
-<span class="nb">cd</span><span class="w"> </span>~
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/open62541/open62541.git
+<p>This is how to build the Debian packages.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assume a fresh checkout of open62541 in the ~/open62541 directory</span>
 <span class="nb">cd</span><span class="w"> </span>~/open62541
-git<span class="w"> </span>checkout<span class="w"> </span>pack/1.0
-</pre></div>
-</div>
-<p>Now it’s all set to build Debian/Ubuntu open62541 packages</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># goto local developmet path</span>
-<span class="nb">cd</span><span class="w"> </span>~/development
 
-<span class="c1"># make a local output directory for the builder where the packages can be placed after build</span>
-mkdir<span class="w"> </span>output
+<span class="c1"># Create the debian packaging definitions</span>
+python3<span class="w"> </span>./tools/prepare_packaging.py
 
-<span class="c1"># build Debian/Ubuntu packages inside Docker container (e.g. Ubuntu-18.04)</span>
-./build<span class="w"> </span>-i<span class="w"> </span>docker-deb-builder:18.04<span class="w"> </span>-o<span class="w"> </span>output<span class="w"> </span>~/open62541
+<span class="c1"># Build the package (generated packages and source will be in the ~ folder)</span>
+debuild
 </pre></div>
 </div>
-<p>After a successfull build the Debian/Ubuntu packages can be found at <code class="file docutils literal notranslate"><span class="pre">~/development/docker-deb-builder/output</span></code></p>
-</section>
-<section id="cmake-build-options-and-debian-packaging">
-<h3>CMake Build Options and Debian Packaging<a class="headerlink" href="#cmake-build-options-and-debian-packaging" title="Link to this heading">¶</a></h3>
-<p>If the open62541 library will be build as a Debian package using a pack branch (e.g. pack/master or pack/1.0)
-then altering or adding CMake build options should be done inside the <code class="file docutils literal notranslate"><span class="pre">debian/rules</span></code> file respectively in
-the <code class="file docutils literal notranslate"><span class="pre">debian/rules-template</span></code> file if working with a development branch (e.g. master or 1.0).</p>
-<p>The section in <code class="file docutils literal notranslate"><span class="pre">debian/rules</span></code> where the CMake build options are defined is</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>...
-override_dh_auto_configure:
-<span class="w">    </span>dh_auto_configure<span class="w"> </span>--<span class="w"> </span>-DBUILD_SHARED_LIBS<span class="o">=</span>ON<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>RelWithDebInfo<span class="w"> </span>-DUA_NAMESPACE_ZERO<span class="o">=</span>FULL<span class="w"> </span>-DUA_ENABLE_AMALGAMATION<span class="o">=</span>OFF<span class="w"> </span>-DUA_PACK_DEBIAN<span class="o">=</span>ON
-...
-</pre></div>
-</div>
-<p>This CMake build options will be passed as command line variables to CMake during Debian packaging.</p>
 </section>
 </section>
 <section id="build-options">
-<span id="id1"></span><h2>Build Options<a class="headerlink" href="#build-options" title="Link to this heading">¶</a></h2>
+<h2>Build Options<a class="headerlink" href="#build-options" title="Link to this heading">¶</a></h2>
 <p>The open62541 project uses CMake to manage the build options, for code
 generation and to generate build projects for the different systems and IDEs.
 The tools <em>ccmake</em> or <em>cmake-gui</em> can be used to graphically set the build
@@ -537,7 +486,7 @@ sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w
 <div><ul class="simple">
 <li><p>Stable Builds: <a class="reference external" href="https://aur.archlinux.org/packages/open62541/">https://aur.archlinux.org/packages/open62541/</a></p></li>
 <li><p>Unstable Builds (current master): <a class="reference external" href="https://aur.archlinux.org/packages/open62541-git/">https://aur.archlinux.org/packages/open62541-git/</a></p></li>
-<li><p>In order to add custom build options (<a class="reference internal" href="#build-options"><span class="std std-ref">Build Options</span></a>), you can set the environment variable <code class="docutils literal notranslate"><span class="pre">OPEN62541_CMAKE_FLAGS</span></code></p></li>
+<li><p>In order to add custom build options (<span class="xref std std-ref">build_options</span>), you can set the environment variable <code class="docutils literal notranslate"><span class="pre">OPEN62541_CMAKE_FLAGS</span></code></p></li>
 </ul>
 </div></blockquote>
 </section>
