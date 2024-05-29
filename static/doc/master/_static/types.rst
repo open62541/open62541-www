@@ -1204,8 +1204,6 @@ The following functions are used for generic handling of data types.
     * @param type The datatype description of the variable */
    void UA_clear(void *p, const UA_DataType *type);
    
-   #define UA_deleteMembers(p, type) UA_clear(p, type)
-   
    /* Frees a variable and all of its content.
     *
     * @param p The memory location of the variable
