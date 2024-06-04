@@ -237,6 +237,12 @@ Limits
        /* Limits for Requests */
        UA_UInt32 maxReferencesPerNode;
    
+   #ifdef UA_ENABLE_ENCRYPTION
+       /* Limits for TrustList */
+       UA_UInt32 maxTrustListSize; /* in bytes, 0 => unlimited */
+       UA_UInt32 maxRejectedListSize; /* 0 => unlimited */
+   #endif
+   
 Async Operations
 ^^^^^^^^^^^^^^^^
 See the section for :ref:`async operations<async-operations>`.

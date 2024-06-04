@@ -399,13 +399,22 @@ Trustlist Helpers
 .. code-block:: c
 
    
+   /* Adds all of the certificates from the src trusted list to the dst trusted list. */
    UA_StatusCode
    UA_TrustListDataType_add(const UA_TrustListDataType *src, UA_TrustListDataType *dst);
    
+   /* Removes all of the certificates from the dst trust list that are specified
+    * in the src trust list. */
    UA_StatusCode
    UA_TrustListDataType_remove(const UA_TrustListDataType *src, UA_TrustListDataType *dst);
    
+   /* Checks if the certificate is present in the trust list.
+    * The mask parameter can be used to specify the part of the trust list to check. */
    UA_Boolean
    UA_TrustListDataType_contains(const UA_TrustListDataType *trustList,
                                  const UA_ByteString *certificate,
                                  UA_TrustListMasks mask);
+   
+   /* Returns the size of the TrustList in bytes. */
+   UA_UInt32
+   UA_TrustListDataType_getSize(const UA_TrustListDataType *trustList);
