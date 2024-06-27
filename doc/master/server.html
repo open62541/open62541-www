@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 1.4.0-rc2 documentation</title>
+  <title>Server &mdash; open62541 1.4.1-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
@@ -14,7 +14,7 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/documentation_options.js?v=f751e407"></script>
+        <script src="_static/documentation_options.js?v=cebbca66"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#alarms-conditions-experimental">Alarms &amp; Conditions (Experimental)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#update-the-server-certificate-at-runtime">Update the Server Certificate at Runtime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creates-a-pkcs-10-der-encoded-certificate-request-signed-with-the-server-s-private-key">Creates a PKCS #10 DER encoded certificate request signed with the server’s private key</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id8">Async Operations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
@@ -322,26 +323,32 @@ ModellingRule of their InstanceDeclaration</p>
 </section>
 <section id="limits">
 <h3>Limits<a class="headerlink" href="#limits" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Limits for SecureChannels */</span>
-<span class="n">UA_UInt16</span><span class="w"> </span><span class="n">maxSecureChannels</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxSecurityTokenLifetime</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in ms */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="cm">/* Limits for SecureChannels */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">maxSecureChannels</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxSecurityTokenLifetime</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in ms */</span>
 
-<span class="cm">/* Limits for Sessions */</span>
-<span class="n">UA_UInt16</span><span class="w"> </span><span class="n">maxSessions</span><span class="p">;</span>
-<span class="n">UA_Double</span><span class="w"> </span><span class="n">maxSessionTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in ms */</span>
+<span class="w">    </span><span class="cm">/* Limits for Sessions */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">maxSessions</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">maxSessionTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in ms */</span>
 
-<span class="cm">/* Operation limits */</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerRead</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerWrite</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerMethodCall</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerBrowse</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerRegisterNodes</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerTranslateBrowsePathsToNodeIds</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerNodeManagement</span><span class="p">;</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxMonitoredItemsPerCall</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Operation limits */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerRead</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerWrite</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerMethodCall</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerBrowse</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerRegisterNodes</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerTranslateBrowsePathsToNodeIds</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNodesPerNodeManagement</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxMonitoredItemsPerCall</span><span class="p">;</span>
 
-<span class="cm">/* Limits for Requests */</span>
-<span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxReferencesPerNode</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Limits for Requests */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxReferencesPerNode</span><span class="p">;</span>
+
+<span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
+<span class="w">    </span><span class="cm">/* Limits for TrustList */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxTrustListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in bytes, 0 =&gt; unlimited */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxRejectedListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -1962,6 +1969,19 @@ would cause the node to be deleted.</p>
 <span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">newPrivateKey</span><span class="p">,</span>
 <span class="w">                            </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">closeSessions</span><span class="p">,</span>
 <span class="w">                            </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">closeSecureChannels</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="creates-a-pkcs-10-der-encoded-certificate-request-signed-with-the-server-s-private-key">
+<h2>Creates a PKCS #10 DER encoded certificate request signed with the server’s private key<a class="headerlink" href="#creates-a-pkcs-10-der-encoded-certificate-request-signed-with-the-server-s-private-key" title="Link to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_createSigningRequest</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">subjectName</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">regenerateKey</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">csr</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

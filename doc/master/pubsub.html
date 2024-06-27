@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PubSub &mdash; open62541 1.4.0-rc2 documentation</title>
+  <title>PubSub &mdash; open62541 1.4.1-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
@@ -14,7 +14,7 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/documentation_options.js?v=f751e407"></script>
+        <script src="_static/documentation_options.js?v=cebbca66"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -536,30 +536,34 @@ contained in the WriterGroup.</p>
 <h2>WriterGroup<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
 <p>The message publishing can be configured for realtime requirements. The RT-levels
 go along with different requirements. The below listed levels can be configured:</p>
-<p>UA_PUBSUB_RT_NONE -
-—&gt; Description: Default “none-RT” Mode
-—&gt; Requirements: -
-—&gt; Restrictions: -
-UA_PUBSUB_RT_DIRECT_VALUE_ACCESS (Preview - not implemented)
-—&gt; Description: Normally, the latest value for each DataSetField is read out of the information model. Within this RT-mode, the
-value source of each field configured as static pointer to an DataValue. The publish cycle won’t use call the server read function.
-—&gt; Requirements: All fields must be configured with a ‘staticValueSource’.
-—&gt; Restrictions: -
-UA_PUBSUB_RT_FIXED_LENGTH (Preview - not implemented)
-—&gt; Description: All DataSetFields have a known, non-changing length. The server will pre-generate some
-buffers and use only memcopy operations to generate requested PubSub packages.
-—&gt; Requirements: DataSetFields with variable size cannot be used within this mode.
-—&gt; Restrictions: The configuration must be frozen and changes are not allowed while the WriterGroup is ‘Operational’.
-UA_PUBSUB_RT_DETERMINISTIC (Preview - not implemented)
-—&gt; Description: -
-—&gt; Requirements: -
-—&gt; Restrictions: -</p>
-<p>WARNING! For hard real time requirements the underlying system must be rt-capable.</p>
+<dl class="simple">
+<dt>UA_PUBSUB_RT_NONE</dt><dd><p>No realtime-specific configuration.</p>
+</dd>
+<dt>UA_PUBSUB_RT_DIRECT_VALUE_ACCESS</dt><dd><p>All PublishedDataSets need to point to a variable with a
+<code class="docutils literal notranslate"><span class="pre">UA_VALUEBACKENDTYPE_EXTERNAL</span></code> value backend. The value backend gets
+cached when the configuration is frozen. No lookup of the variable from
+the information is performed afterwards. This enables also big data
+structures to be updated atomically with a compare-and-switch operation on
+the <code class="docutils literal notranslate"><span class="pre">UA_DataValue</span></code> double-pointer in the backend.</p>
+</dd>
+<dt>UA_PUBSUB_RT_FIXED_SIZE</dt><dd><p>Validate that the message constains only fields with a known size.
+Then the message fields have fixed offsets that are known ahead of time.</p>
+</dd>
+<dt>UA_PUBSUB_RT_DETERMINISTIC</dt><dd><p>Both direct-access and fixed-size is being used. The server pre-allocates
+buffers when the configuration is frozen and uses only memcpy operations
+to update the PubSub network messages for sending.</p>
+</dd>
+</dl>
+<p>WARNING! For hard real time requirements the underlying system must be
+RT-capable. Also note that each PubSubConnection can have a dedicated
+EventLoop. That way normal client/server operations can run independently
+from PubSub. The double-pointer in the <code class="docutils literal notranslate"><span class="pre">UA_VALUEBACKENDTYPE_EXTERNAL</span></code> value
+backend allows avoid race-condition with non-blocking atomic operations.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_PUBSUB_RT_NONE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_PUBSUB_RT_DIRECT_VALUE_ACCESS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_PUBSUB_RT_FIXED_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_DETERMINISTIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUB_RT_DETERMINISTIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubRTLevel</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>

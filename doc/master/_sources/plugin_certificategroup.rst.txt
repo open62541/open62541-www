@@ -11,7 +11,6 @@
    #define UA_PLUGIN_CERTIFICATEGROUP_H
    
    #include <open62541/types.h>
-   #include <open62541/types_generated.h>
    #include <open62541/plugin/log.h>
    
    _UA_BEGIN_DECLS
@@ -60,6 +59,10 @@
    UA_StatusCode
    UA_CertificateUtils_getThumbprint(UA_ByteString *certificate,
                                      UA_String *thumbprint);
+   
+   UA_StatusCode
+   UA_CertificateUtils_getKeySize(UA_ByteString *certificate,
+                                  size_t *keySize);
    
    /* Decrypt a private key in PEM format using a password. The output is the key
     * in the binary DER format. Also succeeds if the PEM private key does not

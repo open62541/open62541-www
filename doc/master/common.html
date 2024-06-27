@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Common Definitions &mdash; open62541 1.4.0-rc2 documentation</title>
+  <title>Common Definitions &mdash; open62541 1.4.1-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
@@ -14,7 +14,7 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/documentation_options.js?v=f751e407"></script>
+        <script src="_static/documentation_options.js?v=cebbca66"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -85,6 +85,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#convenience-macros-for-complex-types">Convenience macros for complex types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cryptography-helpers">Cryptography Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#trustlist-helpers">Trustlist Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -166,7 +167,9 @@ the node type. Possible attributes are as follows:</p>
 <p>The access level to a node is given by the following constants that are ANDed
 with the overall access level.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_ACCESSLEVELMASK_READ           (0x01u &lt;&lt; 0u)</span>
+<span class="cp">#define UA_ACCESSLEVELMASK_CURRENTREAD    (0x01u &lt;&lt; 0u)</span>
 <span class="cp">#define UA_ACCESSLEVELMASK_WRITE          (0x01u &lt;&lt; 1u)</span>
+<span class="cp">#define UA_ACCESSLEVELMASK_CURRENTWRITE   (0x01u &lt;&lt; 1u)</span>
 <span class="cp">#define UA_ACCESSLEVELMASK_HISTORYREAD    (0x01u &lt;&lt; 2u)</span>
 <span class="cp">#define UA_ACCESSLEVELMASK_HISTORYWRITE   (0x01u &lt;&lt; 3u)</span>
 <span class="cp">#define UA_ACCESSLEVELMASK_SEMANTICCHANGE (0x01u &lt;&lt; 4u)</span>
@@ -201,6 +204,9 @@ are ANDed for the overall write mask. Part 3: 5.2.7 Table 2</p>
 <span class="cp">#define UA_WRITEMASK_VALUERANK               (0x01u &lt;&lt; 19u)</span>
 <span class="cp">#define UA_WRITEMASK_WRITEMASK               (0x01u &lt;&lt; 20u)</span>
 <span class="cp">#define UA_WRITEMASK_VALUEFORVARIABLETYPE    (0x01u &lt;&lt; 21u)</span>
+<span class="cp">#define UA_WRITEMASK_DATATYPEDEFINITION      (0x01u &lt;&lt; 22u)</span>
+<span class="cp">#define UA_WRITEMASK_ROLEPERMISSIONS         (0x01u &lt;&lt; 23u)</span>
+<span class="cp">#define UA_WRITEMASK_ACCESSRESTRICTIONS      (0x01u &lt;&lt; 24u)</span>
 <span class="cp">#define UA_WRITEMASK_ACCESSLEVELEX           (0x01u &lt;&lt; 25u)</span>
 </pre></div>
 </div>
@@ -733,6 +739,30 @@ indicates the value attribute of the event instance.</p></li>
 <span class="cm"> * freed. */</span>
 <span class="kt">void</span>
 <span class="nf">UA_ByteString_memZero</span><span class="p">(</span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">bs</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="trustlist-helpers">
+<h2>Trustlist Helpers<a class="headerlink" href="#trustlist-helpers" title="Link to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Adds all of the certificates from the src trusted list to the dst trusted list. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_TrustListDataType_add</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="cm">/* Removes all of the certificates from the dst trust list that are specified</span>
+<span class="cm"> * in the src trust list. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_TrustListDataType_remove</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="cm">/* Checks if the certificate is present in the trust list.</span>
+<span class="cm"> * The mask parameter can be used to specify the part of the trust list to check. */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_TrustListDataType_contains</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">trustList</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">UA_TrustListMasks</span><span class="w"> </span><span class="n">mask</span><span class="p">);</span>
+
+<span class="cm">/* Returns the size of the TrustList in bytes. */</span>
+<span class="n">UA_UInt32</span>
+<span class="nf">UA_TrustListDataType_getSize</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">trustList</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
