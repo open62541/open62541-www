@@ -19,4 +19,4 @@ Telefon: +49 721 6091-0
 
 Web: https://www.iosb.fraunhofer.de/
 
-E-Mail: info@iosb.fraunhofer.de
+E-Mail: julius.pfrommer@iosb.fraunhofer.de
