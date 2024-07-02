@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core Concepts of OPC UA &mdash; open62541 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=02f2166e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Building open62541" href="building.html" />
+    <link rel="prev" title="Introduction" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541
+              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Concepts of OPC UA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#protocol">Protocol</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#structure-of-a-protocol-message">Structure of a protocol message</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#services">Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#discovery-service-set">Discovery Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#securechannel-service-set">SecureChannel Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nodemanagement-service-set">NodeManagement Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#view-service-set">View Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#query-service-set">Query Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#attribute-service-set">Attribute Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-service-set">Method Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#monitoreditem-service-set">MonitoredItem Service Set</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subscription-service-set">Subscription Service Set</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#information-modelling">Information Modelling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data-type">Data Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#valuerank">ValueRank</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#array-dimensions">Array Dimensions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objecttypenode">ObjectTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methodnode">MethodNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Core Concepts of OPC UA</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/core_concepts.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="core-concepts-of-opc-ua">
+<span id="introduction"></span><h1>Core Concepts of OPC UA<a class="headerlink" href="#core-concepts-of-opc-ua" title="Link to this heading">¶</a></h1>
+<p>In one sentence, OPC UA (ISO 62541) defines a framework for object-oriented
+information models (typically representing a physical device) that live in an
+OPC UA server and a protocol with which a client can interact with the
+information model over the network (read and write variables, call methods,
+instantiate and delete objects, subscribe to change notifications, and so on).</p>
+<p>This Section introduces the core concepts of OPC UA. For the full specification
+see the OPC UA standard at <a class="reference external" href="https://reference.opcfoundation.org/">https://reference.opcfoundation.org/</a>.</p>
+<section id="protocol">
+<span id="id1"></span><h2>Protocol<a class="headerlink" href="#protocol" title="Link to this heading">¶</a></h2>
+<p>We focus on the TCP-based binary protocol since it is by far the most common
+transport layer for OPC UA. The general concepts also translate to HTTP and
+SOAP-based communication defined in the standard. Communication in OPC UA is
+best understood by starting with the following key principles:</p>
+<dl class="simple">
+<dt>Request / Response</dt><dd><p>All communication is based on the Request/Response pattern. Only clients can
+send a request to a server. And servers can only send responses to a matching
+request. Often the server is hosted close to a (physical) device, such as a
+sensor or a machine tool.</p>
+</dd>
+<dt>Asynchronous Responses</dt><dd><p>A server does not have to immediately respond to requests and responses may be
+sent in a different order. This keeps the server responsive when it takes time
+until a specific request has been processed (e.g. a method call or when
+reading from a sensor with delay). Subscriptions (push-notifications) are
+implemented via special requests where the response is delayed until a
+notification is published.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><em>OPC UA PubSub</em> (Part 14 of the standard) is an extension for the integration
+of many-to-many communication with OPC UA. PubSub does not use the
+client-server protocol. Rather, OPC UA PubSub integrates with either existing
+broker-based protocols such as MQTT, UDP-multicast or Ethernet-based
+communication. Typically an OPC UA server (accessed via the client-server
+protocol) is used to configured PubSub communication.</p>
+<p>Note that the client-server protocol also supports Subscriptions for
+one-to-one communication and does not depend on PubSub for this feature.</p>
+</div>
+<p>A client-server connection for the OPC UA binary protocol consists of three
+nested levels: The stateful TCP connection, a SecureChannel and the Session. For
+full details, see Part 6 of the OPC UA standard.</p>
+<dl>
+<dt>TCP Connection</dt><dd><p>The TCP connection is opened to the corresponding hostname and port with an
+initial handshake of HEL/ACK messages. The handshake establishes the basic
+settings of the connection, such as the maximum message length. The <em>Reverse
+Connect</em> extension of OPC UA allows the server to initiate the underlying TCP
+connection.</p>
+</dd>
+<dt>SecureChannel</dt><dd><p>SecureChannels are created on top of the raw TCP connection. A SecureChannel
+is established with an <em>OpenSecureChannel</em> request and response message pair.
+<strong>Attention!</strong> Even though a SecureChannel is mandatory, encryption might
+still be disabled. The <em>SecurityMode</em> of a SecureChannel can be either
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">Sign</span></code>, or <code class="docutils literal notranslate"><span class="pre">SignAndEncrypt</span></code>. As of version 0.2 of open62541,
+message signing and encryption is still under ongoing development.</p>
+<p>With message signing or encryption enabled, the <em>OpenSecureChannel</em> messages
+are encrypted using an asymmetric encryption algorithm (public-key
+cryptography) <a class="footnote-reference brackets" href="#key-mgmnt" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. As part of the <em>OpenSecureChannel</em> messages,
+client and server establish a common secret over an initially unsecure
+channel. For subsequent messages, the common secret is used for symmetric
+encryption, which has the advantage of being much faster.</p>
+<p>Different <em>SecurityPolicies</em> – defined in part 7 of the OPC UA standard –
+specify the algorithms for asymmetric and symmetric encryption, encryption key
+lengths, hash functions for message signing, and so on. Example
+SecurityPolicies are <code class="docutils literal notranslate"><span class="pre">None</span></code> for transmission of cleartext and
+<code class="docutils literal notranslate"><span class="pre">Basic256Sha256</span></code> which mandates a variant of RSA with SHA256 certificate
+hashing for asymmetric encryption and AES256 for symmetric encryption.</p>
+<p>The possible SecurityPolicies of a server are described with a list of
+<em>Endpoints</em>. An endpoint jointly defines the SecurityMode, SecurityPolicy and
+means for authenticating a session (discussed in the next section) in order to
+connect to a certain server. The <em>GetEndpoints</em> service returns a list of
+available endpoints. This service can usually be invoked without a session and
+from an unencrypted SecureChannel. This allows clients to first discover
+available endpoints and then use an appropriate SecurityPolicy that might be
+required to open a session.</p>
+</dd>
+<dt>Session</dt><dd><p>Sessions are created on top of a SecureChannel. This ensures that users may
+authenticate without sending their credentials, such as username and password,
+in cleartext. Currently defined authentication mechanisms are anonymous login,
+username/password, Kerberos and x509 certificates. The latter requires that
+the request message is accompanied by a signature to prove that the sender is
+in possession of the private key with which the certificate was created.</p>
+<p>There are two message exchanges required to establish a session:
+<em>CreateSession</em> and <em>ActicateSession</em>. The ActivateSession service can be used
+to switch an existing session to a different SecureChannel. This is important,
+for example when the connection broke down and the existing session is
+reused with a new SecureChannel.</p>
+</dd>
+</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="key-mgmnt" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">1</a><span class="fn-bracket">]</span></span>
+<p>This entails that the client and server exchange so-called
+public keys. The public keys might come with a certificate from a key-signing
+authority or be verified against an external key repository. But we will not
+discuss certificate management in detail in this section.</p>
+</aside>
+</aside>
+<section id="structure-of-a-protocol-message">
+<h3>Structure of a protocol message<a class="headerlink" href="#structure-of-a-protocol-message" title="Link to this heading">¶</a></h3>
+<p>Consider the example OPC UA binary conversation in Figure
+<a class="reference internal" href="#ua-wireshark"><span class="std std-numref">Fig. 1</span></a>, recorded and displayed with <a class="reference external" href="https://www.wireshark.org/">Wireshark</a>.</p>
+<figure class="align-default" id="id10" style="width: 100%">
+<span id="ua-wireshark"></span><img alt="OPC UA conversation in Wireshark" src="_images/ua-wireshark.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">OPC UA conversation displayed in Wireshark</span><a class="headerlink" href="#id10" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>The top part of the Wireshark window shows the messages from the conversation in
+order. The green line contains the applied filter. Here, we want to see the OPC
+UA protocol messages only. The first messages (from TCP packets 49 to 56) show
+the client opening an unencrypted SecureChannel and retrieving the server’s
+endpoints. Then, starting with packet 63, a new connection and SecureChannel are
+created in conformance with one of the endpoints. On top of this SecureChannel,
+the client can then create and activate a session. The following <em>ReadRequest</em>
+message is selected and covered in more detail in the bottom windows.</p>
+<p>The bottom left window shows the structure of the selected <em>ReadRequest</em>
+message. The purpose of the message is invoking the <em>Read</em> <a class="reference internal" href="#services"><span class="std std-ref">service</span></a>. The message is structured into a header and a message body. Note
+that we do not consider encryption or signing of messages here.</p>
+<dl class="simple">
+<dt>Message Header</dt><dd><p>As stated before, OPC UA defines an asynchronous protocol. So responses may be
+out of order. The message header contains some basic information, such as the
+length of the message, as well as necessary information to relate messages to
+a SecureChannel and each request to the corresponding response. “Chunking”
+refers to the splitting and reassembling of messages that are longer than the
+maximum network packet size.</p>
+</dd>
+<dt>Message Body</dt><dd><p>Every OPC UA <a class="reference internal" href="#services"><span class="std std-ref">service</span></a> has a signature in the form of a
+request and response data structure. These are defined according to the OPC UA
+protocol <a class="reference internal" href="types.html#types"><span class="std std-ref">type system</span></a>. See especially the <a class="reference internal" href="types.html#generated-types"><span class="std std-ref">auto-generated
+type definitions</span></a> for the data types corresponding to service
+requests and responses. The message body begins with the identifier of the
+following data type. Then, the main payload of the message follows.</p>
+</dd>
+</dl>
+<p>The bottom right window shows the binary payload of the selected <em>ReadRequest</em>
+message. The message header is highlighted in light-grey. The message body in
+blue highlighting shows the encoded <em>ReadRequest</em> data structure.</p>
+</section>
+</section>
+<section id="services">
+<span id="id3"></span><h2>Services<a class="headerlink" href="#services" title="Link to this heading">¶</a></h2>
+<p>In OPC UA, all communication is based on service calls, each consisting of a
+request and a response message. These messages are defined as data structures
+with a binary encoding and listed in <a class="reference internal" href="types.html#generated-types"><span class="std std-ref">Generated Data Type Definitions</span></a>. Since all
+Services are pre-defined in the standard, they cannot be modified by the
+user. But you can use the <a class="reference internal" href="#method-services"><span class="std std-ref">Call</span></a> service to invoke
+user-defined methods on the server.</p>
+<p>Please refer to the <a class="reference internal" href="client.html#client"><span class="std std-ref">Client</span></a> and <a class="reference internal" href="server.html#server"><span class="std std-ref">Server</span></a> API where the services
+are exposed to end users. Please see part 4 of the OPC UA standard for the
+authoritative definition of the services and their behaviour.</p>
+<section id="discovery-service-set">
+<h3>Discovery Service Set<a class="headerlink" href="#discovery-service-set" title="Link to this heading">¶</a></h3>
+<p>This Service Set defines Services used to discover the Endpoints implemented
+by a Server and to read the security configuration for those Endpoints.</p>
+<dl class="simple">
+<dt>FindServers Service</dt><dd><p>Returns the Servers known to a Server or Discovery Server. The Client may
+reduce the number of results returned by specifying filter criteria</p>
+</dd>
+<dt>GetEndpoints Service</dt><dd><p>Returns the Endpoints supported by a Server and all of the configuration
+information required to establish a SecureChannel and a Session.</p>
+</dd>
+<dt>FindServersOnNetwork Service</dt><dd><p>Returns the Servers known to a Discovery Server. Unlike FindServer,
+this Service is only implemented by Discovery Servers. It additionally
+returns servers which may have been detected through Multicast.</p>
+</dd>
+<dt>RegisterServer</dt><dd><p>Registers a remote server in the local discovery service.</p>
+</dd>
+<dt>RegisterServer2</dt><dd><p>This Service allows a Server to register its DiscoveryUrls and capabilities
+with a Discovery Server. It extends the registration information from
+RegisterServer with information necessary for FindServersOnNetwork.</p>
+</dd>
+</dl>
+</section>
+<section id="securechannel-service-set">
+<h3>SecureChannel Service Set<a class="headerlink" href="#securechannel-service-set" title="Link to this heading">¶</a></h3>
+<p>This Service Set defines Services used to open a communication channel that
+ensures the confidentiality and Integrity of all Messages exchanged with the
+Server.</p>
+<dl class="simple">
+<dt>OpenSecureChannel Service</dt><dd><p>Open or renew a SecureChannel that can be used to ensure Confidentiality and
+Integrity for Message exchange during a Session.</p>
+</dd>
+<dt>CloseSecureChannel Service</dt><dd><p>Used to terminate a SecureChannel.</p>
+</dd>
+<dt>Session Service Set</dt><dd><p>This Service Set defines Services for an application layer connection
+establishment in the context of a Session.</p>
+</dd>
+<dt>CreateSession Service</dt><dd><p>Used by an OPC UA Client to create a Session and the Server returns two
+values which uniquely identify the Session. The first value is the sessionId
+which is used to identify the Session in the audit logs and in the Server’s
+address space. The second is the authenticationToken which is used to
+associate an incoming request with a Session.</p>
+</dd>
+<dt>ActivateSession</dt><dd><p>Used by the Client to submit its SoftwareCertificates to the Server for
+validation and to specify the identity of the user associated with the
+Session. This Service request shall be issued by the Client before it issues
+any other Service request after CreateSession. Failure to do so shall cause
+the Server to close the Session.</p>
+</dd>
+<dt>CloseSession</dt><dd><p>Used to terminate a Session.</p>
+</dd>
+<dt>Cancel Service</dt><dd><p>Used to cancel outstanding Service requests. Successfully cancelled service
+requests shall respond with Bad_RequestCancelledByClient.</p>
+</dd>
+</dl>
+</section>
+<section id="nodemanagement-service-set">
+<h3>NodeManagement Service Set<a class="headerlink" href="#nodemanagement-service-set" title="Link to this heading">¶</a></h3>
+<p>This Service Set defines Services to add and delete AddressSpace Nodes and
+References between them. All added Nodes continue to exist in the
+AddressSpace even if the Client that created them disconnects from the
+Server.</p>
+<dl class="simple">
+<dt>AddNodes Service</dt><dd><p>Used to add one or more Nodes into the AddressSpace hierarchy.
+If the type or one of the supertypes has any HasInterface references
+(see OPC 10001-7 - Amendment 7, 4.9.2), the child nodes of the interfaces
+are added to the new object.</p>
+</dd>
+<dt>AddReferences Service</dt><dd><p>Used to add one or more References to one or more Nodes.</p>
+</dd>
+<dt>DeleteNodes Service</dt><dd><p>Used to delete one or more Nodes from the AddressSpace.</p>
+</dd>
+<dt>DeleteReferences</dt><dd><p>Used to delete one or more References of a Node.</p>
+</dd>
+</dl>
+</section>
+<section id="view-service-set">
+<span id="view-services"></span><h3>View Service Set<a class="headerlink" href="#view-service-set" title="Link to this heading">¶</a></h3>
+<p>Clients use the browse Services of the View Service Set to navigate through
+the AddressSpace or through a View which is a subset of the AddressSpace.</p>
+<dl class="simple">
+<dt>Browse Service</dt><dd><p>Used to discover the References of a specified Node. The browse can be
+further limited by the use of a View. This Browse Service also supports a
+primitive filtering capability.</p>
+</dd>
+<dt>BrowseNext Service</dt><dd><p>Used to request the next set of Browse or BrowseNext response information
+that is too large to be sent in a single response. “Too large” in this
+context means that the Server is not able to return a larger response or that
+the number of results to return exceeds the maximum number of results to
+return that was specified by the Client in the original Browse request.</p>
+</dd>
+<dt>TranslateBrowsePathsToNodeIds Service</dt><dd><p>Used to translate textual node paths to their respective ids.</p>
+</dd>
+<dt>RegisterNodes Service</dt><dd><p>Used by Clients to register the Nodes that they know they will access
+repeatedly (e.g. Write, Call). It allows Servers to set up anything needed so
+that the access operations will be more efficient.</p>
+</dd>
+<dt>UnregisterNodes Service</dt><dd><p>This Service is used to unregister NodeIds that have been obtained via the
+RegisterNodes service.</p>
+</dd>
+</dl>
+</section>
+<section id="query-service-set">
+<h3>Query Service Set<a class="headerlink" href="#query-service-set" title="Link to this heading">¶</a></h3>
+<p>This Service Set is used to issue a Query to a Server. OPC UA Query is
+generic in that it provides an underlying storage mechanism independent Query
+capability that can be used to access a wide variety of OPC UA data stores
+and information management systems. OPC UA Query permits a Client to access
+data maintained by a Server without any knowledge of the logical schema used
+for internal storage of the data. Knowledge of the AddressSpace is
+sufficient.</p>
+<dl class="simple">
+<dt>QueryFirst Service (not implemented)</dt><dd><p>This Service is used to issue a Query request to the Server.</p>
+</dd>
+<dt>QueryNext Service (not implemented)</dt><dd><p>This Service is used to request the next set of QueryFirst or QueryNext
+response information that is too large to be sent in a single response.</p>
+</dd>
+</dl>
+</section>
+<section id="attribute-service-set">
+<h3>Attribute Service Set<a class="headerlink" href="#attribute-service-set" title="Link to this heading">¶</a></h3>
+<p>This Service Set provides Services to access Attributes that are part of
+Nodes.</p>
+<dl class="simple">
+<dt>Read Service</dt><dd><p>Used to read attributes of nodes. For constructed attribute values whose
+elements are indexed, such as an array, this Service allows Clients to read
+the entire set of indexed values as a composite, to read individual elements
+or to read ranges of elements of the composite.</p>
+</dd>
+<dt>Write Service</dt><dd><p>Used to write attributes of nodes. For constructed attribute values whose
+elements are indexed, such as an array, this Service allows Clients to write
+the entire set of indexed values as a composite, to write individual elements
+or to write ranges of elements of the composite.</p>
+</dd>
+<dt>HistoryRead Service</dt><dd><p>Used to read historical values or Events of one or more Nodes. Servers may
+make historical values available to Clients using this Service, although the
+historical values themselves are not visible in the AddressSpace.</p>
+</dd>
+<dt>HistoryUpdate Service</dt><dd><p>Used to update historical values or Events of one or more Nodes. Several
+request parameters indicate how the Server is to update the historical value
+or Event. Valid actions are Insert, Replace or Delete.</p>
+</dd>
+</dl>
+</section>
+<section id="method-service-set">
+<span id="method-services"></span><h3>Method Service Set<a class="headerlink" href="#method-service-set" title="Link to this heading">¶</a></h3>
+<p>The Method Service Set defines the means to invoke methods. A method shall be
+a component of an Object. See the section on <a class="reference internal" href="#methodnode"><span class="std std-ref">MethodNodes</span></a>
+for more information.</p>
+<dl class="simple">
+<dt>Call Service</dt><dd><p>Used to call (invoke) a methods. Each method call is invoked within the
+context of an existing Session. If the Session is terminated, the results of
+the method’s execution cannot be returned to the Client and are discarded.</p>
+</dd>
+</dl>
+</section>
+<section id="monitoreditem-service-set">
+<h3>MonitoredItem Service Set<a class="headerlink" href="#monitoreditem-service-set" title="Link to this heading">¶</a></h3>
+<p>Clients define MonitoredItems to subscribe to data and Events. Each
+MonitoredItem identifies the item to be monitored and the Subscription to use
+to send Notifications. The item to be monitored may be any Node Attribute.</p>
+<dl>
+<dt>CreateMonitoredItems Service</dt><dd><p>Used to create and add one or more MonitoredItems to a Subscription. A
+MonitoredItem is deleted automatically by the Server when the Subscription is
+deleted. Deleting a MonitoredItem causes its entire set of triggered item
+links to be deleted, but has no effect on the MonitoredItems referenced by
+the triggered items.</p>
+</dd>
+<dt>DeleteMonitoredItems Service</dt><dd><p>Used to remove one or more MonitoredItems of a Subscription. When a
+MonitoredItem is deleted, its triggered item links are also deleted.</p>
+</dd>
+<dt>ModifyMonitoredItems Service</dt><dd><p>Used to modify MonitoredItems of a Subscription. Changes to the MonitoredItem
+settings shall be applied immediately by the Server. They take effect as soon
+as practical but not later than twice the new revisedSamplingInterval.</p>
+<p>Illegal request values for parameters that can be revised do not generate
+errors. Instead the server will choose default values and indicate them in
+the corresponding revised parameter.</p>
+</dd>
+<dt>SetMonitoringMode Service</dt><dd><p>Used to set the monitoring mode for one or more MonitoredItems of a
+Subscription.</p>
+</dd>
+<dt>SetTriggering Service</dt><dd><p>Used to create and delete triggering links for a triggering item.</p>
+</dd>
+</dl>
+</section>
+<section id="subscription-service-set">
+<h3>Subscription Service Set<a class="headerlink" href="#subscription-service-set" title="Link to this heading">¶</a></h3>
+<p>Subscriptions are used to report Notifications to the Client.</p>
+<dl class="simple">
+<dt>CreateSubscription Service</dt><dd><p>Used to create a Subscription. Subscriptions monitor a set of MonitoredItems
+for Notifications and return them to the Client in response to Publish
+requests.</p>
+</dd>
+<dt>ModifySubscription Service</dt><dd><p>Used to modify a Subscription.</p>
+</dd>
+<dt>SetPublishingMode Service</dt><dd><p>Used to enable sending of Notifications on one or more Subscriptions.</p>
+</dd>
+<dt>Publish Service</dt><dd><p>Used for two purposes. First, it is used to acknowledge the receipt of
+NotificationMessages for one or more Subscriptions. Second, it is used to
+request the Server to return a NotificationMessage or a keep-alive
+Message.</p>
+</dd>
+<dt>Republish Service</dt><dd><p>Requests the Subscription to republish a NotificationMessage from its
+retransmission queue.</p>
+</dd>
+<dt>DeleteSubscriptions Service</dt><dd><p>Invoked to delete one or more Subscriptions that belong to the Client’s
+Session.</p>
+</dd>
+<dt>TransferSubscription Service</dt><dd><p>Used to transfer a Subscription and its MonitoredItems from one Session to
+another. For example, a Client may need to reopen a Session and then transfer
+its Subscriptions to that Session. It may also be used by one Client to take
+over a Subscription from another Client by transferring the Subscription to
+its Session.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="information-modelling">
+<span id="id4"></span><h2>Information Modelling<a class="headerlink" href="#information-modelling" title="Link to this heading">¶</a></h2>
+<p>Information modelling in OPC UA combines concepts from object-orientation and
+semantic modelling. At the core, an OPC UA information model is a graph
+consisting of Nodes and References between them.</p>
+<dl class="simple">
+<dt>Nodes</dt><dd><p>There are eight possible NodeClasses for Nodes (Variable, VariableType,
+Object, ObjectType, ReferenceType, DataType, Method, View). The NodeClass
+defines the attributes a Node can have.</p>
+</dd>
+<dt>References</dt><dd><p>References are links between Nodes. References are typed (refer to a
+ReferenceType) and directed.</p>
+</dd>
+</dl>
+<p>The original source for the following information is Part 3 of the OPC UA
+specification (<a class="reference external" href="https://reference.opcfoundation.org/Core/Part3/">https://reference.opcfoundation.org/Core/Part3/</a>).</p>
+<p>Each Node is identified by a unique (within the server) <a class="reference internal" href="types.html#nodeid"><span class="std std-ref">NodeId</span></a> and
+carries different attributes depending on the NodeClass. These attributes can be
+read (and sometimes also written) via the OPC UA protocol. The protocol further
+allows the creation and deletion of Nodes and References at runtime. But this is
+not supported by all servers.</p>
+<p>Reference are triples of the form <code class="docutils literal notranslate"><span class="pre">(source-nodeid,</span> <span class="pre">referencetype-nodeid,</span>
+<span class="pre">target-nodeid)</span></code>. (The <code class="docutils literal notranslate"><span class="pre">target-nodeid</span></code> is actually an <a class="reference internal" href="types.html#expandednodeid"><span class="std std-ref">ExpandedNodeId</span></a>
+which is a NodeId that can additionally point to a remote server.) An example
+reference between nodes is a <code class="docutils literal notranslate"><span class="pre">hasTypeDefinition</span></code> reference between a Variable
+and its VariableType. Some ReferenceTypes are <em>hierarchical</em> and must not form
+<em>directed loops</em>. See the section on <a class="reference internal" href="#referencetypenode"><span class="std std-ref">ReferenceTypes</span></a>
+for more details on possible references and their semantics.</p>
+<p>The following table (adapted from Part 3 of the specification) shows which
+attributes are mandatory (<code class="docutils literal notranslate"><span class="pre">M</span></code>), optional (<code class="docutils literal notranslate"><span class="pre">O</span></code>) or not defined for each
+NodeClass. In open62541 all optional attributes are defined - with sensible
+defaults if users do not change them.</p>
+<table class="docutils align-default" id="id11" style="width: 100%">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Node attributes for the different NodeClasses</span><a class="headerlink" href="#id11" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>DataType</p></th>
+<th class="head"><p>Variable</p></th>
+<th class="head"><p>Variable­Type</p></th>
+<th class="head"><p>Object</p></th>
+<th class="head"><p>Object­Type</p></th>
+<th class="head"><p>Reference­Type</p></th>
+<th class="head"><p>Data­Type</p></th>
+<th class="head"><p>Method</p></th>
+<th class="head"><p>View</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NodeId</p></td>
+<td><p>NodeId</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>NodeClass</p></td>
+<td><p>NodeClass</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>BrowseName</p></td>
+<td><p>QualifiedName</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>DisplayName</p></td>
+<td><p>LocalizedText</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Description</p></td>
+<td><p>LocalizedText</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>WriteMask</p></td>
+<td><p>UInt32
+(<a class="reference internal" href="common.html#write-mask"><span class="std std-ref">Write Masks</span></a>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code>
+<code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>UserWriteMask</p></td>
+<td><p>UInt32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>IsAbstract</p></td>
+<td><p>Boolean</p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Symmetric</p></td>
+<td><p>Boolean</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>InverseName</p></td>
+<td><p>LocalizedText</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ContainsNoLoops</p></td>
+<td><p>Boolean</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>EventNotifier</p></td>
+<td><p>Byte
+(<a class="reference internal" href="common.html#eventnotifier"><span class="std std-ref">EventNotifier</span></a>)</p></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Value</p></td>
+<td><p>Variant</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>DataType</p></td>
+<td><p>NodeId</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ValueRank</p></td>
+<td><p>Int32
+(<a class="reference internal" href="common.html#valuerank-defines"><span class="std std-ref">ValueRank</span></a>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ArrayDimensions</p></td>
+<td><p>[UInt32]</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>AccessLevel</p></td>
+<td><p>Byte
+(<a class="reference internal" href="common.html#access-level-mask"><span class="std std-ref">Access Level Masks</span></a>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>UserAccessLevel</p></td>
+<td><p>Byte</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>MinimumSamplingInterval</p></td>
+<td><p>Double</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Historizing</p></td>
+<td><p>Boolean</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Executable</p></td>
+<td><p>Boolean</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>UserExecutable</p></td>
+<td><p>Boolean</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">M</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>DataTypeDefinition</p></td>
+<td><p>DataTypeDefinition</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Each attribute is referenced by a numerical <a class="reference internal" href="common.html#attribute-id"><span class="std std-ref">Attribute Id</span></a>.</p>
+<p>Some numerical attributes are used as bitfields or come with special semantics.
+In particular, see the sections on <a class="reference internal" href="common.html#access-level-mask"><span class="std std-ref">Access Level Masks</span></a>, <a class="reference internal" href="common.html#write-mask"><span class="std std-ref">Write Masks</span></a>,
+<a class="reference internal" href="common.html#valuerank-defines"><span class="std std-ref">ValueRank</span></a> and <a class="reference internal" href="common.html#eventnotifier"><span class="std std-ref">EventNotifier</span></a>.</p>
+<p>New attributes in the standard that are still unsupported in open62541 are
+RolePermissions, UserRolePermissions, AccessRestrictions and AccessLevelEx.</p>
+<section id="variablenode">
+<h3>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading">¶</a></h3>
+<p>Variables store values in a <a class="reference internal" href="types.html#datavalue"><span class="std std-ref">DataValue</span></a> together with
+metadata for introspection. Most notably, the attributes data type, value
+rank and array dimensions constrain the possible values the variable can take
+on.</p>
+<p>Variables come in two flavours: properties and datavariables. Properties are
+related to a parent with a <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code> reference and may not have child
+nodes themselves. Datavariables may contain properties (<code class="docutils literal notranslate"><span class="pre">hasProperty</span></code>) and
+also datavariables (<code class="docutils literal notranslate"><span class="pre">hasComponents</span></code>).</p>
+<p>All variables are instances of some <a class="reference internal" href="#variabletypenode"><span class="std std-ref">VariableTypeNode</span></a> in return
+constraining the possible data type, value rank and array dimensions
+attributes.</p>
+<section id="data-type">
+<h4>Data Type<a class="headerlink" href="#data-type" title="Link to this heading">¶</a></h4>
+<p>The (scalar) data type of the variable is constrained to be of a specific
+type or one of its children in the type hierarchy. The data type is given as
+a NodeId pointing to a <a class="reference internal" href="#datatypenode"><span class="std std-ref">DataTypeNode</span></a> in the type hierarchy. See the
+Section <a class="reference internal" href="#datatypenode"><span class="std std-ref">DataTypeNode</span></a> for more details.</p>
+<p>If the data type attribute points to <code class="docutils literal notranslate"><span class="pre">UInt32</span></code>, then the value attribute
+must be of that exact type since <code class="docutils literal notranslate"><span class="pre">UInt32</span></code> does not have children in the
+type hierarchy. If the data type attribute points <code class="docutils literal notranslate"><span class="pre">Number</span></code>, then the type
+of the value attribute may still be <code class="docutils literal notranslate"><span class="pre">UInt32</span></code>, but also <code class="docutils literal notranslate"><span class="pre">Float</span></code> or
+<code class="docutils literal notranslate"><span class="pre">Byte</span></code>.</p>
+<p>Consistency between the data type attribute in the variable and its
+<a class="reference internal" href="#variabletypenode"><span class="std std-ref">VariableTypeNode</span></a> is ensured.</p>
+</section>
+<section id="valuerank">
+<h4>ValueRank<a class="headerlink" href="#valuerank" title="Link to this heading">¶</a></h4>
+<p>This attribute indicates whether the value attribute of the variable is an
+array and how many dimensions the array has. It may have the following
+values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">&gt;=</span> <span class="pre">1</span></code>: the value is an array with the specified number of dimensions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span>&#160; <span class="pre">0</span></code>: the value is an array with one or more dimensions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">-1</span></code>: the value is a scalar</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">-2</span></code>: the value can be a scalar or an array with any number of dimensions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">-3</span></code>: the value can be a scalar or a one dimensional array</p></li>
+</ul>
+<p>Some helper macros for ValueRanks are defined <a class="reference internal" href="common.html#valuerank-defines"><span class="std std-ref">here</span></a>.</p>
+<p>The consistency between the value rank attribute of a VariableNode and its
+<a class="reference internal" href="#variabletypenode"><span class="std std-ref">VariableTypeNode</span></a> is tested within the server.</p>
+</section>
+<section id="array-dimensions">
+<h4>Array Dimensions<a class="headerlink" href="#array-dimensions" title="Link to this heading">¶</a></h4>
+<p>If the value rank permits the value to be a (multi-dimensional) array, the
+exact length in each dimensions can be further constrained with this
+attribute.</p>
+<ul class="simple">
+<li><p>For positive lengths, the variable value must have a dimension length less
+or equal to the array dimension length defined in the VariableNode.</p></li>
+<li><p>The dimension length zero is a wildcard and the actual value may have any
+length in this dimension. Note that a value (variant) must have array
+dimensions that are positive (not zero).</p></li>
+</ul>
+<p>Consistency between the array dimensions attribute in the variable and its
+<a class="reference internal" href="#variabletypenode"><span class="std std-ref">VariableTypeNode</span></a> is ensured. However, we consider that an array of
+length zero (can also be a null-array with undefined length) has implicit
+array dimensions <code class="docutils literal notranslate"><span class="pre">[0,0,...]</span></code>. These always match the required array
+dimensions.</p>
+</section>
+</section>
+<section id="variabletypenode">
+<span id="id5"></span><h3>VariableTypeNode<a class="headerlink" href="#variabletypenode" title="Link to this heading">¶</a></h3>
+<p>VariableTypes are used to provide type definitions for variables.
+VariableTypes constrain the data type, value rank and array dimensions
+attributes of variable instances. Furthermore, instantiating from a specific
+variable type may provide semantic information. For example, an instance from
+<code class="docutils literal notranslate"><span class="pre">MotorTemperatureVariableType</span></code> is more meaningful than a float variable
+instantiated from <code class="docutils literal notranslate"><span class="pre">BaseDataVariable</span></code>.</p>
+</section>
+<section id="objectnode">
+<h3>ObjectNode<a class="headerlink" href="#objectnode" title="Link to this heading">¶</a></h3>
+<p>Objects are used to represent systems, system components, real-world objects
+and software objects. Objects are instances of an <a class="reference internal" href="#objecttypenode"><span class="std std-ref">object type</span></a>
+and may contain variables, methods and further objects.</p>
+</section>
+<section id="objecttypenode">
+<span id="id6"></span><h3>ObjectTypeNode<a class="headerlink" href="#objecttypenode" title="Link to this heading">¶</a></h3>
+<p>ObjectTypes provide definitions for Objects. Abstract objects cannot be
+instantiated. See <a class="reference internal" href="plugin_nodestore.html#node-lifecycle"><span class="std std-ref">Node Lifecycle: Constructors, Destructors and Node Contexts</span></a> for the use of constructor and
+destructor callbacks.</p>
+</section>
+<section id="referencetypenode">
+<span id="id7"></span><h3>ReferenceTypeNode<a class="headerlink" href="#referencetypenode" title="Link to this heading">¶</a></h3>
+<p>Each reference between two nodes is typed with a ReferenceType that gives
+meaning to the relation. The OPC UA standard defines a set of ReferenceTypes
+as a mandatory part of OPC UA information models.</p>
+<ul class="simple">
+<li><p>Abstract ReferenceTypes cannot be used in actual references and are only
+used to structure the ReferenceTypes hierarchy</p></li>
+<li><p>Symmetric references have the same meaning from the perspective of the
+source and target node</p></li>
+</ul>
+<p>The figure below shows the hierarchy of the standard ReferenceTypes (arrows
+indicate a <code class="docutils literal notranslate"><span class="pre">hasSubType</span></code> relation). Refer to Part 3 of the OPC UA
+specification for the full semantics of each ReferenceType.</p>
+<div class="graphviz"><img src="_images/graphviz-5639351174b70f03ad8af4be8fda3f706bb801e9.png" alt="digraph tree {
+
+node [height=0, shape=box, fillcolor=&quot;#E5E5E5&quot;, concentrate=true]
+
+references [label=&quot;References\n(Abstract, Symmetric)&quot;]
+hierarchical_references [label=&quot;HierarchicalReferences\n(Abstract)&quot;]
+references -&gt; hierarchical_references
+
+nonhierarchical_references [label=&quot;NonHierarchicalReferences\n(Abstract, Symmetric)&quot;]
+references -&gt; nonhierarchical_references
+
+haschild [label=&quot;HasChild\n(Abstract)&quot;]
+hierarchical_references -&gt; haschild
+
+aggregates [label=&quot;Aggregates\n(Abstract)&quot;]
+haschild -&gt; aggregates
+
+organizes [label=&quot;Organizes&quot;]
+hierarchical_references -&gt; organizes
+
+hascomponent [label=&quot;HasComponent&quot;]
+aggregates -&gt; hascomponent
+
+hasorderedcomponent [label=&quot;HasOrderedComponent&quot;]
+hascomponent -&gt; hasorderedcomponent
+
+hasproperty [label=&quot;HasProperty&quot;]
+aggregates -&gt; hasproperty
+
+hassubtype [label=&quot;HasSubtype&quot;]
+haschild -&gt; hassubtype
+
+hasmodellingrule [label=&quot;HasModellingRule&quot;]
+nonhierarchical_references -&gt; hasmodellingrule
+
+hastypedefinition [label=&quot;HasTypeDefinition&quot;]
+nonhierarchical_references -&gt; hastypedefinition
+
+hasencoding [label=&quot;HasEncoding&quot;]
+nonhierarchical_references -&gt; hasencoding
+
+hasdescription [label=&quot;HasDescription&quot;]
+nonhierarchical_references -&gt; hasdescription
+
+haseventsource [label=&quot;HasEventSource&quot;]
+hierarchical_references -&gt; haseventsource
+
+hasnotifier [label=&quot;HasNotifier&quot;]
+hierarchical_references -&gt; hasnotifier
+
+generatesevent [label=&quot;GeneratesEvent&quot;]
+nonhierarchical_references -&gt; generatesevent
+
+alwaysgeneratesevent [label=&quot;AlwaysGeneratesEvent&quot;]
+generatesevent -&gt; alwaysgeneratesevent
+
+{rank=same hierarchical_references nonhierarchical_references}
+{rank=same generatesevent haseventsource hasmodellingrule
+           hasencoding hassubtype}
+{rank=same alwaysgeneratesevent hasproperty}
+
+}" class="graphviz" /></div>
+<p>The ReferenceType hierarchy can be extended with user-defined ReferenceTypes.
+Many Companion Specifications for OPC UA define new ReferenceTypes to be used
+in their domain of interest.</p>
+<p>For the following example of custom ReferenceTypes, we attempt to model the
+structure of a technical system. For this, we introduce two custom
+ReferenceTypes. First, the hierarchical <code class="docutils literal notranslate"><span class="pre">contains</span></code> ReferenceType indicates
+that a system (represented by an OPC UA object) contains a component (or
+subsystem). This gives rise to a tree-structure of containment relations. For
+example, the motor (object) is contained in the car and the crankshaft is
+contained in the motor. Second, the symmetric <code class="docutils literal notranslate"><span class="pre">connectedTo</span></code> ReferenceType
+indicates that two components are connected. For example, the motor’s
+crankshaft is connected to the gear box. Connections are independent of the
+containment hierarchy and can induce a general graph-structure. Further
+subtypes of <code class="docutils literal notranslate"><span class="pre">connectedTo</span></code> could be used to differentiate between physical,
+electrical and information related connections. A client can then learn the
+layout of a (physical) system represented in an OPC UA information model
+based on a common understanding of just two custom reference types.</p>
+</section>
+<section id="datatypenode">
+<span id="id8"></span><h3>DataTypeNode<a class="headerlink" href="#datatypenode" title="Link to this heading">¶</a></h3>
+<p>DataTypes represent simple and structured data types. DataTypes may contain
+arrays. But they always describe the structure of a single instance. In
+open62541, DataTypeNodes in the information model hierarchy are matched to
+<code class="docutils literal notranslate"><span class="pre">UA_DataType</span></code> type descriptions for <a class="reference internal" href="types.html#generic-types"><span class="std std-ref">Generic Type Handling</span></a> via their NodeId.</p>
+<p>Abstract DataTypes (e.g. <code class="docutils literal notranslate"><span class="pre">Number</span></code>) cannot be the type of actual values.
+They are used to constrain values to possible child DataTypes (e.g.
+<code class="docutils literal notranslate"><span class="pre">UInt32</span></code>).</p>
+</section>
+<section id="methodnode">
+<span id="id9"></span><h3>MethodNode<a class="headerlink" href="#methodnode" title="Link to this heading">¶</a></h3>
+<p>Methods define callable functions and are invoked using the <a class="reference internal" href="#method-services"><span class="std std-ref">Call</span></a>
+service. MethodNodes may have special properties (variable
+children with a <code class="docutils literal notranslate"><span class="pre">hasProperty</span></code> reference) with the <a class="reference internal" href="types.html#qualifiedname"><span class="std std-ref">QualifiedName</span></a> <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">&quot;InputArguments&quot;)</span></code>
+and <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">&quot;OutputArguments&quot;)</span></code>. The input and output
+arguments are both described via an array of <code class="docutils literal notranslate"><span class="pre">UA_Argument</span></code>. While the Call
+service uses a generic array of <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a> for input and output, the
+actual argument values are checked to match the signature of the MethodNode.</p>
+<p>Note that the same MethodNode may be referenced from several objects (and
+object types). For this, the NodeId of the method <em>and of the object
+providing context</em> is part of a Call request message.</p>
+</section>
+<section id="viewnode">
+<h3>ViewNode<a class="headerlink" href="#viewnode" title="Link to this heading">¶</a></h3>
+<p>Each View defines a subset of the Nodes in the AddressSpace. Views can be
+used when browsing an information model to focus on a subset of nodes and
+references only. ViewNodes can be created and be interacted with. But their
+use in the <a class="reference internal" href="#view-services"><span class="std std-ref">Browse</span></a> service is currently unsupported in
+open62541.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="building.html" class="btn btn-neutral float-right" title="Building open62541" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
