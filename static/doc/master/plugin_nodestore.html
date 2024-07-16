@@ -839,7 +839,9 @@ checks are omitted. This can crash the application eventually.</p>
 <span class="cm">     * It can be indicated if only a subset of the attributes and referencs need</span>
 <span class="cm">     * to be accessed. That is relevant when the nodestore accesses a slow</span>
 <span class="cm">     * storage backend for the attributes. The attribute mask is a bitfield with</span>
-<span class="cm">     * ORed entries from UA_NodeAttributesMask.</span>
+<span class="cm">     * ORed entries from UA_NodeAttributesMask. If the attributes mask is empty,</span>
+<span class="cm">     * then only the non-standard entries (context-pointer, callbacks, etc.) are</span>
+<span class="cm">     * returned.</span>
 <span class="cm">     *</span>
 <span class="cm">     * The returned node always contains the context-pointer and other fields</span>
 <span class="cm">     * specific to open626541 (not official attributes).</span>
@@ -859,6 +861,34 @@ checks are omitted. This can crash the application eventually.</p>
 <span class="w">                                      </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* ``GetEditNode`` returns a pointer to a mutable version of the node. A</span>
+<span class="cm">     * plugin implementation that keeps all nodes in RAM can return the same</span>
+<span class="cm">     * pointer from ``GetNode`` and ``GetEditNode``. The differences are more</span>
+<span class="cm">     * important if, for example, nodes are stored in a backend database. Then</span>
+<span class="cm">     * the ``GetEditNode`` version is used to indicate that modifications are</span>
+<span class="cm">     * being made.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Call ``releaseNode`` to indicate when editing is done and the pointer is</span>
+<span class="cm">     * no longer used. Note that changes are not (necessarily) visible in other</span>
+<span class="cm">     * (const) node-pointers that were previously retrieved. Changes are however</span>
+<span class="cm">     * visible in all newly retrieved node-pointers for the given NodeId after</span>
+<span class="cm">     * calling ``releaseNode``.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The attribute-mask and reference-description indicate if only a subset of</span>
+<span class="cm">     * the attributes and referencs are to be modified. Other attributes and</span>
+<span class="cm">     * references shall not be changed. */</span>
+<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Similar to ``getEditNode``. But it can take advantage of the NodePointer</span>
+<span class="cm">     * structure, e.g. if it contains a direct pointer. */</span>
+<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNodeFromPtr</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Release a node that has been retrieved with ``getNode`` or</span>
 <span class="cm">     * ``getNodeFromPtr``. */</span>
