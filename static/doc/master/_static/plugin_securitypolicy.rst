@@ -324,7 +324,6 @@ be set in the channel context before de/encrypting.
 .. code-block:: c
 
    
-   #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
    struct UA_PubSubSecurityPolicy;
    typedef struct UA_PubSubSecurityPolicy UA_PubSubSecurityPolicy;
    
@@ -369,5 +368,3 @@ be set in the channel context before de/encrypting.
        void (*clear)(UA_PubSubSecurityPolicy *policy);
        void *policyContext;
    };
-   
-   #endif

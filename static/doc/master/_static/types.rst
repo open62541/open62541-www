@@ -1280,8 +1280,13 @@ additional data types can be forwarded.
     * Zero-out the entire structure initially to ensure code-compatibility when
     * more fields are added in a later release. */
    typedef struct {
-       const UA_DataTypeArray *customTypes; /* Begin of a linked list with custom
-                                             * datatype definitions */
+       /* Begin of a linked list with custom datatype definitions */
+       const UA_DataTypeArray *customTypes;
+   
+       /* Override calloc for arena-based memory allocation. Note that allocated
+        * memory is not freed if decoding fails afterwards. */
+       void *callocContext;
+       void * (*calloc)(void *callocContext, size_t nelem, size_t elsize);
    } UA_DecodeBinaryOptions;
    
    /* Decodes a data structure from the input buffer in the binary format. It is

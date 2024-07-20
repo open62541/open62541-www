@@ -215,11 +215,9 @@ different transport protocols at runtime.
        UA_Boolean enableInformationModelMethods;
    #endif
    
-   #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        /* PubSub security policies */
        size_t securityPoliciesSize;
        UA_PubSubSecurityPolicy *securityPolicies;
-   #endif
    
    #ifdef UA_ENABLE_PUBSUB_MONITORING
        UA_PubSubMonitoringInterface monitoringInterface;
@@ -516,10 +514,8 @@ backend allows avoid race-condition with non-blocking atomic operations.
         * securityMode set accordingly. The symmetric key is a runtime information
         * and has to be set via UA_Server_setWriterGroupEncryptionKey. */
        UA_MessageSecurityMode securityMode; /* via the UA_WriterGroupDataType */
-   #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        UA_PubSubSecurityPolicy *securityPolicy;
        UA_String securityGroupId;
-   #endif
    } UA_WriterGroupConfig;
    
    void
@@ -574,7 +570,6 @@ backend allows avoid race-condition with non-blocking atomic operations.
    #define UA_Server_setWriterGroupDisabled(server, wgId)          \
        UA_Server_disableWriterGroup(server, wgId)
    
-   #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
    /* Set the group key for the message encryption */
    UA_StatusCode UA_THREADSAFE
    UA_Server_setWriterGroupEncryptionKeys(UA_Server *server, const UA_NodeId wgId,
@@ -582,7 +577,6 @@ backend allows avoid race-condition with non-blocking atomic operations.
                                           const UA_ByteString signingKey,
                                           const UA_ByteString encryptingKey,
                                           const UA_ByteString keyNonce);
-   #endif
    
 .. _dsw:
 
@@ -830,10 +824,8 @@ can be configured for a ReaderGroup.
         * securityMode set accordingly. The symmetric key is a runtime information
         * and has to be set via UA_Server_setReaderGroupEncryptionKey. */
        UA_MessageSecurityMode securityMode;
-   #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
        UA_PubSubSecurityPolicy *securityPolicy;
        UA_String securityGroupId;
-   #endif
    } UA_ReaderGroupConfig;
    
    void
@@ -890,7 +882,6 @@ can be configured for a ReaderGroup.
    #define UA_Server_setReaderGroupDisabled(server, rgId) \
        UA_Server_disableReaderGroup(server, rgId)
    
-   #ifdef UA_ENABLE_PUBSUB_ENCRYPTION
    /* Set the group key for the message encryption */
    UA_StatusCode UA_THREADSAFE
    UA_Server_setReaderGroupEncryptionKeys(UA_Server *server, UA_NodeId readerGroup,
@@ -898,7 +889,6 @@ can be configured for a ReaderGroup.
                                           UA_ByteString signingKey,
                                           UA_ByteString encryptingKey,
                                           UA_ByteString keyNonce);
-   #endif
    
    #ifdef UA_ENABLE_PUBSUB_SKS
    
