@@ -46,9 +46,9 @@ variable.
    
        UA_NodeId currentNodeId = UA_NODEID_STRING(1, "current-time-value-callback");
        UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, "current-time-value-callback");
-       UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-       UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-       UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+       UA_NodeId parentNodeId = UA_NS0ID(OBJECTSFOLDER);
+       UA_NodeId parentReferenceNodeId = UA_NS0ID(ORGANIZES);
+       UA_NodeId variableTypeNodeId = UA_NS0ID(BASEDATAVARIABLETYPE);
        UA_Server_addVariableNode(server, currentNodeId, parentNodeId,
                                  parentReferenceNodeId, currentName,
                                  variableTypeNodeId, attr, NULL, NULL);
@@ -137,9 +137,9 @@ its own memory management.
    
        UA_NodeId currentNodeId = UA_NODEID_STRING(1, "current-time-datasource");
        UA_QualifiedName currentName = UA_QUALIFIEDNAME(1, "current-time-datasource");
-       UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
-       UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
-       UA_NodeId variableTypeNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE);
+       UA_NodeId parentNodeId = UA_NS0ID(OBJECTSFOLDER);
+       UA_NodeId parentReferenceNodeId = UA_NS0ID(ORGANIZES);
+       UA_NodeId variableTypeNodeId = UA_NS0ID(BASEDATAVARIABLETYPE);
    
        UA_DataSource timeDataSource;
        timeDataSource.read = readCurrentTime;
