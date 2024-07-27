@@ -428,7 +428,7 @@ error), the client is no longer usable. Create a new client if required.
        cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
    
        /* Connect */
-       return __UA_Client_connect(client, false);
+       return __UA_Client_connect(client, true);
    })
    
    /* Connect to the server and create+activate a Session with the given username
