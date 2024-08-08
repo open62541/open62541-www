@@ -40,7 +40,9 @@ The configuration model for PubSub uses the following components:
        UA_PUBSUB_COMPONENT_WRITERGROUP,
        UA_PUBSUB_COMPONENT_DATASETWRITER,
        UA_PUBSUB_COMPONENT_READERGROUP,
-       UA_PUBSUB_COMPONENT_DATASETREADER
+       UA_PUBSUB_COMPONENT_DATASETREADER,
+       UA_PUBSUB_COMPONENT_PUBLISHEDDATASET,
+       UA_PUBSUB_COMPONENT_SUBSCRIBEDDDATASET
    } UA_PubSubComponentEnumType;
    
 The following figure shows how the PubSub components are related.
