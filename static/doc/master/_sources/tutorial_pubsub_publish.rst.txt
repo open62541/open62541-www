@@ -25,11 +25,13 @@ the system preconfiguration and connection can be found in
    #include <open62541/plugin/log_stdout.h>
    #include <open62541/server.h>
    #include <open62541/server_pubsub.h>
+   #include <open62541/types.h>
    
    #include <stdio.h>
    #include <stdlib.h>
    
-   UA_NodeId connectionIdent, publishedDataSetIdent, writerGroupIdent;
+   UA_NodeId connectionIdent, publishedDataSetIdent, writerGroupIdent,
+       dataSetWriterIdent;
    
    static void
    addPubSubConnection(UA_Server *server, UA_String *transportProfile,
@@ -40,7 +42,6 @@ the system preconfiguration and connection can be found in
        memset(&connectionConfig, 0, sizeof(connectionConfig));
        connectionConfig.name = UA_STRING("UADP Connection 1");
        connectionConfig.transportProfileUri = *transportProfile;
-       connectionConfig.enabled = UA_TRUE;
        UA_Variant_setScalar(&connectionConfig.address, networkAddressUrl,
                             &UA_TYPES[UA_TYPES_NETWORKADDRESSURLDATATYPE]);
        /* Changed to static publisherId from random generation to identify
@@ -67,7 +68,6 @@ connection.
        memset(&publishedDataSetConfig, 0, sizeof(UA_PublishedDataSetConfig));
        publishedDataSetConfig.publishedDataSetType = UA_PUBSUB_DATASET_PUBLISHEDITEMS;
        publishedDataSetConfig.name = UA_STRING("Demo PDS");
-       /* Create new PublishedDataSet based on the PublishedDataSetConfig. */
        UA_Server_addPublishedDataSet(server, &publishedDataSetConfig, &publishedDataSetIdent);
    }
    
@@ -86,9 +86,9 @@ field.
        memset(&dataSetFieldConfig, 0, sizeof(UA_DataSetFieldConfig));
        dataSetFieldConfig.dataSetFieldType = UA_PUBSUB_DATASETFIELD_VARIABLE;
        dataSetFieldConfig.field.variable.fieldNameAlias = UA_STRING("Server localtime");
-       dataSetFieldConfig.field.variable.promotedField = UA_FALSE;
+       dataSetFieldConfig.field.variable.promotedField = false;
        dataSetFieldConfig.field.variable.publishParameters.publishedVariable =
-       UA_NS0ID(SERVER_SERVERSTATUS_CURRENTTIME);
+           UA_NS0ID(SERVER_SERVERSTATUS_CURRENTTIME);
        dataSetFieldConfig.field.variable.publishParameters.attributeId = UA_ATTRIBUTEID_VALUE;
        UA_Server_addDataSetField(server, publishedDataSetIdent,
                                  &dataSetFieldConfig, &dataSetFieldIdent);
@@ -109,27 +109,28 @@ configuration parameters for the message creation.
        memset(&writerGroupConfig, 0, sizeof(UA_WriterGroupConfig));
        writerGroupConfig.name = UA_STRING("Demo WriterGroup");
        writerGroupConfig.publishingInterval = 100;
-       writerGroupConfig.enabled = UA_FALSE;
        writerGroupConfig.writerGroupId = 100;
        writerGroupConfig.encodingMimeType = UA_PUBSUB_ENCODING_UADP;
-       writerGroupConfig.messageSettings.encoding             = UA_EXTENSIONOBJECT_DECODED;
-       writerGroupConfig.messageSettings.content.decoded.type = &UA_TYPES[UA_TYPES_UADPWRITERGROUPMESSAGEDATATYPE];
+   
+       /* Change message settings of writerGroup to send PublisherId,
+        * WriterGroupId in GroupHeader and DataSetWriterId in PayloadHeader
+        * of NetworkMessage */
+       UA_UadpWriterGroupMessageDataType writerGroupMessage;
+       UA_UadpWriterGroupMessageDataType_init(&writerGroupMessage);
+       writerGroupMessage.networkMessageContentMask =
+           (UA_UadpNetworkMessageContentMask)(UA_UADPNETWORKMESSAGECONTENTMASK_PUBLISHERID |
+                                              UA_UADPNETWORKMESSAGECONTENTMASK_GROUPHEADER |
+                                              UA_UADPNETWORKMESSAGECONTENTMASK_WRITERGROUPID |
+                                              UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER);
+   
        /* The configuration flags for the messages are encapsulated inside the
         * message- and transport settings extension objects. These extension
         * objects are defined by the standard. e.g.
         * UadpWriterGroupMessageDataType */
-       UA_UadpWriterGroupMessageDataType *writerGroupMessage  = UA_UadpWriterGroupMessageDataType_new();
-       /* Change message settings of writerGroup to send PublisherId,
-        * WriterGroupId in GroupHeader and DataSetWriterId in PayloadHeader
-        * of NetworkMessage */
-       writerGroupMessage->networkMessageContentMask          = (UA_UadpNetworkMessageContentMask)(UA_UADPNETWORKMESSAGECONTENTMASK_PUBLISHERID |
-                                                                 (UA_UadpNetworkMessageContentMask)UA_UADPNETWORKMESSAGECONTENTMASK_GROUPHEADER |
-                                                                 (UA_UadpNetworkMessageContentMask)UA_UADPNETWORKMESSAGECONTENTMASK_WRITERGROUPID |
-                                                                 (UA_UadpNetworkMessageContentMask)UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER);
-       writerGroupConfig.messageSettings.content.decoded.data = writerGroupMessage;
+       UA_ExtensionObject_setValue(&writerGroupConfig.messageSettings, &writerGroupMessage,
+                                   &UA_TYPES[UA_TYPES_UADPWRITERGROUPMESSAGEDATATYPE]);
+   
        UA_Server_addWriterGroup(server, connectionIdent, &writerGroupConfig, &writerGroupIdent);
-       UA_Server_enableWriterGroup(server, writerGroupIdent);
-       UA_UadpWriterGroupMessageDataType_delete(writerGroupMessage);
    }
    
 **DataSetWriter handling**
@@ -144,7 +145,6 @@ message generation.
    addDataSetWriter(UA_Server *server) {
        /* We need now a DataSetWriter within the WriterGroup. This means we must
         * create a new DataSetWriterConfig and add call the addWriterGroup function. */
-       UA_NodeId dataSetWriterIdent;
        UA_DataSetWriterConfig dataSetWriterConfig;
        memset(&dataSetWriterConfig, 0, sizeof(UA_DataSetWriterConfig));
        dataSetWriterConfig.name = UA_STRING("Demo DataSetWriter");
@@ -172,18 +172,25 @@ It follows the main server code, making use of the above definitions.
 .. code-block:: c
 
    
-   static int run(UA_String *transportProfile,
-                  UA_NetworkAddressUrlDataType *networkAddressUrl) {
+   static int
+   run(UA_String *transportProfile, UA_NetworkAddressUrlDataType *networkAddressUrl) {
+       /* Create a server */
        UA_Server *server = UA_Server_new();
    
+       /* Add the PubSub components. They are initially disabled */
        addPubSubConnection(server, transportProfile, networkAddressUrl);
        addPublishedDataSet(server);
        addDataSetField(server);
        addWriterGroup(server);
        addDataSetWriter(server);
    
+       /* Enable the PubSubComponents */
+       UA_Server_enableAllPubSubComponents(server);
+   
+       /* Run the server */
        UA_StatusCode retval = UA_Server_runUntilInterrupt(server);
    
+       /* Delete the server */
        UA_Server_delete(server);
        return retval == UA_STATUSCODE_GOOD ? EXIT_SUCCESS : EXIT_FAILURE;
    }

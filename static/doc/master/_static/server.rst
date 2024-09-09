@@ -337,8 +337,8 @@ PubSub
 
 .. code-block:: c
 
-       UA_Boolean pubsubEnabled;
    #ifdef UA_ENABLE_PUBSUB
+       UA_Boolean pubsubEnabled;
        UA_PubSubConfiguration pubSubConfig;
    #endif
    
