@@ -400,7 +400,7 @@ Certificate Password Callback
    
    UA_DEPRECATED static UA_INLINE void
    UA_ServerConfig_clean(UA_ServerConfig *config) {
-   	UA_ServerConfig_clear(config);
+       UA_ServerConfig_clear(config);
    }
    
 .. _server-lifecycle:

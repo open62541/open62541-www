@@ -381,7 +381,7 @@ Method and triggering the alarm notification.
    
    static UA_StatusCode
    enteringConfirmedStateCallback(UA_Server *server, const UA_NodeId *condition) {
-   	/* Deactivate Alarm and put it out of the interesting state (by writing
+       /* Deactivate Alarm and put it out of the interesting state (by writing
         * false to Retain field) when confirming*/
        UA_Boolean activeStateId = false;
        UA_Boolean retain = false;
