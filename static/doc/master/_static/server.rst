@@ -1932,11 +1932,10 @@ Update the Server Certificate at Runtime
    
    UA_StatusCode
    UA_Server_updateCertificate(UA_Server *server,
-                               const UA_ByteString *oldCertificate,
-                               const UA_ByteString *newCertificate,
-                               const UA_ByteString *newPrivateKey,
-                               UA_Boolean closeSessions,
-                               UA_Boolean closeSecureChannels);
+                               const UA_NodeId certificateGroupId,
+                               const UA_NodeId certificateTypeId,
+                               const UA_ByteString certificate,
+                               const UA_ByteString *privateKey);
    
 Creates a PKCS #10 DER encoded certificate request signed with the server's private key
 ----------------------------------------------------------------------------------------
