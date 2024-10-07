@@ -70,9 +70,9 @@ message.
 
        UA_ExtensionObject userIdentityToken; /* Configured User-Identity Token */
        UA_MessageSecurityMode securityMode;  /* None, Sign, SignAndEncrypt. The
-                                              * default is invalid. This indicates
-                                              * the client to select any matching
-                                              * endpoint. */
+                                              * default is "invalid". This
+                                              * indicates the client to select any
+                                              * matching endpoint. */
        UA_String securityPolicyUri; /* SecurityPolicy for the SecureChannel. An
                                      * empty string indicates the client to select
                                      * any matching SecurityPolicy. */
@@ -84,17 +84,9 @@ message.
                                  * the intial one is lost. Instead abort the
                                  * connection when the Session is lost. */
    
-If either endpoint or userTokenPolicy has been set (at least one non-zero
-byte in either structure), then the selected Endpoint and UserTokenPolicy
-overwrite the settings in the basic connection configuration. The
-userTokenPolicy array in the EndpointDescription is ignored. The selected
-userTokenPolicy is set in the dedicated configuration field.
-
-If the advanced configuration is not set, the client will write to it the
-selected Endpoint and UserTokenPolicy during GetEndpoints.
-
-The information in the advanced configuration is used during reconnect
-when the SecureChannel was broken.
+If either endpoint or userTokenPolicy has been set, then they are used
+directly. Otherwise this information comes from the GetEndpoints response
+from the server (filtered and selected for the SecurityMode, etc.).
 
 .. code-block:: c
 
@@ -102,10 +94,8 @@ when the SecureChannel was broken.
        UA_UserTokenPolicy userTokenPolicy;
    
 If the EndpointDescription has not been defined, the ApplicationURI
-constrains the servers considered in the FindServers service and the
+filters the servers considered in the FindServers service and the
 Endpoints considered in the GetEndpoints service.
-
-If empty the applicationURI is not used to filter.
 
 .. code-block:: c
 
@@ -167,6 +157,7 @@ Advanced Client Configuration
         * secure channel is selected.*/
        size_t authSecurityPoliciesSize;
        UA_SecurityPolicy *authSecurityPolicies;
+   
        /* SecurityPolicyUri for the Authentication. */
        UA_String authSecurityPolicyUri;
    
