@@ -244,7 +244,7 @@ _copy makes a shallow copy of the plugins.
        if(!identityToken)
            return UA_STATUSCODE_BADOUTOFMEMORY;
        identityToken->userName = UA_STRING_ALLOC(username);
-       identityToken->password = UA_STRING_ALLOC(password);
+       identityToken->password = UA_BYTESTRING_ALLOC(password);
    
        UA_ExtensionObject_clear(&config->userIdentityToken);
        UA_ExtensionObject_setValue(&config->userIdentityToken, identityToken,
