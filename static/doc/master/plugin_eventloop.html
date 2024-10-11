@@ -8,12 +8,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Event Loop Subsystem &mdash; open62541 1.4.6-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
       <script src="_static/documentation_options.js?v=0b0158c9"></script>
-      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -149,7 +149,7 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">/* Delayed callbacks are executed not when they are registered, but in the</span>
 <span class="cm"> * following EventLoop cycle */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Singly-linked list */</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Callback</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
@@ -264,13 +264,16 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * delay a resource cleanup to a point where it is known that the resource</span>
 <span class="cm">     * has no remaining users.</span>
 <span class="cm">     *</span>
-<span class="cm">     * The delayed callbacks are processed in each of the cycle of the EventLoop</span>
+<span class="cm">     * The delayed callbacks are processed in each cycle of the EventLoop</span>
 <span class="cm">     * between the handling of periodic callbacks and polling for (network)</span>
 <span class="cm">     * events. The memory for the delayed callback is *NOT* automatically freed</span>
-<span class="cm">     * after the execution.</span>
+<span class="cm">     * after the execution. But this can be done from within the callback.</span>
 <span class="cm">     *</span>
-<span class="cm">     * addDelayedCallback is non-blocking and can be called from an interrupt</span>
-<span class="cm">     * context. removeDelayedCallback can take a mutex and is blocking. */</span>
+<span class="cm">     * Delayed callbacks are processed in the order in which they are added.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The delayed callback API is thread-safe. addDelayedCallback is</span>
+<span class="cm">     * non-blocking and can be called from an interrupt context.</span>
+<span class="cm">     * removeDelayedCallback can take a mutex and is blocking. */</span>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addDelayedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">);</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeDelayedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">);</span>
