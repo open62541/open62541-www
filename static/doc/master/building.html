@@ -6,13 +6,13 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Building open62541 &mdash; open62541 1.4.6-undefined documentation</title>
+  <title>Building open62541 &mdash; open62541 1.4.8-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-      <script src="_static/documentation_options.js?v=0b0158c9"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -48,7 +48,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Building open62541</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#building-the-library">Building the Library</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#building-with-cmake-on-ubuntu-or-debian">Building with CMake on Ubuntu or Debian</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#building-with-cmake-on-windows">Building with CMake on Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-with-visual-studio-on-windows">Building with Visual Studio on Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-with-cmake-mingw-on-windows">Building with CMake/MinGW on Windows</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-on-os-x">Building on OS X</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-on-openbsd">Building on OpenBSD</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian</a></li>
@@ -75,9 +76,11 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
@@ -125,7 +128,9 @@ sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w
 sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python3-sphinx<span class="w"> </span>graphviz<span class="w">  </span><span class="c1"># for documentation generation</span>
 sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python3-sphinx-rtd-theme<span class="w"> </span><span class="c1"># documentation style</span>
 
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/open62541/open62541.git
 <span class="nb">cd</span><span class="w"> </span>open62541
+git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
 mkdir<span class="w"> </span>build
 <span class="nb">cd</span><span class="w"> </span>build
 cmake<span class="w"> </span>..
@@ -138,6 +143,10 @@ make
 <span class="c1"># build documentation</span>
 make<span class="w"> </span>doc<span class="w"> </span><span class="c1"># html documentation</span>
 make<span class="w"> </span>doc_pdf<span class="w"> </span><span class="c1"># pdf documentation (requires LaTeX)</span>
+</pre></div>
+</div>
+<p>Note: parallel compilation can be enable by using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
 </pre></div>
 </div>
 <p>You can install open62541 using the well known <cite>make install</cite> command. This
@@ -168,17 +177,60 @@ CMake project definition looks as follows:</p>
 </pre></div>
 </div>
 </section>
-<section id="building-with-cmake-on-windows">
-<h3>Building with CMake on Windows<a class="headerlink" href="#building-with-cmake-on-windows" title="Link to this heading">¶</a></h3>
-<p>Here we explain the build process for Visual Studio (2013 or newer). To build
-with MinGW, just replace the compiler selection in the call to CMake.</p>
+<section id="building-with-visual-studio-on-windows">
+<h3>Building with Visual Studio on Windows<a class="headerlink" href="#building-with-visual-studio-on-windows" title="Link to this heading">¶</a></h3>
+<p>Here we explain the build process for Visual Studio 2022 Community.</p>
 <ul class="simple">
-<li><p>Download and install</p>
-<ul>
+<li><dl class="simple">
+<dt>Download and install</dt><dd><ul>
+<li><p>Python 3.x: <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a></p></li>
+<li><dl class="simple">
+<dt>Visual Studio 2022: <a class="reference external" href="https://visualstudio.microsoft.com">https://visualstudio.microsoft.com</a></dt><dd><ul>
+<li><p>When installing Visual Studio select the workload “Desktop development with C++”</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Open Visual Studio and from the Get started window select “Clone a repository”</dt><dd><ul>
+<li><p>Repository location: <a class="reference external" href="https://github.com/open62541/open62541.git">https://github.com/open62541/open62541.git</a></p></li>
+<li><p>Select a local path where to download the project and press Clone</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Switch to Folder View from the Solution Explorer</p></li>
+<li><dl class="simple">
+<dt>Project / CMake Settings for open62541</dt><dd><ul>
+<li><p>Customize CMake variables as wanted and save</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Build / Build All</p></li>
+<li><p>Build / Install open62541</p></li>
+</ul>
+<p>Note: the solution generated with cmake can also be compiled in parallel with the command</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>msbuild<span class="w"> </span>open62541.sln<span class="w"> </span>/v:n<span class="w"> </span>-t:rebuild<span class="w"> </span>-m
+</pre></div>
+</div>
+</section>
+<section id="building-with-cmake-mingw-on-windows">
+<h3>Building with CMake/MinGW on Windows<a class="headerlink" href="#building-with-cmake-mingw-on-windows" title="Link to this heading">¶</a></h3>
+<p>To build with MinGW, just replace the compiler selection in the call to CMake.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Download and install</dt><dd><ul>
+<li><p>MinGW <a class="reference external" href="http://sourceforge.net/projects/mingw">http://sourceforge.net/projects/mingw</a></p></li>
 <li><p>Python 3.x: <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a></p></li>
 <li><p>CMake: <a class="reference external" href="http://www.cmake.org/cmake/resources/software.html">http://www.cmake.org/cmake/resources/software.html</a></p></li>
-<li><p>Microsoft Visual Studio: <a class="reference external" href="https://www.visualstudio.com/products/visual-studio-community-vs">https://www.visualstudio.com/products/visual-studio-community-vs</a></p></li>
 </ul>
+</dd>
+</dl>
 </li>
 <li><p>Download the open62541 sources (using git or as a zipfile from github)</p></li>
 <li><p>Open a command shell (cmd) and run</p></li>
@@ -186,13 +238,11 @@ with MinGW, just replace the compiler selection in the call to CMake.</p>
 <div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">cd</span> <span class="p">&lt;</span>path-to<span class="p">&gt;</span>\open62541
 <span class="k">mkdir</span> build
 <span class="k">cd</span> build
-<span class="p">&lt;</span>path-to<span class="p">&gt;</span>\cmake.exe .. -G <span class="s2">&quot;Visual Studio 14 2015&quot;</span>
+<span class="p">&lt;</span>path-to<span class="p">&gt;</span>\cmake.exe .. -G <span class="s2">&quot;MinGW Makefiles&quot;</span>
 <span class="p">:</span><span class="c1">: You can use use cmake-gui for a graphical user-interface to select features</span>
+make
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>Then open <code class="file docutils literal notranslate"><span class="pre">buildopen62541.sln</span></code> in Visual Studio 2015 and build as usual</p></li>
-</ul>
 </section>
 <section id="building-on-os-x">
 <h3>Building on OS X<a class="headerlink" href="#building-on-os-x" title="Link to this heading">¶</a></h3>
@@ -276,7 +326,7 @@ need to adjust them.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">MinSizeRel</span></code> -Os optimization without debug symbols</p></li>
 </ul>
 </dd>
-<dt><strong>BUILD_SHARED_LIBS</strong></dt><dd><p>Build a shared library (dll/so) or (an archive of) object files for linking
+<dt><strong>BUILD_SHARED_LIBS</strong></dt><dd><p>Build a shared library (.dll/.so) or (an archive of) object files for linking
 into a static binary. Shared libraries are recommended for a system-wide
 install. Note that this option modifies the <code class="file docutils literal notranslate"><span class="pre">ua_config.h</span></code> file that is
 also included in <code class="file docutils literal notranslate"><span class="pre">open62541.h</span></code> for the single-file distribution.</p>
@@ -355,11 +405,13 @@ always consistent and can be accessed from an interrupt or parallel thread
 <dt><strong>UA_ENABLE_DISCOVERY_SEMAPHORE</strong></dt><dd><p>Enable Discovery Semaphore support</p>
 </dd>
 <dt><strong>UA_ENABLE_ENCRYPTION</strong></dt><dd><p>Enable encryption support and specify the used encryption backend. The possible
-options are:
-- <code class="docutils literal notranslate"><span class="pre">OFF</span></code> No encryption support. (default)
-- <code class="docutils literal notranslate"><span class="pre">MBEDTLS</span></code> Encryption support using mbed TLS
-- <code class="docutils literal notranslate"><span class="pre">OPENSSL</span></code> Encryption support using OpenSSL
-- <code class="docutils literal notranslate"><span class="pre">LIBRESSL</span></code> EXPERIMENTAL: Encryption support using LibreSSL</p>
+options are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">OFF</span></code> No encryption support. (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MBEDTLS</span></code> Encryption support using mbed TLS</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OPENSSL</span></code> Encryption support using OpenSSL</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LIBRESSL</span></code> EXPERIMENTAL: Encryption support using LibreSSL</p></li>
+</ul>
 </dd>
 <dt><strong>UA_ENABLE_ENCRYPTION_TPM2</strong></dt><dd><dl class="simple">
 <dt>Enable TPM hardware for encryption. The possible options are:</dt><dd><ul class="simple">
@@ -381,6 +433,10 @@ clients. But this namespace 0 is so small that it does not pass the CTT
 <p>The advanced build option <code class="docutils literal notranslate"><span class="pre">UA_FILE_NS0</span></code> can be used to override the XML
 file used for namespace zero generation.</p>
 </dd>
+<dt><strong>UA_ENABLE_DIAGNOSTICS</strong></dt><dd><p>Enable diagnostics information exposed by the server. Enabled by default.</p>
+</dd>
+<dt><strong>UA_ENABLE_JSON_ENCODING</strong></dt><dd><p>Enable JSON encoding. Enabled by default.</p>
+</dd>
 </dl>
 <p>Some options are marked as advanced. The advanced options need to be toggled to
 be visible in the cmake GUIs.</p>
@@ -398,15 +454,15 @@ be visible in the cmake GUIs.</p>
 <h3>PubSub Build Options<a class="headerlink" href="#pubsub-build-options" title="Link to this heading">¶</a></h3>
 <dl class="simple">
 <dt><strong>UA_ENABLE_PUBSUB</strong></dt><dd><p>Enable the experimental OPC UA PubSub support. The option will include the
-PubSub UDP multicast plugin. Disabled by default.</p>
+PubSub UDP multicast plugin. Enabled by default.</p>
 </dd>
 <dt><strong>UA_ENABLE_PUBSUB_FILE_CONFIG</strong></dt><dd><p>Enable loading OPC UA PubSub configuration from File/ByteString. Enabling
 PubSub informationmodel methods also will add a method to the
-Publish/Subscribe object which allows configuring PubSub at runtime.</p>
+Publish/Subscribe object which allows configuring PubSub at runtime. Disabled by default.</p>
 </dd>
 <dt><strong>UA_ENABLE_PUBSUB_INFORMATIONMODEL</strong></dt><dd><p>Enable the information model representation of the PubSub configuration. For
 more details take a look at the following section <cite>PubSub Information Model
-Representation</cite>. Disabled by default.</p>
+Representation</cite>. Enabled by default.</p>
 </dd>
 </dl>
 </section>

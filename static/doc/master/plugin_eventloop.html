@@ -6,20 +6,20 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event Loop Subsystem &mdash; open62541 1.4.6-undefined documentation</title>
+  <title>EventLoop Plugin API &mdash; open62541 1.4.8-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-      <script src="_static/documentation_options.js?v=0b0158c9"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="SecurityPolicy" href="plugin_securitypolicy.html" />
-    <link rel="prev" title="Access Control Plugin API" href="plugin_accesscontrol.html" /> 
+    <link rel="next" title="CertificateGroup Plugin API" href="plugin_certificategroup.html" />
+    <link rel="prev" title="AccessControl Plugin API" href="plugin_accesscontrol.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,16 +49,18 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="plugin.html">Plugin API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_nodestore.html">Node Store Plugin API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">Access Control Plugin API</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Event Loop Subsystem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plugin_nodestore.html">Nodestore Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">AccessControl Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">EventLoop Plugin API</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#timer-policies">Timer Policies</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#event-loop">Event Loop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#event-source">Event Source</a></li>
@@ -74,8 +76,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html">SecurityPolicy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html#pubsub-securitypolicy">PubSub SecurityPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_certificategroup.html">CertificateGroup Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html">SecurityPolicy Plugin API</a></li>
 </ul>
 </li>
 </ul>
@@ -95,7 +97,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="plugin.html">Plugin API</a></li>
-      <li class="breadcrumb-item active">Event Loop Subsystem</li>
+      <li class="breadcrumb-item active">EventLoop Plugin API</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/plugin_eventloop.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,8 +107,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="event-loop-subsystem">
-<h1>Event Loop Subsystem<a class="headerlink" href="#event-loop-subsystem" title="Link to this heading">¶</a></h1>
+  <section id="eventloop-plugin-api">
+<h1>EventLoop Plugin API<a class="headerlink" href="#eventloop-plugin-api" title="Link to this heading">¶</a></h1>
 <p>An OPC UA-enabled application can have several clients and servers. And
 server can serve different transport-level protocols for OPC UA. The
 EventLoop is a central module that provides a unified control-flow for all of
@@ -653,6 +655,8 @@ creating any connection but solely validating the provided parameters
 <p>No additional parameters for sending over an UDP connection defined.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_UDP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#if defined(__linux__) </span><span class="cm">/* Linux only so far */</span>
 </pre></div>
 </div>
 </section>
@@ -725,6 +729,7 @@ txtime parameters uses Linux conventions.</p>
 </dl>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_Ethernet</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -782,7 +787,15 @@ for the interruptHandle.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_InterruptManager_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 
-<span class="cp">#endif </span><span class="cm">/* defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32) */</span>
+<span class="cp">#elif defined(UA_ARCHITECTURE_ZEPHYR)</span>
+
+<span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_Zephyr</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
+
+<span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_Zephyr_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -793,8 +806,8 @@ for the interruptHandle.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plugin_accesscontrol.html" class="btn btn-neutral float-left" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="plugin_securitypolicy.html" class="btn btn-neutral float-right" title="SecurityPolicy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="plugin_accesscontrol.html" class="btn btn-neutral float-left" title="AccessControl Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plugin_certificategroup.html" class="btn btn-neutral float-right" title="CertificateGroup Plugin API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

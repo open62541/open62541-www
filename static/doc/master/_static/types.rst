@@ -201,6 +201,9 @@ A sequence of Unicode characters. Strings are just an array of UA_Byte.
    UA_Boolean
    UA_String_isEmpty(const UA_String *s);
    
+   UA_StatusCode
+   UA_String_append(UA_String *s, const UA_String s2);
+   
    extern const UA_String UA_STRING_NULL;
    
 ``UA_STRING`` returns a string pointing to the original char-array.
@@ -223,6 +226,28 @@ of the char-array.
    
    /* Define strings at compile time (in ROM) */
    #define UA_STRING_STATIC(CHARS) {sizeof(CHARS)-1, (UA_Byte*)CHARS}
+   
+   /* The following methods implement the C standard's printf/vprintf.
+    *
+    * In addition to the format specifiers from the C standard, the following can
+    * be used also:
+    *
+    * - %S - UA_String (not wrapped in quotation marks in the output)
+    * - %N - UA_NodeId (using UA_NodeId_print)
+    *
+    * The output is written to the output string in the first argument. Memory of
+    * sufficient length is allocated when the output string initially has zero
+    * length.
+    *
+    * If the string in the first argument initially has non-zero length, then this
+    * string is used as buffer for encoding and its length is adjusted accordingly.
+    * If the length is too short, then UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED is
+    * reported. Also in that case the string is printed as much as possible. */
+   UA_StatusCode
+   UA_String_printf(UA_String *str, const char *format, ...);
+   
+   UA_StatusCode
+   UA_String_vprintf(UA_String *str, const char *format, va_list args);
    
 .. _datetime:
 
@@ -694,7 +719,6 @@ Human readable text with an optional locale identifier.
 
 NumericRange
 ^^^^^^^^^^^^
-
 NumericRanges are used to indicate subsets of a (multidimensional) array.
 They no official data type in the OPC UA standard and are transmitted only
 with a string encoding, such as "1:2,0:3,5". The colon separates min/max

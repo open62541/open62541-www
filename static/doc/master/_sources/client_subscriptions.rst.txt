@@ -92,6 +92,13 @@ may be recieved during a synchronous service call or in
    UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_deleteSingle(UA_Client *client, UA_UInt32 subscriptionId);
    
+   /* Retrieve or change the user supplied subscription contexts */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_Subscriptions_getContext(UA_Client *client, UA_UInt32 subscriptionId, void **subContext);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_Subscriptions_setContext(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
+   
    static UA_INLINE UA_THREADSAFE UA_SetPublishingModeResponse
    UA_Client_Subscriptions_setPublishingMode(UA_Client *client,
        const UA_SetPublishingModeRequest request) {
@@ -272,3 +279,10 @@ settings are not stored in the client.
            &UA_TYPES[UA_TYPES_SETTRIGGERINGRESPONSE],
            userdata, requestId);
    }
+   
+   /* Retrieve or change the user supplied monitored item context */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_MonitoredItem_getContext(UA_Client *client, UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId, void **monContext);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_MonitoredItem_setContext(UA_Client *client, UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId, void *monContext);

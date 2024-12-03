@@ -6,13 +6,13 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Types &mdash; open62541 1.4.6-undefined documentation</title>
+  <title>Data Types &mdash; open62541 1.4.8-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-      <script src="_static/documentation_options.js?v=0b0158c9"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -451,9 +451,11 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
@@ -663,6 +665,9 @@ reasons indicated by the SubCode.</p></li>
 <span class="n">UA_Boolean</span>
 <span class="nf">UA_String_isEmpty</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
 
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_String_append</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+
 <span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -683,6 +688,28 @@ of the char-array.</p>
 
 <span class="cm">/* Define strings at compile time (in ROM) */</span>
 <span class="cp">#define UA_STRING_STATIC(CHARS) {sizeof(CHARS)-1, (UA_Byte*)CHARS}</span>
+
+<span class="cm">/* The following methods implement the C standard&#39;s printf/vprintf.</span>
+<span class="cm"> *</span>
+<span class="cm"> * In addition to the format specifiers from the C standard, the following can</span>
+<span class="cm"> * be used also:</span>
+<span class="cm"> *</span>
+<span class="cm"> * - %S - UA_String (not wrapped in quotation marks in the output)</span>
+<span class="cm"> * - %N - UA_NodeId (using UA_NodeId_print)</span>
+<span class="cm"> *</span>
+<span class="cm"> * The output is written to the output string in the first argument. Memory of</span>
+<span class="cm"> * sufficient length is allocated when the output string initially has zero</span>
+<span class="cm"> * length.</span>
+<span class="cm"> *</span>
+<span class="cm"> * If the string in the first argument initially has non-zero length, then this</span>
+<span class="cm"> * string is used as buffer for encoding and its length is adjusted accordingly.</span>
+<span class="cm"> * If the length is too short, then UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED is</span>
+<span class="cm"> * reported. Also in that case the string is printed as much as possible. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="n">UA_String_printf</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_String_vprintf</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="kt">va_list</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

@@ -1,5 +1,5 @@
-SecurityPolicy 
---------------
+SecurityPolicy Plugin API
+=========================
 
 .. code-block:: c
 

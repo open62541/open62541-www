@@ -1,3 +1,5 @@
+.. _common:
+
 Common Definitions
 ==================
 
@@ -44,8 +46,12 @@ the node type. Possible attributes are as follows:
        UA_ATTRIBUTEID_ACCESSLEVELEX           = 27
    } UA_AttributeId;
    
-   /* Returns a readable attribute name like "NodeId" or "Invalid" if the attribute
-    * does not exist */
+Returns a readable attribute name like "NodeId" or "Invalid" if the attribute
+does not exist.
+
+.. code-block:: c
+
+   
    const char *
    UA_AttributeId_name(UA_AttributeId attrId);
    
@@ -145,7 +151,6 @@ Part 3: 5.4 Table 10
 
 Rule Handling
 -------------
-
 The RuleHanding settings define how error cases that result from rules in the
 OPC UA specification shall be handled. The rule handling can be softened,
 e.g. to workaround misbehaving implementations or to mitigate the impact of
@@ -163,7 +168,6 @@ specification.
    
 Order
 -----
-
 The Order enum is used to establish an absolute ordering between elements.
 
 .. code-block:: c
@@ -219,7 +223,6 @@ Connection State
    
 Statistic Counters
 ------------------
-
 The stack manages statistic counters for SecureChannels and Sessions.
 
 The Session layer counters are matching the counters of the
@@ -259,7 +262,6 @@ but are harmonized with the Session layer counters if possible.
    
 Lifecycle States
 ----------------
-
 Generic lifecycle states. The STOPPING state indicates that the lifecycle is
 being terminated. But it might take time to (asynchronously) perform a
 graceful shutdown.
@@ -272,23 +274,3 @@ graceful shutdown.
        UA_LIFECYCLESTATE_STARTED,
        UA_LIFECYCLESTATE_STOPPING
    } UA_LifecycleState;
-   
-Forward Declarations
---------------------
-Opaque pointers used in Client, Server and PubSub.
-
-.. code-block:: c
-
-   
-   struct UA_Server;
-   typedef struct UA_Server UA_Server;
-   
-   struct UA_ServerConfig;
-   typedef struct UA_ServerConfig UA_ServerConfig;
-   
-   typedef void (*UA_ServerCallback)(UA_Server *server, void *data);
-   
-   struct UA_Client;
-   typedef struct UA_Client UA_Client;
-   
-.. include:: util.rst

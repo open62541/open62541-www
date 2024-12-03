@@ -1,4 +1,4 @@
-Event Loop Subsystem
+EventLoop Plugin API
 ====================
 An OPC UA-enabled application can have several clients and servers. And
 server can serve different transport-level protocols for OPC UA. The
@@ -588,6 +588,7 @@ No additional parameters for sending over an UDP connection defined.
    UA_ConnectionManager *
    UA_ConnectionManager_new_POSIX_UDP(const UA_String eventSourceName);
    
+   #if defined(__linux__) /* Linux only so far */
 Ethernet Connection Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Listens on the network and manages UDP connections. This should be available
@@ -673,7 +674,7 @@ txtime parameters uses Linux conventions.
 
    UA_ConnectionManager *
    UA_ConnectionManager_new_POSIX_Ethernet(const UA_String eventSourceName);
-   
+   #endif
 MQTT Connection Manager
 ~~~~~~~~~~~~~~~~~~~~~~~
 The MQTT ConnectionManager reuses the TCP ConnectionManager that is
@@ -742,4 +743,12 @@ for the interruptHandle.
    UA_InterruptManager *
    UA_InterruptManager_new_POSIX(const UA_String eventSourceName);
    
-   #endif /* defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32) */
+   #elif defined(UA_ARCHITECTURE_ZEPHYR)
+   
+   UA_EventLoop *
+   UA_EventLoop_new_Zephyr(const UA_Logger *logger);
+   
+   UA_ConnectionManager *
+   UA_ConnectionManager_new_Zephyr_TCP(const UA_String eventSourceName);
+   
+   #endif

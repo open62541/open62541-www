@@ -12,6 +12,7 @@ file(REMOVE_RECURSE
   "../doc_src/plugin_securitypolicy.rst"
   "../doc_src/pubsub.rst"
   "../doc_src/server.rst"
+  "../doc_src/server_pubsub.rst"
   "../doc_src/statuscodes.rst"
   "../doc_src/tutorial_client_firststeps.rst"
   "../doc_src/tutorial_datatypes.rst"

@@ -6,13 +6,13 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 1.4.6-undefined documentation</title>
+  <title>Server &mdash; open62541 1.4.8-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-      <script src="_static/documentation_options.js?v=0b0158c9"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -97,9 +97,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
@@ -1976,6 +1978,46 @@ would cause the node to be deleted.</p>
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">regenerateKey</span><span class="p">,</span>
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">csr</span><span class="p">);</span>
+
+<span class="cm">/* Adds certificates and Certificate Revocation Lists (CRLs) to a specific certificate group</span>
+<span class="cm"> * on the server.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param certificateGroupId The NodeId of the certificate group where certificates will be added</span>
+<span class="cm"> * @param certificates The certificates to be added</span>
+<span class="cm"> * @param certificatesSize The number of certificates</span>
+<span class="cm"> * @param crls The associated CRLs for the certificates, required when adding issuer certificates</span>
+<span class="cm"> * @param crlsSize The number of CRLs</span>
+<span class="cm"> * @param isTrusted Indicates whether the certificates should be added to the trusted list or the issuer list</span>
+<span class="cm"> * @param appendCertificates Indicates whether the certificates should be added to the list or replace the existing list</span>
+<span class="cm"> * @return ``UA_STATUSCODE_GOOD`` on success</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addCertificates</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificates</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">certificatesSize</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">crls</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">crlsSize</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTrusted</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">appendCertificates</span><span class="p">);</span>
+
+<span class="cm">/* Removes certificates from a specific certificate group on the server.</span>
+<span class="cm"> * The corresponding CRLs are removed automatically.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param certificateGroupId The NodeId of the certificate group from which certificates will be removed</span>
+<span class="cm"> * @param certificates The certificates to be removed</span>
+<span class="cm"> * @param certificatesSize The number of certificates</span>
+<span class="cm"> * @param isTrusted Indicates whether the certificates are being removed from the trusted list or the issuer list</span>
+<span class="cm"> * @return ``UA_STATUSCODE_GOOD`` on success</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeCertificates</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificates</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">certificatesSize</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTrusted</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

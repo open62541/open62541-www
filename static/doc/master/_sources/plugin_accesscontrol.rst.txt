@@ -1,7 +1,7 @@
 .. _access-control:
 
-Access Control Plugin API
-=========================
+AccessControl Plugin API
+========================
 The access control callback is used to authenticate sessions and grant access
 rights accordingly.
 
