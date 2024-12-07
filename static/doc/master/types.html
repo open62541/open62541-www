@@ -77,6 +77,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#generic-type-handling">Generic Type Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#namespace-mapping">Namespace Mapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#binary-encoding-decoding">Binary Encoding/Decoding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#json-en-decoding">JSON En/Decoding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#xml-en-decoding">XML En/Decoding</a></li>
@@ -1701,14 +1702,78 @@ following method to retrieve the data type description.</p>
 </pre></div>
 </div>
 </section>
+<section id="namespace-mapping">
+<h2>Namespace Mapping<a class="headerlink" href="#namespace-mapping" title="Link to this heading">¶</a></h2>
+<p>Every <a class="reference internal" href="#nodeid"><span class="std std-ref">NodeId</span></a> references a namespace index. Actually the namespace is
+identified by its URI. The namespace-array of the server maps the URI to the
+namespace index in the array. Namespace zero always has the URI
+<code class="docutils literal notranslate"><span class="pre">`http://opcfoundation.org/UA/`</span></code>. Namespace one has the application URI of
+the server. All namespaces beyond get a custom assignment.</p>
+<p>In order to have predictable NodeIds, a client might predefined its own
+namespace array that is different from the server’s. When a NodeId is decoded
+from a network message (binary or JSON), a mapping-table can be used to
+automatically translate between the remote and local namespace index. The
+mapping is typically done by the client who can generate the mapping table
+after reading the namespace-array of the server. The reverse mapping is done
+in the encoding if the mapping table is set in the options.</p>
+<p>The mapping table also contains the full URI names. It is also used to
+translate the <code class="docutils literal notranslate"><span class="pre">NamespaceUri</span></code> field of an ExpandedNodeId into the namespace
+index of the NodeId embedded in the ExpandedNodeId.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Namespaces with their local index */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceUris</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">namespaceUrisSize</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Map from local to remote indices */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">local2remote</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">local2remoteSize</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Map from remote to local indices */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">remote2local</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">remote2localSize</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="p">;</span>
+
+<span class="cm">/* If the index is unknown, returns (UINT16_MAX - index) */</span>
+<span class="n">UA_UInt16</span>
+<span class="nf">UA_NamespaceMapping_local2Remote</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">localIndex</span><span class="p">);</span>
+
+<span class="n">UA_UInt16</span>
+<span class="nf">UA_NamespaceMapping_remote2Local</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">remoteIndex</span><span class="p">);</span>
+
+<span class="cm">/* Returns an error if the namespace uri was not found.</span>
+<span class="cm"> * The pointer to the index argument needs to be non-NULL. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_NamespaceMapping_uri2Index</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">UA_String</span><span class="w"> </span><span class="n">uri</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">index</span><span class="p">);</span>
+
+<span class="cm">/* Upon success, the uri string gets set. The string is not copied and must not</span>
+<span class="cm"> * outlive the namespace mapping structure. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_NamespaceMapping_index2Uri</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">uri</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_NamespaceMapping_delete</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
 <section id="binary-encoding-decoding">
 <h2>Binary Encoding/Decoding<a class="headerlink" href="#binary-encoding-decoding" title="Link to this heading">¶</a></h2>
 <p>Encoding and decoding routines for the binary format. For the binary decoding
 additional data types can be forwarded.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Returns the number of bytes the value p takes in binary encoding. Returns</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Mapping of namespace indices in NodeIds and of NamespaceUris in</span>
+<span class="cm">     * ExpandedNodeIds. */</span>
+<span class="w">    </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceMapping</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_EncodeBinaryOptions</span><span class="p">;</span>
+
+<span class="cm">/* Returns the number of bytes the value p takes in binary encoding. Returns</span>
 <span class="cm"> * zero if an error occurs. */</span>
 <span class="kt">size_t</span>
-<span class="nf">UA_calcSizeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+<span class="nf">UA_calcSizeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">UA_EncodeBinaryOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
 <span class="cm">/* Encodes a data-structure in the binary format. If outBuf has a length of</span>
 <span class="cm"> * zero, a buffer of the required size is allocated. Otherwise, encoding into</span>
@@ -1716,7 +1781,7 @@ additional data types can be forwarded.</p>
 <span class="cm"> * small). */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_encodeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
-<span class="w">                </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">);</span>
+<span class="w">                </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">,</span><span class="w"> </span><span class="n">UA_EncodeBinaryOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
 <span class="cm">/* The structure with the decoding options may be extended in the future.</span>
 <span class="cm"> * Zero-out the entire structure initially to ensure code-compatibility when</span>
@@ -1724,6 +1789,10 @@ additional data types can be forwarded.</p>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Begin of a linked list with custom datatype definitions */</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customTypes</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Mapping of namespace indices in NodeIds and of NamespaceUris in</span>
+<span class="cm">     * ExpandedNodeIds. */</span>
+<span class="w">    </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceMapping</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Override calloc for arena-based memory allocation. Note that allocated</span>
 <span class="cm">     * memory is not freed if decoding fails afterwards. */</span>

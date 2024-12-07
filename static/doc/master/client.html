@@ -52,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#connection-configuration">Connection configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#custom-data-types">Custom Data Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#namespace-mapping">Namespace Mapping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#advanced-client-configuration">Advanced Client Configuration</a></li>
 </ul>
 </li>
@@ -209,6 +210,33 @@ ROM.</p>
 <p>See the section on <a class="reference internal" href="types.html#generic-types"><span class="std std-ref">Generic Type Handling</span></a>. Examples for working with custom
 data types are provided in <code class="docutils literal notranslate"><span class="pre">/examples/custom_datatype/</span></code>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="namespace-mapping">
+<h3>Namespace Mapping<a class="headerlink" href="#namespace-mapping" title="Link to this heading">¶</a></h3>
+<p>The namespaces index is “just” a mapping to the Uris in the namespace
+array of the server. In order to have stable NodeIds across servers, the
+client keeps a list of predefined namespaces. Use
+<code class="docutils literal notranslate"><span class="pre">UA_Client_addNamespaceUri</span></code>, <code class="docutils literal notranslate"><span class="pre">UA_Client_getNamespaceUri</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UA_Client_getNamespaceIndex</span></code> to interact with the local namespace
+mapping.</p>
+<p>The namespace indices are assigned internally in the client as follows:</p>
+<ul class="simple">
+<li><p>Ns0 and Ns1 are pre-defined by the standard. Ns0 is always
+<code class="docutils literal notranslate"><span class="pre">`http://opcfoundation.org/UA/`</span></code> and used for standard-defined
+NodeIds. Ns1 corresponds to the application uri of the individual
+server.</p></li>
+<li><p>The next namespaces are added in-order from the list below at startup
+(starting at index 2).</p></li>
+<li><p>The local API <code class="docutils literal notranslate"><span class="pre">UA_Client_addNamespaceUri</span></code> can be used to add more
+namespaces.</p></li>
+<li><p>When the client connects, the namespace array of the server is read.
+All previously unknown namespaces are added from this to the internal
+array of the client.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">namespaces</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">namespacesSize</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -1001,6 +1029,20 @@ defined interval.</p>
 <span class="cm"> * configuration into account. Return NULL if none found. */</span>
 <span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Client_findDataType</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeId</span><span class="p">);</span>
+
+<span class="cm">/* The string is allocated and needs to be cleared */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_getNamespaceUri</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">index</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">nsUri</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_getNamespaceIndex</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">nsUri</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">outIndex</span><span class="p">);</span>
+
+<span class="cm">/* Returns the old index of the namespace already exists */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_addNamespace</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">nsUri</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">outIndex</span><span class="p">);</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">
