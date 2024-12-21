@@ -94,12 +94,7 @@
 is not required when <a class="reference internal" href="server_pubsub.html#pubsub"><span class="std std-ref">PubSub is integrated with a server</span></a>.</p>
 <section id="dataset-message">
 <h2>DataSet Message<a class="headerlink" href="#dataset-message" title="Link to this heading">¶</a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">count</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="o">*</span><span class="w"> </span><span class="n">dataSetWriterIds</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetPayloadHeader</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_FIELDENCODING_VARIANT</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_FIELDENCODING_RAWDATA</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_FIELDENCODING_DATAVALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
@@ -152,6 +147,8 @@ is not required when <a class="reference internal" href="server_pubsub.html#pubs
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessage_DataDeltaFrameData</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterId</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Goes into the payload header */</span>
+
 <span class="w">    </span><span class="n">UA_DataSetMessageHeader</span><span class="w"> </span><span class="n">header</span><span class="p">;</span>
 <span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">UA_DataSetMessage_DataKeyFrameData</span><span class="w"> </span><span class="n">keyFrameData</span><span class="p">;</span>
@@ -169,11 +166,6 @@ is not required when <a class="reference internal" href="server_pubsub.html#pubs
 <span class="w">    </span><span class="n">UA_NETWORKMESSAGE_DISCOVERY_REQUEST</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_NETWORKMESSAGE_DISCOVERY_RESPONSE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_NetworkMessageType</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="o">*</span><span class="w"> </span><span class="n">sizes</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_DataSetMessage</span><span class="o">*</span><span class="w"> </span><span class="n">dataSetMessages</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetPayload</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">writerGroupIdEnabled</span><span class="p">;</span>
@@ -218,10 +210,6 @@ is not required when <a class="reference internal" href="server_pubsub.html#pubs
 
 <span class="w">    </span><span class="n">UA_NetworkMessageGroupHeader</span><span class="w"> </span><span class="n">groupHeader</span><span class="p">;</span>
 
-<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">UA_DataSetPayloadHeader</span><span class="w"> </span><span class="n">dataSetPayloadHeader</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">payloadHeader</span><span class="p">;</span>
-
 <span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">timestamp</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">picoseconds</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">promotedFieldsSize</span><span class="p">;</span>
@@ -230,7 +218,11 @@ is not required when <a class="reference internal" href="server_pubsub.html#pubs
 <span class="w">    </span><span class="n">UA_NetworkMessageSecurityHeader</span><span class="w"> </span><span class="n">securityHeader</span><span class="p">;</span>
 
 <span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">UA_DataSetPayload</span><span class="w"> </span><span class="n">dataSetPayload</span><span class="p">;</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">UA_DataSetMessage</span><span class="w"> </span><span class="o">*</span><span class="n">dataSetMessages</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">size_t</span><span class="w"> </span><span class="n">dataSetMessagesSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Goes into the payload header */</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="n">dataSetPayload</span><span class="p">;</span>
+<span class="w">        </span><span class="cm">/* Extended with other payload types in the future */</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">payload</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">securityFooter</span><span class="p">;</span>
