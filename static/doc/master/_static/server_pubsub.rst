@@ -160,6 +160,32 @@ The PubSub configuration is part of the server-config.
        UA_PubSubSecurityPolicy *securityPolicies;
    } UA_PubSubConfiguration;
    
+PubSub Components
+-----------------
+All PubSubComponents (Connection, Reader, ReaderGroup, ...) have a two
+configuration items in common: A void context-pointer and a callback to
+override the default state machine with a custom implementation.
+
+When a custom state machine is set, then internally no sockets are opened and
+no periodic callbacks are registered. All "active behavior" has to be
+managed/configured entirely in the custom state machine.
+
+.. code-block:: c
+
+   
+   /* The custom state machine callback is optional (can be NULL). It gets called
+    * with a request to change the state targetState. The state pointer contains
+    * the old (and afterwards the new) state. The notification stateChangeCallback
+    * is called afterwards. When a bad statuscode is returned, the component must
+    * be set to an ERROR state. */
+   #define UA_PUBSUB_COMPONENT_CONTEXT                                   \
+       void *context;                                                    \
+       UA_StatusCode (*customStateMachine)(UA_Server *server,            \
+                                           const UA_NodeId componentId,  \
+                                           void *componentContext,       \
+                                           UA_PubSubState *state,        \
+                                           UA_PubSubState targetState);  \
+   
    /* Enable all PubSubComponents. Returns the ORed statuscodes for enabling each
     * component individually. */
    UA_StatusCode
@@ -180,12 +206,15 @@ runtime.
 
    
    typedef struct {
+       /* Configuration parameters from PubSubConnectionDataType */
        UA_String name;
        UA_PublisherId publisherId;
        UA_String transportProfileUri;
        UA_Variant address;
        UA_KeyValueMap connectionProperties;
        UA_Variant connectionTransportSettings;
+   
+       UA_PUBSUB_COMPONENT_CONTEXT /* Context Configuration */
    
        UA_EventLoop *eventLoop; /* Use an external EventLoop (use the EventLoop of
                                  * the server if this is NULL). Propagates to the
@@ -212,6 +241,14 @@ runtime.
    UA_StatusCode UA_THREADSAFE
    UA_Server_disablePubSubConnection(UA_Server *server,
                                      const UA_NodeId connectionId);
+   
+   /* Manually "inject" a packet as if it had been received by the
+    * PubSubConnection. This is intended to be used in combination with a custom
+    * state machine where sockets (connections) are handled by user code. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_processPubSubConnectionReceive(UA_Server *server,
+                                            const UA_NodeId connectionId,
+                                            const UA_ByteString packet);
    
    /* Returns a deep copy of the config */
    UA_StatusCode UA_THREADSAFE
@@ -274,6 +311,9 @@ functions to add new fields.
            UA_PublishedEventConfig event;
            UA_PublishedEventTemplateConfig eventTemplate;
        } config;
+   
+       void *context; /* Context Configuration (PublishedDataSet has no state
+                       * machine) */
    } UA_PublishedDataSetConfig;
    
    void
@@ -469,12 +509,15 @@ are provided as an argument so that the user can implement his callback
        /* non std. field */
        UA_PubSubRTLevel rtLevel;
    
-       /* Message are encrypted if a SecurityPolicy is configured and the
+       /* Security Configuration
+        * Message are encrypted if a SecurityPolicy is configured and the
         * securityMode set accordingly. The symmetric key is a runtime information
         * and has to be set via UA_Server_setWriterGroupEncryptionKey. */
        UA_MessageSecurityMode securityMode; /* via the UA_WriterGroupDataType */
        UA_PubSubSecurityPolicy *securityPolicy;
        UA_String securityGroupId;
+   
+       UA_PUBSUB_COMPONENT_CONTEXT /* Context Configuration */
    } UA_WriterGroupConfig;
    
    void
@@ -554,6 +597,8 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
        UA_ExtensionObject transportSettings;
        UA_String dataSetName;
        UA_KeyValueMap dataSetWriterProperties;
+   
+       UA_PUBSUB_COMPONENT_CONTEXT /* Context Configuration */
    } UA_DataSetWriterConfig;
    
    void
@@ -657,6 +702,9 @@ AddressSpace.
            UA_TargetVariablesDataType target;
        } subscribedDataSet;
        UA_DataSetMetaDataType dataSetMetaData;
+   
+       void *context; /* Context Configuration (SubscribedDataSet has no state
+                       * machine) */
    } UA_SubscribedDataSetConfig;
    
    void
@@ -714,6 +762,8 @@ SubscribedDataSet and be contained within a ReaderGroup.
        /* non std. fields */
        UA_String linkedStandaloneSubscribedDataSetName;
        UA_PubSubRtEncoding expectedEncoding;
+   
+       UA_PUBSUB_COMPONENT_CONTEXT /* Context Configuration */
    } UA_DataSetReaderConfig;
    
    UA_StatusCode
@@ -796,6 +846,8 @@ can be configured for a ReaderGroup.
        UA_MessageSecurityMode securityMode;
        UA_PubSubSecurityPolicy *securityPolicy;
        UA_String securityGroupId;
+   
+       UA_PUBSUB_COMPONENT_CONTEXT /* Context Configuration */
    } UA_ReaderGroupConfig;
    
    void

@@ -53,6 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#pubsub-information-model-representation">PubSub Information Model Representation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#publisherid">PublisherId</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-wide-pubsub-configuration">Server-wide PubSub Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pubsub-components">PubSub Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pubsubconnection">PubSubConnection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#publisheddataset">PublishedDataSet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#datasetfield">DataSetField</a></li>
@@ -243,6 +244,29 @@ where we can.</p>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicies</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubConfiguration</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="pubsub-components">
+<h2>PubSub Components<a class="headerlink" href="#pubsub-components" title="Link to this heading">¶</a></h2>
+<p>All PubSubComponents (Connection, Reader, ReaderGroup, …) have a two
+configuration items in common: A void context-pointer and a callback to
+override the default state machine with a custom implementation.</p>
+<p>When a custom state machine is set, then internally no sockets are opened and
+no periodic callbacks are registered. All “active behavior” has to be
+managed/configured entirely in the custom state machine.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The custom state machine callback is optional (can be NULL). It gets called</span>
+<span class="cm"> * with a request to change the state targetState. The state pointer contains</span>
+<span class="cm"> * the old (and afterwards the new) state. The notification stateChangeCallback</span>
+<span class="cm"> * is called afterwards. When a bad statuscode is returned, the component must</span>
+<span class="cm"> * be set to an ERROR state. */</span>
+<span class="cp">#define UA_PUBSUB_COMPONENT_CONTEXT                                   \</span>
+<span class="cp">    void *context;                                                    \</span>
+<span class="cp">    UA_StatusCode (*customStateMachine)(UA_Server *server,            \</span>
+<span class="cp">                                        const UA_NodeId componentId,  \</span>
+<span class="cp">                                        void *componentContext,       \</span>
+<span class="cp">                                        UA_PubSubState *state,        \</span>
+<span class="cp">                                        UA_PubSubState targetState);  \</span>
 
 <span class="cm">/* Enable all PubSubComponents. Returns the ORed statuscodes for enabling each</span>
 <span class="cm"> * component individually. */</span>
@@ -262,12 +286,15 @@ and the PubSub functionality. It is possible to create multiple
 PubSubConnections with (possibly) different transport protocols at
 runtime.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Configuration parameters from PubSubConnectionDataType */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">transportProfileUri</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">connectionProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">connectionTransportSettings</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 
 <span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Use an external EventLoop (use the EventLoop of</span>
 <span class="cm">                              * the server if this is NULL). Propagates to the</span>
@@ -294,6 +321,14 @@ runtime.</p>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_disablePubSubConnection</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">connectionId</span><span class="p">);</span>
+
+<span class="cm">/* Manually &quot;inject&quot; a packet as if it had been received by the</span>
+<span class="cm"> * PubSubConnection. This is intended to be used in combination with a custom</span>
+<span class="cm"> * state machine where sockets (connections) are handled by user code. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_processPubSubConnectionReceive</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">connectionId</span><span class="p">,</span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">packet</span><span class="p">);</span>
 
 <span class="cm">/* Returns a deep copy of the config */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
@@ -354,6 +389,9 @@ functions to add new fields.</p>
 <span class="w">        </span><span class="n">UA_PublishedEventConfig</span><span class="w"> </span><span class="n">event</span><span class="p">;</span>
 <span class="w">        </span><span class="n">UA_PublishedEventTemplateConfig</span><span class="w"> </span><span class="n">eventTemplate</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">config</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Context Configuration (PublishedDataSet has no state</span>
+<span class="cm">                    * machine) */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PublishedDataSetConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -538,12 +576,15 @@ are provided as an argument so that the user can implement his callback
 <span class="w">    </span><span class="cm">/* non std. field */</span>
 <span class="w">    </span><span class="n">UA_PubSubRTLevel</span><span class="w"> </span><span class="n">rtLevel</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Message are encrypted if a SecurityPolicy is configured and the</span>
+<span class="w">    </span><span class="cm">/* Security Configuration</span>
+<span class="cm">     * Message are encrypted if a SecurityPolicy is configured and the</span>
 <span class="cm">     * securityMode set accordingly. The symmetric key is a runtime information</span>
 <span class="cm">     * and has to be set via UA_Server_setWriterGroupEncryptionKey. */</span>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w"> </span><span class="cm">/* via the UA_WriterGroupDataType */</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_WriterGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -619,6 +660,8 @@ with an existing PublishedDataSet and be contained within a WriterGroup.</p>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">dataSetName</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">dataSetWriterProperties</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetWriterConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -719,6 +762,9 @@ AddressSpace.</p>
 <span class="w">        </span><span class="n">UA_TargetVariablesDataType</span><span class="w"> </span><span class="n">target</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">subscribedDataSet</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="n">dataSetMetaData</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Context Configuration (SubscribedDataSet has no state</span>
+<span class="cm">                    * machine) */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_SubscribedDataSetConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -774,6 +820,8 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="w">    </span><span class="cm">/* non std. fields */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">linkedStandaloneSubscribedDataSetName</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubRtEncoding</span><span class="w"> </span><span class="n">expectedEncoding</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span>
@@ -854,6 +902,8 @@ buffer.</p></li>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
