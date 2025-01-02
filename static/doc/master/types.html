@@ -882,8 +882,7 @@ seconds.</p>
 
 <span class="n">UA_Boolean</span><span class="w"> </span><span class="nf">UA_NodeId_isNull</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">);</span>
 
-<span class="cm">/* Print the NodeId in the human-readable format defined in Part 6,</span>
-<span class="cm"> * 5.3.1.10.</span>
+<span class="cm">/* Print the NodeId in the human-readable format defined in Part 6.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Examples:</span>
 <span class="cm"> *   UA_NODEID(&quot;i=13&quot;)</span>
@@ -897,12 +896,38 @@ seconds.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NodeId_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
+<span class="cm">/* Extended NodeId printing. If nsMapping argument is non-NULL, then the</span>
+<span class="cm"> * NamespaceIndex is translated to the NamespaceUri. If that is not successful,</span>
+<span class="cm"> * the numerical NamespaceIndex is used instead.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Examples:</span>
+<span class="cm"> *   nsu=http://widgets.com/schemas/hello;s=Hello World</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_NodeId_printEx</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
+<span class="w">                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="cm">/* Parse the human-readable NodeId format. Attention! String and</span>
 <span class="cm"> * ByteString NodeIds have their identifier malloc&#39;ed and need to be</span>
 <span class="cm"> * cleaned up. */</span>
-<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NodeId_parse</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
+
+<span class="cm">/* Extended parsing that uses the provided namespace mapping to find the</span>
+<span class="cm"> * NamespaceIndex for a provided NamespaceUri.</span>
+<span class="cm"> *</span>
+<span class="cm"> * If the NodeId uses an unknown NamespaceUri, then a String-NodeId is returned</span>
+<span class="cm"> * that uses NamespaceIndex 0 and the full original encoding for the string</span>
+<span class="cm"> * part.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Example:</span>
+<span class="cm"> *   nsu=my_uri;i=5 =&gt; s=&quot;nsu=my_uri;i=5&quot; (The quotation marks are for</span>
+<span class="cm"> *       illustration purposes and not actually included)</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_NodeId_parseEx</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
+<span class="w">                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">);</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
 <span class="w">             </span><span class="n">UA_NODEID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
@@ -1015,12 +1040,28 @@ seconds.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_ExpandedNodeId_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
+<span class="cm">/* Extended printing of ExpandedNodeId. It tries to map NamespaceIndex and</span>
+<span class="cm"> * ServerIndex to a Uri using the provided mapping.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Examples:</span>
+<span class="cm"> *     svu=http://smith.com/west/factory;nsu=tag:acme.com,2023;i=1234</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_ExpandedNodeId_printEx</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="cm">/* Parse the human-readable NodeId format. Attention! String and</span>
 <span class="cm"> * ByteString NodeIds have their identifier malloc&#39;ed and need to be</span>
 <span class="cm"> * cleaned up. */</span>
-<span class="cp">#ifdef UA_ENABLE_PARSING</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_ExpandedNodeId_parse</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_ExpandedNodeId_parseEx</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">);</span>
 
 <span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
 <span class="w">             </span><span class="n">UA_EXPANDEDNODEID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
@@ -1128,6 +1169,42 @@ seconds.</p>
 <span class="w">    </span><span class="n">qn</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">qn</span><span class="p">;</span>
 <span class="p">})</span>
+
+<span class="cm">/* Print the human-readable QualifiedName format. QualifiedNames can be printed</span>
+<span class="cm"> * with either the integer NamespaceIndex or using the NamespaceUri.</span>
+<span class="cm"> * The Namespace 0 is always omitted.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The extended printing tries to translate the NamespaceIndex to the</span>
+<span class="cm"> * NamespaceUri from the mapping table. When the mapping fails, the integer</span>
+<span class="cm"> * NamespaceIndex from is used.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Examples:</span>
+<span class="cm"> *    Namespace Zero: HelloWorld</span>
+<span class="cm"> *    NamespaceIndex Form: 3:HelloWorld</span>
+<span class="cm"> *    NamespaceUri Form: nsu=http://widgets.com/schemas/hello;HelloWorld</span>
+<span class="cm"> *</span>
+<span class="cm"> * The method can either use a pre-allocated string buffer or allocates memory</span>
+<span class="cm"> * internally if called with an empty output string. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="n">UA_QualifiedName_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_QualifiedName_printEx</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_PARSING</span>
+<span class="cm">/* Parse the human-readable QualifiedName format.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The extended parsing tries to translate the NamespaceIndex to a NamespaceUri</span>
+<span class="cm"> * from the mapping table. When the mapping fails, the name component gets the</span>
+<span class="cm"> * entire string. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_QualifiedName_parse</span><span class="p">(</span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_QualifiedName_parseEx</span><span class="p">(</span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -1719,7 +1796,7 @@ in the encoding if the mapping table is set in the options.</p>
 <p>The mapping table also contains the full URI names. It is also used to
 translate the <code class="docutils literal notranslate"><span class="pre">NamespaceUri</span></code> field of an ExpandedNodeId into the namespace
 index of the NodeId embedded in the ExpandedNodeId.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_NamespaceMapping</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Namespaces with their local index */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceUris</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">namespaceUrisSize</span><span class="p">;</span>
@@ -1731,27 +1808,27 @@ index of the NodeId embedded in the ExpandedNodeId.</p>
 <span class="w">    </span><span class="cm">/* Map from remote to local indices */</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">remote2local</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">remote2localSize</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="p">;</span>
+<span class="p">};</span>
 
 <span class="cm">/* If the index is unknown, returns (UINT16_MAX - index) */</span>
 <span class="n">UA_UInt16</span>
-<span class="nf">UA_NamespaceMapping_local2Remote</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="nf">UA_NamespaceMapping_local2Remote</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">localIndex</span><span class="p">);</span>
 
 <span class="n">UA_UInt16</span>
-<span class="nf">UA_NamespaceMapping_remote2Local</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="nf">UA_NamespaceMapping_remote2Local</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">remoteIndex</span><span class="p">);</span>
 
 <span class="cm">/* Returns an error if the namespace uri was not found.</span>
 <span class="cm"> * The pointer to the index argument needs to be non-NULL. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_NamespaceMapping_uri2Index</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="nf">UA_NamespaceMapping_uri2Index</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">UA_String</span><span class="w"> </span><span class="n">uri</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">index</span><span class="p">);</span>
 
 <span class="cm">/* Upon success, the uri string gets set. The string is not copied and must not</span>
 <span class="cm"> * outlive the namespace mapping structure. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_NamespaceMapping_index2Uri</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
+<span class="nf">UA_NamespaceMapping_index2Uri</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">uri</span><span class="p">);</span>
 
 <span class="kt">void</span>
