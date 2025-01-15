@@ -63,6 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#datasetreader">DataSetReader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#readergroup">ReaderGroup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#securitygroup">SecurityGroup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#offset-table">Offset Table</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
@@ -1078,6 +1079,67 @@ and manage role permission on SecurityGroup object.</p>
 <span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">writerGroup</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB_SKS */</span>
+</pre></div>
+</div>
+</section>
+<section id="offset-table">
+<h2>Offset Table<a class="headerlink" href="#offset-table" title="Link to this heading">¶</a></h2>
+<p>When the content of a PubSub Networkmessage has a fixed length, then only a
+few “content bytes” at known locations within the NetworkMessage change
+between publish cycles. The so-called offset table exposes this to enable
+fast-path implementations for realtime applications.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_NETWORKMESSAGE_GROUPVERSION</span><span class="p">,</span><span class="w">   </span><span class="cm">/* UInt32 */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_NETWORKMESSAGE_SEQUENCENUMBER</span><span class="p">,</span><span class="w"> </span><span class="cm">/* UInt16 */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_NETWORKMESSAGE_TIMESTAMP</span><span class="p">,</span><span class="w">      </span><span class="cm">/* DateTime */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_NETWORKMESSAGE_PICOSECONDS</span><span class="p">,</span><span class="w">    </span><span class="cm">/* UInt16 */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETMESSAGE</span><span class="p">,</span><span class="w"> </span><span class="cm">/* no content, marks the DSM beginning */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETMESSAGE_SEQUENCENUMBER</span><span class="p">,</span><span class="w"> </span><span class="cm">/* UInt16 */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETMESSAGE_STATUS</span><span class="p">,</span><span class="w">         </span><span class="cm">/* UInt16 */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETMESSAGE_TIMESTAMP</span><span class="p">,</span><span class="w">      </span><span class="cm">/* DateTime */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETMESSAGE_PICOSECONDS</span><span class="p">,</span><span class="w">    </span><span class="cm">/* UInt16 */</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETFIELD_DATAVALUE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETFIELD_VARIANT</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBOFFSETTYPE_DATASETFIELD_RAW</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubOffsetType</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_PubSubOffsetType</span><span class="w"> </span><span class="n">offsetType</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Content type at the offset */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span><span class="w">                  </span><span class="cm">/* Offset in the NetworkMessage */</span>
+
+<span class="w">    </span><span class="cm">/* The PubSub component that originates / receives the offset content.</span>
+<span class="cm">     * - For NetworkMessage-offsets this is the ReaderGroup / WriterGroup.</span>
+<span class="cm">     * - For DataSetMessage-offsets this is DataSetReader / DataSetWriter.</span>
+<span class="cm">     * - For DataSetFields this is the NodeId associated with the field:</span>
+<span class="cm">     *   - For Writers the NodeId of the DataSetField (in a PublishedDataSet).</span>
+<span class="cm">     *   - For Readers the TargetNodeId of the FieldTargetDataType (this can</span>
+<span class="cm">     *     come from a SubscribedDataSet or a StandaloneSubscribedDataSets).</span>
+<span class="cm">     *     Access more metadata from the FieldTargetVariable by counting the</span>
+<span class="cm">     *     index of the current DataSetField-offset within the DataSetMessage</span>
+<span class="cm">     *     and use that index for the lookup in the DataSetReader configuration. */</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">component</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubOffset</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_PubSubOffset</span><span class="w"> </span><span class="o">*</span><span class="n">offsets</span><span class="p">;</span><span class="w">      </span><span class="cm">/* Array of offset entries */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">offsetsSize</span><span class="p">;</span><span class="w">            </span><span class="cm">/* Number of entries */</span>
+<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">networkMessage</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Current NetworkMessage in binary encoding */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubOffsetTable</span><span class="p">;</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_PubSubOffsetTable_clear</span><span class="p">(</span><span class="n">UA_PubSubOffsetTable</span><span class="w"> </span><span class="o">*</span><span class="n">ot</span><span class="p">);</span>
+
+<span class="cm">/* Compute the offset table for a WriterGroup */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_computeWriterGroupOffsetTable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">writerGroupId</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_PubSubOffsetTable</span><span class="w"> </span><span class="o">*</span><span class="n">ot</span><span class="p">);</span>
+
+<span class="cm">/* Compute the offset table for a ReaderGroup */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_computeReaderGroupOffsetTable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerGroupId</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_PubSubOffsetTable</span><span class="w"> </span><span class="o">*</span><span class="n">ot</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span>
 </pre></div>
