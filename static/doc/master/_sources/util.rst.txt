@@ -448,6 +448,10 @@ Trustlist Helpers
    UA_StatusCode
    UA_TrustListDataType_add(const UA_TrustListDataType *src, UA_TrustListDataType *dst);
    
+   /* Replaces the contents of the destination trusted list with the certificates from the source trusted list. */
+   UA_StatusCode
+   UA_TrustListDataType_set(const UA_TrustListDataType *src, UA_TrustListDataType *dst);
+   
    /* Removes all of the certificates from the dst trust list that are specified
     * in the src trust list. */
    UA_StatusCode
