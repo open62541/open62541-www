@@ -296,11 +296,6 @@ runtime.</p>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="n">connectionTransportSettings</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
-
-<span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Use an external EventLoop (use the EventLoop of</span>
-<span class="cm">                              * the server if this is NULL). Propagates to the</span>
-<span class="cm">                              * ReaderGroup/WriterGroup attached to the</span>
-<span class="cm">                              * Connection. */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubConnectionConfig</span><span class="p">;</span>
 
 <span class="cm">/* Add a new PubSub connection to the given server and open it.</span>
@@ -440,20 +435,10 @@ handling process.</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">promotedField</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PublishedVariableDataType</span><span class="w"> </span><span class="n">publishParameters</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* non std. field */</span>
-<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">rtFieldSourceEnabled</span><span class="p">;</span>
-<span class="w">        </span><span class="cm">/* If the rtInformationModelNode is set, the nodeid in publishParameter</span>
-<span class="cm">         * must point to a node with external data source backend defined */</span>
-<span class="w">        </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">rtInformationModelNode</span><span class="p">;</span>
-<span class="w">        </span><span class="cm">/* TODO: Decide if suppress C++ warnings and use &#39;UA_DataValue * * const</span>
-<span class="cm">         * staticValueSource;&#39; */</span>
-<span class="w">        </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">staticValueSource</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">rtValueSource</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxStringLength</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="n">description</span><span class="p">;</span>
 <span class="w">    </span><span class="cm">/* If dataSetFieldId is not set, the GUID will be generated on adding the</span>
-<span class="cm">    *  field*/</span>
+<span class="cm">     * field */</span>
 <span class="w">    </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">dataSetFieldId</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetVariableConfig</span><span class="p">;</span>
 
@@ -502,62 +487,10 @@ container for <a class="reference internal" href="#dsw"><span class="std std-ref
 imagined as producer of the network messages. The creation of network
 messages is controlled by parameters like the publish interval, which is e.g.
 contained in the WriterGroup.</p>
-<p>The message publishing can be configured for realtime requirements. The RT-levels
-go along with different requirements. The below listed levels can be configured:</p>
-<dl class="simple">
-<dt>UA_PUBSUB_RT_NONE</dt><dd><p>No realtime-specific configuration.</p>
-</dd>
-<dt>UA_PUBSUB_RT_DIRECT_VALUE_ACCESS</dt><dd><p>All PublishedDataSets need to point to a variable with a
-<code class="docutils literal notranslate"><span class="pre">UA_VALUEBACKENDTYPE_EXTERNAL</span></code> value backend. The value backend gets
-cached when the configuration is frozen. No lookup of the variable from
-the information is performed afterwards. This enables also big data
-structures to be updated atomically with a compare-and-switch operation on
-the <code class="docutils literal notranslate"><span class="pre">UA_DataValue</span></code> double-pointer in the backend.</p>
-</dd>
-<dt>UA_PUBSUB_RT_FIXED_SIZE</dt><dd><p>Validate that the message constains only fields with a known size.
-Then the message fields have fixed offsets that are known ahead of time.</p>
-</dd>
-<dt>UA_PUBSUB_RT_DETERMINISTIC</dt><dd><p>Both direct-access and fixed-size is being used. The server pre-allocates
-buffers when the configuration is frozen and uses only memcpy operations
-to update the PubSub network messages for sending.</p>
-</dd>
-</dl>
-<p>WARNING! For hard real time requirements the underlying system must be
-RT-capable. Also note that each PubSubConnection can have a dedicated
-EventLoop. That way normal client/server operations can run independently
-from PubSub. The double-pointer in the <code class="docutils literal notranslate"><span class="pre">UA_VALUEBACKENDTYPE_EXTERNAL</span></code> value
-backend allows avoid race-condition with non-blocking atomic operations.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_NONE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_DIRECT_VALUE_ACCESS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_FIXED_SIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_DETERMINISTIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubRTLevel</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_UADP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_PUBSUB_ENCODING_JSON</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubEncodingType</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>The user can define his own callback implementation for publishing and
-subscribing. The user must take care of the callback to call for every
-publishing or subscibing interval. The configured base time and timer policy
-are provided as an argument so that the user can implement his callback
-(thread) considering base time and timer policies</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span>
-<span class="w">                                       </span><span class="n">UA_ServerCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span>
-<span class="w">                                       </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span>
-<span class="w">                                       </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">,</span>
-<span class="w">                                       </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">changeCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span>
-<span class="w">                                          </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span>
-<span class="w">                                          </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span>
-<span class="w">                                          </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeCustomCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span>
-<span class="w">                                 </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSub_CallbackLifecycle</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
@@ -569,13 +502,10 @@ are provided as an argument so that the user can implement his callback
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">groupProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* PubSub Manager Callback */</span>
-<span class="w">    </span><span class="n">UA_PubSub_CallbackLifecycle</span><span class="w"> </span><span class="n">pubsubManagerCallback</span><span class="p">;</span>
+
 <span class="w">    </span><span class="cm">/* non std. config parameter. maximum count of embedded DataSetMessage in</span>
 <span class="cm">     * one NetworkMessage */</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">maxEncapsulatedDataSetMessageCount</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* non std. field */</span>
-<span class="w">    </span><span class="n">UA_PubSubRTLevel</span><span class="w"> </span><span class="n">rtLevel</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Security Configuration</span>
 <span class="cm">     * Message are encrypted if a SecurityPolicy is configured and the</span>
@@ -725,41 +655,10 @@ AddressSpace.</p>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_SubscribedDataSetType</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Standard-defined FieldTargetDataType */</span>
-<span class="w">    </span><span class="n">UA_FieldTargetDataType</span><span class="w"> </span><span class="n">targetVariable</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* If realtime-handling is required, set this pointer non-NULL and it will be used</span>
-<span class="cm">     * to memcpy the value instead of using the Write service.</span>
-<span class="cm">     * If the beforeWrite method pointer is set, it will be called before a memcpy update</span>
-<span class="cm">     * to the value. But param externalDataValue already contains the new value.</span>
-<span class="cm">     * If the afterWrite method pointer is set, it will be called after a memcpy update</span>
-<span class="cm">     * to the value. */</span>
-<span class="w">    </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="n">externalDataValue</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariableContext</span><span class="p">;</span><span class="w"> </span><span class="cm">/* user-defined pointer */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">beforeWrite</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">readerIdentifier</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariableIdentifier</span><span class="p">,</span>
-<span class="w">                        </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariableContext</span><span class="p">,</span>
-<span class="w">                        </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="n">externalDataValue</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">afterWrite</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">readerIdentifier</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariableIdentifier</span><span class="p">,</span>
-<span class="w">                       </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariableContext</span><span class="p">,</span>
-<span class="w">                       </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="n">externalDataValue</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_FieldTargetVariable</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">targetVariablesSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_FieldTargetVariable</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariables</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_TargetVariables</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SubscribedDataSetType</span><span class="w"> </span><span class="n">subscribedDataSetType</span><span class="p">;</span>
 <span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="cm">/* datasetmirror is currently not implemented */</span>
+<span class="w">        </span><span class="cm">/* DataSetMirror is currently not implemented */</span>
 <span class="w">        </span><span class="n">UA_TargetVariablesDataType</span><span class="w"> </span><span class="n">target</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">subscribedDataSet</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="n">dataSetMetaData</span><span class="p">;</span>
@@ -813,10 +712,9 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SubscribedDataSetType</span><span class="w"> </span><span class="n">subscribedDataSetType</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* TODO UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror */</span>
 <span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">UA_TargetVariables</span><span class="w"> </span><span class="n">subscribedDataSetTarget</span><span class="p">;</span>
-<span class="w">        </span><span class="c1">// UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror;</span>
+<span class="w">        </span><span class="cm">/* TODO: UA_SubscribedDataSetMirrorDataType subscribedDataSetMirror */</span>
+<span class="w">        </span><span class="n">UA_TargetVariablesDataType</span><span class="w"> </span><span class="n">target</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">subscribedDataSet</span><span class="p">;</span>
 <span class="w">    </span><span class="cm">/* non std. fields */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">linkedStandaloneSubscribedDataSetName</span><span class="p">;</span>
@@ -857,10 +755,8 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="n">UA_Server_disableDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setDataSetReaderTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">,</span>
-<span class="w">                                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">tvsSize</span><span class="p">,</span>
-<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FieldTargetVariable</span><span class="w"> </span><span class="o">*</span><span class="n">tvs</span><span class="p">);</span>
+<span class="n">UA_Server_setDataSetReaderTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">targetVariablesSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FieldTargetDataType</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariables</span><span class="p">);</span>
 
 <span class="cm">/* Legacy API */</span>
 <span class="cp">#define UA_Server_DataSetReader_getConfig(server, dsrId, config) \</span>
@@ -881,18 +777,10 @@ is removed. All network message related filters are only available in the
 DataSetReader.</p>
 <p>The RT-levels go along with different requirements. The below listed levels
 can be configured for a ReaderGroup.</p>
-<ul class="simple">
-<li><p>UA_PUBSUB_RT_NONE: RT applied to this level</p></li>
-<li><p>UA_PUBSUB_RT_FIXED_SIZE: Extends PubSub RT functionality and implements
-fast path message decoding in the Subscriber. Uses a buffered network
-message and only decodes the necessary offsets stored in an offset
-buffer.</p></li>
-</ul>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* non std. field */</span>
-<span class="w">    </span><span class="n">UA_PubSubRTLevel</span><span class="w"> </span><span class="n">rtLevel</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">groupProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
