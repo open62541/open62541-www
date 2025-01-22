@@ -54,10 +54,129 @@ title_align = "left" # Default is center, can be left, right or center
 
 [[rows]]
   [[rows.values]]
-    header = "1.4.1 Release"
+    header = "1.4.8 Release"
 
   [[rows.values]]
     text = "Released"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.8/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.8.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.7 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.7/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.7.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.6 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.6/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.6.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.5 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.5/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.5.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.4 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.4/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.4.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.3 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.3/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.3.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.2 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.2/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.2.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.1 Release"
+
+  [[rows.values]]
+    text = "Legacy"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"
