@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 1.4.1-undefined documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+  <title>Server &mdash; open62541 1.4.8-undefined documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/documentation_options.js?v=cebbca66"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +34,6 @@
             open62541
               <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                1.4
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -102,9 +97,11 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
@@ -378,10 +375,12 @@ ModellingRule of their InstanceDeclaration</p>
 <span class="cp"># ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">mdnsEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_MdnsDiscoveryConfiguration</span><span class="w"> </span><span class="n">mdnsConfig</span><span class="p">;</span>
+<span class="cp">#  ifdef UA_ENABLE_DISCOVERY_MULTICAST_MDNSD</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">mdnsInterfaceIP</span><span class="p">;</span>
-<span class="cp">#  if !defined(UA_HAS_GETIFADDR)</span>
+<span class="cp">#   if !defined(UA_HAS_GETIFADDR)</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">mdnsIpAddressListSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">mdnsIpAddressList</span><span class="p">;</span>
+<span class="cp">#   endif</span>
 <span class="cp">#  endif</span>
 <span class="cp"># endif</span>
 <span class="cp">#endif</span>
@@ -440,8 +439,8 @@ ModellingRule of their InstanceDeclaration</p>
 </section>
 <section id="pubsub">
 <h3>PubSub<a class="headerlink" href="#pubsub" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">pubsubEnabled</span><span class="p">;</span>
-<span class="cp">#ifdef UA_ENABLE_PUBSUB</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_PUBSUB</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">pubsubEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubConfiguration</span><span class="w"> </span><span class="n">pubSubConfig</span><span class="p">;</span>
 <span class="cp">#endif</span>
 </pre></div>
@@ -500,7 +499,7 @@ ModellingRule of their InstanceDeclaration</p>
 
 <span class="n">UA_DEPRECATED</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="kt">void</span>
 <span class="n">UA_ServerConfig_clean</span><span class="p">(</span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">     </span><span class="n">UA_ServerConfig_clear</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_ServerConfig_clear</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1964,11 +1963,10 @@ would cause the node to be deleted.</p>
 <h2>Update the Server Certificate at Runtime<a class="headerlink" href="#update-the-server-certificate-at-runtime" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_updateCertificate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">oldCertificate</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">newCertificate</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">newPrivateKey</span><span class="p">,</span>
-<span class="w">                            </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">closeSessions</span><span class="p">,</span>
-<span class="w">                            </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">closeSecureChannels</span><span class="p">);</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">privateKey</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1982,6 +1980,46 @@ would cause the node to be deleted.</p>
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">regenerateKey</span><span class="p">,</span>
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">csr</span><span class="p">);</span>
+
+<span class="cm">/* Adds certificates and Certificate Revocation Lists (CRLs) to a specific certificate group</span>
+<span class="cm"> * on the server.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param certificateGroupId The NodeId of the certificate group where certificates will be added</span>
+<span class="cm"> * @param certificates The certificates to be added</span>
+<span class="cm"> * @param certificatesSize The number of certificates</span>
+<span class="cm"> * @param crls The associated CRLs for the certificates, required when adding issuer certificates</span>
+<span class="cm"> * @param crlsSize The number of CRLs</span>
+<span class="cm"> * @param isTrusted Indicates whether the certificates should be added to the trusted list or the issuer list</span>
+<span class="cm"> * @param appendCertificates Indicates whether the certificates should be added to the list or replace the existing list</span>
+<span class="cm"> * @return ``UA_STATUSCODE_GOOD`` on success</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addCertificates</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificates</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">certificatesSize</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">crls</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">crlsSize</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTrusted</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">appendCertificates</span><span class="p">);</span>
+
+<span class="cm">/* Removes certificates from a specific certificate group on the server.</span>
+<span class="cm"> * The corresponding CRLs are removed automatically.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object</span>
+<span class="cm"> * @param certificateGroupId The NodeId of the certificate group from which certificates will be removed</span>
+<span class="cm"> * @param certificates The certificates to be removed</span>
+<span class="cm"> * @param certificatesSize The number of certificates</span>
+<span class="cm"> * @param isTrusted Indicates whether the certificates are being removed from the trusted list or the issuer list</span>
+<span class="cm"> * @return ``UA_STATUSCODE_GOOD`` on success</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeCertificates</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificates</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">certificatesSize</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTrusted</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

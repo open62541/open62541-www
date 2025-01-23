@@ -660,6 +660,9 @@ with the OPC UA standard.
    /* The request has not been processed by the server yet. */
    #define UA_STATUSCODE_BADREQUESTNOTCOMPLETE 0x81130000
    
+   /* The operation is not allowed because a transaction is in progress. */
+   #define UA_STATUSCODE_BADTRANSACTIONPENDING 0x80E80000
+   
    /* The device identity needs a ticket before it can be accepted. */
    #define UA_STATUSCODE_BADTICKETREQUIRED 0x811F0000
    

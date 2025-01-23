@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 1.4.1-undefined documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+  <title>Client &mdash; open62541 1.4.8-undefined documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/documentation_options.js?v=cebbca66"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +34,6 @@
             open62541
               <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                1.4
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -57,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#client-configuration">Client Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#connection-configuration">Connection configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#custom-data-types">Custom Data Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#namespace-mapping">Namespace Mapping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#advanced-client-configuration">Advanced Client Configuration</a></li>
 </ul>
 </li>
@@ -81,9 +77,11 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
@@ -169,9 +167,9 @@ under these restrictions, then the connection will abort with an error
 message.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">userIdentityToken</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Configured User-Identity Token */</span>
 <span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w">  </span><span class="cm">/* None, Sign, SignAndEncrypt. The</span>
-<span class="cm">                                       * default is invalid. This indicates</span>
-<span class="cm">                                       * the client to select any matching</span>
-<span class="cm">                                       * endpoint. */</span>
+<span class="cm">                                       * default is &quot;invalid&quot;. This</span>
+<span class="cm">                                       * indicates the client to select any</span>
+<span class="cm">                                       * matching endpoint. */</span>
 <span class="n">UA_String</span><span class="w"> </span><span class="n">securityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* SecurityPolicy for the SecureChannel. An</span>
 <span class="cm">                              * empty string indicates the client to select</span>
 <span class="cm">                              * any matching SecurityPolicy. */</span>
@@ -184,23 +182,16 @@ message.</p>
 <span class="cm">                          * connection when the Session is lost. */</span>
 </pre></div>
 </div>
-<p>If either endpoint or userTokenPolicy has been set (at least one non-zero
-byte in either structure), then the selected Endpoint and UserTokenPolicy
-overwrite the settings in the basic connection configuration. The
-userTokenPolicy array in the EndpointDescription is ignored. The selected
-userTokenPolicy is set in the dedicated configuration field.</p>
-<p>If the advanced configuration is not set, the client will write to it the
-selected Endpoint and UserTokenPolicy during GetEndpoints.</p>
-<p>The information in the advanced configuration is used during reconnect
-when the SecureChannel was broken.</p>
+<p>If either endpoint or userTokenPolicy has been set, then they are used
+directly. Otherwise this information comes from the GetEndpoints response
+from the server (filtered and selected for the SecurityMode, etc.).</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="n">endpoint</span><span class="p">;</span>
 <span class="n">UA_UserTokenPolicy</span><span class="w"> </span><span class="n">userTokenPolicy</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>If the EndpointDescription has not been defined, the ApplicationURI
-constrains the servers considered in the FindServers service and the
+filters the servers considered in the FindServers service and the
 Endpoints considered in the GetEndpoints service.</p>
-<p>If empty the applicationURI is not used to filter.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_String</span><span class="w"> </span><span class="n">applicationUri</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -219,6 +210,33 @@ ROM.</p>
 <p>See the section on <a class="reference internal" href="types.html#generic-types"><span class="std std-ref">Generic Type Handling</span></a>. Examples for working with custom
 data types are provided in <code class="docutils literal notranslate"><span class="pre">/examples/custom_datatype/</span></code>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="namespace-mapping">
+<h3>Namespace Mapping<a class="headerlink" href="#namespace-mapping" title="Link to this heading">¶</a></h3>
+<p>The namespaces index is “just” a mapping to the Uris in the namespace
+array of the server. In order to have stable NodeIds across servers, the
+client keeps a list of predefined namespaces. Use
+<code class="docutils literal notranslate"><span class="pre">UA_Client_addNamespaceUri</span></code>, <code class="docutils literal notranslate"><span class="pre">UA_Client_getNamespaceUri</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UA_Client_getNamespaceIndex</span></code> to interact with the local namespace
+mapping.</p>
+<p>The namespace indices are assigned internally in the client as follows:</p>
+<ul class="simple">
+<li><p>Ns0 and Ns1 are pre-defined by the standard. Ns0 is always
+<code class="docutils literal notranslate"><span class="pre">`http://opcfoundation.org/UA/`</span></code> and used for standard-defined
+NodeIds. Ns1 corresponds to the application uri of the individual
+server.</p></li>
+<li><p>The next namespaces are added in-order from the list below at startup
+(starting at index 2).</p></li>
+<li><p>The local API <code class="docutils literal notranslate"><span class="pre">UA_Client_addNamespaceUri</span></code> can be used to add more
+namespaces.</p></li>
+<li><p>When the client connects, the namespace array of the server is read.
+All previously unknown namespaces are added from this to the internal
+array of the client.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">namespaces</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">namespacesSize</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -253,6 +271,7 @@ data types are provided in <code class="docutils literal notranslate"><span clas
 <span class="cm">     * secure channel is selected.*/</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
+
 <span class="w">    </span><span class="cm">/* SecurityPolicyUri for the Authentication. */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">authSecurityPolicyUri</span><span class="p">;</span>
 
@@ -332,7 +351,7 @@ _copy makes a shallow copy of the plugins.</p>
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">identityToken</span><span class="p">)</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_BADOUTOFMEMORY</span><span class="p">;</span>
 <span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">userName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">username</span><span class="p">);</span>
-<span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">password</span><span class="p">);</span>
+<span class="w">    </span><span class="n">identityToken</span><span class="o">-&gt;</span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">password</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_ExtensionObject_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject_setValue</span><span class="p">(</span><span class="o">&amp;</span><span class="n">config</span><span class="o">-&gt;</span><span class="n">userIdentityToken</span><span class="p">,</span><span class="w"> </span><span class="n">identityToken</span><span class="p">,</span>
@@ -498,7 +517,7 @@ error), the client is no longer usable. Create a new client if required.</p>
 <span class="w">    </span><span class="n">cc</span><span class="o">-&gt;</span><span class="n">endpointUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">endpointUrl</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Connect */</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
 <span class="p">})</span>
 
 <span class="cm">/* Connect to the server and create+activate a Session with the given username</span>
@@ -1010,6 +1029,20 @@ defined interval.</p>
 <span class="cm"> * configuration into account. Return NULL if none found. */</span>
 <span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Client_findDataType</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeId</span><span class="p">);</span>
+
+<span class="cm">/* The string is allocated and needs to be cleared */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_getNamespaceUri</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">index</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">nsUri</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_getNamespaceIndex</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">nsUri</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">outIndex</span><span class="p">);</span>
+
+<span class="cm">/* Returns the old index of the namespace already exists */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_addNamespace</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">nsUri</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="o">*</span><span class="n">outIndex</span><span class="p">);</span>
 </pre></div>
 </div>
 <div class="toctree-wrapper compound">
@@ -1019,6 +1052,7 @@ defined interval.</p>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#historical-access">Historical Access</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#write-attributes">Write Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#method-calling">Method Calling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#browsing">Browsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#node-management">Node Management</a></li>
 <li class="toctree-l2"><a class="reference internal" href="client_highlevel.html#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
 </ul>

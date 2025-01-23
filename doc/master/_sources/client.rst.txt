@@ -70,9 +70,9 @@ message.
 
        UA_ExtensionObject userIdentityToken; /* Configured User-Identity Token */
        UA_MessageSecurityMode securityMode;  /* None, Sign, SignAndEncrypt. The
-                                              * default is invalid. This indicates
-                                              * the client to select any matching
-                                              * endpoint. */
+                                              * default is "invalid". This
+                                              * indicates the client to select any
+                                              * matching endpoint. */
        UA_String securityPolicyUri; /* SecurityPolicy for the SecureChannel. An
                                      * empty string indicates the client to select
                                      * any matching SecurityPolicy. */
@@ -84,17 +84,9 @@ message.
                                  * the intial one is lost. Instead abort the
                                  * connection when the Session is lost. */
    
-If either endpoint or userTokenPolicy has been set (at least one non-zero
-byte in either structure), then the selected Endpoint and UserTokenPolicy
-overwrite the settings in the basic connection configuration. The
-userTokenPolicy array in the EndpointDescription is ignored. The selected
-userTokenPolicy is set in the dedicated configuration field.
-
-If the advanced configuration is not set, the client will write to it the
-selected Endpoint and UserTokenPolicy during GetEndpoints.
-
-The information in the advanced configuration is used during reconnect
-when the SecureChannel was broken.
+If either endpoint or userTokenPolicy has been set, then they are used
+directly. Otherwise this information comes from the GetEndpoints response
+from the server (filtered and selected for the SecurityMode, etc.).
 
 .. code-block:: c
 
@@ -102,10 +94,8 @@ when the SecureChannel was broken.
        UA_UserTokenPolicy userTokenPolicy;
    
 If the EndpointDescription has not been defined, the ApplicationURI
-constrains the servers considered in the FindServers service and the
+filters the servers considered in the FindServers service and the
 Endpoints considered in the GetEndpoints service.
-
-If empty the applicationURI is not used to filter.
 
 .. code-block:: c
 
@@ -131,6 +121,34 @@ data types are provided in ``/examples/custom_datatype/``.
 .. code-block:: c
 
        const UA_DataTypeArray *customDataTypes;
+   
+Namespace Mapping
+~~~~~~~~~~~~~~~~~
+The namespaces index is "just" a mapping to the Uris in the namespace
+array of the server. In order to have stable NodeIds across servers, the
+client keeps a list of predefined namespaces. Use
+``UA_Client_addNamespaceUri``, ``UA_Client_getNamespaceUri`` and
+``UA_Client_getNamespaceIndex`` to interact with the local namespace
+mapping.
+
+The namespace indices are assigned internally in the client as follows:
+
+- Ns0 and Ns1 are pre-defined by the standard. Ns0 is always
+  ```http://opcfoundation.org/UA/``` and used for standard-defined
+  NodeIds. Ns1 corresponds to the application uri of the individual
+  server.
+- The next namespaces are added in-order from the list below at startup
+  (starting at index 2).
+- The local API ``UA_Client_addNamespaceUri`` can be used to add more
+  namespaces.
+- When the client connects, the namespace array of the server is read.
+  All previously unknown namespaces are added from this to the internal
+  array of the client.
+
+.. code-block:: c
+
+       UA_String *namespaces;
+       size_t namespacesSize;
    
 Advanced Client Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -167,6 +185,7 @@ Advanced Client Configuration
         * secure channel is selected.*/
        size_t authSecurityPoliciesSize;
        UA_SecurityPolicy *authSecurityPolicies;
+   
        /* SecurityPolicyUri for the Authentication. */
        UA_String authSecurityPolicyUri;
    
@@ -253,7 +272,7 @@ _copy makes a shallow copy of the plugins.
        if(!identityToken)
            return UA_STATUSCODE_BADOUTOFMEMORY;
        identityToken->userName = UA_STRING_ALLOC(username);
-       identityToken->password = UA_STRING_ALLOC(password);
+       identityToken->password = UA_BYTESTRING_ALLOC(password);
    
        UA_ExtensionObject_clear(&config->userIdentityToken);
        UA_ExtensionObject_setValue(&config->userIdentityToken, identityToken,
@@ -428,7 +447,7 @@ error), the client is no longer usable. Create a new client if required.
        cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
    
        /* Connect */
-       return __UA_Client_connect(client, false);
+       return __UA_Client_connect(client, true);
    })
    
    /* Connect to the server and create+activate a Session with the given username
@@ -958,6 +977,20 @@ Client Utility Functions
     * configuration into account. Return NULL if none found. */
    const UA_DataType *
    UA_Client_findDataType(UA_Client *client, const UA_NodeId *typeId);
+   
+   /* The string is allocated and needs to be cleared */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_getNamespaceUri(UA_Client *client, UA_UInt16 index,
+                             UA_String *nsUri);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_getNamespaceIndex(UA_Client *client, const UA_String nsUri,
+                               UA_UInt16 *outIndex);
+   
+   /* Returns the old index of the namespace already exists */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_addNamespace(UA_Client *client, const UA_String nsUri,
+                          UA_UInt16 *outIndex);
    
 .. toctree::
 

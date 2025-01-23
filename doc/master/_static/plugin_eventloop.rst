@@ -1,4 +1,4 @@
-Event Loop Subsystem
+EventLoop Plugin API
 ====================
 An OPC UA-enabled application can have several clients and servers. And
 server can serve different transport-level protocols for OPC UA. The
@@ -14,7 +14,7 @@ information, etc. from the ConnectionManagers.
 
 Timer Policies
 --------------
-A timer comes with a cyclic interval in which a callback is executed. If an
+A timer comes with a periodic interval in which a callback is executed. If an
 application is congested the interval can be missed. Two different policies
 can be used when this happens. Either schedule the next execution after the
 interval has elapsed again from the current time onwards or stay within the
@@ -24,10 +24,15 @@ regular interval with respect to the original basetime.
 
    
    typedef enum {
-       UA_TIMER_HANDLE_CYCLEMISS_WITH_CURRENTTIME = 0, /* deprecated */
-       UA_TIMER_HANDLE_CYCLEMISS_WITH_BASETIME = 1,    /* deprecated */
-       UA_TIMERPOLICY_CURRENTTIME = 0,
-       UA_TIMERPOLICY_BASETIME = 1,
+       UA_TIMERPOLICY_ONCE = 0,        /* Execute the timer once and remove */
+       UA_TIMERPOLICY_CURRENTTIME = 1, /* Repeated timer. Upon cycle miss, execute
+                                        * "now" and wait exactly for the interval
+                                        * until the next execution (new basetime). */
+       UA_TIMERPOLICY_BASETIME = 2,    /* Repeated timer. Upon cycle miss, execute
+                                        * "now" and fall back into the regular
+                                        * cycle from the original basetime (the
+                                        * next execution might come after less
+                                        * delay than the interval defines). */
    } UA_TimerPolicy;
    
 Event Loop
@@ -45,7 +50,7 @@ But the globally defined functions are the same everywhere.
    /* Delayed callbacks are executed not when they are registered, but in the
     * following EventLoop cycle */
    typedef struct UA_DelayedCallback {
-       struct UA_DelayedCallback *next; /* Singly-linked list */
+       struct UA_DelayedCallback *next;
        UA_Callback callback;
        void *application;
        void *context;
@@ -128,33 +133,30 @@ But the globally defined functions are the same everywhere.
        UA_DateTime (*dateTime_nowMonotonic)(UA_EventLoop *el);
        UA_Int64    (*dateTime_localTimeUtcOffset)(UA_EventLoop *el);
    
-       /* Timed Callbacks
+       /* Timer Callbacks
         * ~~~~~~~~~~~~~~~
-        * Cyclic callbacks are executed regularly with an interval.
-        * A timed callback is executed only once. */
+        * Timer callbacks are executed at a defined time or regularly with a
+        * periodic interval. */
    
-       /* Time of the next cyclic callback. Returns the max DateTime if no cyclic
-        * callback is registered. */
-       UA_DateTime (*nextCyclicTime)(UA_EventLoop *el);
+       /* Time of the next timer. Returns the UA_DATETIME_MAX if no timer is
+        * registered. */
+       UA_DateTime (*nextTimer)(UA_EventLoop *el);
    
-       /* The execution interval is in ms. Returns the callbackId if the pointer is
-        * non-NULL. */
+       /* The execution interval is in ms. The first execution time is baseTime +
+        * interval. If baseTime is NULL, then the current time is used for the base
+        * time. The timerId is written if the pointer is non-NULL. */
        UA_StatusCode
-       (*addCyclicCallback)(UA_EventLoop *el, UA_Callback cb, void *application,
-                            void *data, UA_Double interval_ms, UA_DateTime *baseTime,
-                            UA_TimerPolicy timerPolicy, UA_UInt64 *callbackId);
+       (*addTimer)(UA_EventLoop *el, UA_Callback cb, void *application,
+                   void *data, UA_Double interval_ms, UA_DateTime *baseTime,
+                   UA_TimerPolicy timerPolicy, UA_UInt64 *timerId);
    
+       /* If baseTime is NULL, use the current time as the base. */
        UA_StatusCode
-       (*modifyCyclicCallback)(UA_EventLoop *el, UA_UInt64 callbackId,
-                               UA_Double interval_ms, UA_DateTime *baseTime,
-                               UA_TimerPolicy timerPolicy);
+       (*modifyTimer)(UA_EventLoop *el, UA_UInt64 timerId,
+                      UA_Double interval_ms, UA_DateTime *baseTime,
+                      UA_TimerPolicy timerPolicy);
    
-       void (*removeCyclicCallback)(UA_EventLoop *el, UA_UInt64 callbackId);
-   
-       /* Like a cyclic callback, but executed only once */
-       UA_StatusCode
-       (*addTimedCallback)(UA_EventLoop *el, UA_Callback cb, void *application,
-                           void *data, UA_DateTime date, UA_UInt64 *callbackId);
+       void (*removeTimer)(UA_EventLoop *el, UA_UInt64 timerId);
    
        /* Delayed Callbacks
         * ~~~~~~~~~~~~~~~~~
@@ -163,13 +165,16 @@ But the globally defined functions are the same everywhere.
         * delay a resource cleanup to a point where it is known that the resource
         * has no remaining users.
         *
-        * The delayed callbacks are processed in each of the cycle of the EventLoop
-        * between the handling of timed cyclic callbacks and polling for (network)
+        * The delayed callbacks are processed in each cycle of the EventLoop
+        * between the handling of periodic callbacks and polling for (network)
         * events. The memory for the delayed callback is *NOT* automatically freed
-        * after the execution.
+        * after the execution. But this can be done from within the callback.
         *
-        * addDelayedCallback is non-blocking and can be called from an interrupt
-        * context. removeDelayedCallback can take a mutex and is blocking. */
+        * Delayed callbacks are processed in the order in which they are added.
+        *
+        * The delayed callback API is thread-safe. addDelayedCallback is
+        * non-blocking and can be called from an interrupt context.
+        * removeDelayedCallback can take a mutex and is blocking. */
    
        void (*addDelayedCallback)(UA_EventLoop *el, UA_DelayedCallback *dc);
        void (*removeDelayedCallback)(UA_EventLoop *el, UA_DelayedCallback *dc);
@@ -583,6 +588,7 @@ No additional parameters for sending over an UDP connection defined.
    UA_ConnectionManager *
    UA_ConnectionManager_new_POSIX_UDP(const UA_String eventSourceName);
    
+   #if defined(__linux__) /* Linux only so far */
 Ethernet Connection Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Listens on the network and manages UDP connections. This should be available
@@ -668,7 +674,7 @@ txtime parameters uses Linux conventions.
 
    UA_ConnectionManager *
    UA_ConnectionManager_new_POSIX_Ethernet(const UA_String eventSourceName);
-   
+   #endif
 MQTT Connection Manager
 ~~~~~~~~~~~~~~~~~~~~~~~
 The MQTT ConnectionManager reuses the TCP ConnectionManager that is
@@ -737,4 +743,12 @@ for the interruptHandle.
    UA_InterruptManager *
    UA_InterruptManager_new_POSIX(const UA_String eventSourceName);
    
-   #endif /* defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32) */
+   #elif defined(UA_ARCHITECTURE_ZEPHYR)
+   
+   UA_EventLoop *
+   UA_EventLoop_new_Zephyr(const UA_Logger *logger);
+   
+   UA_ConnectionManager *
+   UA_ConnectionManager_new_Zephyr_TCP(const UA_String eventSourceName);
+   
+   #endif

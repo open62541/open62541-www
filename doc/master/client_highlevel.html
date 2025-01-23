@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Highlevel Client Functionality &mdash; open62541 1.4.1-undefined documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+  <title>Highlevel Client Functionality &mdash; open62541 1.4.8-undefined documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/documentation_options.js?v=cebbca66"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=5b057bd6"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +34,6 @@
             open62541
               <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                1.4
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -68,6 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#historical-access">Historical Access</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#write-attributes">Write Attributes</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#method-calling">Method Calling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#browsing">Browsing</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#node-management">Node Management</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#misc-highlevel-functionality">Misc Highlevel Functionality</a></li>
 </ul>
@@ -84,9 +80,11 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
@@ -130,7 +128,10 @@ the same functionality using the raw <a class="reference internal" href="client.
 <h2>Read Attributes<a class="headerlink" href="#read-attributes" title="Link to this heading">¶</a></h2>
 <p>The following functions can be used to retrieve a single node attribute. Use
 the regular service to read several attributes at once.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_DataValue</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_read</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReadValueId</span><span class="w"> </span><span class="o">*</span><span class="n">rvi</span><span class="p">);</span>
+
+<span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">__UA_Client_readAttribute</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                          </span><span class="n">UA_AttributeId</span><span class="w"> </span><span class="n">attributeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">,</span>
@@ -368,7 +369,10 @@ Use the regular service to read several nodes at once.</p>
 <h2>Write Attributes<a class="headerlink" href="#write-attributes" title="Link to this heading">¶</a></h2>
 <p>The following functions can be use to write a single node attribute at a
 time. Use the regular write service to write several attributes at once.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Client_write</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_WriteValue</span><span class="w"> </span><span class="o">*</span><span class="n">wv</span><span class="p">);</span>
+
+<span class="cm">/* Don&#39;t call this function, use the typed versions */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">__UA_Client_writeAttribute</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                           </span><span class="n">UA_AttributeId</span><span class="w"> </span><span class="n">attributeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">in</span><span class="p">,</span>
@@ -574,6 +578,25 @@ time. Use the regular write service to write several attributes at once.</p>
 <span class="w">               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">methodId</span><span class="p">,</span>
 <span class="w">               </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
 <span class="w">               </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outputSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">**</span><span class="n">output</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="browsing">
+<h2>Browsing<a class="headerlink" href="#browsing" title="Link to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_BrowseResult</span>
+<span class="n">UA_Client_browse</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ViewDescription</span><span class="w"> </span><span class="o">*</span><span class="n">view</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestedMaxReferencesPerNode</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_BrowseDescription</span><span class="w"> </span><span class="o">*</span><span class="n">nodesToBrowse</span><span class="p">);</span>
+
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_BrowseResult</span>
+<span class="n">UA_Client_browseNext</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">releaseContinuationPoint</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">continuationPoint</span><span class="p">);</span>
+
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_BrowsePathResult</span>
+<span class="n">UA_Client_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_BrowsePath</span><span class="w"> </span><span class="o">*</span><span class="n">browsePath</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
