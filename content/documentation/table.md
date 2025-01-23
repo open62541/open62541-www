@@ -38,12 +38,12 @@ title_align = "left" # Default is center, can be left, right or center
     #url = "#"
     #color = "success"
     icon = "fas fa-external-link-alt"
-    url = "https://open62541.org/doc/master/toc.html#"
+    url = "/doc/master/toc.html#"
     align = "center"
 
   [[rows.values]]
     icon = "fas fa-download"
-    url = "https://open62541.org/doc/open62541-master.pdf"
+    url = "/doc/open62541-master.pdf"
     align = "center"
 
   #[[rows.values]]
@@ -53,21 +53,191 @@ title_align = "left" # Default is center, can be left, right or center
   #  align = "center"
 
 [[rows]]
-[[rows.values]]
-header = "1.2 Release"
+  [[rows.values]]
+    header = "1.4.8 Release"
 
-[[rows.values]]
-text = "Released"
+  [[rows.values]]
+    text = "Released"
 
-[[rows.values]]
-icon = "fas fa-external-link-alt"
-url = "https://open62541.org/doc/1.2/"
-align = "center"
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.8/"
+    align = "center"
 
-[[rows.values]]
-icon = "fas fa-download"
-url = "https://open62541.org/doc/open62541-1.2.pdf"
-align = "center"
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.8.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.7 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.7/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.7.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.6 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.6/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.6.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.5 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.5/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.5.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.4 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.4/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.4.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.3 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.3/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.3.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.2 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.2/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.2.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.1 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.1/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.1.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.0 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.0/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.0.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.3 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/1.3/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-1.3.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.2 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/1.2/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-1.2.pdf"
+    align = "center"
 
 [[rows]]
   [[rows.values]]
@@ -78,12 +248,12 @@ align = "center"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"
-    url = "https://open62541.org/doc/1.1/"
+    url = "/doc/1.1/"
     align = "center"
 
   [[rows.values]]
     icon = "fas fa-download"
-    url = "https://open62541.org/doc/open62541-1.1.pdf"
+    url = "/doc/open62541-1.1.pdf"
     align = "center"
     
 [[rows]]
@@ -95,12 +265,12 @@ align = "center"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"
-    url = "https://open62541.org/doc/1.0/"
+    url = "/doc/1.0/"
     align = "center"
 
   [[rows.values]]
     icon = "fas fa-download"
-    url = "https://open62541.org/doc/open62541-1.0.pdf"
+    url = "/doc/open62541-1.0.pdf"
     align = "center"
 
  [[rows]]
@@ -112,11 +282,11 @@ align = "center"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"
-    url = "https://open62541.org/doc/0.3/"
+    url = "/doc/0.3/"
     align = "center"
 
   [[rows.values]]
     icon = "fas fa-download"
-    url = "https://open62541.org/doc/open62541-0.3.pdf"
+    url = "/doc/open62541-0.3.pdf"
     align = "center"
 +++
