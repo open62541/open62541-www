@@ -10,63 +10,76 @@ title = "Download"
 #subtitle= "Easily right align the item fragment even with some buttons"
 
 # Subtitle pre and post item
-pre = "Latest stable Release 1.3"
+pre = "Latest stable Release 1.4.9"
 #post = "With a simple subtitle"
 
 [[buttons]]
 text = "Source Code (zip)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.3.zip"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.9.zip"
 color = "primary btn-block"
 #color = "primary"
 
 [[buttons]]
 text = "Source Code (tar.gz)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.3.tar.gz"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.9.tar.gz"
 color = "primary btn-block"
 #color = "secondary"
 
 [[buttons]]
 text = "Single-File Release open62541.h/open62541.c"
-url = "https://github.com/open62541/open62541/releases/tag/v1.3.6"
+url = "https://github.com/open62541/open62541/releases/tag/v1.4.9"
 color = "primary btn-block"
-
-#[[buttons]]
-#  text = "Single File Release"
-#  url = "#"
-#  color = "primary btn-block"
-#  #color = "secondary"
-
-[[buttons]]
-text = "Ubuntu PPA"
-url = "https://launchpad.net/~open62541-team/+archive/ubuntu/ppa"
-color = "primary btn-block"
-#color = "secondary"
-
 +++
 
-Release notes Version 1.3:
+Release notes Version 1.4.9:
 
-This is the first release of the 1.3 release series of open62541.
-Going forward, only fixes and non-breaking changes will be integrated in the 1.3 release family.
+This is the ninth patch release v1.4.9 of the 1.4 release series of open62541.
 
-New features compared to the previous release series 1.2 include:
+The important changes compared to the previous release v1.4.8 are:
+- core: Mask additional certificate verification statuscodes in the ERR response
+- core: Use recursive locks for client/server/pubsub
+- core: avoid double decrement in UA_KeyValueMap_remove()
+- server: Use ".local" for mDNS published records
+- server: Consistency in the use of the Windows architecture flag
+- client: The server can send no ServerCertificate in the asym header for #None
+- pubsub: Properly handle SKS key rollover callback
+- pubsub: Always update the timed callback in UA_PubSubKeyStorage_addKeyRolloverCallback
+- plugin: Auto-Convert PEM to DER for RSA SecurityPolicies
+- plugin: Add SecurityPolicy#Aes256_Sha256_RsaPss to json configuration plugin
+- plugin: Fix generation of wrong private key format for MbedTLS
+- plugin: fix clearing previous plugin in UA_AccessControl_default()
+- plugin: Remove comparison of authorityKeyIdentifier / subjectKeyIdentifier not supported by CTT
 
-* Support for OPC UA PubSub encryption (also TPM-based key handling)
-* Session authentication with x509 certificates (server-side)
-* Support for Event Filters
-* Support for Server Diagnostics
-* Binary/JSON encoding as a stable public API
-* Handling of Subscriptions with different priority
-* Greatly improved Nodeset Compiler, including support for structure values
-* Added UA_order function for all data types (equality test / absolute ordering for binary search trees, etc.)
-* Support for TLS-encrypted MQTT-based PubSub
-* Internally generate temporary self-signed certificates
+New features and major changes compared to the previous release series 1.3 include:
+- core: Switch to an EventLoop model for the control flow
+- core: Support for OpenSSL 3.0
+- core: Add the Aes256-Sha256-RsaPss security policy
+- core: Automatically unwrap ExtensionObject arrays inside UA_Variant
+- core: txtime feature for time-based sending of Ethernet packets (Linux only)
+- client/server/pubsub: Server, Client and PubSub API are thread-safe with internal locks
+- client/server: Private key password protection with a userland callback (client and server)
+- client/server: Authentication with x509 certificates (client and server)
+- client/server: Support for session-specific server locales (nodes can have localized Description and DisplayName)
+- client: Make connection properties in the client accessible via the API
+- client: Allow setting a custom SessionName in the client config
+- client: Consider the request timeoutHint in synchronous service calls of the client
+- server: Implementation of the TransferSubscription and Cancel Service
+- server: File-based server configuration using a JSON5 configuration file
+- server: Make Session properties in the server accessible via the API
+- server: Use an encrypted SecureChannel for registering at a Discovery Server
+- server: MonitoredItems with negative sampling interval (linked to the publish interval of the Subscription)
+- server: Integration with the NodesetLoader project for runtime parsing and integration of Nodeset XML files
+- server: Session and Subscription Diagnostics as part of the server object
+- server: Support for the AccessLevelEx attribute
+- server: Support for EventFilters
+- server: ReverseConnect for the Server
+- server: Use config->shutdownDelay delay for the server shutdown
+- server: Use dedicate PKI for SecureChannel and Session certificates
+- pubsub: Support for the PubSub SKS (Security Key Service)
+- pubsub: Support for PubSub UDP Unicast
+- pubsub: PubSub StandaloneSubscribedDataSets information model representation
 
-Besides the major functional additions, many small features, fixes and general improvements went into this release. Particularly, the memory consumption of the information model was reduced by about 1/3 compared to the 1.2 release series.
-
-Note that the v1.3 release family contains new features compared to v1.0. These have not been part of the certification that was achieved for the example server based on the v1.0 release.
-
-open62541 (http://open62541.org) is an open source and free implementation of OPC UA (OPC Unified Architecture) written in the common subset of the C99 and C++98 languages. The library is usable with all major compilers and provides the necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications. open62541 library is platform independent. All platform-specific functionality is implemented via exchangeable plugins. Plugin implementations are provided for the major operating systems.
+open62541 (http://open62541.org) is an open source implementation of OPC UA (OPC Unified Architecture / IEC 62541) written in the C language. The library is usable with all major compilers and provides the necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications. The open62541 library is platform independent: All platform-specific functionality is implemented via exchangeable plugins for easy porting to different (embedded) targets.
 
 open62541 is licensed under the Mozilla Public License v2.0 (MPLv2). This allows the open62541 library to be combined and distributed with any proprietary software. Only changes to the open62541 library itself need to be licensed under the MPLv2 when copied and distributed. The plugins, as well as the server and client examples are in the public domain (CC0 license). They can be reused under any license and changes do not have to be published.
 
