@@ -30,6 +30,6 @@ Note: The event is in German.
 
 🔗 **Sign up now and secure your place**: https://www.iosb.fraunhofer.de/opcua-workshop
 
-👉 Any questions? Write us via [Email](mailto:open62541@googlegroups.com)
+👉 Any questions? Write us via [Email](mailto:andreas.ebner@iosb.fraunhofer.de)
  
-[Julius Pfrommer](https://de.linkedin.com/in/juliuspfrommer), [Andreas Ebner](https://de.linkedin.com/in/andreas-ebner-54b806242)
+[Andreas Ebner](mailto:andreas.ebner@iosb.fraunhofer.de), [Noel Graf](mailto:noel.graf@iosb.fraunhofer.de), [Florian Düwel](mailto:florian.duewel@iosb.fraunhofer.de)
