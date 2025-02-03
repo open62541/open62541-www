@@ -1,7 +1,7 @@
 +++
 fragment = "item"
 #disabled = false
-date = "2022-05-11"
+date = "2024-02-03"
 weight = 150
 #background = "primary"
 align = "left"
@@ -10,45 +10,37 @@ title = "Download"
 #subtitle= "Easily right align the item fragment even with some buttons"
 
 # Subtitle pre and post item
-pre = "Latest stable Release 1.4.9"
+pre = "Latest stable Release 1.4.10"
 #post = "With a simple subtitle"
 
 [[buttons]]
 text = "Source Code (zip)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.9.zip"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.10.zip"
 color = "primary btn-block"
 #color = "primary"
 
 [[buttons]]
 text = "Source Code (tar.gz)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.9.tar.gz"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.10.tar.gz"
 color = "primary btn-block"
 #color = "secondary"
 
 [[buttons]]
 text = "Single-File Release open62541.h/open62541.c"
-url = "https://github.com/open62541/open62541/releases/tag/v1.4.9"
+url = "https://github.com/open62541/open62541/releases/tag/v1.4.10"
 color = "primary btn-block"
 +++
 
-Release notes Version 1.4.9:
+Release notes Version 1.4.10:
 
-This is the ninth patch release v1.4.9 of the 1.4 release series of open62541.
+This is the tenth patch release v1.4.10 of the 1.4 release series of open62541.
 
-The important changes compared to the previous release v1.4.8 are:
-- core: Mask additional certificate verification statuscodes in the ERR response
-- core: Use recursive locks for client/server/pubsub
-- core: avoid double decrement in UA_KeyValueMap_remove()
-- server: Use ".local" for mDNS published records
-- server: Consistency in the use of the Windows architecture flag
-- client: The server can send no ServerCertificate in the asym header for #None
-- pubsub: Properly handle SKS key rollover callback
-- pubsub: Always update the timed callback in UA_PubSubKeyStorage_addKeyRolloverCallback
-- plugin: Auto-Convert PEM to DER for RSA SecurityPolicies
-- plugin: Add SecurityPolicy#Aes256_Sha256_RsaPss to json configuration plugin
-- plugin: Fix generation of wrong private key format for MbedTLS
-- plugin: fix clearing previous plugin in UA_AccessControl_default()
-- plugin: Remove comparison of authorityKeyIdentifier / subjectKeyIdentifier not supported by CTT
+The important changes compared to the previous release v1.4.9 are:
+- core: Fix an inter overrun in the JSON decoding (not a security concern)
+- core: Remove UA_LOCK_STATIC_INIT and its only user -- not available on all platforms
+- core: Recursive locking strategy
+- core: JSON-encode Variant ArrayDimensions needs to be UInt32 (unsigned)
+- el: Expose the EventLoop mutex in the API
 
 New features and major changes compared to the previous release series 1.3 include:
 - core: Switch to an EventLoop model for the control flow
