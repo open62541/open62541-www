@@ -6,13 +6,13 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventLoop Plugin API &mdash; open62541 1.4.8-undefined documentation</title>
+  <title>EventLoop Plugin API &mdash; open62541 1.4.10-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-      <script src="_static/documentation_options.js?v=5b057bd6"></script>
+      <script src="_static/documentation_options.js?v=e4afe810"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -298,6 +298,18 @@ But the globally defined functions are the same everywhere.</p>
 <span class="w">    </span><span class="cm">/* Stops the EventSource before deregistrering it */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span>
 <span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">deregisterEventSource</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">es</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Locking</span>
+<span class="cm">     * ~~~~~~~</span>
+<span class="cm">     *</span>
+<span class="cm">     * For multi-threading the EventLoop is protected by a mutex. The mutex is</span>
+<span class="cm">     * expected to be recursive (can be taken more than once from the same</span>
+<span class="cm">     * thread). A common approach to avoid deadlocks is to establish an absolute</span>
+<span class="cm">     * ordering between the locks. Where the &quot;lower&quot; locks needs to be taken</span>
+<span class="cm">     * before the &quot;upper&quot; lock. The EventLoop-mutex is exposed here to allow it</span>
+<span class="cm">     * to be taken from the outside. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">lock</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">unlock</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 <span class="p">};</span>
 </pre></div>
 </div>
