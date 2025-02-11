@@ -896,3 +896,4 @@ checks are omitted. This can crash the application eventually.
    /* Remove all malloc'ed members of the node and reset */
    void
    UA_Node_clear(UA_Node *node);
+

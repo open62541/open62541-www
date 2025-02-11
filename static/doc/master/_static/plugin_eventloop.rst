@@ -765,3 +765,4 @@ for the interruptHandle.
    UA_ConnectionManager_new_Zephyr_TCP(const UA_String eventSourceName);
    
    #endif
+

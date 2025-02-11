@@ -331,7 +331,7 @@ The last BrowseName in a RelativePath can be omitted. This acts as a wildcard
 that matches any BrowseName.
 
 Example RelativePaths
-`````````````````````
+~~~~~~~~~~~~~~~~~~~~~
 - ``/2:Block&.Output``
 - ``/3:Truck.0:NodeVersion``
 - ``<0:HasProperty>1:Boiler/1:HeatSensor``
@@ -406,7 +406,7 @@ The different parts of the expression are parsed as follows:
 - For the index range, see the section on :ref:`numericrange`.
 
 Example SimpleAttributeOperands
-```````````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - ``ns=2;s=TruckEventType/3:Truck/5:Wheel#Value[1:3]``
 - ``/3:Truck/5:Wheel``
 - ``#BrowseName``
@@ -504,3 +504,4 @@ Trustlist Helpers
    /* Returns the size of the TrustList in bytes. */
    UA_UInt32
    UA_TrustListDataType_getSize(const UA_TrustListDataType *trustList);
+

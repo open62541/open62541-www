@@ -274,3 +274,4 @@ graceful shutdown.
        UA_LIFECYCLESTATE_STARTED,
        UA_LIFECYCLESTATE_STOPPING
    } UA_LifecycleState;
+

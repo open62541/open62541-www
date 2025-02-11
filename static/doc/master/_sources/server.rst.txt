@@ -32,25 +32,21 @@ The :ref:`tutorials` provide a good starting point for this.
                        * pointer to the server. */
        UA_Logger *logging; /* Plugin for log output */
    
-Server Description
-^^^^^^^^^^^^^^^^^^
-The description must be internally consistent. The ApplicationUri set in
-the ApplicationDescription must match the URI set in the server
-certificate.
-The applicationType is not just descriptive, it changes the actual
-functionality of the server. The RegisterServer service is available only
-if the server is a DiscoveryServer and the applicationType is set to the
-appropriate value.*/
-
-
-
-
-Server Lifecycle
-^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
-       /* Delay in ms from the shutdown signal (ctrl-c) until the actual shutdown.
+       /* Server Description
+        * ~~~~~~~~~~~~~~~~~~
+        * The description must be internally consistent. The ApplicationUri set in
+        * the ApplicationDescription must match the URI set in the server
+        * certificate.
+        * The applicationType is not just descriptive, it changes the actual
+        * functionality of the server. The RegisterServer service is available only
+        * if the server is a DiscoveryServer and the applicationType is set to the
+        * appropriate value.*/
+       UA_BuildInfo buildInfo;
+       UA_ApplicationDescription applicationDescription;
+   
+       /* Server Lifecycle
+        * ~~~~~~~~~~~~~~~~
+        * Delay in ms from the shutdown signal (ctrl-c) until the actual shutdown.
         * Clients need to be able to get a notification ahead of time. */
        UA_Double shutdownDelay;
    
@@ -59,23 +55,20 @@ Server Lifecycle
         * transition). */
        void (*notifyLifecycleState)(UA_Server *server, UA_LifecycleState state);
    
-Rule Handling
-^^^^^^^^^^^^^
-Override the handling of standard-defined behavior. These settings are
-used to balance the following contradicting requirements:
-
-- Strict conformance with the standard (for certification).
-- Ensure interoperability with old/non-conforming implementations
-  encountered in the wild.
-
-The defaults are set for compatibility with the largest number of OPC UA
-vendors (with log warnings activated). Cf. Postel's Law "be conservative
-in what you send, be liberal in what you accept".
-
-See the section :ref:`rule-handling` for the possible settings.
-
-.. code-block:: c
-
+       /* Rule Handling
+        * ~~~~~~~~~~~~~
+        * Override the handling of standard-defined behavior. These settings are
+        * used to balance the following contradicting requirements:
+        *
+        * - Strict conformance with the standard (for certification).
+        * - Ensure interoperability with old/non-conforming implementations
+        *   encountered in the wild.
+        *
+        * The defaults are set for compatibility with the largest number of OPC UA
+        * vendors (with log warnings activated). Cf. Postel's Law "be conservative
+        * in what you send, be liberal in what you accept".
+        *
+        * See the section :ref:`rule-handling` for the possible settings. */
    
        /* Verify that the server sends a timestamp in the request header */
        UA_RuleHandling verifyRequestTimestamp;
@@ -87,59 +80,40 @@ See the section :ref:`rule-handling` for the possible settings.
    
        UA_RuleHandling allowAllCertificateUris;
    
-Custom Data Types
-^^^^^^^^^^^^^^^^^
-The following is a linked list of arrays with custom data types. All data
-types that are accessible from here are automatically considered for the
-decoding of received messages. Custom data types are not cleaned up
-together with the configuration. So it is possible to allocate them on
-ROM.
-
-See the section on :ref:`generic-types`. Examples for working with custom
-data types are provided in ``/examples/custom_datatype/``.
-
-.. code-block:: c
-
+       /* Custom Data Types
+        * ~~~~~~~~~~~~~~~~~
+        * The following is a linked list of arrays with custom data types. All data
+        * types that are accessible from here are automatically considered for the
+        * decoding of received messages. Custom data types are not cleaned up
+        * together with the configuration. So it is possible to allocate them on
+        * ROM.
+        *
+        * See the section on :ref:`generic-types`. Examples for working with custom
+        * data types are provided in ``/examples/custom_datatype/``. */
        const UA_DataTypeArray *customDataTypes;
    
-.. note:: See the section on :ref:`generic-types`. Examples for working
-   with custom data types are provided in
-   ``/examples/custom_datatype/``.
-
-.. code-block:: c
-
-   
-EventLoop
-^^^^^^^^^
-The sever can be plugged into an external EventLoop. Otherwise the
-EventLoop is considered to be attached to the server's lifecycle and will
-be destroyed when the config is cleaned up.
-
-.. code-block:: c
-
+       /* EventLoop
+        * ~~~~~~~~~
+        * The sever can be plugged into an external EventLoop. Otherwise the
+        * EventLoop is considered to be attached to the server's lifecycle and will
+        * be destroyed when the config is cleaned up. */
        UA_EventLoop *eventLoop;
        UA_Boolean externalEventLoop; /* The EventLoop is not deleted with the config */
    
-Networking
-^^^^^^^^^^
-The `severUrls` array contains the server URLs like
-`opc.tcp://my-server:4840` or `opc.wss://localhost:443`. The URLs are
-used both for discovery and to set up the server sockets based on the
-defined hostnames (and ports).
-
-- If the list is empty: Listen on all network interfaces with TCP port 4840.
-- If the hostname of a URL is empty: Use the define protocol and port and
-  listen on all interfaces.
-
-.. code-block:: c
-
+       /* Networking
+        * ~~~~~~~~~~
+        * The `severUrls` array contains the server URLs like
+        * `opc.tcp://my-server:4840` or `opc.wss://localhost:443`. The URLs are
+        * used both for discovery and to set up the server sockets based on the
+        * defined hostnames (and ports).
+        *
+        * - If the list is empty: Listen on all network interfaces with TCP port 4840.
+        * - If the hostname of a URL is empty: Use the define protocol and port and
+        *   listen on all interfaces. */
        UA_String *serverUrls;
        size_t serverUrlsSize;
    
-The following settings are specific to OPC UA with TCP transport.
-
-.. code-block:: c
-
+       /* The following settings are specific to OPC UA with TCP transport. */
        UA_Boolean tcpEnabled;
        UA_UInt32 tcpBufSize;    /* Max length of sent and received chunks (packets)
                                  * (default: 64kB) */
@@ -149,11 +123,8 @@ The following settings are specific to OPC UA with TCP transport.
                                  * (default: 0 -> unbounded) */
        UA_Boolean tcpReuseAddr;
    
-Security and Encryption
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+       /* Security and Encryption
+        * ~~~~~~~~~~~~~~~~~~~~~~~ */
        size_t securityPoliciesSize;
        UA_SecurityPolicy* securityPolicies;
    
@@ -183,39 +154,26 @@ Security and Encryption
        UA_CertificateGroup secureChannelPKI;
        UA_CertificateGroup sessionPKI;
    
-See the section for :ref:`access-control
-handling<access-control>`.
-
-.. code-block:: c
-
+       /* See the AccessControl Plugin API */
        UA_AccessControl accessControl;
    
-Nodes and Node Lifecycle
-^^^^^^^^^^^^^^^^^^^^^^^^
-See the section for :ref:`node lifecycle handling<node-lifecycle>`.
-
-.. code-block:: c
-
+       /* Nodes and Node Lifecycle
+        * ~~~~~~~~~~~~~~~~~~~~~~~~
+        * See the section for :ref:`node lifecycle handling<node-lifecycle>`. */
        UA_Nodestore nodestore;
        UA_GlobalNodeLifecycle nodeLifecycle;
    
-Copy the HasModellingRule reference in instances from the type
-definition in UA_Server_addObjectNode and UA_Server_addVariableNode.
-
-Part 3 - 6.4.4: [...] it is not required that newly created or referenced
-instances based on InstanceDeclarations have a ModellingRule, however, it
-is allowed that they have any ModellingRule independent of the
-ModellingRule of their InstanceDeclaration
-
-.. code-block:: c
-
+       /* Copy the HasModellingRule reference in instances from the type
+        * definition in UA_Server_addObjectNode and UA_Server_addVariableNode.
+        *
+        * Part 3 - 6.4.4: [...] it is not required that newly created or referenced
+        * instances based on InstanceDeclarations have a ModellingRule, however, it
+        * is allowed that they have any ModellingRule independent of the
+        * ModellingRule of their InstanceDeclaration */
        UA_Boolean modellingRulesOnInstances;
    
-Limits
-^^^^^^
-
-.. code-block:: c
-
+       /* Limits
+        * ~~~~~~ */
        /* Limits for SecureChannels */
        UA_UInt16 maxSecureChannels;
        UA_UInt32 maxSecurityTokenLifetime; /* in ms */
@@ -243,12 +201,9 @@ Limits
        UA_UInt32 maxRejectedListSize; /* 0 => unlimited */
    #endif
    
-Async Operations
-^^^^^^^^^^^^^^^^
-See the section for :ref:`async operations<async-operations>`.
-
-.. code-block:: c
-
+       /* Async Operations
+        * ~~~~~~~~~~~~~~~~
+        * See the section for :ref:`async operations<async-operations>`. */
    #if UA_MULTITHREADING >= 100
        UA_Double asyncOperationTimeout; /* in ms, 0 => unlimited */
        size_t maxAsyncOperationQueueSize; /* 0 => unlimited */
@@ -256,11 +211,8 @@ See the section for :ref:`async operations<async-operations>`.
        UA_Server_AsyncOperationNotifyCallback asyncOperationNotifyCallback;
    #endif
    
-Discovery
-^^^^^^^^^
-
-.. code-block:: c
-
+       /* Discovery
+        * ~~~~~~~~~ */
    #ifdef UA_ENABLE_DISCOVERY
        /* Timeout in seconds when to automatically remove a registered server from
         * the list, if it doesn't re-register within the given time frame. A value
@@ -283,11 +235,8 @@ Discovery
    # endif
    #endif
    
-Subscriptions
-^^^^^^^^^^^^^
-
-.. code-block:: c
-
+       /* Subscriptions
+        * ~~~~~~~~~~~~~ */
        UA_Boolean subscriptionsEnabled;
    #ifdef UA_ENABLE_SUBSCRIPTIONS
        /* Limits for Subscriptions */
@@ -334,21 +283,15 @@ Subscriptions
                                              UA_Boolean removed);
    #endif
    
-PubSub
-^^^^^^
-
-.. code-block:: c
-
+       /* PubSub
+        * ~~~~~~ */
    #ifdef UA_ENABLE_PUBSUB
        UA_Boolean pubsubEnabled;
        UA_PubSubConfiguration pubSubConfig;
    #endif
    
-Historical Access
-^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+       /* Historical Access
+        * ~~~~~~~~~~~~~~~~~ */
        UA_Boolean historizingEnabled;
    #ifdef UA_ENABLE_HISTORIZING
        UA_HistoryDatabase historyDatabase;
@@ -374,18 +317,12 @@ Historical Access
        UA_Boolean deleteAtTimeDataCapability;
    #endif
    
-Reverse Connect
-^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+       /* Reverse Connect
+        * ~~~~~~~~~~~~~~~ */
        UA_UInt32 reverseReconnectInterval; /* Default is 15000 ms */
    
-Certificate Password Callback
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: c
-
+       /* Certificate Password Callback
+        * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
    #ifdef UA_ENABLE_ENCRYPTION
        /* If the private key is in PEM format and password protected, this callback
         * is called during initialization to get the password to decrypt the
@@ -410,6 +347,16 @@ Certificate Password Callback
 Server Lifecycle
 ----------------
 
+The server continuously listens on the network to consume incoming messages.
+Furthermore the server internally registers timed callbacks. For the control
+flow of the server, these are the options (with increasing complexity):
+
+- Run ``UA_Server_runUntilInterrupt`` or similar.
+- Run ``UA_Server_run_startup`` followed by repeated calls of
+  ``UA_Server_run_iterate`` during the server lifetime.
+- Configure an external EventLoop and run ``UA_Server_run_startup`` to
+  register sockets and timed callbacks.
+
 .. code-block:: c
 
    
@@ -422,7 +369,7 @@ Server Lifecycle
     * /plugins folder under the CC0 license. Furthermore the server confiugration
     * only uses the public server API.
     *
-    * @return Returns the configured server or NULL if an error occurs. */
+    * Returns the configured server or NULL if an error occurs. */
    UA_Server *
    UA_Server_new(void);
    
@@ -444,16 +391,12 @@ Server Lifecycle
    UA_LifecycleState
    UA_Server_getLifecycleState(UA_Server *server);
    
-   /* Runs the server until interrupted. On Unix/Windows this registers an
-    * interrupt for SIGINT (ctrl-c). The method only returns after having received
-    * the interrupt. The logical sequence is as follows:
+   /* Runs the server until until "running" is set to false. The logical sequence
+    * is as follows:
     *
     * - UA_Server_run_startup
     * - Loop until interrupt: UA_Server_run_iterate
-    * - UA_Server_run_shutdown
-    *
-    * @param server The server object.
-    * @return Returns a bad statuscode if an error occurred internally. */
+    * - UA_Server_run_shutdown */
    UA_StatusCode
    UA_Server_run(UA_Server *server, const volatile UA_Boolean *running);
    
@@ -469,10 +412,7 @@ Server Lifecycle
     *
     * Attention! This method is implemented individually for the different
     * platforms (POSIX/Win32/etc.). The default implementation is in
-    * /plugins/ua_config_default.c under the CC0 license. Adjust as needed.
-    *
-    * @param server The server object.
-    * @return Returns a bad statuscode if an error occurred internally. */
+    * /plugins/ua_config_default.c under the CC0 license. Adjust as needed. */
    UA_StatusCode
    UA_Server_runUntilInterrupt(UA_Server *server);
    
@@ -497,63 +437,6 @@ Server Lifecycle
    UA_StatusCode
    UA_Server_run_shutdown(UA_Server *server);
    
-Timed Callbacks
----------------
-Add a callback to the server that is executed at a defined time.
-The callback can also be registered with a cyclic interval.
-
-.. code-block:: c
-
-   
-   /* Add a callback for execution at a specified time. If the indicated time lies
-    * in the past, then the callback is executed at the next iteration of the
-    * server's main loop.
-    *
-    * @param server The server object.
-    * @param callback The callback that shall be added.
-    * @param data Data that is forwarded to the callback.
-    * @param date The timestamp for the execution time.
-    * @param callbackId Set to the identifier of the repeated callback . This can
-    *        be used to cancel the callback later on. If the pointer is null, the
-    *        identifier is not set.
-    * @return Upon success, ``UA_STATUSCODE_GOOD`` is returned. An error code
-    *         otherwise. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_addTimedCallback(UA_Server *server, UA_ServerCallback callback,
-                              void *data, UA_DateTime date, UA_UInt64 *callbackId);
-   
-   /* Add a callback for cyclic repetition to the server.
-    *
-    * @param server The server object.
-    * @param callback The callback that shall be added.
-    * @param data Data that is forwarded to the callback.
-    * @param interval_ms The callback shall be repeatedly executed with the given
-    *        interval (in ms). The interval must be positive. The first execution
-    *        occurs at now() + interval at the latest.
-    * @param callbackId Set to the identifier of the repeated callback . This can
-    *        be used to cancel the callback later on. If the pointer is null, the
-    *        identifier is not set.
-    * @return Upon success, ``UA_STATUSCODE_GOOD`` is returned. An error code
-    *         otherwise. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_addRepeatedCallback(UA_Server *server, UA_ServerCallback callback,
-                                 void *data, UA_Double interval_ms,
-                                 UA_UInt64 *callbackId);
-   
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_changeRepeatedCallbackInterval(UA_Server *server, UA_UInt64 callbackId,
-                                            UA_Double interval_ms);
-   
-   /* Remove a repeated callback. Does nothing if the callback is not found.
-    *
-    * @param server The server object.
-    * @param callbackId The id of the callback */
-   void UA_THREADSAFE
-   UA_Server_removeCallback(UA_Server *server, UA_UInt64 callbackId);
-   
-   #define UA_Server_removeRepeatedCallback(server, callbackId) \
-       UA_Server_removeCallback(server, callbackId);
-   
 Session Handling
 ----------------
 A new session is announced via the AccessControl plugin. The session
@@ -575,10 +458,10 @@ meta-data.
 
 Always present as session attributes are:
 
-- 0:localeIds [UA_String]: List of preferred languages (read-only)
-- 0:clientDescription [UA_ApplicationDescription]: Client description (read-only)
-- 0:sessionName [String] Client-defined name of the session (read-only)
-- 0:clientUserId [String] User identifier used to activate the session (read-only)
+- ``0:localeIds`` (``UA_String``): List of preferred languages (read-only)
+- ``0:clientDescription`` (``UA_ApplicationDescription``): Client description (read-only)
+- ``0:sessionName`` (``String``): Client-defined name of the session (read-only)
+- ``0:clientUserId`` (``String``): User identifier used to activate the session (read-only)
 
 .. code-block:: c
 
@@ -878,12 +761,9 @@ specific to the different users and set by the access control callback:
                                 &UA_TYPES[UA_TYPES_BYTE], &eventNotifier);
    })
    
-Writes an UA_Variant to a variable/variableType node.
-StatusCode is set to ``UA_STATUSCODE_GOOD``, sourceTimestamp and
-serverTimestamp are set to UA_DateTime_now()
-
-.. code-block:: c
-
+   /* Writes an UA_Variant to a variable/variableType node. StatusCode is set to
+    * UA_STATUSCODE_GOOD, sourceTimestamp and serverTimestamp are set to
+    * UA_DateTime_now(). */
    UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeValue(UA_Server *server, const UA_NodeId nodeId,
                         const UA_Variant value) ,{
@@ -891,12 +771,9 @@ serverTimestamp are set to UA_DateTime_now()
                                 &UA_TYPES[UA_TYPES_VARIANT], &value);
    })
    
-Writes an UA_DataValue to a variable/variableType node.
-In contrast to UA_Server_writeValue, this functions can also write
-sourceTimestamp, serverTimestamp and statusCode.
-
-.. code-block:: c
-
+   /* Writes an UA_DataValue to a variable/variableType node. In contrast to
+    * UA_Server_writeValue, this functions can also write sourceTimestamp,
+    * serverTimestamp and statusCode. */
    UA_INLINABLE( UA_THREADSAFE UA_StatusCode
    UA_Server_writeDataValue(UA_Server *server, const UA_NodeId nodeId,
                         const UA_DataValue value) ,{
@@ -1031,7 +908,7 @@ Discovery
 ---------
 
 Registering at a Discovery Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: c
 
@@ -1060,7 +937,7 @@ Registering at a Discovery Server
                                  const UA_String discoveryServerUrl);
    
 Operating a Discovery Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: c
 
@@ -1149,7 +1026,7 @@ user-defined code can happen.
 .. _datasource:
 
 Data Source Callback
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 The server has a unique way of dealing with the content of variables. Instead
 of storing a variant attached to the variable node, the node can point to a
 function with a local data provider. Whenever the value attribute is read,
@@ -1179,7 +1056,7 @@ be set to a null-pointer.
 .. _local-monitoreditems:
 
 Local MonitoredItems
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 MonitoredItems are used with the Subscription mechanism of OPC UA to
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
@@ -1308,7 +1185,7 @@ still the same as the specified select-clauses).
    #endif
    
 Method Callbacks
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 Method callbacks are set to `NULL` (not executable) when a method node is
 added over the network. In theory, it is possible to add a callback via
 ``UA_Server_setMethodNode_callback`` within the global constructor when
@@ -1337,53 +1214,10 @@ adding methods over the network is really wanted. See the Section
    UA_Server_call(UA_Server *server, const UA_CallMethodRequest *request);
    #endif
    
-.. _object-interaction:
-
-Interacting with Objects
-------------------------
-Objects in the information model are represented as ObjectNodes. Some
-convenience functions are provided to simplify the interaction with objects.
-
-.. code-block:: c
-
-   
-   /* Write an object property. The property is represented as a VariableNode with
-    * a ``HasProperty`` reference from the ObjectNode. The VariableNode is
-    * identified by its BrowseName. Writing the property sets the value attribute
-    * of the VariableNode.
-    *
-    * @param server The server object
-    * @param objectId The identifier of the object (node)
-    * @param propertyName The name of the property
-    * @param value The value to be set for the event attribute
-    * @return The StatusCode for setting the event attribute */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_writeObjectProperty(UA_Server *server, const UA_NodeId objectId,
-                                 const UA_QualifiedName propertyName,
-                                 const UA_Variant value);
-   
-   /* Directly point to the scalar value instead of a variant */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_writeObjectProperty_scalar(UA_Server *server, const UA_NodeId objectId,
-                                        const UA_QualifiedName propertyName,
-                                        const void *value, const UA_DataType *type);
-   
-   /* Read an object property.
-    *
-    * @param server The server object
-    * @param objectId The identifier of the object (node)
-    * @param propertyName The name of the property
-    * @param value Contains the property value after reading. Must not be NULL.
-    * @return The StatusCode for setting the event attribute */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_readObjectProperty(UA_Server *server, const UA_NodeId objectId,
-                                const UA_QualifiedName propertyName,
-                                UA_Variant *value);
-   
 .. _addnodes:
 
-Node Addition and Deletion
---------------------------
+Node Management
+---------------
 When creating dynamic node instances at runtime, chances are that you will
 not care about the specific NodeId of the new node, as long as you can
 reference it later. When passing numeric NodeIds with a numeric identifier 0,
@@ -1583,7 +1417,6 @@ use a :ref:`datasource` or a :ref:`value-callback`.
    
    #endif
    
-   
 The method pair UA_Server_addNode_begin and _finish splits the AddNodes
 service in two parts. This is useful if the node shall be modified before
 finish the instantiation. For example to add children with specific NodeIds.
@@ -1645,12 +1478,6 @@ arguments which are added in the finish step (if not yet already there)
    UA_StatusCode UA_THREADSAFE
    UA_Server_deleteNode(UA_Server *server, const UA_NodeId nodeId,
                         UA_Boolean deleteReferences);
-   
-Reference Management
---------------------
-
-.. code-block:: c
-
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_addReference(UA_Server *server, const UA_NodeId sourceId,
@@ -1926,98 +1753,6 @@ Alarms & Conditions (Experimental)
    
    #endif /* UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS */
    
-Update the Server Certificate at Runtime
-----------------------------------------
-
-.. code-block:: c
-
-   
-   UA_StatusCode
-   UA_Server_updateCertificate(UA_Server *server,
-                               const UA_NodeId certificateGroupId,
-                               const UA_NodeId certificateTypeId,
-                               const UA_ByteString certificate,
-                               const UA_ByteString *privateKey);
-   
-Creates a PKCS #10 DER encoded certificate request signed with the server's private key
-----------------------------------------------------------------------------------------
-
-.. code-block:: c
-
-   UA_StatusCode
-   UA_Server_createSigningRequest(UA_Server *server,
-                                  const UA_NodeId certificateGroupId,
-                                  const UA_NodeId certificateTypeId,
-                                  const UA_String *subjectName,
-                                  const UA_Boolean *regenerateKey,
-                                  const UA_ByteString *nonce,
-                                  UA_ByteString *csr);
-   
-   /* Adds certificates and Certificate Revocation Lists (CRLs) to a specific certificate group
-    * on the server.
-    *
-    * @param server The server object
-    * @param certificateGroupId The NodeId of the certificate group where certificates will be added
-    * @param certificates The certificates to be added
-    * @param certificatesSize The number of certificates
-    * @param crls The associated CRLs for the certificates, required when adding issuer certificates
-    * @param crlsSize The number of CRLs
-    * @param isTrusted Indicates whether the certificates should be added to the trusted list or the issuer list
-    * @param appendCertificates Indicates whether the certificates should be added to the list or replace the existing list
-    * @return ``UA_STATUSCODE_GOOD`` on success
-    */
-   UA_StatusCode
-   UA_Server_addCertificates(UA_Server *server,
-                             const UA_NodeId certificateGroupId,
-                             UA_ByteString *certificates,
-                             size_t certificatesSize,
-                             UA_ByteString *crls,
-                             size_t crlsSize,
-                             const UA_Boolean isTrusted,
-                             const UA_Boolean appendCertificates);
-   
-   /* Removes certificates from a specific certificate group on the server.
-    * The corresponding CRLs are removed automatically.
-    *
-    * @param server The server object
-    * @param certificateGroupId The NodeId of the certificate group from which certificates will be removed
-    * @param certificates The certificates to be removed
-    * @param certificatesSize The number of certificates
-    * @param isTrusted Indicates whether the certificates are being removed from the trusted list or the issuer list
-    * @return ``UA_STATUSCODE_GOOD`` on success
-    */
-   UA_StatusCode
-   UA_Server_removeCertificates(UA_Server *server,
-                             const UA_NodeId certificateGroupId,
-                             UA_ByteString *certificates,
-                             size_t certificatesSize,
-                             const UA_Boolean isTrusted);
-   
-Utility Functions
------------------
-
-.. code-block:: c
-
-   
-   /* Lookup a datatype by its NodeId. Takes the custom types in the server
-    * configuration into account. Return NULL if none found. */
-   const UA_DataType *
-   UA_Server_findDataType(UA_Server *server, const UA_NodeId *typeId);
-   
-   /* Add a new namespace to the server. Returns the index of the new namespace */
-   UA_UInt16 UA_THREADSAFE
-   UA_Server_addNamespace(UA_Server *server, const char* name);
-   
-   /* Get namespace by name from the server. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_getNamespaceByName(UA_Server *server, const UA_String namespaceUri,
-                                size_t* foundIndex);
-   
-   /* Get namespace by id from the server. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Server_getNamespaceByIndex(UA_Server *server, const size_t namespaceIndex,
-                                 UA_String *foundUri);
-   
 .. _async-operations:
 
 Async Operations
@@ -2160,3 +1895,194 @@ so the server is able to reach it.
     *         successfully removed */
    UA_StatusCode
    UA_Server_removeReverseConnect(UA_Server *server, UA_UInt64 handle);
+   
+Utility Functions
+-----------------
+
+.. code-block:: c
+
+   
+   /* Lookup a datatype by its NodeId. Takes the custom types in the server
+    * configuration into account. Return NULL if none found. */
+   const UA_DataType *
+   UA_Server_findDataType(UA_Server *server, const UA_NodeId *typeId);
+   
+   /* Add a new namespace to the server. Returns the index of the new namespace */
+   UA_UInt16 UA_THREADSAFE
+   UA_Server_addNamespace(UA_Server *server, const char* name);
+   
+   /* Get namespace by name from the server. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_getNamespaceByName(UA_Server *server, const UA_String namespaceUri,
+                                size_t* foundIndex);
+   
+   /* Get namespace by id from the server. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_getNamespaceByIndex(UA_Server *server, const size_t namespaceIndex,
+                                 UA_String *foundUri);
+   
+.. _object-interaction:
+
+Interacting with Objects
+~~~~~~~~~~~~~~~~~~~~~~~~
+Objects in the information model are represented as ObjectNodes. Some
+convenience functions are provided to simplify the interaction with objects.
+
+.. code-block:: c
+
+   
+   /* Write an object property. The property is represented as a VariableNode with
+    * a ``HasProperty`` reference from the ObjectNode. The VariableNode is
+    * identified by its BrowseName. Writing the property sets the value attribute
+    * of the VariableNode.
+    *
+    * @param server The server object
+    * @param objectId The identifier of the object (node)
+    * @param propertyName The name of the property
+    * @param value The value to be set for the event attribute
+    * @return The StatusCode for setting the event attribute */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_writeObjectProperty(UA_Server *server, const UA_NodeId objectId,
+                                 const UA_QualifiedName propertyName,
+                                 const UA_Variant value);
+   
+   /* Directly point to the scalar value instead of a variant */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_writeObjectProperty_scalar(UA_Server *server, const UA_NodeId objectId,
+                                        const UA_QualifiedName propertyName,
+                                        const void *value, const UA_DataType *type);
+   
+   /* Read an object property.
+    *
+    * @param server The server object
+    * @param objectId The identifier of the object (node)
+    * @param propertyName The name of the property
+    * @param value Contains the property value after reading. Must not be NULL.
+    * @return The StatusCode for setting the event attribute */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_readObjectProperty(UA_Server *server, const UA_NodeId objectId,
+                                const UA_QualifiedName propertyName,
+                                UA_Variant *value);
+   
+Timed Callbacks
+~~~~~~~~~~~~~~~
+Add a callback to the server that is executed at a defined time.
+The callback can also be registered with a cyclic interval.
+
+.. code-block:: c
+
+   
+   /* Add a callback for execution at a specified time. If the indicated time lies
+    * in the past, then the callback is executed at the next iteration of the
+    * server's main loop.
+    *
+    * @param server The server object.
+    * @param callback The callback that shall be added.
+    * @param data Data that is forwarded to the callback.
+    * @param date The timestamp for the execution time.
+    * @param callbackId Set to the identifier of the repeated callback . This can
+    *        be used to cancel the callback later on. If the pointer is null, the
+    *        identifier is not set.
+    * @return Upon success, ``UA_STATUSCODE_GOOD`` is returned. An error code
+    *         otherwise. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_addTimedCallback(UA_Server *server, UA_ServerCallback callback,
+                              void *data, UA_DateTime date, UA_UInt64 *callbackId);
+   
+   /* Add a callback for cyclic repetition to the server.
+    *
+    * @param server The server object.
+    * @param callback The callback that shall be added.
+    * @param data Data that is forwarded to the callback.
+    * @param interval_ms The callback shall be repeatedly executed with the given
+    *        interval (in ms). The interval must be positive. The first execution
+    *        occurs at now() + interval at the latest.
+    * @param callbackId Set to the identifier of the repeated callback . This can
+    *        be used to cancel the callback later on. If the pointer is null, the
+    *        identifier is not set.
+    * @return Upon success, ``UA_STATUSCODE_GOOD`` is returned. An error code
+    *         otherwise. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_addRepeatedCallback(UA_Server *server, UA_ServerCallback callback,
+                                 void *data, UA_Double interval_ms,
+                                 UA_UInt64 *callbackId);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_changeRepeatedCallbackInterval(UA_Server *server, UA_UInt64 callbackId,
+                                            UA_Double interval_ms);
+   
+   /* Remove a repeated callback. Does nothing if the callback is not found. */
+   void UA_THREADSAFE
+   UA_Server_removeCallback(UA_Server *server, UA_UInt64 callbackId);
+   
+   #define UA_Server_removeRepeatedCallback(server, callbackId) \
+       UA_Server_removeCallback(server, callbackId);
+   
+Update the Server Certificate at Runtime
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: c
+
+   
+   UA_StatusCode
+   UA_Server_updateCertificate(UA_Server *server,
+                               const UA_NodeId certificateGroupId,
+                               const UA_NodeId certificateTypeId,
+                               const UA_ByteString certificate,
+                               const UA_ByteString *privateKey);
+   
+   /* Creates a PKCS #10 DER encoded certificate request signed with the server's
+    * private key */
+   UA_StatusCode
+   UA_Server_createSigningRequest(UA_Server *server,
+                                  const UA_NodeId certificateGroupId,
+                                  const UA_NodeId certificateTypeId,
+                                  const UA_String *subjectName,
+                                  const UA_Boolean *regenerateKey,
+                                  const UA_ByteString *nonce,
+                                  UA_ByteString *csr);
+   
+   /* Adds certificates and Certificate Revocation Lists (CRLs) to a specific
+    * certificate group on the server.
+    *
+    * @param server The server object
+    * @param certificateGroupId The NodeId of the certificate group where
+    *        certificates will be added
+    * @param certificates The certificates to be added
+    * @param certificatesSize The number of certificates
+    * @param crls The associated CRLs for the certificates, required when adding
+    *        issuer certificates
+    * @param crlsSize The number of CRLs
+    * @param isTrusted Indicates whether the certificates should be added to the
+    *        trusted list or the issuer list
+    * @param appendCertificates Indicates whether the certificates should be added
+    *        to the list or replace the existing list
+    * @return ``UA_STATUSCODE_GOOD`` on success */
+   UA_StatusCode
+   UA_Server_addCertificates(UA_Server *server,
+                             const UA_NodeId certificateGroupId,
+                             UA_ByteString *certificates,
+                             size_t certificatesSize,
+                             UA_ByteString *crls,
+                             size_t crlsSize,
+                             const UA_Boolean isTrusted,
+                             const UA_Boolean appendCertificates);
+   
+   /* Removes certificates from a specific certificate group on the server. The
+    * corresponding CRLs are removed automatically.
+    *
+    * @param server The server object
+    * @param certificateGroupId The NodeId of the certificate group from which
+    *        certificates will be removed
+    * @param certificates The certificates to be removed
+    * @param certificatesSize The number of certificates
+    * @param isTrusted Indicates whether the certificates are being removed from
+    *        the trusted list or the issuer list
+    * @return ``UA_STATUSCODE_GOOD`` on success */
+   UA_StatusCode
+   UA_Server_removeCertificates(UA_Server *server,
+                             const UA_NodeId certificateGroupId,
+                             UA_ByteString *certificates,
+                             size_t certificatesSize,
+                             const UA_Boolean isTrusted);
+

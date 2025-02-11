@@ -382,3 +382,4 @@ be set in the channel context before de/encrypting.
        void (*clear)(UA_PubSubSecurityPolicy *policy);
        void *policyContext;
    };
+

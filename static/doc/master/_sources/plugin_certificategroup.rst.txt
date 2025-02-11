@@ -97,3 +97,4 @@ CertificateGroup Plugin API
    UA_CertificateUtils_decryptPrivateKey(const UA_ByteString privateKey,
                                          const UA_ByteString password,
                                          UA_ByteString *outDerKey);
+
