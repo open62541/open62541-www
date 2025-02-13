@@ -1,14 +1,14 @@
 +++
 weight = 110
-title = "Mailing List"
+title = "IRC Chat"
 #subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing"
 #item_url = "#"
 #disabled = true
 
 [asset]
-  image = "google.jpg"
+  image = "libera-color.svg"
 +++
 
-Mailing List
-open62541-core@googlegroups.com
+IRC Chat
+https://web.libera.chat/#open62541
 

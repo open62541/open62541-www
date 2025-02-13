@@ -1,13 +1,14 @@
 +++
 weight = 110
-title = "Core Call"
+title = "Mailing List"
 #subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing"
 #item_url = "#"
-disabled = true
+#disabled = true
 
 [asset]
-  image = "teams.jpg"
+  image = "google.svg"
 +++
 
-Date of the Core Call
+Mailing List
+open62541-core@googlegroups.com
 
