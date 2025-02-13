@@ -6,7 +6,7 @@ title = "Mailing List"
 #disabled = true
 
 [asset]
-  image = "google.jpg"
+  image = "google.svg"
 +++
 
 Mailing List
