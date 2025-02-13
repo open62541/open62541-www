@@ -6,13 +6,13 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Utility Definitions &mdash; open62541 1.4.8-undefined documentation</title>
+  <title>Utility Definitions &mdash; open62541 1.4.10-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
-      <script src="_static/documentation_options.js?v=5b057bd6"></script>
+      <script src="_static/documentation_options.js?v=e4afe810"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -49,8 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="server_pubsub.html">PubSub</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pubsub.html">Raw PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utility Definitions</a><ul>
@@ -61,7 +60,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#binary-connection-config-parameters">Binary Connection Config Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#default-node-attributes">Default Node Attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#endpoint-url-parser">Endpoint URL Parser</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#and-escaping-of-strings">And-Escaping of Strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#escaping-of-strings">Escaping of Strings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#and-escaping">And-Escaping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#percent-escaping">Percent-Escaping</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#relativepath-expressions">RelativePath Expressions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#example-relativepaths">Example RelativePaths</a></li>
 </ul>
@@ -331,11 +334,13 @@ layer plugins.</p>
 </pre></div>
 </div>
 </section>
-<section id="and-escaping-of-strings">
-<h2>And-Escaping of Strings<a class="headerlink" href="#and-escaping-of-strings" title="Link to this heading">¶</a></h2>
-<p>The “and-escaping” of strings for is described in Part 4, A2. The <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>
-character is used to escape the reserved characters <code class="docutils literal notranslate"><span class="pre">/.&lt;&gt;:#!&amp;</span></code>.
-So the string <code class="docutils literal notranslate"><span class="pre">My.String</span></code> becomes <code class="docutils literal notranslate"><span class="pre">My&amp;.String</span></code>.</p>
+<section id="escaping-of-strings">
+<h2>Escaping of Strings<a class="headerlink" href="#escaping-of-strings" title="Link to this heading">¶</a></h2>
+<section id="and-escaping">
+<h3>And-Escaping<a class="headerlink" href="#and-escaping" title="Link to this heading">¶</a></h3>
+<p>The “and-escaping” of strings is described in Part 4, A2. The <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> character
+is used to escape the reserved characters <code class="docutils literal notranslate"><span class="pre">/.&lt;&gt;:#!&amp;</span></code>. So the string
+<code class="docutils literal notranslate"><span class="pre">My.String</span></code> becomes <code class="docutils literal notranslate"><span class="pre">My&amp;.String</span></code>.</p>
 <p>In addition to the standard we define “extended-and-escaping” where
 additionaly commas, semicolons, brackets and whitespace characters are
 escaped. This improves the parsing in a larger context, as a lexer can find
@@ -343,6 +348,35 @@ the end of the escaped string. The additionally reserved characters for the
 extended escaping are <code class="docutils literal notranslate"><span class="pre">,()[]</span> <span class="pre">\t\n\v\f\r</span></code>.</p>
 <p>This documentation always states whether “and-escaping” or the
 “extended-and-escaping is used.</p>
+</section>
+<section id="percent-escaping">
+<span id="id2"></span><h3>Percent-Escaping<a class="headerlink" href="#percent-escaping" title="Link to this heading">¶</a></h3>
+<p>Percent-escaped characters get encoded as <code class="docutils literal notranslate"><span class="pre">%xx</span></code> where xx is the hex-string
+for an 8-bit octet. Its use is stated in Part 6 of the OPC UA specification
+for human-readable QualifiedNames, NodeIds and ExpandedNodeIds. The
+specification (only) requires that the <code class="docutils literal notranslate"><span class="pre">;</span></code> characters gets escaped, and
+that decoders allow percent-escaping of any character.</p>
+<p>Percent-escaping was originally defined for URIs. RFC 3986 defines a set of
+reserved characters (delimiters) that require escaping when they are used
+within URI components. But the reserved characters can be used directly in an
+URI to “delimit” between its components.</p>
+<p>For the <strong>percent-escaping</strong> (e.g. used for the NamespaceUri part of the
+NodeId in <code class="docutils literal notranslate"><span class="pre">UA_NodeId_printEx</span></code>), the reserved characters are the semicolon,
+the percent character, whitespaces and unprintable ASCII control codes.
+Besides those, any UTF8 encoding is allowed.</p>
+<p>In some contexts the semicolon alone is not sufficient as the delimiter. For
+our non-standard <strong>extended-percent-escaping</strong> the reserved characters are
+the following (in addition to whitespaces and unprintable ASCII control
+codes).:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39; &#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">20</span>     <span class="s1">&#39;(&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">28</span>     <span class="s1">&#39;&gt;&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">3</span><span class="n">E</span>
+<span class="s1">&#39;&quot;&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">22</span>     <span class="s1">&#39;)&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">29</span>     <span class="s1">&#39;[&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">5</span><span class="n">B</span>
+<span class="s1">&#39;#&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">23</span>     <span class="s1">&#39;,&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">2</span><span class="n">C</span>     <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1"> - %5C</span>
+<span class="s1">&#39;%&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">25</span>     <span class="s1">&#39;/&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">2</span><span class="n">F</span>     <span class="s1">&#39;]&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">5</span><span class="n">D</span>
+<span class="s1">&#39;&amp;&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">26</span>     <span class="s1">&#39;;&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">3</span><span class="n">B</span>     <span class="s1">&#39;`&#39;</span> <span class="o">-</span> <span class="o">%</span><span class="mi">60</span>
+<span class="s1">&#39;&#39;&#39; - %27     &#39;&lt;&#39; - %3C</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="relativepath-expressions">
 <span id="relativepath"></span><h2>RelativePath Expressions<a class="headerlink" href="#relativepath-expressions" title="Link to this heading">¶</a></h2>

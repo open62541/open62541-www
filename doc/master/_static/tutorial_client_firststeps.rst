@@ -76,3 +76,4 @@ Further tasks
   :doc:`tutorial_server_firststeps`) using "UA_Client_write" function. The
   example server needs some more modifications, i.e., changing request types.
   The answer can be found in ``examples/client.c``.
+

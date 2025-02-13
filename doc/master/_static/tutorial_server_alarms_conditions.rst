@@ -555,3 +555,4 @@ It follows the main server code, making use of the above definitions.
        UA_Server_delete(server);
        return 0;
    }
+

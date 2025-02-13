@@ -112,3 +112,4 @@ from its Session but continues to run.
                                                          bool isDeleteModified);
    #endif
    };
+
