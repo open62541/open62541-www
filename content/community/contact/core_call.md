@@ -3,7 +3,7 @@ weight = 110
 title = "Core Call"
 #subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing"
 #item_url = "#"
-#disabled = true
+disabled = true
 
 [asset]
   image = "teams.jpg"
