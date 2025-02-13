@@ -8,27 +8,6 @@ align = "left"
 
 title = "Download"
 #subtitle= "Easily right align the item fragment even with some buttons"
-
-# Subtitle pre and post item
-pre = "Latest stable Release 1.4.10"
-#post = "With a simple subtitle"
-
-[[buttons]]
-text = "Source Code (zip)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.10.zip"
-color = "primary btn-block"
-#color = "primary"
-
-[[buttons]]
-text = "Source Code (tar.gz)"
-url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.10.tar.gz"
-color = "primary btn-block"
-#color = "secondary"
-
-[[buttons]]
-text = "Single-File Release open62541.h/open62541.c"
-url = "https://github.com/open62541/open62541/releases/tag/v1.4.10"
-color = "primary btn-block"
 +++
 
 Release notes Version 1.4.10:
