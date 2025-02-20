@@ -2,6 +2,7 @@
 fragment = "item"
 #disabled = false
 date = "2024-02-03"
+title = "Download"
 weight = 150
 #background = "primary"
 align = "left"
@@ -9,7 +10,7 @@ align = "left"
 #subtitle= "Easily right align the item fragment even with some buttons"
 
 # Subtitle pre and post item
-pre = "Latest stable Release 1.4.10"
+pre = """<b style="	width: 100%;display: block;text-align: center;">Latest stable Release 1.4.10</b><br>"""
 #post = "With a simple subtitle"
 
 [[buttons]]
