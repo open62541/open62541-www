@@ -55,8 +55,13 @@ server/client.
 .. code-block:: c
 
    
+   /* Initialize the RNG with the seed number and UA_DateTime_now() */
    void
    UA_random_seed(UA_UInt64 seed);
+   
+   /* Initialize the RNG with the seed number (only) */
+   void
+   UA_random_seed_deterministic(UA_UInt64 seed);
    
    UA_UInt32
    UA_UInt32_random(void); /* no cryptographic entropy */
