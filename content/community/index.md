@@ -1,9 +1,8 @@
-+++ 
++++
 fragment = "content" 
-weight = 150
+weight = 100
 
-disabled=true
-
-#title = "Portfolio" 
+title = "Community" 
+disabled = true
 background = "light" 
 +++

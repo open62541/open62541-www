@@ -1,14 +1,10 @@
 +++
-weight = 110
+weight = 120
 title = "IRC Chat"
-#subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing"
-#item_url = "#"
-#disabled = true
 
 [asset]
   image = "libera-color.svg"
+  url = "https://web.libera.chat/#open62541"
 +++
 
-IRC Chat
-https://web.libera.chat/#open62541
-
+On libera.chat
