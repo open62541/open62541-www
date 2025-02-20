@@ -226,21 +226,10 @@ The :ref:`tutorials` provide a good starting point for this.
     * UA_ClientConfig_setAuthenticationCert for x509-based authentication, which is
     * implemented as a plugin (as it can be based on different crypto
     * libraries). */
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode
    UA_ClientConfig_setAuthenticationUsername(UA_ClientConfig *config,
                                              const char *username,
-                                             const char *password) ,{
-       UA_UserNameIdentityToken* identityToken = UA_UserNameIdentityToken_new();
-       if(!identityToken)
-           return UA_STATUSCODE_BADOUTOFMEMORY;
-       identityToken->userName = UA_STRING_ALLOC(username);
-       identityToken->password = UA_BYTESTRING_ALLOC(password);
-   
-       UA_ExtensionObject_clear(&config->userIdentityToken);
-       UA_ExtensionObject_setValue(&config->userIdentityToken, identityToken,
-                                   &UA_TYPES[UA_TYPES_USERNAMEIDENTITYTOKEN]);
-       return UA_STATUSCODE_GOOD;
-   })
+                                             const char *password);
    
 Client Lifecycle
 ----------------
@@ -276,11 +265,9 @@ Client Lifecycle
    UA_ClientConfig *
    UA_Client_getConfig(UA_Client *client);
    
-   /* Get the client context */
-   UA_INLINABLE( void *
-   UA_Client_getContext(UA_Client *client) ,{
-       return UA_Client_getConfig(client)->clientContext; /* Cannot fail */
-   })
+   /* Get the client context (inside the context) */
+   #define UA_Client_getContext(client) \
+       UA_Client_getConfig(client)->clientContext
    
    /* (Disconnect and) delete the client */
    void
@@ -296,106 +283,53 @@ Client Lifecycle
 Connect to a Server
 -------------------
 
-Once a client is connected to an endpointUrl, it is not possible to switch to
-another server. A new client has to be created for that.
+A Client connecting to an OPC UA Server first opens a SecureChannel and on
+top of that opens a Session. The Session can also be moved to another
+SecureChannel. The Session lifetime is typically longer than the
+SecureChannel.
+
+The methods below are used to connect a client with a server. The supplied
+arguments (for example the EndpointUrl or username/password) are first copied
+into the client config. This is the same as modifying the client config first
+and then connecting without these extra arguments.
 
 Once a connection is established, the client keeps the connection open and
-reconnects if necessary.
-
-If the connection fails unrecoverably (state->connectStatus is set to an
-error), the client is no longer usable. Create a new client if required.
+reconnects if necessary. But as the client has no dedicated thread, it might
+be necessary to call ``UA_Client_run_iterate`` in an interval for the
+housekeeping tasks. Note normal Service-calls (like reading a value) also
+triggers the scheduled house-keeping tasks.
 
 .. code-block:: c
 
    
-   /* Connect with the client configuration. For the async connection, finish
-    * connecting via UA_Client_run_iterate (or manually running a configured
-    * external EventLoop). */
+   /* Copy the given endpointUrl into the configuration and connect. If the
+    * endpointURL is NULL, then the client configuration is not modified. */
    UA_StatusCode UA_THREADSAFE
-   __UA_Client_connect(UA_Client *client, UA_Boolean async);
+   UA_Client_connect(UA_Client *client, const char *endpointUrl);
    
-   /* Connect to the server. First a SecureChannel is opened, then a Session. The
-    * client configuration restricts the SecureChannel selection and contains the
-    * UserIdentityToken for the Session.
-    *
-    * @param client to use
-    * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
-    * @return Indicates whether the operation succeeded or returns an error code */
-   UA_INLINABLE( UA_StatusCode
-   UA_Client_connect(UA_Client *client, const char *endpointUrl), {
-       /* Update the configuration */
-       UA_ClientConfig *cc = UA_Client_getConfig(client);
-       cc->noSession = false; /* Open a Session */
-       UA_String_clear(&cc->endpointUrl);
-       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
+   /* Connect to the server and create+activate a Session with the given username
+    * and password. This first set the UserIdentityToken in the client config and
+    * then calls the regular connect method. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_connectUsername(UA_Client *client, const char *endpointUrl,
+                             const char *username, const char *password);
    
-       /* Connect */
-       return __UA_Client_connect(client, false);
-   })
+   /* Connect to the server with a SecureChannel, but without creating a Session */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_connectSecureChannel(UA_Client *client, const char *endpointUrl);
    
    /* Connect async (non-blocking) to the server. After initiating the connection,
     * call UA_Client_run_iterate repeatedly until the connection is fully
     * established. You can set a callback to client->config.stateCallback to be
     * notified when the connection status changes. Or use UA_Client_getState to get
     * the state manually. */
-   UA_INLINABLE( UA_StatusCode
-   UA_Client_connectAsync(UA_Client *client, const char *endpointUrl) ,{
-       /* Update the configuration */
-       UA_ClientConfig *cc = UA_Client_getConfig(client);
-       cc->noSession = false; /* Open a Session */
-       UA_String_clear(&cc->endpointUrl);
-       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_connectAsync(UA_Client *client, const char *endpointUrl);
    
-       /* Connect */
-       return __UA_Client_connect(client, true);
-   })
-   
-   /* Connect to the server without creating a session
-    *
-    * @param client to use
-    * @param endpointURL to connect (for example "opc.tcp://localhost:4840")
-    * @return Indicates whether the operation succeeded or returns an error code */
-   UA_INLINABLE( UA_StatusCode
-   UA_Client_connectSecureChannel(UA_Client *client, const char *endpointUrl) ,{
-       /* Update the configuration */
-       UA_ClientConfig *cc = UA_Client_getConfig(client);
-       cc->noSession = true; /* Don't open a Session */
-       UA_String_clear(&cc->endpointUrl);
-       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
-   
-       /* Connect */
-       return __UA_Client_connect(client, false);
-   })
-   
-   /* Connect async (non-blocking) only the SecureChannel */
-   UA_INLINABLE( UA_StatusCode
-   UA_Client_connectSecureChannelAsync(UA_Client *client, const char *endpointUrl) ,{
-       /* Update the configuration */
-       UA_ClientConfig *cc = UA_Client_getConfig(client);
-       cc->noSession = true; /* Don't open a Session */
-       UA_String_clear(&cc->endpointUrl);
-       cc->endpointUrl = UA_STRING_ALLOC(endpointUrl);
-   
-       /* Connect */
-       return __UA_Client_connect(client, true);
-   })
-   
-   /* Connect to the server and create+activate a Session with the given username
-    * and password. This first set the UserIdentityToken in the client config and
-    * then calls the regular connect method. */
-   UA_INLINABLE( UA_StatusCode
-   UA_Client_connectUsername(UA_Client *client, const char *endpointUrl,
-                             const char *username, const char *password) ,{
-       /* Set the user identity token */
-       UA_ClientConfig *cc = UA_Client_getConfig(client);
-       UA_StatusCode res =
-           UA_ClientConfig_setAuthenticationUsername(cc, username, password);
-       if(res != UA_STATUSCODE_GOOD)
-           return res;
-   
-       /* Connect */
-       return UA_Client_connect(client, endpointUrl);
-   })
+   /* Connect async to the server with a SecureChannel, but without creating a
+    * Session */
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_connectSecureChannelAsync(UA_Client *client, const char *endpointUrl);
    
    /* Sets up a listening socket for incoming reverse connect requests by OPC UA
     * servers. After the first server has connected, the listening socket is
@@ -411,9 +345,10 @@ error), the client is no longer usable. Create a new client if required.
     * of the connect methods will also close the listening socket and the
     * connection to the remote server. */
    UA_StatusCode
-   UA_Client_startListeningForReverseConnect(
-       UA_Client *client, const UA_String *listenHostnames,
-       size_t listenHostnamesLength, UA_UInt16 port);
+   UA_Client_startListeningForReverseConnect(UA_Client *client,
+                                             const UA_String *listenHostnames,
+                                             size_t listenHostnamesLength,
+                                             UA_UInt16 port);
    
    /* Disconnect and close a connection to the selected server. Disconnection is
     * always performed async (without blocking). */
@@ -438,8 +373,9 @@ error), the client is no longer usable. Create a new client if required.
    /* Get the AuthenticationToken and ServerNonce required to activate the current
     * Session on a different SecureChannel. */
    UA_StatusCode UA_THREADSAFE
-   UA_Client_getSessionAuthenticationToken(
-       UA_Client *client, UA_NodeId *authenticationToken, UA_ByteString *serverNonce);
+   UA_Client_getSessionAuthenticationToken(UA_Client *client,
+                                           UA_NodeId *authenticationToken,
+                                           UA_ByteString *serverNonce);
    
    /* Re-activate the current session. A change of prefered locales can be done by
     * updating the client configuration. */
@@ -552,19 +488,19 @@ Discovery
 Services
 --------
 
-The raw OPC UA services are exposed to the client. But most of the time, it
-is better to use the convenience functions from ``ua_client_highlevel.h``
-that wrap the raw services.
+The raw OPC UA services are exposed to the client. A Request-message
+typically contains an array of operations to be performed by the server. The
+convenience-methods from ``ua_client_highlevel.h`` are used to call
+individual operations and are often easier to use. For performance reasons it
+might however be better to request many operations in a single message.
 
-.. code-block:: c
+The raw Service-calls return the entire Response-message. Check the
+ResponseHeader for the overall StatusCode. The operations within the
+Service-call may return individual StatusCodes in addition.
 
-   
-   /* Don't use this function. Use the type versions below instead. */
-   void UA_THREADSAFE
-   __UA_Client_Service(UA_Client *client, const void *request,
-                       const UA_DataType *requestType, void *response,
-                       const UA_DataType *responseType);
-   
+Note that some Services are not exposed here. For example, there is a
+dedicated client API for Subscriptions and for Session management.
+
 Attribute Service Set
 ~~~~~~~~~~~~~~~~~~~~~
 This Service Set provides Services to access Attributes that are part of
@@ -573,41 +509,19 @@ Nodes.
 .. code-block:: c
 
    
-   UA_INLINABLE( UA_THREADSAFE UA_ReadResponse
-   UA_Client_Service_read(UA_Client *client, const UA_ReadRequest request) ,{
-       UA_ReadResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_READREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_READRESPONSE]);
-       return response;
-   })
+   UA_ReadResponse UA_THREADSAFE
+   UA_Client_Service_read(UA_Client *client, const UA_ReadRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_WriteResponse
-   UA_Client_Service_write(UA_Client *client, const UA_WriteRequest request) ,{
-       UA_WriteResponse response;
-       __UA_Client_Service(client, &request, &UA_TYPES[UA_TYPES_WRITEREQUEST],
-                           &response, &UA_TYPES[UA_TYPES_WRITERESPONSE]);
-       return response;
-   })
+   UA_WriteResponse UA_THREADSAFE
+   UA_Client_Service_write(UA_Client *client, const UA_WriteRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_HistoryReadResponse
+   UA_HistoryReadResponse UA_THREADSAFE
    UA_Client_Service_historyRead(UA_Client *client,
-                                 const UA_HistoryReadRequest request) ,{
-       UA_HistoryReadResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_HISTORYREADREQUEST],
-           &response, &UA_TYPES[UA_TYPES_HISTORYREADRESPONSE]);
-       return response;
-   })
+                                 const UA_HistoryReadRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_HistoryUpdateResponse
+   UA_HistoryUpdateResponse UA_THREADSAFE
    UA_Client_Service_historyUpdate(UA_Client *client,
-                                   const UA_HistoryUpdateRequest request) ,{
-       UA_HistoryUpdateResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_HISTORYUPDATEREQUEST],
-           &response, &UA_TYPES[UA_TYPES_HISTORYUPDATERESPONSE]);
-       return response;
-   })
+                                   const UA_HistoryUpdateRequest req);
    
 Method Service Set
 ~~~~~~~~~~~~~~~~~~
@@ -617,15 +531,8 @@ defines the means to invoke Methods.
 .. code-block:: c
 
    
-   UA_INLINABLE( UA_THREADSAFE UA_CallResponse
-   UA_Client_Service_call(UA_Client *client,
-                          const UA_CallRequest request) ,{
-       UA_CallResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_CALLREQUEST],
-           &response, &UA_TYPES[UA_TYPES_CALLRESPONSE]);
-       return response;
-   })
+   UA_CallResponse UA_THREADSAFE
+   UA_Client_Service_call(UA_Client *client, const UA_CallRequest req);
    
 NodeManagement Service Set
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -635,45 +542,20 @@ References between them.
 .. code-block:: c
 
    
-   UA_INLINABLE( UA_THREADSAFE UA_AddNodesResponse
-   UA_Client_Service_addNodes(UA_Client *client,
-                              const UA_AddNodesRequest request) ,{
-       UA_AddNodesResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_ADDNODESREQUEST],
-           &response, &UA_TYPES[UA_TYPES_ADDNODESRESPONSE]);
-       return response;
-   })
+   UA_AddNodesResponse UA_THREADSAFE
+   UA_Client_Service_addNodes(UA_Client *client, const UA_AddNodesRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_AddReferencesResponse
+   UA_AddReferencesResponse UA_THREADSAFE
    UA_Client_Service_addReferences(UA_Client *client,
-                                   const UA_AddReferencesRequest request) ,{
-       UA_AddReferencesResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_ADDREFERENCESREQUEST],
-           &response, &UA_TYPES[UA_TYPES_ADDREFERENCESRESPONSE]);
-       return response;
-   })
+                                   const UA_AddReferencesRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_DeleteNodesResponse
+   UA_DeleteNodesResponse UA_THREADSAFE
    UA_Client_Service_deleteNodes(UA_Client *client,
-                                 const UA_DeleteNodesRequest request) ,{
-       UA_DeleteNodesResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_DELETENODESREQUEST],
-           &response, &UA_TYPES[UA_TYPES_DELETENODESRESPONSE]);
-       return response;
-   })
+                                 const UA_DeleteNodesRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_DeleteReferencesResponse
-   UA_Client_Service_deleteReferences(
-       UA_Client *client, const UA_DeleteReferencesRequest request) ,{
-       UA_DeleteReferencesResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_DELETEREFERENCESREQUEST],
-           &response, &UA_TYPES[UA_TYPES_DELETEREFERENCESRESPONSE]);
-       return response;
-   })
+   UA_DeleteReferencesResponse UA_THREADSAFE
+   UA_Client_Service_deleteReferences(UA_Client *client,
+                                      const UA_DeleteReferencesRequest req);
    
 View Service Set
 ~~~~~~~~~~~~~~~~
@@ -683,58 +565,24 @@ the AddressSpace or through a View which is a subset of the AddressSpace.
 .. code-block:: c
 
    
-   UA_INLINABLE( UA_THREADSAFE UA_BrowseResponse
-   UA_Client_Service_browse(UA_Client *client,
-                            const UA_BrowseRequest request) ,{
-       UA_BrowseResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_BROWSEREQUEST],
-           &response, &UA_TYPES[UA_TYPES_BROWSERESPONSE]);
-       return response;
-   })
+   UA_BrowseResponse UA_THREADSAFE
+   UA_Client_Service_browse(UA_Client *client, const UA_BrowseRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_BrowseNextResponse
+   UA_BrowseNextResponse UA_THREADSAFE
    UA_Client_Service_browseNext(UA_Client *client,
-                                const UA_BrowseNextRequest request) ,{
-       UA_BrowseNextResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_BROWSENEXTREQUEST],
-           &response, &UA_TYPES[UA_TYPES_BROWSENEXTRESPONSE]);
-       return response;
-   })
+                                const UA_BrowseNextRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_TranslateBrowsePathsToNodeIdsResponse
-   UA_Client_Service_translateBrowsePathsToNodeIds(
-       UA_Client *client,
-       const UA_TranslateBrowsePathsToNodeIdsRequest request) ,{
-       UA_TranslateBrowsePathsToNodeIdsResponse response;
-       __UA_Client_Service(
-           client, &request,
-           &UA_TYPES[UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSREQUEST],
-           &response,
-           &UA_TYPES[UA_TYPES_TRANSLATEBROWSEPATHSTONODEIDSRESPONSE]);
-       return response;
-   })
+   UA_TranslateBrowsePathsToNodeIdsResponse UA_THREADSAFE
+   UA_Client_Service_translateBrowsePathsToNodeIds(UA_Client *client,
+       const UA_TranslateBrowsePathsToNodeIdsRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_RegisterNodesResponse
-   UA_Client_Service_registerNodes(
-       UA_Client *client, const UA_RegisterNodesRequest request) ,{
-       UA_RegisterNodesResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_REGISTERNODESREQUEST],
-           &response, &UA_TYPES[UA_TYPES_REGISTERNODESRESPONSE]);
-       return response;
-   })
+   UA_RegisterNodesResponse UA_THREADSAFE
+   UA_Client_Service_registerNodes(UA_Client *client,
+                                   const UA_RegisterNodesRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_UnregisterNodesResponse
-   UA_Client_Service_unregisterNodes(
-       UA_Client *client, const UA_UnregisterNodesRequest request) ,{
-       UA_UnregisterNodesResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_UNREGISTERNODESREQUEST],
-           &response, &UA_TYPES[UA_TYPES_UNREGISTERNODESRESPONSE]);
-       return response;
-   })
+   UA_UnregisterNodesResponse UA_THREADSAFE
+   UA_Client_Service_unregisterNodes(UA_Client *client,
+                                     const UA_UnregisterNodesRequest req);
    
 Query Service Set
 ~~~~~~~~~~~~~~~~~
@@ -745,25 +593,13 @@ This Service Set is used to issue a Query to a Server.
    
    #ifdef UA_ENABLE_QUERY
    
-   UA_INLINABLE( UA_THREADSAFE UA_QueryFirstResponse
+   UA_QueryFirstResponse UA_THREADSAFE
    UA_Client_Service_queryFirst(UA_Client *client,
-                                const UA_QueryFirstRequest request) ,{
-       UA_QueryFirstResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
-           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
-       return response;
-   })
+                                const UA_QueryFirstRequest req);
    
-   UA_INLINABLE( UA_THREADSAFE UA_QueryNextResponse
+   UA_QueryNextResponse UA_THREADSAFE
    UA_Client_Service_queryNext(UA_Client *client,
-                               const UA_QueryNextRequest request) ,{
-       UA_QueryNextResponse response;
-       __UA_Client_Service(
-           client, &request, &UA_TYPES[UA_TYPES_QUERYFIRSTREQUEST],
-           &response, &UA_TYPES[UA_TYPES_QUERYFIRSTRESPONSE]);
-       return response;
-   })
+                               const UA_QueryNextRequest req);
    
    #endif
    
@@ -948,55 +784,69 @@ may be recieved during a synchronous service call or in
        UA_Client_StatusChangeNotificationCallback statusChangeCallback,
        UA_Client_DeleteSubscriptionCallback deleteCallback);
    
+   typedef void
+   (*UA_ClientAsyncCreateSubscriptionCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_CreateSubscriptionResponse *response);
+   
    UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_create_async(UA_Client *client,
        const UA_CreateSubscriptionRequest request,
        void *subscriptionContext,
        UA_Client_StatusChangeNotificationCallback statusChangeCallback,
        UA_Client_DeleteSubscriptionCallback deleteCallback,
-       UA_ClientAsyncServiceCallback callback,
+       UA_ClientAsyncCreateSubscriptionCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
    UA_ModifySubscriptionResponse UA_THREADSAFE
    UA_Client_Subscriptions_modify(UA_Client *client,
        const UA_ModifySubscriptionRequest request);
    
+   typedef void
+   (*UA_ClientAsyncModifySubscriptionCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_ModifySubscriptionResponse *response);
+   
    UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_modify_async(UA_Client *client,
        const UA_ModifySubscriptionRequest request,
-       UA_ClientAsyncServiceCallback callback,
+       UA_ClientAsyncModifySubscriptionCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
    UA_DeleteSubscriptionsResponse UA_THREADSAFE
    UA_Client_Subscriptions_delete(UA_Client *client,
        const UA_DeleteSubscriptionsRequest request);
    
+   typedef void
+   (*UA_ClientAsyncDeleteSubscriptionsCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_DeleteSubscriptionsResponse *response);
+   
    UA_StatusCode UA_THREADSAFE
    UA_Client_Subscriptions_delete_async(UA_Client *client,
        const UA_DeleteSubscriptionsRequest request,
-       UA_ClientAsyncServiceCallback callback,
+       UA_ClientAsyncDeleteSubscriptionsCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
    /* Delete a single subscription */
    UA_StatusCode UA_THREADSAFE
-   UA_Client_Subscriptions_deleteSingle(UA_Client *client, UA_UInt32 subscriptionId);
+   UA_Client_Subscriptions_deleteSingle(UA_Client *client,
+                                        UA_UInt32 subscriptionId);
    
    /* Retrieve or change the user supplied subscription contexts */
    UA_StatusCode UA_THREADSAFE
-   UA_Client_Subscriptions_getContext(UA_Client *client, UA_UInt32 subscriptionId, void **subContext);
+   UA_Client_Subscriptions_getContext(UA_Client *client,
+                                      UA_UInt32 subscriptionId,
+                                      void **subContext);
    
    UA_StatusCode UA_THREADSAFE
-   UA_Client_Subscriptions_setContext(UA_Client *client, UA_UInt32 subscriptionId, void *subContext);
+   UA_Client_Subscriptions_setContext(UA_Client *client,
+                                      UA_UInt32 subscriptionId,
+                                      void *subContext);
    
-   static UA_INLINE UA_THREADSAFE UA_SetPublishingModeResponse
+   UA_SetPublishingModeResponse UA_THREADSAFE
    UA_Client_Subscriptions_setPublishingMode(UA_Client *client,
-       const UA_SetPublishingModeRequest request) {
-       UA_SetPublishingModeResponse response;
-       __UA_Client_Service(client,
-           &request, &UA_TYPES[UA_TYPES_SETPUBLISHINGMODEREQUEST],
-           &response, &UA_TYPES[UA_TYPES_SETPUBLISHINGMODERESPONSE]);
-       return response;
-   }
+       const UA_SetPublishingModeRequest request);
    
 MonitoredItems
 ~~~~~~~~~~~~~~
@@ -1026,8 +876,8 @@ to get the current parameters.
        return request;
    }
    
-The clientHandle parameter cannot be set by the user, any value will be replaced
-by the client before sending the request to the server.
+The clientHandle parameter cannot be set by the user, any value will be
+replaced by the client before sending the request to the server.
 
 .. code-block:: c
 
@@ -1056,12 +906,17 @@ by the client before sending the request to the server.
        UA_Client_DataChangeNotificationCallback *callbacks,
        UA_Client_DeleteMonitoredItemCallback *deleteCallbacks);
    
+   typedef void
+   (*UA_ClientAsyncCreateMonitoredItemsCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_CreateMonitoredItemsResponse *response);
+   
    UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_createDataChanges_async(UA_Client *client,
        const UA_CreateMonitoredItemsRequest request, void **contexts,
        UA_Client_DataChangeNotificationCallback *callbacks,
        UA_Client_DeleteMonitoredItemCallback *deleteCallbacks,
-       UA_ClientAsyncServiceCallback createCallback,
+       UA_ClientAsyncCreateMonitoredItemsCallback createCallback,
        void *userdata, UA_UInt32 *requestId);
    
    UA_MonitoredItemCreateResult UA_THREADSAFE
@@ -1085,7 +940,7 @@ by the client before sending the request to the server.
        const UA_CreateMonitoredItemsRequest request, void **contexts,
        UA_Client_EventNotificationCallback *callbacks,
        UA_Client_DeleteMonitoredItemCallback *deleteCallbacks,
-       UA_ClientAsyncServiceCallback createCallback,
+       UA_ClientAsyncCreateMonitoredItemsCallback createCallback,
        void *userdata, UA_UInt32 *requestId);
    
    UA_MonitoredItemCreateResult UA_THREADSAFE
@@ -1100,83 +955,82 @@ by the client before sending the request to the server.
    UA_Client_MonitoredItems_delete(UA_Client *client,
        const UA_DeleteMonitoredItemsRequest);
    
+   typedef void
+   (*UA_ClientAsyncDeleteMonitoredItemsCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_DeleteMonitoredItemsResponse *response);
+   
    UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_delete_async(UA_Client *client,
        const UA_DeleteMonitoredItemsRequest request,
-       UA_ClientAsyncServiceCallback callback,
+       UA_ClientAsyncDeleteMonitoredItemsCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
    UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_deleteSingle(UA_Client *client,
        UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId);
    
-   /* The clientHandle parameter will be filled automatically */
-   UA_ModifyMonitoredItemsResponse UA_THREADSAFE
-   UA_Client_MonitoredItems_modify(UA_Client *client,
-       const UA_ModifyMonitoredItemsRequest request);
-   
-   UA_StatusCode UA_THREADSAFE
-   UA_Client_MonitoredItems_modify_async(UA_Client *client,
-       const UA_ModifyMonitoredItemsRequest request,
-       UA_ClientAsyncServiceCallback callback,
-       void *userdata, UA_UInt32 *requestId);
-   
-The following service calls go directly to the server. The MonitoredItem
-settings are not stored in the client.
+The "ClientHandle" is part of the MonitoredItem configuration. The handle is
+set internally and not exposed to the user.
 
 .. code-block:: c
 
    
-   static UA_INLINE UA_THREADSAFE UA_SetMonitoringModeResponse
-   UA_Client_MonitoredItems_setMonitoringMode(UA_Client *client,
-       const UA_SetMonitoringModeRequest request) {
-       UA_SetMonitoringModeResponse response;
-       __UA_Client_Service(client,
-           &request, &UA_TYPES[UA_TYPES_SETMONITORINGMODEREQUEST],
-           &response, &UA_TYPES[UA_TYPES_SETMONITORINGMODERESPONSE]);
-       return response;
-   }
+   UA_ModifyMonitoredItemsResponse UA_THREADSAFE
+   UA_Client_MonitoredItems_modify(UA_Client *client,
+       const UA_ModifyMonitoredItemsRequest request);
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
-   UA_Client_MonitoredItems_setMonitoringMode_async(UA_Client *client,
-       const UA_SetMonitoringModeRequest request,
-       UA_ClientAsyncServiceCallback callback,
-       void *userdata, UA_UInt32 *requestId) {
-       return __UA_Client_AsyncService(client, &request,
-           &UA_TYPES[UA_TYPES_SETMONITORINGMODEREQUEST], callback,
-           &UA_TYPES[UA_TYPES_SETMONITORINGMODERESPONSE],
-           userdata, requestId);
-   }
+   typedef void
+   (*UA_ClientAsyncModifyMonitoredItemsCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_DeleteMonitoredItemsResponse *response);
    
-   static UA_INLINE UA_THREADSAFE UA_SetTriggeringResponse
-   UA_Client_MonitoredItems_setTriggering(UA_Client *client,
-       const UA_SetTriggeringRequest request) {
-       UA_SetTriggeringResponse response;
-       __UA_Client_Service(client,
-           &request, &UA_TYPES[UA_TYPES_SETTRIGGERINGREQUEST],
-           &response, &UA_TYPES[UA_TYPES_SETTRIGGERINGRESPONSE]);
-       return response;
-   }
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_MonitoredItems_modify_async(UA_Client *client,
+       const UA_ModifyMonitoredItemsRequest request,
+       UA_ClientAsyncModifyMonitoredItemsCallback callback,
+       void *userdata, UA_UInt32 *requestId);
    
-   static UA_INLINE UA_THREADSAFE UA_StatusCode
-   UA_Client_MonitoredItems_setTriggering_async(UA_Client *client,
-       const UA_SetTriggeringRequest request,
-       UA_ClientAsyncServiceCallback callback,
-       void *userdata, UA_UInt32 *requestId) {
-       return __UA_Client_AsyncService(client, &request,
-           &UA_TYPES[UA_TYPES_SETTRIGGERINGREQUEST], callback,
-           &UA_TYPES[UA_TYPES_SETTRIGGERINGRESPONSE],
-           userdata, requestId);
-   }
+   UA_SetMonitoringModeResponse UA_THREADSAFE
+   UA_Client_MonitoredItems_setMonitoringMode(
+       UA_Client *client, const UA_SetMonitoringModeRequest request);
+   
+   typedef void
+   (*UA_ClientAsyncSetMonitoringModeCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_SetMonitoringModeResponse *response);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_MonitoredItems_setMonitoringMode_async(
+       UA_Client *client, const UA_SetMonitoringModeRequest request,
+       UA_ClientAsyncSetMonitoringModeCallback callback,
+       void *userdata, UA_UInt32 *requestId);
+   
+   UA_SetTriggeringResponse UA_THREADSAFE
+   UA_Client_MonitoredItems_setTriggering(
+       UA_Client *client, const UA_SetTriggeringRequest request);
+   
+   typedef void
+   (*UA_ClientAsyncSetTriggeringCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_SetTriggeringResponse *response);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_MonitoredItems_setTriggering_async(
+       UA_Client *client, const UA_SetTriggeringRequest request,
+       UA_ClientAsyncSetTriggeringCallback callback,
+       void *userdata, UA_UInt32 *requestId);
    
    /* Retrieve or change the user supplied MonitoredItem context */
    UA_StatusCode UA_THREADSAFE
-   UA_Client_MonitoredItem_getContext(UA_Client *client, UA_UInt32 subscriptionId,
-                                      UA_UInt32 monitoredItemId, void **monContext);
+   UA_Client_MonitoredItem_getContext(UA_Client *client,
+       UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId,
+       void **monContext);
    
    UA_StatusCode UA_THREADSAFE
-   UA_Client_MonitoredItem_setContext(UA_Client *client, UA_UInt32 subscriptionId,
-                                      UA_UInt32 monitoredItemId, void *monContext);
+   UA_Client_MonitoredItem_setContext(UA_Client *client,
+       UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId,
+       void *monContext);
 
 .. _client-highlevel:
 
@@ -1867,10 +1721,7 @@ Asynchronous Services
 
 All OPC UA services are asynchronous in nature. So several service calls can
 be made without waiting for the individual responses. Depending on the
-server's priorities responses may come in a different ordering than sent. Use
-the typed wrappers for async service requests instead of
-`__UA_Client_AsyncService` directly. However, the general mechanism of async
-service calls is explained here.
+server's priorities responses may come in a different ordering than sent.
 
 Connection and session management are performed in `UA_Client_run_iterate`,
 so to keep a connection healthy any client needs to consider how and when it
@@ -1878,17 +1729,14 @@ is appropriate to do the call. This is especially true for the periodic
 renewal of a SecureChannel's SecurityToken which is designed to have a
 limited lifetime and will invalidate the connection if not renewed.
 
-We say that an async service call has been dispatched once
-__UA_Client_AsyncService returns UA_STATUSCODE_GOOD. If there is an error
-after an async service has been dispatched, the callback is called with an
-"empty" response where the StatusCode has been set accordingly. This is also
-done if the client is shutting down and the list of dispatched async services
-is emptied.
-
-The StatusCode received when the client is shutting down is
-UA_STATUSCODE_BADSHUTDOWN. The StatusCode received when the client doesn't
-receive response after the specified in config->timeout (can be overridden
-via the "timeoutHint" in the request header) is UA_STATUSCODE_BADTIMEOUT.
+If there is an error after an async service has been dispatched, the callback
+is called with an "empty" response where the StatusCode has been set
+accordingly. This is also done if the client is shutting down and the list of
+dispatched async services is emptied. The StatusCode received when the client
+is shutting down is UA_STATUSCODE_BADSHUTDOWN. The StatusCode received when
+the client doesn't receive response after the specified in config->timeout
+(can be overridden via the "timeoutHint" in the request header) is
+UA_STATUSCODE_BADTIMEOUT.
 
 The userdata and requestId arguments can be NULL. The (optional) requestId
 output can be used to cancel the service while it is still pending. The
@@ -1902,6 +1750,9 @@ in the requestHeader to avoid clashes.
 .. code-block:: c
 
    
+   /* Generalized asynchronous service call. This can be used for any
+    * request/response datatype pair whenever no type-stable specialization is
+    * defined below. */
    typedef void
    (*UA_ClientAsyncServiceCallback)(UA_Client *client, void *userdata,
                                     UA_UInt32 requestId, void *response);
@@ -1925,19 +1776,6 @@ in the requestHeader to avoid clashes.
    UA_THREADSAFE UA_StatusCode
    UA_Client_cancelByRequestId(UA_Client *client, UA_UInt32 requestId,
                                UA_UInt32 *cancelCount);
-   
-   /* Set new userdata and callback for an existing request.
-    *
-    * @param client Pointer to the UA_Client
-    * @param requestId RequestId of the request, which was returned by
-    *        __UA_Client_AsyncService before
-    * @param userdata The new userdata
-    * @param callback The new callback
-    * @return UA_StatusCode UA_STATUSCODE_GOOD on success
-    *         UA_STATUSCODE_BADNOTFOUND when no request with requestId is found. */
-   UA_StatusCode UA_THREADSAFE
-   UA_Client_modifyAsyncCallback(UA_Client *client, UA_UInt32 requestId,
-                                 void *userdata, UA_ClientAsyncServiceCallback callback);
    
    /* Force the manual renewal of the SecureChannel. This is useful to renew the
     * SecureChannel during a downtime when no time-critical operations are
@@ -1964,62 +1802,39 @@ output can be used to cancel the service while it is still pending.
    (*UA_ClientAsyncReadCallback)(UA_Client *client, void *userdata,
                                  UA_UInt32 requestId, UA_ReadResponse *rr);
    
-   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
-   UA_Client_sendAsyncReadRequest(
-       UA_Client *client, UA_ReadRequest *request,
-       UA_ClientAsyncReadCallback readCallback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_AsyncService(
-           client, request, &UA_TYPES[UA_TYPES_READREQUEST],
-           (UA_ClientAsyncServiceCallback)readCallback,
-           &UA_TYPES[UA_TYPES_READRESPONSE], userdata, reqId);
-   })
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_sendAsyncReadRequest(UA_Client *client, UA_ReadRequest *request,
+                                  UA_ClientAsyncReadCallback readCallback,
+                                  void *userdata, UA_UInt32 *reqId);
    
    typedef void
    (*UA_ClientAsyncWriteCallback)(UA_Client *client, void *userdata,
                                   UA_UInt32 requestId, UA_WriteResponse *wr);
    
-   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
-   UA_Client_sendAsyncWriteRequest(
-       UA_Client *client, UA_WriteRequest *request,
-       UA_ClientAsyncWriteCallback writeCallback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_AsyncService(
-           client, request, &UA_TYPES[UA_TYPES_WRITEREQUEST],
-           (UA_ClientAsyncServiceCallback)writeCallback,
-           &UA_TYPES[UA_TYPES_WRITERESPONSE], userdata, reqId);
-   })
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_sendAsyncWriteRequest(UA_Client *client, UA_WriteRequest *request,
+                                   UA_ClientAsyncWriteCallback writeCallback,
+                                   void *userdata, UA_UInt32 *reqId);
    
    typedef void
    (*UA_ClientAsyncBrowseCallback)(UA_Client *client, void *userdata,
                                    UA_UInt32 requestId, UA_BrowseResponse *wr);
    
-   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
-   UA_Client_sendAsyncBrowseRequest(
-       UA_Client *client, UA_BrowseRequest *request,
-       UA_ClientAsyncBrowseCallback browseCallback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_AsyncService(
-           client, request, &UA_TYPES[UA_TYPES_BROWSEREQUEST],
-           (UA_ClientAsyncServiceCallback)browseCallback,
-           &UA_TYPES[UA_TYPES_BROWSERESPONSE], userdata, reqId);
-   })
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_sendAsyncBrowseRequest(UA_Client *client, UA_BrowseRequest *request,
+                                    UA_ClientAsyncBrowseCallback browseCallback,
+                                    void *userdata, UA_UInt32 *reqId);
    
    typedef void
    (*UA_ClientAsyncBrowseNextCallback)(UA_Client *client, void *userdata,
                                        UA_UInt32 requestId,
                                        UA_BrowseNextResponse *wr);
    
-   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_sendAsyncBrowseNextRequest(
        UA_Client *client, UA_BrowseNextRequest *request,
        UA_ClientAsyncBrowseNextCallback browseNextCallback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_AsyncService(
-           client, request, &UA_TYPES[UA_TYPES_BROWSENEXTREQUEST],
-           (UA_ClientAsyncServiceCallback)browseNextCallback,
-           &UA_TYPES[UA_TYPES_BROWSENEXTRESPONSE], userdata, reqId);
-   })
+       void *userdata, UA_UInt32 *reqId);
    
 Asynchronous Operations
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -2335,77 +2150,37 @@ the status of the operation is not good.
    
 Write Attribute
 ^^^^^^^^^^^^^^^
-
-The methods for async writing of attributes all have a similar API::
-
-    UA_StatusCode
-    UA_Client_writeValueAttribute_async(
-        UA_Client *client, const UA_NodeId nodeId,
-        const UA_Variant *attr, UA_ClientAsyncWriteCallback callback,
-        void *userdata, UA_UInt32 *reqId);
-
-We generate the methods for the different attributes with a macro.
+The methods for async writing of attributes all have a similar API. We
+generate the method signatures with a macro.
 
 .. code-block:: c
 
    
-   UA_StatusCode UA_THREADSAFE
-   __UA_Client_writeAttribute_async(
-       UA_Client *client, const UA_NodeId *nodeId,
-       UA_AttributeId attributeId, const void *in,
-       const UA_DataType *inDataType,
-       UA_ClientAsyncServiceCallback callback,
-       void *userdata, UA_UInt32 *reqId);
+   #define UA_CLIENT_ASYNCWRITE(NAME, ATTR_TYPE)                           \
+       UA_StatusCode UA_THREADSAFE                               \
+       NAME(UA_Client *client, const UA_NodeId nodeId,                     \
+            const ATTR_TYPE *attr, UA_ClientAsyncWriteCallback callback,   \
+            void *userdata, UA_UInt32 *reqId);
    
-   #define UA_CLIENT_ASYNCWRITE(NAME, ATTR_ID, ATTR_TYPE, ATTR_TYPEDESC)   \
-       UA_INLINABLE( UA_THREADSAFE UA_StatusCode NAME(                     \
-           UA_Client *client, const UA_NodeId nodeId,                      \
-           const ATTR_TYPE *attr, UA_ClientAsyncWriteCallback callback,    \
-           void *userdata, UA_UInt32 *reqId), {                            \
-       return __UA_Client_writeAttribute_async(                            \
-           client, &nodeId, UA_ATTRIBUTEID_##ATTR_ID, attr,                \
-           &UA_TYPES[UA_TYPES_##ATTR_TYPEDESC],                            \
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);      \
-   })
-   
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeNodeIdAttribute_async,
-                        NODEID, UA_NodeId, NODEID)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeNodeClassAttribute_async,
-                        NODECLASS, UA_NodeClass, NODECLASS)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeBrowseNameAttribute_async,
-                        BROWSENAME, UA_QualifiedName, QUALIFIEDNAME)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeDisplayNameAttribute_async,
-                        DISPLAYNAME, UA_LocalizedText, LOCALIZEDTEXT)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeDescriptionAttribute_async,
-                        DESCRIPTION, UA_LocalizedText, LOCALIZEDTEXT)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeWriteMaskAttribute_async,
-                        WRITEMASK, UA_UInt32, UINT32)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeIsAbstractAttribute_async,
-                        ISABSTRACT, UA_Boolean, BOOLEAN)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeSymmetricAttribute_async,
-                        SYMMETRIC, UA_Boolean, BOOLEAN)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeInverseNameAttribute_async,
-                        INVERSENAME, UA_LocalizedText, LOCALIZEDTEXT)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeContainsNoLoopsAttribute_async,
-                        CONTAINSNOLOOPS, UA_Boolean, BOOLEAN)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeEventNotifierAttribute_async,
-                        EVENTNOTIFIER, UA_Byte, BYTE)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeValueAttribute_async,
-                        VALUE, UA_Variant, VARIANT)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeDataTypeAttribute_async,
-                        DATATYPE, UA_NodeId, NODEID)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeValueRankAttribute_async,
-                        VALUERANK, UA_Int32, INT32)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeAccessLevelAttribute_async,
-                        ACCESSLEVEL, UA_Byte, BYTE)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeMinimumSamplingIntervalAttribute_async,
-                        MINIMUMSAMPLINGINTERVAL, UA_Double, DOUBLE)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeHistorizingAttribute_async,
-                        HISTORIZING, UA_Boolean, BOOLEAN)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeExecutableAttribute_async,
-                        EXECUTABLE, UA_Boolean, BOOLEAN)
-   UA_CLIENT_ASYNCWRITE(UA_Client_writeAccessLevelExAttribute_async,
-                        ACCESSLEVELEX, UA_UInt32, UINT32)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeNodeIdAttribute_async, UA_NodeId)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeNodeClassAttribute_async, UA_NodeClass)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeBrowseNameAttribute_async, UA_QualifiedName)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeDisplayNameAttribute_async, UA_LocalizedText)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeDescriptionAttribute_async, UA_LocalizedText)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeWriteMaskAttribute_async, UA_UInt32)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeIsAbstractAttribute_async, UA_Boolean)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeSymmetricAttribute_async, UA_Boolean)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeInverseNameAttribute_async, UA_LocalizedText)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeContainsNoLoopsAttribute_async, UA_Boolean)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeEventNotifierAttribute_async, UA_Byte)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeValueAttribute_async, UA_Variant)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeDataTypeAttribute_async, UA_NodeId)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeValueRankAttribute_async, UA_Int32)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeAccessLevelAttribute_async, UA_Byte)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeMinimumSamplingIntervalAttribute_async, UA_Double)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeHistorizingAttribute_async, UA_Boolean)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeExecutableAttribute_async, UA_Boolean)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeAccessLevelExAttribute_async, UA_UInt32)
    
 Method Calling
 ^^^^^^^^^^^^^^
@@ -2413,170 +2188,93 @@ Method Calling
 .. code-block:: c
 
    
-   UA_StatusCode UA_THREADSAFE
-   __UA_Client_call_async(
-       UA_Client *client,
-       const UA_NodeId objectId, const UA_NodeId methodId,
-       size_t inputSize, const UA_Variant *input,
-       UA_ClientAsyncServiceCallback callback,
-       void *userdata, UA_UInt32 *reqId);
-   
    typedef void
    (*UA_ClientAsyncCallCallback)(
        UA_Client *client, void *userdata,
        UA_UInt32 requestId, UA_CallResponse *cr);
    
-   UA_INLINABLE( UA_THREADSAFE UA_StatusCode
-   UA_Client_call_async(
-       UA_Client *client, const UA_NodeId objectId,
-       const UA_NodeId methodId, size_t inputSize,
-       const UA_Variant *input, UA_ClientAsyncCallCallback callback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_call_async(
-           client, objectId, methodId, inputSize, input,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_call_async(UA_Client *client, const UA_NodeId objectId,
+                        const UA_NodeId methodId, size_t inputSize,
+                        const UA_Variant *input,
+                        UA_ClientAsyncCallCallback callback,
+                        void *userdata, UA_UInt32 *reqId);
    
 Node Management
 ^^^^^^^^^^^^^^^
 
 .. code-block:: c
 
+   
    typedef void
    (*UA_ClientAsyncAddNodesCallback)(
        UA_Client *client, void *userdata,
        UA_UInt32 requestId, UA_AddNodesResponse *ar);
    
-   UA_StatusCode
-   __UA_Client_addNode_async(
-       UA_Client *client, const UA_NodeClass nodeClass,
-       const UA_NodeId requestedNewNodeId, const UA_NodeId parentNodeId,
-       const UA_NodeId referenceTypeId, const UA_QualifiedName browseName,
-       const UA_NodeId typeDefinition, const UA_NodeAttributes *attr,
-       const UA_DataType *attributeType, UA_NodeId *outNewNodeId,
-       UA_ClientAsyncServiceCallback callback, void *userdata,
-       UA_UInt32 *reqId);
-   
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addVariableNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_NodeId typeDefinition,
        const UA_VariableAttributes attr, UA_NodeId *outNewNodeId,
        UA_ClientAsyncAddNodesCallback callback, void *userdata,
-       UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_VARIABLE, requestedNewNodeId,
-           parentNodeId, referenceTypeId, browseName,
-           typeDefinition, (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_VARIABLEATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addVariableTypeNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_VariableTypeAttributes attr,
        UA_NodeId *outNewNodeId, UA_ClientAsyncAddNodesCallback callback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_VARIABLETYPE, requestedNewNodeId, parentNodeId,
-           referenceTypeId, browseName, UA_NODEID_NULL,
-           (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_VARIABLETYPEATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       void *userdata, UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addObjectNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_NodeId typeDefinition,
        const UA_ObjectAttributes attr, UA_NodeId *outNewNodeId,
        UA_ClientAsyncAddNodesCallback callback, void *userdata,
-       UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_OBJECT, requestedNewNodeId,
-           parentNodeId, referenceTypeId,
-           browseName, typeDefinition, (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_OBJECTATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addObjectTypeNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_ObjectTypeAttributes attr,
        UA_NodeId *outNewNodeId, UA_ClientAsyncAddNodesCallback callback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_OBJECTTYPE, requestedNewNodeId, parentNodeId,
-           referenceTypeId, browseName, UA_NODEID_NULL,
-           (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_OBJECTTYPEATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       void *userdata, UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addViewNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName,
        const UA_ViewAttributes attr, UA_NodeId *outNewNodeId,
        UA_ClientAsyncAddNodesCallback callback, void *userdata,
-       UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_VIEW, requestedNewNodeId,
-           parentNodeId, referenceTypeId,
-           browseName, UA_NODEID_NULL, (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_VIEWATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addReferenceTypeNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_ReferenceTypeAttributes attr,
        UA_NodeId *outNewNodeId, UA_ClientAsyncAddNodesCallback callback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_REFERENCETYPE, requestedNewNodeId, parentNodeId,
-           referenceTypeId, browseName, UA_NODEID_NULL,
-           (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_REFERENCETYPEATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       void *userdata, UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addDataTypeNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_DataTypeAttributes attr,
        UA_NodeId *outNewNodeId, UA_ClientAsyncAddNodesCallback callback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_DATATYPE, requestedNewNodeId,
-           parentNodeId, referenceTypeId, browseName,
-           UA_NODEID_NULL, (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_DATATYPEATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       void *userdata, UA_UInt32 *reqId);
    
-   UA_INLINABLE( UA_StatusCode
+   UA_StatusCode UA_THREADSAFE
    UA_Client_addMethodNode_async(
        UA_Client *client, const UA_NodeId requestedNewNodeId,
        const UA_NodeId parentNodeId, const UA_NodeId referenceTypeId,
        const UA_QualifiedName browseName, const UA_MethodAttributes attr,
        UA_NodeId *outNewNodeId, UA_ClientAsyncAddNodesCallback callback,
-       void *userdata, UA_UInt32 *reqId), {
-       return __UA_Client_addNode_async(
-           client, UA_NODECLASS_METHOD, requestedNewNodeId, parentNodeId,
-           referenceTypeId, browseName, UA_NODEID_NULL,
-           (const UA_NodeAttributes *)&attr,
-           &UA_TYPES[UA_TYPES_METHODATTRIBUTES], outNewNodeId,
-           (UA_ClientAsyncServiceCallback)callback, userdata, reqId);
-   })
+       void *userdata, UA_UInt32 *reqId);
 
