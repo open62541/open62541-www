@@ -7,6 +7,27 @@ weight = 150
 align = "left"
 
 #subtitle= "Easily right align the item fragment even with some buttons"
+
+# Subtitle pre and post item
+pre = "Latest stable Release 1.4.10"
+#post = "With a simple subtitle"
+
+[[buttons]]
+text = "Source Code (zip)"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.10.zip"
+color = "primary btn-block"
+#color = "primary"
+
+[[buttons]]
+text = "Source Code (tar.gz)"
+url = "https://github.com/open62541/open62541/archive/refs/tags/v1.4.10.tar.gz"
+color = "primary btn-block"
+#color = "secondary"
+
+[[buttons]]
+text = "Single-File Release open62541.h/open62541.c"
+url = "https://github.com/open62541/open62541/releases/tag/v1.4.10"
+color = "primary btn-block"
 +++
 
 open62541 (http://open62541.org) is an open source implementation of OPC UA (OPC Unified Architecture / IEC 62541) written in the C language. The library is usable with all major compilers and provides the necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications. The open62541 library is platform independent: All platform-specific functionality is implemented via exchangeable plugins for easy porting to different (embedded) targets.
