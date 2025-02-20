@@ -10,7 +10,7 @@ search = false
 
 [repo_button]
   url = "https://github.com/open62541/open62541"
-  text = "Fork" # default: "Star"
+  text = "Star" # default: "Star"
   icon = "fab fa-github" # defaults: "fab fa-github"
 
 # Branding options
