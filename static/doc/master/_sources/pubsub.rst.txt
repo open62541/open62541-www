@@ -251,6 +251,12 @@ runtime.
                                        const UA_NodeId connectionId,
                                        UA_PubSubConnectionConfig *config);
    
+   /* The PubSubConnection must be disabled to update the config */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updatePubSubConnectionConfig(UA_Server *server,
+                                          const UA_NodeId connectionId,
+                                          const UA_PubSubConnectionConfig *config);
+   
    /* Deletion of a PubSubConnection removes all "below" WriterGroups and
     * ReaderGroups. This can fail if the PubSubConnection is enabled. */
    UA_StatusCode UA_THREADSAFE
@@ -456,6 +462,11 @@ contained in the WriterGroup.
    UA_Server_getWriterGroupConfig(UA_Server *server, const UA_NodeId wgId,
                                   UA_WriterGroupConfig *config);
    
+   /* The WriterGroup must be disabled to update the config */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updateWriterGroupConfig(UA_Server *server, const UA_NodeId wgId,
+                                     const UA_WriterGroupConfig *config);
+   
    UA_StatusCode UA_THREADSAFE
    UA_Server_getWriterGroupState(UA_Server *server, const UA_NodeId wgId,
                                  UA_PubSubState *state);
@@ -543,6 +554,11 @@ with an existing PublishedDataSet and be contained within a WriterGroup.
    UA_StatusCode UA_THREADSAFE
    UA_Server_getDataSetWriterConfig(UA_Server *server, const UA_NodeId dswId,
                                     UA_DataSetWriterConfig *config);
+   
+   /* The DataSetWriter must be disabled to update the config */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updateDataSetWriterConfig(UA_Server *server, const UA_NodeId dswId,
+                                       const UA_DataSetWriterConfig *config);
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_enableDataSetWriter(UA_Server *server, const UA_NodeId dswId);

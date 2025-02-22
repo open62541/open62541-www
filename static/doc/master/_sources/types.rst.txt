@@ -1065,6 +1065,10 @@ target NodeId is stored instead of the decoded value.
                                    void *p,
                                    const UA_DataType *type);
    
+   UA_Boolean
+   UA_ExtensionObject_hasDecodedType(const UA_ExtensionObject *eo,
+                                     const UA_DataType *type);
+   
 .. _datavalue:
 
 DataValue
