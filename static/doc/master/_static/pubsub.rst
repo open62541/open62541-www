@@ -133,6 +133,16 @@ where we can.
    void
    UA_PublisherId_toVariant(const UA_PublisherId *p, UA_Variant *dst);
    
+   typedef enum  {
+       UA_PUBSUBCOMPONENT_CONNECTION  = 0,
+       UA_PUBSUBCOMPONENT_WRITERGROUP  = 1,
+       UA_PUBSUBCOMPONENT_DATASETWRITER  = 2,
+       UA_PUBSUBCOMPONENT_READERGROUP  = 3,
+       UA_PUBSUBCOMPONENT_DATASETREADER  = 4,
+       UA_PUBSUBCOMPONENT_PUBLISHEDDATASET  = 5,
+       UA_PUBSUBCOMPONENT_SUBSCRIBEDDDATASET = 6,
+   } UA_PubSubComponentType;
+   
 Server-wide PubSub Configuration
 --------------------------------
 The PubSub configuration is part of the server-config.
@@ -141,11 +151,28 @@ The PubSub configuration is part of the server-config.
 
    
    typedef struct {
-       /* Callback for PubSub component state changes: If provided this callback
-        * informs the application about PubSub component state changes. E.g. state
-        * change from operational to error in case of a DataSetReader
-        * MessageReceiveTimeout. The status code provides additional
-        * information. */
+       /* Notify the application when a new PubSubComponent is added removed. That
+        * way it is possible to keep track of the configurations coming in from the
+        * methods in ns0.
+        *
+        * When the return StatusCode is not good, then adding/removing the
+        * component is aborted. When a component is added, it is possible to call
+        * the public API _getConfig and _updateConfig methods on it from within the
+        * callback. */
+       UA_StatusCode
+       (*componentLifecycleCallback)(UA_Server *server, const UA_NodeId id,
+                                     const UA_PubSubComponentType componentType,
+                                     UA_Boolean remove);
+   
+       /* The callback is executed first thing in the state machine. The component
+        * config can be modified from within the beforeStateChangeCallback if the
+        * component is not enabled. Also the TargetState can be changed. For
+        * example to prevent a component that is not ready from getting enabled. */
+       void (*beforeStateChangeCallback)(UA_Server *server, const UA_NodeId id,
+                                         UA_PubSubState *targetState);
+   
+       /* Callback to notify the application about PubSub component state changes.
+        * The status code provides additional information. */
        void (*stateChangeCallback)(UA_Server *server, const UA_NodeId id,
                                    UA_PubSubState state, UA_StatusCode status);
    
@@ -216,6 +243,13 @@ runtime.
    
        UA_PUBSUB_COMPONENT_CONTEXT /* Context Configuration */
    } UA_PubSubConnectionConfig;
+   
+   UA_StatusCode
+   UA_PubSubConnectionConfig_copy(const UA_PubSubConnectionConfig *src,
+                                  UA_PubSubConnectionConfig *dst);
+   
+   void
+   UA_PubSubConnectionConfig_clear(UA_PubSubConnectionConfig *cfg);
    
    /* Add a new PubSub connection to the given server and open it.
     * @param server The server to add the connection to.
@@ -690,13 +724,18 @@ SubscribedDataSet and be contained within a ReaderGroup.
                                    UA_PubSubState *state);
    
    UA_StatusCode UA_THREADSAFE
-   UA_Server_addDataSetReader(UA_Server *server, UA_NodeId readerGroupIdentifier,
-                              const UA_DataSetReaderConfig *dataSetReaderConfig,
-                              UA_NodeId *readerIdentifier);
+   UA_Server_addDataSetReader(UA_Server *server, UA_NodeId readerGroupId,
+                              const UA_DataSetReaderConfig *config,
+                              UA_NodeId *dsrId);
+   
+   /* The DataSetReader must be disabled to update the config */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updateDataSetReaderConfig(UA_Server *server,
+                                       const UA_NodeId dsrId,
+                                       const UA_DataSetReaderConfig *config);
    
    UA_StatusCode UA_THREADSAFE
-   UA_Server_removeDataSetReader(UA_Server *server, UA_NodeId readerIdentifier);
-   
+   UA_Server_removeDataSetReader(UA_Server *server, const UA_NodeId dsrId);
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_enableDataSetReader(UA_Server *server, const UA_NodeId dsrId);
@@ -705,8 +744,10 @@ SubscribedDataSet and be contained within a ReaderGroup.
    UA_Server_disableDataSetReader(UA_Server *server, const UA_NodeId dsrId);
    
    UA_StatusCode UA_THREADSAFE
-   UA_Server_setDataSetReaderTargetVariables(UA_Server *server, const UA_NodeId dsrId,
-       size_t targetVariablesSize, const UA_FieldTargetDataType *targetVariables);
+   UA_Server_setDataSetReaderTargetVariables(
+       UA_Server *server, const UA_NodeId dsrId,
+       size_t targetVariablesSize,
+       const UA_FieldTargetDataType *targetVariables);
    
    /* Legacy API */
    #define UA_Server_DataSetReader_getConfig(server, dsrId, config) \
@@ -762,8 +803,14 @@ can be configured for a ReaderGroup.
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_addReaderGroup(UA_Server *server, const UA_NodeId connectionId,
-                            const UA_ReaderGroupConfig *readerGroupConfig,
-                            UA_NodeId *readerGroupIdentifier);
+                            const UA_ReaderGroupConfig *config,
+                            UA_NodeId *rgId);
+   
+   /* The ReaderGroup must be disabled to update the config */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updateReaderGroupConfig(UA_Server *server,
+                                     const UA_NodeId rgId,
+                                     const UA_ReaderGroupConfig *config);
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_removeReaderGroup(UA_Server *server, const UA_NodeId rgId);
@@ -776,7 +823,8 @@ can be configured for a ReaderGroup.
    
    /* Set the group key for the message encryption */
    UA_StatusCode UA_THREADSAFE
-   UA_Server_setReaderGroupEncryptionKeys(UA_Server *server, const UA_NodeId readerGroup,
+   UA_Server_setReaderGroupEncryptionKeys(UA_Server *server,
+                                          const UA_NodeId rgId,
                                           UA_UInt32 securityTokenId,
                                           const UA_ByteString signingKey,
                                           const UA_ByteString encryptingKey,

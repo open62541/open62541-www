@@ -225,6 +225,16 @@ where we can.</p>
 <span class="cm">/* Makes a shallow copy (no malloc) in the variant */</span>
 <span class="kt">void</span>
 <span class="nf">UA_PublisherId_toVariant</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_CONNECTION</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_WRITERGROUP</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_DATASETWRITER</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_READERGROUP</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_DATASETREADER</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_PUBLISHEDDATASET</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_SUBSCRIBEDDDATASET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubComponentType</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -232,11 +242,28 @@ where we can.</p>
 <h2>Server-wide PubSub Configuration<a class="headerlink" href="#server-wide-pubsub-configuration" title="Link to this heading">¶</a></h2>
 <p>The PubSub configuration is part of the server-config.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Callback for PubSub component state changes: If provided this callback</span>
-<span class="cm">     * informs the application about PubSub component state changes. E.g. state</span>
-<span class="cm">     * change from operational to error in case of a DataSetReader</span>
-<span class="cm">     * MessageReceiveTimeout. The status code provides additional</span>
-<span class="cm">     * information. */</span>
+<span class="w">    </span><span class="cm">/* Notify the application when a new PubSubComponent is added removed. That</span>
+<span class="cm">     * way it is possible to keep track of the configurations coming in from the</span>
+<span class="cm">     * methods in ns0.</span>
+<span class="cm">     *</span>
+<span class="cm">     * When the return StatusCode is not good, then adding/removing the</span>
+<span class="cm">     * component is aborted. When a component is added, it is possible to call</span>
+<span class="cm">     * the public API _getConfig and _updateConfig methods on it from within the</span>
+<span class="cm">     * callback. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">componentLifecycleCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubComponentType</span><span class="w"> </span><span class="n">componentType</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">remove</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* The callback is executed first thing in the state machine. The component</span>
+<span class="cm">     * config can be modified from within the beforeStateChangeCallback if the</span>
+<span class="cm">     * component is not enabled. Also the TargetState can be changed. For</span>
+<span class="cm">     * example to prevent a component that is not ready from getting enabled. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">beforeStateChangeCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_PubSubState</span><span class="w"> </span><span class="o">*</span><span class="n">targetState</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Callback to notify the application about PubSub component state changes.</span>
+<span class="cm">     * The status code provides additional information. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">stateChangeCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">UA_PubSubState</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">);</span>
 
@@ -302,6 +329,13 @@ runtime.</p>
 
 <span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubConnectionConfig</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_PubSubConnectionConfig_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubConnectionConfig</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">UA_PubSubConnectionConfig</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_PubSubConnectionConfig_clear</span><span class="p">(</span><span class="n">UA_PubSubConnectionConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cfg</span><span class="p">);</span>
 
 <span class="cm">/* Add a new PubSub connection to the given server and open it.</span>
 <span class="cm"> * @param server The server to add the connection to.</span>
@@ -761,13 +795,18 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="w">                                </span><span class="n">UA_PubSubState</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_addDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerGroupIdentifier</span><span class="p">,</span>
-<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataSetReaderConfig</span><span class="w"> </span><span class="o">*</span><span class="n">dataSetReaderConfig</span><span class="p">,</span>
-<span class="w">                           </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">readerIdentifier</span><span class="p">);</span>
+<span class="n">UA_Server_addDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerGroupId</span><span class="p">,</span>
+<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataSetReaderConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
+<span class="w">                           </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">dsrId</span><span class="p">);</span>
+
+<span class="cm">/* The DataSetReader must be disabled to update the config */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_updateDataSetReaderConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataSetReaderConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_removeDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerIdentifier</span><span class="p">);</span>
-
+<span class="n">UA_Server_removeDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_enableDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">);</span>
@@ -776,8 +815,10 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="n">UA_Server_disableDataSetReader</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setDataSetReaderTargetVariables</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">,</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">targetVariablesSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FieldTargetDataType</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariables</span><span class="p">);</span>
+<span class="n">UA_Server_setDataSetReaderTargetVariables</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dsrId</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">targetVariablesSize</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FieldTargetDataType</span><span class="w"> </span><span class="o">*</span><span class="n">targetVariables</span><span class="p">);</span>
 
 <span class="cm">/* Legacy API */</span>
 <span class="cp">#define UA_Server_DataSetReader_getConfig(server, dsrId, config) \</span>
@@ -830,8 +871,14 @@ can be configured for a ReaderGroup.</p>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_addReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">connectionId</span><span class="p">,</span>
-<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="w"> </span><span class="o">*</span><span class="n">readerGroupConfig</span><span class="p">,</span>
-<span class="w">                         </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">readerGroupIdentifier</span><span class="p">);</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">rgId</span><span class="p">);</span>
+
+<span class="cm">/* The ReaderGroup must be disabled to update the config */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_updateReaderGroupConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">rgId</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removeReaderGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">rgId</span><span class="p">);</span>
@@ -844,7 +891,8 @@ can be configured for a ReaderGroup.</p>
 
 <span class="cm">/* Set the group key for the message encryption */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setReaderGroupEncryptionKeys</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerGroup</span><span class="p">,</span>
+<span class="n">UA_Server_setReaderGroupEncryptionKeys</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">rgId</span><span class="p">,</span>
 <span class="w">                                       </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">securityTokenId</span><span class="p">,</span>
 <span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">signingKey</span><span class="p">,</span>
 <span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">encryptingKey</span><span class="p">,</span>
