@@ -632,6 +632,12 @@ The following functions are shorthand for creating ExpandedNodeIds.
 
    
    UA_INLINABLE(UA_ExpandedNodeId
+                UA_NODEID2EXPANDEDNODEID(UA_NodeId nodeId), {
+       UA_ExpandedNodeId id; id.nodeId = nodeId;
+       id.serverIndex = 0; id.namespaceUri = UA_STRING_NULL; return id;
+   })
+   
+   UA_INLINABLE(UA_ExpandedNodeId
                 UA_EXPANDEDNODEID_NUMERIC(UA_UInt16 nsIndex, UA_UInt32 identifier), {
        UA_ExpandedNodeId id; id.nodeId = UA_NODEID_NUMERIC(nsIndex, identifier);
        id.serverIndex = 0; id.namespaceUri = UA_STRING_NULL; return id;
@@ -1064,6 +1070,10 @@ target NodeId is stored instead of the decoded value.
    UA_ExtensionObject_setValueCopy(UA_ExtensionObject *eo,
                                    void *p,
                                    const UA_DataType *type);
+   
+   UA_Boolean
+   UA_ExtensionObject_hasDecodedType(const UA_ExtensionObject *eo,
+                                     const UA_DataType *type);
    
 .. _datavalue:
 

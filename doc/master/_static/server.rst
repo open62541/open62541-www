@@ -2020,6 +2020,7 @@ The callback can also be registered with a cyclic interval.
    
 Update the Server Certificate at Runtime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If certificateGroupId is null the DefaultApplicationGroup is used.
 
 .. code-block:: c
 
@@ -2032,7 +2033,9 @@ Update the Server Certificate at Runtime
                                const UA_ByteString *privateKey);
    
    /* Creates a PKCS #10 DER encoded certificate request signed with the server's
-    * private key */
+    * private key.
+    * If certificateGroupId is null the DefaultApplicationGroup is used.
+    */
    UA_StatusCode
    UA_Server_createSigningRequest(UA_Server *server,
                                   const UA_NodeId certificateGroupId,
