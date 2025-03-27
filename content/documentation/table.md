@@ -54,10 +54,44 @@ title_align = "left" # Default is center, can be left, right or center
 
 [[rows]]
   [[rows.values]]
-    header = "1.4.10 Release"
+    header = "1.4.11.1 Release"
 
   [[rows.values]]
     text = "Released"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.11/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.11.1.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.11 Release"
+
+  [[rows.values]]
+    text = "Legacy"
+
+  [[rows.values]]
+    icon = "fas fa-external-link-alt"
+    url = "/doc/v1.4.11/"
+    align = "center"
+
+  [[rows.values]]
+    icon = "fas fa-download"
+    url = "/doc/open62541-v1.4.11.pdf"
+    align = "center"
+
+[[rows]]
+  [[rows.values]]
+    header = "1.4.10 Release"
+
+  [[rows.values]]
+    text = "Legacy"
 
   [[rows.values]]
     icon = "fas fa-external-link-alt"
@@ -68,6 +102,7 @@ title_align = "left" # Default is center, can be left, right or center
     icon = "fas fa-download"
     url = "/doc/open62541-v1.4.10.pdf"
     align = "center"
+
 
 [[rows]]
   [[rows.values]]
