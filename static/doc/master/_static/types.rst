@@ -1225,7 +1225,7 @@ type operations as static inline functions.
    #endif
        UA_NodeId typeId;           /* The nodeid of the type */
        UA_NodeId binaryEncodingId; /* NodeId of datatype when encoded as binary */
-       //UA_NodeId xmlEncodingId;  /* NodeId of datatype when encoded as XML */
+       UA_NodeId xmlEncodingId;    /* NodeId of datatype when encoded as XML */
        UA_UInt32 memSize     : 16; /* Size of the struct in memory */
        UA_UInt32 typeKind    : 6;  /* Dispatch index for the handling routines */
        UA_UInt32 pointerFree : 1;  /* The type (and its members) contains no
@@ -1436,6 +1436,9 @@ index of the NodeId embedded in the ExpandedNodeId.
                                  UA_UInt16 index, UA_String *uri);
    
    void
+   UA_NamespaceMapping_clear(UA_NamespaceMapping *nm);
+   
+   void
    UA_NamespaceMapping_delete(UA_NamespaceMapping *nm);
    
 Binary Encoding/Decoding
@@ -1603,8 +1606,13 @@ formats that also include data in the OPC UA type system.
    
    #ifdef UA_ENABLE_XML_ENCODING
    
+   /* The structure with the encoding options may be extended in the future.
+    * Zero-out the entire structure initially to ensure code-compatibility when
+    * more fields are added in a later release. */
    typedef struct {
-       UA_Boolean prettyPrint;   /* Add newlines and spaces for legibility */
+       UA_NamespaceMapping *namespaceMapping;
+       const UA_String *serverUris;
+       size_t serverUrisSize;
    } UA_EncodeXmlOptions;
    
    /* Returns the number of bytes the value src takes in xml encoding. Returns
@@ -1628,6 +1636,12 @@ formats that also include data in the OPC UA type system.
     * Zero-out the entire structure initially to ensure code-compatibility when
     * more fields are added in a later release. */
    typedef struct {
+       UA_Boolean unwrapped; /* The value xxx is not wrapped in an XML element - as
+                              * in <Type>xxx</Type> */
+   
+       UA_NamespaceMapping *namespaceMapping;
+       const UA_String *serverUris;
+       size_t serverUrisSize;
        const UA_DataTypeArray *customTypes; /* Begin of a linked list with custom
                                              * datatype definitions */
    } UA_DecodeXmlOptions;

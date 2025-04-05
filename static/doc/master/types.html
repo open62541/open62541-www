@@ -1643,7 +1643,7 @@ type operations as static inline functions.</p>
 <span class="cp">#endif</span>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeId</span><span class="p">;</span><span class="w">           </span><span class="cm">/* The nodeid of the type */</span>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">binaryEncodingId</span><span class="p">;</span><span class="w"> </span><span class="cm">/* NodeId of datatype when encoded as binary */</span>
-<span class="w">    </span><span class="c1">//UA_NodeId xmlEncodingId;  /* NodeId of datatype when encoded as XML */</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">xmlEncodingId</span><span class="p">;</span><span class="w">    </span><span class="cm">/* NodeId of datatype when encoded as XML */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">memSize</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Size of the struct in memory */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">typeKind</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Dispatch index for the handling routines */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">pointerFree</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="cm">/* The type (and its members) contains no</span>
@@ -1843,6 +1843,9 @@ index of the NodeId embedded in the ExpandedNodeId.</p>
 <span class="w">                              </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">index</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">uri</span><span class="p">);</span>
 
 <span class="kt">void</span>
+<span class="nf">UA_NamespaceMapping_clear</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">);</span>
+
+<span class="kt">void</span>
 <span class="nf">UA_NamespaceMapping_delete</span><span class="p">(</span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nm</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -2000,8 +2003,13 @@ network. They were rather added to allow more convenient configuration file
 formats that also include data in the OPC UA type system.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_XML_ENCODING</span>
 
+<span class="cm">/* The structure with the encoding options may be extended in the future.</span>
+<span class="cm"> * Zero-out the entire structure initially to ensure code-compatibility when</span>
+<span class="cm"> * more fields are added in a later release. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">prettyPrint</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Add newlines and spaces for legibility */</span>
+<span class="w">    </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceMapping</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_EncodeXmlOptions</span><span class="p">;</span>
 
 <span class="cm">/* Returns the number of bytes the value src takes in xml encoding. Returns</span>
@@ -2025,6 +2033,12 @@ formats that also include data in the OPC UA type system.</p>
 <span class="cm"> * Zero-out the entire structure initially to ensure code-compatibility when</span>
 <span class="cm"> * more fields are added in a later release. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">unwrapped</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The value xxx is not wrapped in an XML element - as</span>
+<span class="cm">                           * in &lt;Type&gt;xxx&lt;/Type&gt; */</span>
+
+<span class="w">    </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceMapping</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">;</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customTypes</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Begin of a linked list with custom</span>
 <span class="cm">                                          * datatype definitions */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DecodeXmlOptions</span><span class="p">;</span>
