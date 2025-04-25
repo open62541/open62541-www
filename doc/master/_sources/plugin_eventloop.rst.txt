@@ -601,6 +601,7 @@ No additional parameters for sending over an UDP connection defined.
    UA_ConnectionManager_new_POSIX_UDP(const UA_String eventSourceName);
    
    #if defined(__linux__) /* Linux only so far */
+   
 Ethernet Connection Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Listens on the network and manages UDP connections. This should be available
