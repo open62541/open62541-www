@@ -102,6 +102,7 @@ doc/CMakeFiles/doc_latex: doc_src/nodeset_compiler_pump.png
 doc/CMakeFiles/doc_latex: doc_src/open62541.png
 doc/CMakeFiles/doc_latex: doc_src/open62541_html.png
 doc/CMakeFiles/doc_latex: doc_src/plugin.rst
+doc/CMakeFiles/doc_latex: doc_src/requirements.txt
 doc/CMakeFiles/doc_latex: doc_src/toc.rst
 doc/CMakeFiles/doc_latex: doc_src/tutorials.rst
 doc/CMakeFiles/doc_latex: doc_src/ua-wireshark-pubsub.png
