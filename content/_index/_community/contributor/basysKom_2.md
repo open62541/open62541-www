@@ -11,5 +11,5 @@ title = "BasysKom"
 
 basysKom GmbH
 
-Web: https://www.basyskom.de/en/technologies/#opc
+Web: https://www.basyskom.de/en/lp/expert-opc-ua-consulting-and-dev-services/
 
