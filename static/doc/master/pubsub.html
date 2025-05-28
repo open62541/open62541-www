@@ -746,15 +746,7 @@ of interest sent by the Publisher. DataSetReaders represent
 the configuration necessary to receive and process DataSetMessages
 on the Subscriber side. DataSetReader must be linked with a
 SubscribedDataSet and be contained within a ReaderGroup.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_UNKNOWN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_VARIANT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_DATA_VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUB_RT_RAW</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubRtEncoding</span><span class="p">;</span>
-
-<span class="cm">/* Parameters for PubSub DataSetReader Configuration */</span>
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">writerGroupId</span><span class="p">;</span>
@@ -775,7 +767,6 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">subscribedDataSet</span><span class="p">;</span>
 <span class="w">    </span><span class="cm">/* non std. fields */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">linkedStandaloneSubscribedDataSetName</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_PubSubRtEncoding</span><span class="w"> </span><span class="n">expectedEncoding</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_PUBSUB_COMPONENT_CONTEXT</span><span class="w"> </span><span class="cm">/* Context Configuration */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetReaderConfig</span><span class="p">;</span>
@@ -1093,12 +1084,22 @@ fast-path implementations for realtime applications.</p>
 <span class="n">UA_Server_computeWriterGroupOffsetTable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">writerGroupId</span><span class="p">,</span>
 <span class="w">                                        </span><span class="n">UA_PubSubOffsetTable</span><span class="w"> </span><span class="o">*</span><span class="n">ot</span><span class="p">);</span>
-
-<span class="cm">/* Compute the offset table for a ReaderGroup */</span>
+</pre></div>
+</div>
+<p>For ReaderGroups we cannot compute the offset table up front, because it is
+not ensured that all Readers end up with their DataSetMessage in the same
+NetworkMessage. Furthermore the ReaderGroup might receive messages from
+multiple different publishers.</p>
+<p>Instead the offset tables are computed beforehand for each DataSetReader. At
+runtime, use UA_NetworkMessage_decodeBinaryHeaders to decode the
+NetworkMessage headers. The information therein (e.g. the MessageCount and
+and the DataSetWriterIds) can then be used to iterate over the
+DataSetMessages in the payload with their respective offset tables.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The offsets begin at zero for the DataSetMessage */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_computeReaderGroupOffsetTable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">readerGroupId</span><span class="p">,</span>
-<span class="w">                                        </span><span class="n">UA_PubSubOffsetTable</span><span class="w"> </span><span class="o">*</span><span class="n">ot</span><span class="p">);</span>
+<span class="n">UA_Server_computeDataSetReaderOffsetTable</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dataSetReaderId</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">UA_PubSubOffsetTable</span><span class="w"> </span><span class="o">*</span><span class="n">ot</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span>
 </pre></div>
@@ -1157,35 +1158,20 @@ is not required when <a class="reference internal" href="#pubsub"><span class="s
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessageHeader</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">fieldCount</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_DataValue</span><span class="o">*</span><span class="w"> </span><span class="n">dataSetFields</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">rawFields</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* Json keys for the dataSetFields: TODO: own dataSetMessageType for json? */</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="o">*</span><span class="w"> </span><span class="n">fieldNames</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* This information is for proper en- and decoding needed */</span>
-<span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="o">*</span><span class="n">dataSetMetaDataType</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessage_DataKeyFrameData</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">fieldIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="n">fieldValue</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">index</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessage_DeltaFrameField</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">fieldCount</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_DataSetMessage_DeltaFrameField</span><span class="o">*</span><span class="w"> </span><span class="n">deltaFrameFields</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessage_DataDeltaFrameData</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterId</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Goes into the payload header */</span>
-
 <span class="w">    </span><span class="n">UA_DataSetMessageHeader</span><span class="w"> </span><span class="n">header</span><span class="p">;</span>
-<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">UA_DataSetMessage_DataKeyFrameData</span><span class="w"> </span><span class="n">keyFrameData</span><span class="p">;</span>
-<span class="w">        </span><span class="n">UA_DataSetMessage_DataDeltaFrameData</span><span class="w"> </span><span class="n">deltaFrameData</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">fieldCount</span><span class="p">;</span>
+<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* Array of fields (cf. header-&gt;dataSetMessageType) */</span>
+<span class="w">        </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">keyFrameFields</span><span class="p">;</span>
+<span class="w">        </span><span class="n">UA_DataSetMessage_DeltaFrameField</span><span class="w"> </span><span class="o">*</span><span class="n">deltaFrameFields</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">configuredSize</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessage</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">UA_DataSetMessage_clear</span><span class="p">(</span><span class="n">UA_DataSetMessage</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1229,19 +1215,21 @@ is not required when <a class="reference internal" href="#pubsub"><span class="s
 <span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">messageNonce</span><span class="p">[</span><span class="n">UA_NETWORKMESSAGE_MAX_NONCE_LENGTH</span><span class="p">];</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_NetworkMessageSecurityHeader</span><span class="p">;</span>
 
+<span class="cp">#define UA_NETWORKMESSAGE_MAXMESSAGECOUNT 32</span>
+
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">version</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Fields defined via the UADPFlags */</span>
+
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">publisherIdEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">groupHeaderEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_NetworkMessageGroupHeader</span><span class="w"> </span><span class="n">groupHeader</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">payloadHeaderEnabled</span><span class="p">;</span>
-
 <span class="w">    </span><span class="cm">/* Fields defined via the Extended1Flags */</span>
+
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">dataSetClassIdEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">dataSetClassId</span><span class="p">;</span>
 
@@ -1255,24 +1243,39 @@ is not required when <a class="reference internal" href="#pubsub"><span class="s
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">picoseconds</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Fields defined via the Extended2Flags */</span>
+
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">chunkMessage</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">promotedFieldsEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">promotedFieldsSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">promotedFields</span><span class="p">;</span><span class="w"> </span><span class="cm">/* BaseDataType */</span>
 
-<span class="w">    </span><span class="n">UA_NetworkMessageType</span><span class="w"> </span><span class="n">networkMessageType</span><span class="p">;</span>
-
 <span class="w">    </span><span class="cm">/* For Json NetworkMessage */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">messageIdEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">messageId</span><span class="p">;</span>
 
+<span class="w">    </span><span class="cm">/* The PayloadHeader contains the number of DataSetMessages and the</span>
+<span class="cm">     * DataSetWriterId for each of them. If the PayloadHeader is disabled, then</span>
+<span class="cm">     * the number of DataSetMessages is determined as follows:</span>
+<span class="cm">     *</span>
+<span class="cm">     * - If the UA_NetworkMessage_EncodingOptions contain metadata, they define</span>
+<span class="cm">     *   the number and the order of the DataSetMessages.</span>
+<span class="cm">     * - Otherwise we assume exactly one DataSetMessage which takes up all of the</span>
+<span class="cm">     *   remaining NetworkMessage length.</span>
+<span class="cm">     *</span>
+<span class="cm">     * There is an upper bound for the number of DataSetMessages, so that the</span>
+<span class="cm">     * DataSetWriterIds can be parsed as part of the headers without allocating</span>
+<span class="cm">     * memory. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">payloadHeaderEnabled</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">messageCount</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterIds</span><span class="p">[</span><span class="n">UA_NETWORKMESSAGE_MAXMESSAGECOUNT</span><span class="p">];</span>
+
+<span class="w">    </span><span class="cm">/* TODO: Add support for Discovery Messages */</span>
+<span class="w">    </span><span class="n">UA_NetworkMessageType</span><span class="w"> </span><span class="n">networkMessageType</span><span class="p">;</span>
 <span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">UA_DataSetMessage</span><span class="w"> </span><span class="o">*</span><span class="n">dataSetMessages</span><span class="p">;</span>
-<span class="w">            </span><span class="kt">size_t</span><span class="w"> </span><span class="n">dataSetMessagesSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Goes into the payload header */</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="n">dataSetPayload</span><span class="p">;</span>
-<span class="w">        </span><span class="cm">/* Extended with other payload types in the future */</span>
+<span class="w">        </span><span class="cm">/* The DataSetMessages are an array of messageCount length.</span>
+<span class="cm">         * Can be NULL if only the headers have been decoded. */</span>
+<span class="w">        </span><span class="n">UA_DataSetMessage</span><span class="w"> </span><span class="o">*</span><span class="n">dataSetMessages</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">payload</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">securityFooter</span><span class="p">;</span>
@@ -1285,44 +1288,79 @@ is not required when <a class="reference internal" href="#pubsub"><span class="s
 </section>
 <section id="networkmessage-encoding">
 <h3>NetworkMessage Encoding<a class="headerlink" href="#networkmessage-encoding" title="Link to this heading"></a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The output buffer is allocated to the required size if initially empty.</span>
+<p>The en/decoding translates the NetworkMessage structure to/from a binary or
+JSON encoding. The en/decoding of PubSub NetworkMessages can require
+additional metadata. For example, during decoding, the DataType of raw
+encoded fields must be already known. As an example for encoding, the
+<code class="docutils literal notranslate"><span class="pre">configuredSize</span></code> may define zero-padding after a DataSetMessage.</p>
+<p>In the below methods, the different encoding options can be a NULL pointer
+and will then be ignored.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* The WriterId is used to find the matching encoding metadata. If the</span>
+<span class="cm">     * NetworkMessage/DataSetMessage does not transmit the identifier, then the</span>
+<span class="cm">     * encoding metadata is used in-order for the received fields. */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* FieldMetaData for JSON and RAW encoding */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">fieldsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_FieldMetaData</span><span class="w"> </span><span class="o">*</span><span class="n">fields</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Zero-padding if the DataSetMessage is shorter (UADP) */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">configuredSize</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_DataSetMessage_EncodingMetaData</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">metaDataSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_DataSetMessage_EncodingMetaData</span><span class="w"> </span><span class="o">*</span><span class="n">metaData</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="p">;</span>
+
+<span class="cm">/* The output buffer is allocated to the required size if initially empty.</span>
 <span class="cm"> * Otherwise, upon success, the length is adjusted. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NetworkMessage_encodeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage</span><span class="o">*</span><span class="w"> </span><span class="n">src</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">);</span>
+<span class="w">                               </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">);</span>
 
 <span class="kt">size_t</span>
-<span class="nf">UA_NetworkMessage_calcSizeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">);</span>
+<span class="nf">UA_NetworkMessage_calcSizeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">);</span>
 
-<span class="cm">/* The customTypes can be NULL */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NetworkMessage_decodeBinary</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_NetworkMessage</span><span class="o">*</span><span class="w"> </span><span class="n">dst</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeBinaryOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
+<span class="w">                               </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeBinaryOptions</span><span class="w"> </span><span class="o">*</span><span class="n">bo</span><span class="p">);</span>
+
+<span class="cm">/* Decode only the headers before the payload */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_NetworkMessage_decodeBinaryHeaders</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeBinaryOptions</span><span class="w"> </span><span class="o">*</span><span class="n">bo</span><span class="p">,</span>
+<span class="w">                                      </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">payloadOffset</span><span class="p">);</span>
 
 <span class="cp">#ifdef UA_ENABLE_JSON_ENCODING</span>
 
 <span class="cm">/* The output buffer is allocated to the required size if initially empty.</span>
-<span class="cm"> * Otherwise, upon success, the length is adjusted.</span>
-<span class="cm"> * The encoding options can be NULL. */</span>
+<span class="cm"> * Otherwise, upon success, the length is adjusted. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NetworkMessage_encodeJson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">jo</span><span class="p">);</span>
 
-<span class="cm">/* The encoding options can be NULL */</span>
 <span class="kt">size_t</span>
 <span class="nf">UA_NetworkMessage_calcSizeJson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">jo</span><span class="p">);</span>
 
-<span class="cm">/* The encoding options can be NULL */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NetworkMessage_decodeJson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_NetworkMessage</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NetworkMessage_EncodingOptions</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">jo</span><span class="p">);</span>
 
-<span class="cp">#endif</span>
-
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_JSON_ENCODING */</span>
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_PUBSUB */</span>
 </pre></div>
 </div>
