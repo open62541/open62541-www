@@ -623,32 +623,28 @@ reasons indicated by the SubCode.</p></li>
 <span class="cm"> * empty string for every StatusCode. */</span>
 <span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_StatusCode_name</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The following methods extract the severity from a StatusCode. See Part 4,
+Section 7.34 for details.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* (code &gt;&gt; 30) &gt;= 0x02 */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_StatusCode_isBad</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
 
-<span class="cm">/* Extracts the severity from a StatusCode. See Part 4, Section 7.34 for</span>
-<span class="cm"> * details. */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_StatusCode_isBad</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">((</span><span class="n">code</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">30</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mh">0x02</span><span class="p">);</span>
-<span class="p">})</span>
+<span class="cm">/* ((code &gt;&gt; 30) == 0x01) &amp;&amp; ((code &gt;&gt; 30) &lt; 0x02) */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_StatusCode_isUncertain</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_StatusCode_isUncertain</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">((</span><span class="n">code</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">30</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x01</span><span class="p">);</span>
-<span class="p">})</span>
+<span class="cm">/* (code &gt;&gt; 30) == 0x00 */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_StatusCode_isGood</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_StatusCode_isGood</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">code</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">((</span><span class="n">code</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">30</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x00</span><span class="p">);</span>
-<span class="p">})</span>
-
-<span class="cm">/* Compares the top 16 bits of two StatusCodes for equality. This should only</span>
-<span class="cm"> * be used when processing user-defined StatusCodes e.g when processing a ReadResponse.</span>
-<span class="cm"> * As a convention, the lower bits of StatusCodes should not be used internally, meaning</span>
-<span class="cm"> * can compare them without the use of this function. */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_StatusCode_isEqualTop</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">s2</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">((</span><span class="n">s1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0xFFFF0000</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">s2</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0xFFFF0000</span><span class="p">));</span>
-<span class="p">})</span>
+<span class="cm">/* Compares the top 16 bits of two StatusCodes for equality. This should only be</span>
+<span class="cm"> * used when processing user-defined StatusCodes e.g when processing a</span>
+<span class="cm"> * ReadResponse. As a convention, the lower bits of StatusCodes should not be</span>
+<span class="cm"> * used internally. */</span>
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="nf">UA_StatusCode_equalTop</span><span class="p">(</span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+<span class="cp">#define UA_StatusCode_isEqualTop(s1, s2) UA_StatusCode_equalTop(s1, s2)</span>
 </pre></div>
 </div>
 </section>
@@ -660,65 +656,53 @@ reasons indicated by the SubCode.</p></li>
 <span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The content (not null-terminated) */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_String</span><span class="p">;</span>
 
-<span class="cm">/* Copies the content on the heap. Returns a null-string when alloc fails */</span>
-<span class="n">UA_String</span>
-<span class="nf">UA_String_fromChars</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">);</span>
-
-<span class="n">UA_Boolean</span>
-<span class="nf">UA_String_isEmpty</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_String_append</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
-
 <span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">UA_STRING</span></code> returns a string pointing to the original char-array.
-<code class="docutils literal notranslate"><span class="pre">UA_STRING_ALLOC</span></code> is shorthand for <code class="docutils literal notranslate"><span class="pre">UA_String_fromChars</span></code> and makes a copy
-of the char-array.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_String</span>
-<span class="w">             </span><span class="n">UA_STRING</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">s</span><span class="p">));</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">chars</span><span class="p">)</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
-<span class="w">    </span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strlen</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_Byte</span><span class="o">*</span><span class="p">)</span><span class="n">chars</span><span class="p">;</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="nf">UA_String_isEmpty</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
+<span class="cp">#define UA_String_isNull(s) UA_String_isEmpty(s)</span>
 
+<span class="cm">/* Returns a string pointing to the original char-array */</span>
+<span class="n">UA_String</span><span class="w"> </span><span class="nf">UA_STRING</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="cm">/* Returns a string-copy of the char-array. Returns a null-string when</span>
+<span class="cm"> * alloc fails. */</span>
+<span class="n">UA_String</span><span class="w"> </span><span class="nf">UA_String_fromChars</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">);</span>
 <span class="cp">#define UA_STRING_ALLOC(CHARS) UA_String_fromChars(CHARS)</span>
 
-<span class="cm">/* Define strings at compile time (in ROM) */</span>
+<span class="cm">/* Define string variable at compile time (in ROM) */</span>
 <span class="cp">#define UA_STRING_STATIC(CHARS) {sizeof(CHARS)-1, (UA_Byte*)CHARS}</span>
 
-<span class="cm">/* The following methods implement the C standard&#39;s printf/vprintf.</span>
-<span class="cm"> *</span>
-<span class="cm"> * In addition to the format specifiers from the C standard, the following can</span>
-<span class="cm"> * be used also:</span>
-<span class="cm"> *</span>
-<span class="cm"> * - %S - UA_String (not wrapped in quotation marks in the output)</span>
-<span class="cm"> * - %N - UA_NodeId (using UA_NodeId_print)</span>
-<span class="cm"> *</span>
-<span class="cm"> * Example usage:</span>
-<span class="cm"> *   UA_NodeId nodeId = UA_NODEID_NUMERIC(1, 4711);</span>
-<span class="cm"> *   UA_String_format(outString, &quot;Test %N&quot;, nodeId);</span>
-<span class="cm"> *</span>
-<span class="cm"> * The output is written to the output string in the first argument. Memory of</span>
-<span class="cm"> * sufficient length is allocated when the output string initially has zero</span>
-<span class="cm"> * length.</span>
-<span class="cm"> *</span>
-<span class="cm"> * If the string in the first argument initially has non-zero length, then this</span>
-<span class="cm"> * string is used as buffer for encoding and its length is adjusted accordingly.</span>
-<span class="cm"> * If the length is too short, then UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED is</span>
-<span class="cm"> * reported. Also in that case the string is printed as much as possible. */</span>
+<span class="cm">/* Uses realloc to append to the string in the first argument */</span>
 <span class="n">UA_StatusCode</span>
-<span class="n">UA_String_format</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+<span class="nf">UA_String_append</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The following methods implement the C standard’s printf/vprintf.</p>
+<p>In addition to the format specifiers from the C standard, the following can
+be used also:</p>
+<ul class="simple">
+<li><p>%S - UA_String (not wrapped in quotation marks in the output)</p></li>
+<li><p>%N - UA_NodeId (using UA_NodeId_print)</p></li>
+</ul>
+<dl class="simple">
+<dt>Example usage:</dt><dd><p>UA_NodeId nodeId = UA_NODEID_NUMERIC(1, 4711);
+UA_String_format(outString, “Test %N”, nodeId);</p>
+</dd>
+</dl>
+<p>The output is written to the output string in the first argument. Memory of
+sufficient length is allocated when the output string initially has zero
+length.</p>
+<p>If the string in the first argument initially has non-zero length, then this
+string is used as buffer for encoding and its length is adjusted accordingly.
+If the length is too short, then UA_STATUSCODE_BADENCODINGLIMITSEXCEEDED is
+reported. Also in that case the string is printed as much as possible.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_String_format</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_String_vformat</span><span class="p">(</span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">format</span><span class="p">,</span><span class="w"> </span><span class="kt">va_list</span><span class="w"> </span><span class="n">args</span><span class="p">);</span>
 
 <span class="cm">/* Old API */</span>
-<span class="cp">#define UA_String_printf(str, format, ...) \</span>
+<span class="cp">#define UA_String_printf(str, format, ...)   \</span>
 <span class="cp">    UA_String_format(str, format, __VA_ARGS__)</span>
 <span class="cp">#define UA_String_vprintf(str, format, args) \</span>
 <span class="cp">    UA_String_vformat(str, format, args)</span>
@@ -780,24 +764,22 @@ seconds.</p>
 
 <span class="n">UA_DateTimeStruct</span><span class="w"> </span><span class="nf">UA_DateTime_toStruct</span><span class="p">(</span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">t</span><span class="p">);</span>
 <span class="n">UA_DateTime</span><span class="w"> </span><span class="nf">UA_DateTime_fromStruct</span><span class="p">(</span><span class="n">UA_DateTimeStruct</span><span class="w"> </span><span class="n">ts</span><span class="p">);</span>
-
-<span class="cm">/* The C99 standard (7.23.1) says: &quot;The range and precision of times</span>
-<span class="cm"> * representable in clock_t and time_t are implementation-defined.&quot; On most</span>
-<span class="cm"> * systems, time_t is a 4 or 8 byte integer counting seconds since the UTC Unix</span>
-<span class="cm"> * epoch. The following methods are used for conversion. */</span>
-
-<span class="cm">/* Datetime of 1 Jan 1970 00:00 */</span>
+</pre></div>
+</div>
+<p>The C99 standard (7.23.1) says: “The range and precision of times
+representable in clock_t and time_t are implementation-defined.” On most
+systems, time_t is a 4 or 8 byte integer counting seconds since the UTC Unix
+epoch. The following methods are used for conversion.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Datetime of 1 Jan 1970 00:00 */</span>
 <span class="cp">#define UA_DATETIME_UNIX_EPOCH (11644473600LL * UA_DATETIME_SEC)</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Int64</span>
-<span class="w">             </span><span class="n">UA_DateTime_toUnixTime</span><span class="p">(</span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">date</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">date</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">UA_DATETIME_UNIX_EPOCH</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">UA_DATETIME_SEC</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* (date - UA_DATETIME_UNIX_EPOCH) / UA_DATETIME_SEC */</span>
+<span class="n">UA_Int64</span>
+<span class="nf">UA_DateTime_toUnixTime</span><span class="p">(</span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">date</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_DateTime</span>
-<span class="w">             </span><span class="n">UA_DateTime_fromUnixTime</span><span class="p">(</span><span class="n">UA_Int64</span><span class="w"> </span><span class="n">unixDate</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">unixDate</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">UA_DATETIME_SEC</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">UA_DATETIME_UNIX_EPOCH</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* (unixDate * UA_DATETIME_SEC) + UA_DATETIME_UNIX_EPOCH */</span>
+<span class="n">UA_DateTime</span>
+<span class="nf">UA_DateTime_fromUnixTime</span><span class="p">(</span><span class="n">UA_Int64</span><span class="w"> </span><span class="n">unixDate</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -829,12 +811,8 @@ seconds.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Guid_parse</span><span class="p">(</span><span class="n">UA_Guid</span><span class="w"> </span><span class="o">*</span><span class="n">guid</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Guid</span>
-<span class="w">             </span><span class="n">UA_GUID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">guid</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_Guid_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">guid</span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chars</span><span class="p">));</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">guid</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* Shorthand, returns UA_GUID_NULL upon failure to parse */</span>
+<span class="n">UA_Guid</span><span class="w"> </span><span class="nf">UA_GUID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
 <span class="cp">#endif</span>
 </pre></div>
 </div>
@@ -903,6 +881,29 @@ seconds.</p>
 
 <span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">UA_NODEID_NULL</span><span class="p">;</span>
 
+<span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">identifier</span><span class="p">);</span>
+
+<span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID_STRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID_GUID</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">guid</span><span class="p">);</span>
+
+<span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID_BYTESTRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_NodeId</span>
+<span class="nf">UA_NODEID_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span>
+<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="cm">/* Shorthand for standard-defined NodeIds in Namespace 0.</span>
+<span class="cm"> * See the generated nodeids.h for the full list. */</span>
+<span class="cp">#define UA_NS0ID(ID) UA_NODEID_NUMERIC(0, UA_NS0ID_##ID)</span>
+
 <span class="n">UA_Boolean</span><span class="w"> </span><span class="nf">UA_NodeId_isNull</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">);</span>
 
 <span class="cm">/* Print the NodeId in the human-readable format defined in Part 6.</span>
@@ -954,86 +955,13 @@ seconds.</p>
 <span class="nf">UA_NodeId_parseEx</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
 <span class="w">                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_NodeId_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chars</span><span class="p">));</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* Shorthand, returns UA_NODEID_NULL when parsing fails */</span>
+<span class="n">UA_NodeId</span><span class="w"> </span><span class="nf">UA_NODEID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
 <span class="cp">#endif</span>
-</pre></div>
-</div>
-<p>The following methods are a shorthand for creating NodeIds.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">identifier</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifierType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEIDTYPE_NUMERIC</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">identifier</span><span class="p">;</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="cm">/* Shorthand for standard-defined NodeIds in Namespace 0.</span>
-<span class="cm"> * See the generated nodeids.h for the full list. */</span>
-<span class="cp">#define UA_NS0ID(ID) UA_NODEID_NUMERIC(0, UA_NS0ID_##ID)</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifierType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEIDTYPE_STRING</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifierType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEIDTYPE_STRING</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID_GUID</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">guid</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifierType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEIDTYPE_GUID</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">guid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">guid</span><span class="p">;</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID_BYTESTRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifierType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEIDTYPE_BYTESTRING</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">byteString</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_BYTESTRING</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span>
-<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifierType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEIDTYPE_BYTESTRING</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">byteString</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
 
 <span class="cm">/* Total ordering of NodeId */</span>
 <span class="n">UA_Order</span>
-<span class="n">UA_NodeId_order</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n2</span><span class="p">);</span>
+<span class="nf">UA_NodeId_order</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n2</span><span class="p">);</span>
 
 <span class="cm">/* Returns a non-cryptographic hash for NodeId */</span>
 <span class="n">UA_UInt32</span><span class="w"> </span><span class="nf">UA_NodeId_hash</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
@@ -1050,6 +978,31 @@ seconds.</p>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="p">;</span>
 
 <span class="k">extern</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">UA_EXPANDEDNODEID_NULL</span><span class="p">;</span>
+
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">identifier</span><span class="p">);</span>
+
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID_STRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID_STRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID_STRING_GUID</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">guid</span><span class="p">);</span>
+
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID_BYTESTRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="nf">UA_EXPANDEDNODEID_NODEID</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">);</span>
+<span class="cp">#define UA_NODEID2EXPANDEDNODEID(n) UA_EXPANDEDNODEID_NODEID(n)</span>
+
+<span class="cm">/* Shorthand for standard-defined NodeIds in Namespace 0.</span>
+<span class="cm"> * See the generated nodeids.h for the full list. */</span>
+<span class="cp">#define UA_NS0EXID(ID) UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_##ID)</span>
 
 <span class="cm">/* Print the ExpandedNodeId in the humand-readable format defined in Part 6,</span>
 <span class="cm"> * 5.3.1.11:</span>
@@ -1088,72 +1041,15 @@ seconds.</p>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">nsMapping</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">chars</span><span class="p">));</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* Shorthand, returns UA_EXPANDEDNODEID_NULL when parsing fails */</span>
+<span class="n">UA_ExpandedNodeId</span>
+<span class="nf">UA_EXPANDEDNODEID</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
 <span class="cp">#endif</span>
-</pre></div>
-</div>
-<p>The following functions are shorthand for creating ExpandedNodeIds.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_NODEID2EXPANDEDNODEID</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nodeId</span><span class="p">;</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_NUMERIC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">identifier</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">identifier</span><span class="p">);</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="cm">/* Shorthand for standard-defined NodeIds in Namespace 0.</span>
-<span class="cm"> * See the generated nodeids.h for the full list. */</span>
-<span class="cp">#define UA_NS0EXID(ID) UA_EXPANDEDNODEID_NUMERIC(0, UA_NS0ID_##ID)</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_STRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_STRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_STRING_GUID</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Guid</span><span class="w"> </span><span class="n">guid</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_GUID</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">guid</span><span class="p">);</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_BYTESTRING</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_BYTESTRING</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_BYTESTRING_ALLOC</span><span class="p">(</span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">serverIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">id</span><span class="p">.</span><span class="n">namespaceUri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span>
-<span class="w">             </span><span class="n">UA_EXPANDEDNODEID_NODEID</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"> </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_ExpandedNodeId</span><span class="p">));</span>
-<span class="w">    </span><span class="n">id</span><span class="p">.</span><span class="n">nodeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nodeId</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="p">})</span>
 
 <span class="cm">/* Does the ExpandedNodeId point to a local node? That is, are namespaceUri and</span>
 <span class="cm"> * serverIndex empty? */</span>
 <span class="n">UA_Boolean</span>
-<span class="n">UA_ExpandedNodeId_isLocal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+<span class="nf">UA_ExpandedNodeId_isLocal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
 
 <span class="cm">/* Total ordering of ExpandedNodeId */</span>
 <span class="n">UA_Order</span>
@@ -1176,30 +1072,18 @@ seconds.</p>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="p">;</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_QualifiedName_isNull</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">q</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">.</span><span class="n">length</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<span class="p">})</span>
+<span class="n">UA_QualifiedName</span>
+<span class="nf">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_QualifiedName</span>
+<span class="nf">UA_QUALIFIEDNAME_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">);</span>
+
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_QualifiedName_isNull</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">);</span>
 
 <span class="cm">/* Returns a non-cryptographic hash for QualifiedName */</span>
 <span class="n">UA_UInt32</span>
-<span class="n">UA_QualifiedName_hash</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">);</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_QualifiedName</span>
-<span class="w">             </span><span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">qn</span><span class="p">;</span>
-<span class="w">    </span><span class="n">qn</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">qn</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">qn</span><span class="p">;</span>
-<span class="p">})</span>
-
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_QualifiedName</span>
-<span class="w">             </span><span class="n">UA_QUALIFIEDNAME_ALLOC</span><span class="p">(</span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">chars</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">qn</span><span class="p">;</span>
-<span class="w">    </span><span class="n">qn</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nsIndex</span><span class="p">;</span>
-<span class="w">    </span><span class="n">qn</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">chars</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">qn</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="nf">UA_QualifiedName_hash</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">q</span><span class="p">);</span>
 
 <span class="cm">/* Print the human-readable QualifiedName format. QualifiedNames can be printed</span>
 <span class="cm"> * with either the integer NamespaceIndex or using the NamespaceUri.</span>
@@ -1217,7 +1101,7 @@ seconds.</p>
 <span class="cm"> * The method can either use a pre-allocated string buffer or allocates memory</span>
 <span class="cm"> * internally if called with an empty output string. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="n">UA_QualifiedName_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
+<span class="nf">UA_QualifiedName_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_QualifiedName_printEx</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">qn</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
@@ -1247,21 +1131,11 @@ seconds.</p>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">text</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="p">;</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_LocalizedText</span>
-<span class="w">             </span><span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">locale</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">text</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="n">lt</span><span class="p">;</span>
-<span class="w">    </span><span class="n">lt</span><span class="p">.</span><span class="n">locale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">locale</span><span class="p">);</span>
-<span class="w">    </span><span class="n">lt</span><span class="p">.</span><span class="n">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">text</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">lt</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="n">UA_LocalizedText</span>
+<span class="nf">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">locale</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">text</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_LocalizedText</span>
-<span class="w">             </span><span class="n">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">locale</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">text</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="n">lt</span><span class="p">;</span>
-<span class="w">    </span><span class="n">lt</span><span class="p">.</span><span class="n">locale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">locale</span><span class="p">);</span>
-<span class="w">    </span><span class="n">lt</span><span class="p">.</span><span class="n">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="n">text</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">lt</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="n">UA_LocalizedText</span>
+<span class="nf">UA_LOCALIZEDTEXT_ALLOC</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">locale</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">text</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1285,13 +1159,8 @@ with a single element (min==max).</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_NumericRange_parse</span><span class="p">(</span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
 
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_NumericRange</span>
-<span class="w">             </span><span class="n">UA_NUMERICRANGE</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="n">nr</span><span class="p">;</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nr</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">nr</span><span class="p">));</span>
-<span class="w">    </span><span class="n">UA_NumericRange_parse</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">s</span><span class="p">));</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">nr</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* Returns an empty NumericRange if parsing fails */</span>
+<span class="n">UA_NumericRange</span><span class="w"> </span><span class="nf">UA_NUMERICRANGE</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1346,122 +1215,61 @@ used. <code class="docutils literal notranslate"><span class="pre">UA_Variant_is
 <span class="p">}</span><span class="w"> </span><span class="n">UA_Variant</span><span class="p">;</span>
 
 <span class="cm">/* Returns true if the variant has no value defined (contains neither an array</span>
-<span class="cm"> * nor a scalar value).</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @return Is the variant empty */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_Variant_isEmpty</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">v</span><span class="o">-&gt;</span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm"> * nor a scalar value) */</span>
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="nf">UA_Variant_isEmpty</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">);</span>
+<span class="cp">#define UA_Variant_isNull(v) UA_Variant_isEmpty(v)</span>
 
-<span class="cm">/* Returns true if the variant contains a scalar value. Note that empty variants</span>
-<span class="cm"> * contain an array of length -1 (undefined).</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @return Does the variant contain a scalar value */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="o">-&gt;</span><span class="n">arrayLength</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">v</span><span class="o">-&gt;</span><span class="n">data</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">UA_EMPTY_ARRAY_SENTINEL</span><span class="p">);</span>
-<span class="p">})</span>
+<span class="cm">/* Returns true if the variant contains a scalar value */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_isScalar</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">);</span>
 
-<span class="cm">/* Returns true if the variant contains a scalar value of the given type.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param type The data type</span>
-<span class="cm"> * @return Does the variant contain a scalar value of the given type */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_Variant_hasScalarType</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">v</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* Returns true if the variant contains a scalar value of the given type */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_hasScalarType</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Returns true if the variant contains an array of the given type.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param type The data type</span>
-<span class="cm"> * @return Does the variant contain an array of the given type */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_Variant_hasArrayType</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span>
-<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">UA_Variant_isScalar</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">v</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">;</span>
-<span class="p">})</span>
+<span class="cm">/* Returns true if the variant contains an array */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_isArray</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">);</span>
+
+<span class="cm">/* Returns true if the variant contains an array of the given type */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Variant_hasArrayType</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Set the variant to a scalar value that already resides in memory. The value</span>
-<span class="cm"> * takes on the lifecycle of the variant and is deleted with it.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param p A pointer to the value data</span>
-<span class="cm"> * @param type The datatype of the value in question */</span>
+<span class="cm"> * will be cleared together with the variant. */</span>
 <span class="kt">void</span>
-<span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+<span class="nf">UA_Variant_setScalar</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Set the variant to a scalar value that is copied from an existing variable.</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param p A pointer to the value data</span>
-<span class="cm"> * @param type The datatype of the value</span>
-<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="cm">/* Set the variant to a deep-copy of the provided scalar value */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
-<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+<span class="nf">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Set the variant to an array that already resides in memory. The array takes</span>
-<span class="cm"> * on the lifecycle of the variant and is deleted with it.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param array A pointer to the array data</span>
-<span class="cm"> * @param arraySize The size of the array</span>
-<span class="cm"> * @param type The datatype of the array */</span>
+<span class="cm">/* Set the variant to an existing array value. The array is cleared together</span>
+<span class="cm"> * with the variant. */</span>
 <span class="kt">void</span>
-<span class="nf">UA_Variant_setArray</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span>
-<span class="w">                    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+<span class="nf">UA_Variant_setArray</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Set the variant to an array that is copied from an existing array.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param array A pointer to the array data</span>
-<span class="cm"> * @param arraySize The size of the array</span>
-<span class="cm"> * @param type The datatype of the array</span>
-<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="cm">/* Set the variant to a deep-copy of the provided array */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Variant_setArrayCopy</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span>
-<span class="w">                        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+<span class="nf">UA_Variant_setArrayCopy</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Copy the variant, but use only a subset of the (multidimensional) array into</span>
 <span class="cm"> * a variant. Returns an error code if the variant is not an array or if the</span>
-<span class="cm"> * indicated range does not fit.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The source variant</span>
-<span class="cm"> * @param dst The target variant</span>
-<span class="cm"> * @param range The range of the copied data</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or an error code */</span>
+<span class="cm"> * indicated range does not fit. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Variant_copyRange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="n">range</span><span class="p">);</span>
 
 <span class="cm">/* Insert a range of data into an existing variant. The data array cannot be</span>
 <span class="cm"> * reused afterwards if it contains types without a fixed size (e.g. strings)</span>
-<span class="cm"> * since the members are moved into the variant and take on its lifecycle.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param dataArray The data array. The type must match the variant</span>
-<span class="cm"> * @param dataArraySize The length of the data array. This is checked to match</span>
-<span class="cm"> *        the range size.</span>
-<span class="cm"> * @param range The range of where the new data is inserted</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or an error code */</span>
+<span class="cm"> * since the members are moved into the variant and take on its lifecycle. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Variant_setRange</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span>
 <span class="w">                    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="n">range</span><span class="p">);</span>
 
-<span class="cm">/* Deep-copy a range of data into an existing variant.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param v The variant</span>
-<span class="cm"> * @param dataArray The data array. The type must match the variant</span>
-<span class="cm"> * @param dataArraySize The length of the data array. This is checked to match</span>
-<span class="cm"> *        the range size.</span>
-<span class="cm"> * @param range The range of where the new data is inserted</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or an error code */</span>
+<span class="cm">/* Deep-copy a range of data into the variant */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Variant_setRangeCopy</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span>
 <span class="w">                        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="n">range</span><span class="p">);</span>
@@ -1501,26 +1309,24 @@ target NodeId is stored instead of the decoded value.</p>
 <span class="cm">/* Initialize the ExtensionObject and set the &quot;decoded&quot; value to the given</span>
 <span class="cm"> * pointer. The value will be deleted when the ExtensionObject is cleared. */</span>
 <span class="kt">void</span>
-<span class="nf">UA_ExtensionObject_setValue</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
-<span class="w">                            </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
+<span class="nf">UA_ExtensionObject_setValue</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
 <span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Initialize the ExtensionObject and set the &quot;decoded&quot; value to the given</span>
 <span class="cm"> * pointer. The value will *not* be deleted when the ExtensionObject is</span>
 <span class="cm"> * cleared. */</span>
 <span class="kt">void</span>
-<span class="nf">UA_ExtensionObject_setValueNoDelete</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
-<span class="w">                                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
+<span class="nf">UA_ExtensionObject_setValueNoDelete</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
 <span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Initialize the ExtensionObject and set the &quot;decoded&quot; value to a fresh copy of</span>
 <span class="cm"> * the given value pointer. The value will be deleted when the ExtensionObject</span>
 <span class="cm"> * is cleared. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_ExtensionObject_setValueCopy</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
-<span class="w">                                </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
+<span class="nf">UA_ExtensionObject_setValueCopy</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
+<span class="cm">/* Returns true if the ExtensionObject contains a decoded value of the type */</span>
 <span class="n">UA_Boolean</span>
 <span class="nf">UA_ExtensionObject_hasDecodedType</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">eo</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
@@ -1547,15 +1353,11 @@ target NodeId is stored instead of the decoded value.</p>
 
 <span class="cm">/* Copy the DataValue, but use only a subset of the (multidimensional) array of</span>
 <span class="cm"> * of the variant of the source DataValue. Returns an error code if the variant</span>
-<span class="cm"> * of the DataValue is not an array or if the indicated range does not fit.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The source DataValue</span>
-<span class="cm"> * @param dst The target DataValue</span>
-<span class="cm"> * @param range The range of the variant of the DataValue to copy</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or an error code */</span>
+<span class="cm"> * of the DataValue is not an array or if the indicated range does not fit. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_DataValue_copyVariantRange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="n">range</span><span class="p">);</span>
+<span class="nf">UA_DataValue_copyRange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span>
+<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="n">range</span><span class="p">);</span>
+<span class="cp">#define UA_DataValue_copyVariantRange(s,d,r) UA_DataValue_copyRange(s,d,r)</span>
 </pre></div>
 </div>
 </section>
@@ -1718,67 +1520,38 @@ following method to retrieve the data type description.</p>
 <span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_findDataType</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeId</span><span class="p">);</span>
 
-<span class="cm">/*</span>
-<span class="cm"> * Add custom data types to the search scope of UA_findDataType. */</span>
-
+<span class="cm">/* Add custom data types to the search scope of UA_findDataType. */</span>
 <span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_findDataTypeWithCustom</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeId</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customTypes</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The following functions are used for generic handling of data types.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allocates and initializes a variable of type dataType</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param type The datatype description</span>
-<span class="cm"> * @return Returns the memory location of the variable or NULL if no</span>
-<span class="cm"> *         memory could be allocated */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allocates and initializes a variable of type dataType */</span>
 <span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nf">UA_new</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Initializes a variable to default values</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p The memory location of the variable</span>
-<span class="cm"> * @param type The datatype description */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="kt">void</span>
-<span class="w">             </span><span class="n">UA_init</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="o">-&gt;</span><span class="n">memSize</span><span class="p">);</span>
-<span class="p">})</span>
+<span class="cm">/* Initializes a variable to default null values */</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">UA_init</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Copies the content of two variables. If copying fails (e.g. because no memory</span>
-<span class="cm"> * was available for an array), then dst is emptied and initialized to prevent</span>
-<span class="cm"> * memory leaks.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The memory location of the source variable</span>
-<span class="cm"> * @param dst The memory location of the destination variable</span>
-<span class="cm"> * @param type The datatype description</span>
-<span class="cm"> * @return Indicates whether the operation succeeded or returns an error code */</span>
+<span class="cm">/* Copies the content of two variables. The pointer is _init&#39;ed internally. If</span>
+<span class="cm"> * copying fails, then dst is cleared internally to prevent memory leaks. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="n">UA_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+<span class="nf">UA_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Deletes the dynamically allocated content of a variable (e.g. deallocates all</span>
-<span class="cm"> * arrays in the variable). Also initializes the variable to default values.</span>
-<span class="cm"> * Afterwards, the variable can be safely deleted without causing memory leaks.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p The memory location of the variable</span>
-<span class="cm"> * @param type The datatype description of the variable */</span>
+<span class="cm">/* Deletes the dynamically allocated content of a value (e.g. deallocates all</span>
+<span class="cm"> * arrays in the variable). At last the entire value is _init&#39;ed. */</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">UA_clear</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Frees a variable and all of its content.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p The memory location of the variable</span>
-<span class="cm"> * @param type The datatype description of the variable */</span>
+<span class="cm">/* Calls UA_clear and then UA_free on the memory */</span>
 <span class="kt">void</span><span class="w"> </span><span class="nf">UA_delete</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Pretty-print the value from the datatype. The output is pretty-printed JSON5.</span>
 <span class="cm"> * Note that this format is non-standard and should not be sent over the</span>
 <span class="cm"> * network. It can however be read by our own JSON decoding.</span>
 <span class="cm"> *</span>
-<span class="cm"> * @param p The memory location of the variable</span>
-<span class="cm"> * @param type The datatype description of the variable</span>
-<span class="cm"> * @param output A string that is used for the pretty-printed output. If the</span>
-<span class="cm"> *        memory for string is already allocated, we try to use the existing</span>
-<span class="cm"> *        string (the length is adjusted). If the string is empty, memory</span>
-<span class="cm"> *        is allocated for it.</span>
-<span class="cm"> * @return Indicates whether the operation succeeded */</span>
+<span class="cm"> * If the memory for string is already allocated, we try to use the existing</span>
+<span class="cm"> * string (the length is adjusted down). If the string is empty, memory is</span>
+<span class="cm"> * allocated for it. */</span>
 <span class="cp">#ifdef UA_ENABLE_JSON_ENCODING</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_print</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
@@ -1798,19 +1571,13 @@ following method to retrieve the data type description.</p>
 <span class="cm"> *</span>
 <span class="cm"> * When members of different types are permitted (in Variants and</span>
 <span class="cm"> * ExtensionObjects), the memory address in the &quot;UA_DataType*&quot; pointer</span>
-<span class="cm"> * determines which variable is smaller.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p1 The memory location of the first value</span>
-<span class="cm"> * @param p2 The memory location of the first value</span>
-<span class="cm"> * @param type The datatype description of both values */</span>
+<span class="cm"> * determines which variable is smaller. */</span>
 <span class="n">UA_Order</span>
 <span class="nf">UA_order</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Compare if two values have identical content. */</span>
-<span class="n">UA_INLINABLE</span><span class="p">(</span><span class="n">UA_Boolean</span>
-<span class="w">             </span><span class="n">UA_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">),</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">UA_order</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_ORDER_EQ</span><span class="p">);</span>
-<span class="p">})</span>
+<span class="cm">/* Compare if two values are identical */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p2</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1963,19 +1730,16 @@ formats that also include data in the OPC UA type system.</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">stringNodeIds</span><span class="p">;</span><span class="w"> </span><span class="cm">/* String encoding for NodeIds, like &quot;ns=1;i=42&quot; */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="p">;</span>
 
-<span class="cm">/* Returns the number of bytes the value src takes in json encoding. Returns</span>
+<span class="cm">/* Returns the number of bytes the value src takes in JSON encoding. Returns</span>
 <span class="cm"> * zero if an error occurs. */</span>
 <span class="kt">size_t</span>
 <span class="nf">UA_calcSizeJson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
 <span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
-<span class="cm">/* Encodes the scalar value described by type to json encoding.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The value. Must not be NULL.</span>
-<span class="cm"> * @param type The value type. Must not be NULL.</span>
-<span class="cm"> * @param outBuf Pointer to ByteString containing the result if the encoding</span>
-<span class="cm"> *        was successful</span>
-<span class="cm"> * @return Returns a statuscode whether encoding succeeded. */</span>
+<span class="cm">/* Encodes the scalar value described by type to JSON encoding. If the outBuf</span>
+<span class="cm"> * already contains memory, this is used (if sufficient) and outBuf-&gt;length is</span>
+<span class="cm"> * adjusted down. Otherwise sufficient memory is allocated. The options can be</span>
+<span class="cm"> * NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_encodeJson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
@@ -2000,16 +1764,9 @@ formats that also include data in the OPC UA type system.</p>
 <span class="cm">                            * first JSON element in the input string. */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DecodeJsonOptions</span><span class="p">;</span>
 
-<span class="cm">/* Decodes a scalar value described by type from json encoding.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The buffer with the json encoded value. Must not be NULL.</span>
-<span class="cm"> * @param dst The target value. Must not be NULL. The target is assumed to have</span>
-<span class="cm"> *        size type-&gt;memSize. The value is reset to zero before decoding. If</span>
-<span class="cm"> *        decoding fails, members are deleted and the value is reset (zeroed)</span>
-<span class="cm"> *        again.</span>
-<span class="cm"> * @param type The value type. Must not be NULL.</span>
-<span class="cm"> * @param options The options struct for decoding.</span>
-<span class="cm"> * @return Returns a statuscode whether decoding succeeded. */</span>
+<span class="cm">/* Decodes a scalar value described by type from JSON encoding. The dst value is</span>
+<span class="cm"> * _init&#39;ed initially. It gets cleared internally when an error occurs. The</span>
+<span class="cm"> * options can be NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_decodeJson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeJsonOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
@@ -2042,13 +1799,10 @@ formats that also include data in the OPC UA type system.</p>
 <span class="nf">UA_calcSizeXml</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
 <span class="w">               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeXmlOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
-<span class="cm">/* Encodes the scalar value described by type to xml encoding.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The value. Must not be NULL.</span>
-<span class="cm"> * @param type The value type. Must not be NULL.</span>
-<span class="cm"> * @param outBuf Pointer to ByteString containing the result if the encoding</span>
-<span class="cm"> *        was successful</span>
-<span class="cm"> * @return Returns a statuscode whether encoding succeeded. */</span>
+<span class="cm">/* Encodes the scalar value described by type to XML encoding. If the outBuf</span>
+<span class="cm"> * already contains memory, this is used (if sufficient) and outBuf-&gt;length is</span>
+<span class="cm"> * adjusted down. Otherwise sufficient memory is allocated. The options can be</span>
+<span class="cm"> * NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_encodeXml</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outBuf</span><span class="p">,</span>
 <span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_EncodeXmlOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
@@ -2067,16 +1821,9 @@ formats that also include data in the OPC UA type system.</p>
 <span class="cm">                                          * datatype definitions */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DecodeXmlOptions</span><span class="p">;</span>
 
-<span class="cm">/* Decodes a scalar value described by type from xml encoding.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The buffer with the xml encoded value. Must not be NULL.</span>
-<span class="cm"> * @param dst The target value. Must not be NULL. The target is assumed to have</span>
-<span class="cm"> *        size type-&gt;memSize. The value is reset to zero before decoding. If</span>
-<span class="cm"> *        decoding fails, members are deleted and the value is reset (zeroed)</span>
-<span class="cm"> *        again.</span>
-<span class="cm"> * @param type The value type. Must not be NULL.</span>
-<span class="cm"> * @param options The options struct for decoding, currently unused</span>
-<span class="cm"> * @return Returns a statuscode whether decoding succeeded. */</span>
+<span class="cm">/* Decodes a scalar value described by type from XML encoding. The dst value is</span>
+<span class="cm"> * _init&#39;ed initially. It gets cleared internally when an error occurs. The</span>
+<span class="cm"> * options can be NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_decodeXml</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
 <span class="w">             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DecodeXmlOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
@@ -2093,75 +1840,40 @@ the binary encoding, this is indicated by an array of length -1.</p>
 <p>In open62541 however, we use <code class="docutils literal notranslate"><span class="pre">size_t</span></code> for array lengths. An undefined array
 has length 0 and the data pointer is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>. An array of length 0 also has
 length 0 but a data pointer <code class="docutils literal notranslate"><span class="pre">UA_EMPTY_ARRAY_SENTINEL</span></code>.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allocates and initializes an array of variables of a specific type</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param size The requested array length</span>
-<span class="cm"> * @param type The datatype description</span>
-<span class="cm"> * @return Returns the memory location of the variable or NULL if no memory</span>
-<span class="cm"> *         could be allocated */</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Allocates and initializes an array of the given type */</span>
 <span class="kt">void</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Array_new</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Allocates and copies an array</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param src The memory location of the source array</span>
-<span class="cm"> * @param size The size of the array</span>
-<span class="cm"> * @param dst The location of the pointer to the new array</span>
-<span class="cm"> * @param type The datatype of the array members</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or UA_STATUSCODE_BADOUTOFMEMORY */</span>
+<span class="cm">/* Makes a deep-copy of an array. On success, the dst argument is set to point</span>
+<span class="cm"> * to the allocated memory. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Array_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">dst</span><span class="p">,</span>
 <span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Resizes (and reallocates) an array. The last entries are initialized to zero</span>
 <span class="cm"> * if the array length is increased. If the array length is decreased, the last</span>
-<span class="cm"> * entries are removed if the size is decreased.</span>
+<span class="cm"> * entries are cleared if the size is decreased.</span>
 <span class="cm"> *</span>
-<span class="cm"> * @param p Double pointer to the array memory. Can be overwritten by the result</span>
-<span class="cm"> *          of a realloc.</span>
-<span class="cm"> * @param size The current size of the array. Overwritten in case of success.</span>
-<span class="cm"> * @param newSize The new size of the array</span>
-<span class="cm"> * @param type The datatype of the array members</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or UA_STATUSCODE_BADOUTOFMEMORY. The</span>
-<span class="cm"> *         original array is left untouched in the failure case. */</span>
+<span class="cm"> * The double-pointer to the array and the size-pointer are overwritten upon</span>
+<span class="cm"> * success. The array remains untouched in case of an internal error. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Array_resize</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">newSize</span><span class="p">,</span>
 <span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Append the given element at the end of the array. The content is moved</span>
-<span class="cm"> * (shallow copy) and the original memory is _init&#39;ed if appending is</span>
-<span class="cm"> * successful.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p Double pointer to the array memory. Can be overwritten by the result</span>
-<span class="cm"> *          of a realloc.</span>
-<span class="cm"> * @param size The current size of the array. Overwritten in case of success.</span>
-<span class="cm"> * @param newElem The element to be appended. The memory is reset upon success.</span>
-<span class="cm"> * @param type The datatype of the array members</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or UA_STATUSCODE_BADOUTOFMEMORY. The</span>
-<span class="cm"> *         original array is left untouched in the failure case. */</span>
+<span class="cm">/* Append a scalar value at the end of the array. The content is moved (shallow</span>
+<span class="cm"> * copy) and the original value location is _init&#39;ed if appending is successful.</span>
+<span class="cm"> * Otherwise similar to UA_Array_resize. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Array_append</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">newElem</span><span class="p">,</span>
 <span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Append a copy of the given element at the end of the array.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p Double pointer to the array memory. Can be overwritten by the result</span>
-<span class="cm"> *          of a realloc.</span>
-<span class="cm"> * @param size The current size of the array. Overwritten in case of success.</span>
-<span class="cm"> * @param newElem The element to be appended.</span>
-<span class="cm"> * @param type The datatype of the array members</span>
-<span class="cm"> * @return Returns UA_STATUSCODE_GOOD or UA_STATUSCODE_BADOUTOFMEMORY. The</span>
-<span class="cm"> *         original array is left untouched in the failure case. */</span>
-
+<span class="cm">/* Append a copy of the given element at the end of the array. The memory of the</span>
+<span class="cm"> * newValue argument is not written. Otherwise similar to UA_Array_append. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Array_appendCopy</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">newElem</span><span class="p">,</span>
 <span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
-<span class="cm">/* Deletes an array.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param p The memory location of the array</span>
-<span class="cm"> * @param size The size of the array</span>
-<span class="cm"> * @param type The datatype of the array members */</span>
+<span class="cm">/* Deletes an array by calling _clear on the element and freeing the memory */</span>
 <span class="kt">void</span>
 <span class="nf">UA_Array_delete</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 </pre></div>

@@ -61,7 +61,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#information-model-callbacks">Information Model Callbacks</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-source">Value Source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#local-monitoreditems">Local MonitoredItems</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
 </ul>
@@ -1089,7 +1089,7 @@ specific to the different users and set by the access control callback:</p>
 user-defined code can happen.</p>
 <ul class="simple">
 <li><p>Custom node constructors and destructors</p></li>
-<li><p>Linking VariableNodes with an external data source</p></li>
+<li><p>Linking VariableNodes with a data source</p></li>
 <li><p>MethodNode callbacks</p></li>
 </ul>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
@@ -1110,28 +1110,49 @@ user-defined code can happen.</p>
 <span class="w">                         </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
 </pre></div>
 </div>
-<section id="data-source-callback">
-<span id="datasource"></span><h3>Data Source Callback<a class="headerlink" href="#data-source-callback" title="Link to this heading"></a></h3>
-<p>The server has a unique way of dealing with the content of variables. Instead
-of storing a variant attached to the variable node, the node can point to a
-function with a local data provider. Whenever the value attribute is read,
-the function will be called and asked to provide a UA_DataValue return value
-that contains the value content and additional timestamps.</p>
-<p>It is expected that the read callback is implemented. The write callback can
-be set to a null-pointer.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setVariableNode_dataSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataSource</span><span class="w"> </span><span class="n">dataSource</span><span class="p">);</span>
-
+<section id="value-source">
+<span id="datasource"></span><h3>Value Source<a class="headerlink" href="#value-source" title="Link to this heading"></a></h3>
+<p>There are two options for storing the value of a VariableNode: Internal in
+the VariableNode itself or with callbacks to the application. See
+the section on <a class="reference internal" href="plugin_nodestore.html#variable-node"><span class="std std-ref">VariableNode</span></a> for details.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Set the internal value source. Both the value argument and the notifications</span>
+<span class="cm"> * argument can be NULL. If value is NULL, the Read service is used to get the</span>
+<span class="cm"> * latest value before switching from a callback to an internal value source.</span>
+<span class="cm"> * If notifications is NULL, then all onRead/onWrite notifications are</span>
+<span class="cm"> * disabled. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ValueCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">);</span>
+<span class="n">UA_Server_setVariableNode_internalValueSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="w"> </span><span class="o">*</span><span class="n">notifications</span><span class="p">);</span>
 
+<span class="cm">/* For the external value, no initial copy is made. The node &quot;just&quot; points to</span>
+<span class="cm"> * the provided double-pointer. Otherwise identical to the internal data</span>
+<span class="cm"> * source. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setVariableNode_valueBackend</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ValueBackend</span><span class="w"> </span><span class="n">valueBackend</span><span class="p">);</span>
+<span class="n">UA_Server_setVariableNode_externalValueSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="n">value</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="w"> </span><span class="o">*</span><span class="n">notifications</span><span class="p">);</span>
+
+<span class="cm">/* It is expected that the read callback is implemented. Whenever the value</span>
+<span class="cm"> * attribute is read, the function will be called and asked to fill a</span>
+<span class="cm"> * UA_DataValue structure that contains the value content and additional</span>
+<span class="cm"> * metadata like timestamps.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The write callback can be set to a null-pointer. Then writing into the value</span>
+<span class="cm"> * is disabled. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_setVariableNode_callbackValueSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallbackValueSource</span><span class="w"> </span><span class="n">evs</span><span class="p">);</span>
+
+<span class="cm">/* Deprecated API */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">UA_CallbackValueSource</span><span class="w"> </span><span class="n">UA_DataSource</span><span class="p">;</span>
+<span class="cp">#define UA_Server_setVariableNode_dataSource(server, nodeId, dataSource) \</span>
+<span class="cp">    UA_Server_setVariableNode_callbackValueSource(server, nodeId, dataSource);</span>
+
+<span class="cm">/* Deprecated API */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="w"> </span><span class="n">UA_ValueCallback</span><span class="p">;</span>
+<span class="cp">#define UA_Server_setVariableNode_valueCallback(server, nodeId, callback) \</span>
+<span class="cp">    UA_Server_setVariableNode_internalValueSource(server, nodeId, NULL, &amp;callback);</span>
 </pre></div>
 </div>
 </section>
@@ -1304,7 +1325,7 @@ node attributes, etc. is created. Therefore, it is possible to call for
 example <code class="docutils literal notranslate"><span class="pre">UA_Server_addVariablenode</span></code> with a value attribute (a
 <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>) pointing to a memory location on the stack. If you need
 changes to a variable value to manifest at a specific memory location, please
-use a <a class="reference internal" href="#datasource"><span class="std std-ref">Data Source Callback</span></a> or a <a class="reference internal" href="plugin_nodestore.html#value-callback"><span class="std std-ref">Value Callback</span></a>.</p>
+use a <a class="reference internal" href="#datasource"><span class="std std-ref">Value Source</span></a>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Don&#39;t use this function. There are typed versions as inline functions. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="n">nodeClass</span><span class="p">,</span>
@@ -1424,15 +1445,25 @@ use a <a class="reference internal" href="#datasource"><span class="std std-ref"
 <span class="p">})</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_addDataSourceVariableNode</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_VariableAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataSource</span><span class="w"> </span><span class="n">dataSource</span><span class="p">,</span>
-<span class="w">                                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="n">UA_Server_addCallbackValueSourceVariableNode</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_VariableAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallbackValueSource</span><span class="w"> </span><span class="n">evs</span><span class="p">,</span>
+<span class="w">                                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+
+<span class="cm">/* Legacy API */</span>
+<span class="cp">#define UA_Server_addDataSourceVariableNode(server, requestedNewNodeId, parentNodeId,    \</span>
+<span class="cp">                                            referenceTypeId, browseName, typeDefinition, \</span>
+<span class="cp">                                            attr, dataSource, nodeContext, outNewNodeId) \</span>
+<span class="cp">    UA_Server_addCallbackValueSourceVariableNode(server, requestedNewNodeId,             \</span>
+<span class="cp">                                                 parentNodeId, referenceTypeId,          \</span>
+<span class="cp">                                                 browseName, typeDefinition,             \</span>
+<span class="cp">                                                 attr, dataSource, nodeContext,          \</span>
+<span class="cp">                                                 outNewNodeId)</span>
 
 <span class="cm">/* VariableNodes that are &quot;dynamic&quot; (default for user-created variables) receive</span>
 <span class="cm"> * and store a SourceTimestamp. For non-dynamic VariableNodes the current time</span>
