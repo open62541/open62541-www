@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CertificateGroup Plugin API &mdash; open62541 (master) 1.4.11-undefined documentation</title>
+  <title>CertificateGroup Plugin API &mdash; open62541 (master) 1.4.12-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c8fc6e29"></script>
+      <script src="_static/documentation_options.js?v=bc08e462"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -95,6 +95,14 @@
              
   <section id="certificategroup-plugin-api">
 <h1>CertificateGroup Plugin API<a class="headerlink" href="#certificategroup-plugin-api" title="Link to this heading"></a></h1>
+<p>This plugin verifies that the origin of the certificate is trusted. It does
+not assign any access rights/roles to the holder of the certificate.</p>
+<p>Usually, implementations of the CertificateGroup plugin provide an
+initialization method that takes a trust-list and a revocation-list as input.
+This initialization method takes a pointer to the plugin location and therein
+calls the <code class="docutils literal notranslate"><span class="pre">clear</span></code> method if valid, before attempting to initialize it anew.
+The lifecycle of the plugin is attached to a server or client config. The
+<code class="docutils literal notranslate"><span class="pre">clear</span></code> method is called automatically when the config is destroyed.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_CertificateGroup</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* The NodeId of the certificate group this pki store is associated with */</span>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">;</span>
@@ -109,11 +117,13 @@
 
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getTrustList</span><span class="p">)(</span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certGroup</span><span class="p">,</span>
 <span class="w">                                  </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">trustList</span><span class="p">);</span>
+
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setTrustList</span><span class="p">)(</span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certGroup</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">trustList</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addToTrustList</span><span class="p">)(</span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certGroup</span><span class="p">,</span>
 <span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">trustList</span><span class="p">);</span>
+
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeFromTrustList</span><span class="p">)(</span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certGroup</span><span class="p">,</span>
 <span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_TrustListDataType</span><span class="w"> </span><span class="o">*</span><span class="n">trustList</span><span class="p">);</span>
 
@@ -125,7 +135,8 @@
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getCertificateCrls</span><span class="p">)(</span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certGroup</span><span class="p">,</span>
 <span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>
 <span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTrusted</span><span class="p">,</span>
-<span class="w">                                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">**</span><span class="n">crls</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">crlsSize</span><span class="p">);</span>
+<span class="w">                                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">**</span><span class="n">crls</span><span class="p">,</span>
+<span class="w">                                        </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">crlsSize</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">verifyCertificate</span><span class="p">)(</span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certGroup</span><span class="p">,</span>
 <span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">);</span>

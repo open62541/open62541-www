@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nodestore Plugin API &mdash; open62541 (master) 1.4.11-undefined documentation</title>
+  <title>Nodestore Plugin API &mdash; open62541 (master) 1.4.12-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c8fc6e29"></script>
+      <script src="_static/documentation_options.js?v=bc08e462"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -68,10 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#referencetype-bitfield-representation">ReferenceType Bitfield Representation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#node-pointer">Node Pointer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#base-node-attributes">Base Node Attributes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#variablenode">VariableNode</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#value-callback">Value Callback</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#variablenode">VariableNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variabletypenode">VariableTypeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#methodnode">MethodNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#objectnode">ObjectNode</a></li>
@@ -497,18 +494,23 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 </div>
 </section>
 <section id="variablenode">
-<h2>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Indicates whether a variable contains data inline or whether it points to an</span>
-<span class="cm"> * external data source */</span>
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCE_DATA</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCE_DATASOURCE</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSource</span><span class="p">;</span>
+<span id="variable-node"></span><h2>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h2>
+<p>Variables store values as well as contraints for possible values. There are
+two options for storing the value: Internal in the VariableNode data
+structure itself, external with a double-pointer (to switch to an updated
+value with an atomic pointer-replacing operation) or with a callback
+registered by the application.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_INTERNAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_EXTERNAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_CALLBACK</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSourceType</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Called before the value attribute is read. It is possible to write into the</span>
-<span class="cm">     * value attribute during onRead (using the write service). The node is</span>
-<span class="cm">     * re-opened afterwards so that changes are considered in the following read</span>
+<span class="w">    </span><span class="cm">/* Notify the application before the value attribute is read. Ignored if</span>
+<span class="cm">     * NULL. It is possible to write into the value attribute during onRead</span>
+<span class="cm">     * (using the write service). The node is re-retrieved from the Nodestore</span>
+<span class="cm">     * afterwards so that changes are considered in the following read</span>
 <span class="cm">     * operation.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param handle Points to user-provided data for the callback.</span>
@@ -521,8 +523,9 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="w">                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
 <span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
-<span class="cm">     * writing so that the new value is visible in the callback.</span>
+<span class="w">    </span><span class="cm">/* Notify the application after writing the value attribute. Ignored if</span>
+<span class="cm">     * NULL. The node is re-retrieved after writing, so that the new value is</span>
+<span class="cm">     * visible in the callback.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param server The server executing the callback</span>
 <span class="cm">     * @sessionId The identifier of the session</span>
@@ -539,7 +542,7 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="w">                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
 <span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueCallback</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Copies the data from the source into the provided value.</span>
@@ -573,8 +576,7 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="cm">     *        sourcetimestamp.</span>
 <span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
 <span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done</span>
-<span class="cm">     */</span>
+<span class="cm">     *         then no releasing of the value is done. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">includeSourceTimeStamp</span><span class="p">,</span>
@@ -598,69 +600,12 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="cm">     *        optionally a sourcetimestamp</span>
 <span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
 <span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done</span>
-<span class="cm">     */</span>
+<span class="cm">     *         then no releasing of the value is done. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
 <span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_DataSource</span><span class="p">;</span>
-</pre></div>
-</div>
-<section id="value-callback">
-<span id="id1"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Link to this heading"></a></h3>
-<p>Value Callbacks can be attached to variable and variable type nodes. If
-not <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, they are called before reading and after writing respectively.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Called before the value attribute is read. The external value source can be</span>
-<span class="cm">     * be updated and/or locked during this notification call. After this function returns</span>
-<span class="cm">     * to the core, the external value source is readed immediately.</span>
-<span class="cm">    */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">notificationRead</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
-<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
-<span class="cm">     * writing so that the new value is visible in the callback.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @sessionId The identifier of the session</span>
-<span class="cm">     * @sessionContext Additional data attached to the session</span>
-<span class="cm">     *                 in the access control layer</span>
-<span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param nodeUserContext Additional data attached to the node by</span>
-<span class="cm">     *        the user.</span>
-<span class="cm">     * @param nodeConstructorContext Additional data attached to the node</span>
-<span class="cm">     *        by the type constructor(s).</span>
-<span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
-<span class="cm">     *        NULL). */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">userWrite</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ExternalValueCallback</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_VALUEBACKENDTYPE_NONE</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUEBACKENDTYPE_INTERNAL</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUEBACKENDTYPE_DATA_SOURCE_CALLBACK</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUEBACKENDTYPE_EXTERNAL</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueBackendType</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ValueBackendType</span><span class="w"> </span><span class="n">backendType</span><span class="p">;</span>
-<span class="w">    </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
-<span class="w">            </span><span class="n">UA_ValueCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="n">internal</span><span class="p">;</span>
-<span class="w">        </span><span class="n">UA_DataSource</span><span class="w"> </span><span class="n">dataSource</span><span class="p">;</span>
-<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="n">value</span><span class="p">;</span>
-<span class="w">            </span><span class="n">UA_ExternalValueCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="n">external</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">backend</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueBackend</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_CallbackValueSource</span><span class="p">;</span>
 
 <span class="cp">#define UA_NODE_VARIABLEATTRIBUTES                                      \</span>
 <span class="cp">    </span><span class="cm">/* Constraints on possible values */</span><span class="cp">                                \</span>
@@ -669,17 +614,19 @@ not <code class="docutils literal notranslate"><span class="pre">NULL</span></co
 <span class="cp">    size_t arrayDimensionsSize;                                         \</span>
 <span class="cp">    UA_UInt32 *arrayDimensions;                                         \</span>
 <span class="cp">                                                                        \</span>
-<span class="cp">    UA_ValueBackend valueBackend;                                       \</span>
-<span class="cp">                                                                        \</span>
 <span class="cp">    </span><span class="cm">/* The current value */</span><span class="cp">                                             \</span>
-<span class="cp">    UA_ValueSource valueSource;                                         \</span>
+<span class="cp">    UA_ValueSourceType valueSourceType;                                 \</span>
 <span class="cp">    union {                                                             \</span>
 <span class="cp">        struct {                                                        \</span>
 <span class="cp">            UA_DataValue value;                                         \</span>
-<span class="cp">            UA_ValueCallback callback;                                  \</span>
-<span class="cp">        } data;                                                         \</span>
-<span class="cp">        UA_DataSource dataSource;                                       \</span>
-<span class="cp">    } value;</span>
+<span class="cp">            UA_ValueSourceNotifications notifications;                  \</span>
+<span class="cp">        } internal;                                                     \</span>
+<span class="cp">        struct {                                                        \</span>
+<span class="cp">            UA_DataValue **value; </span><span class="cm">/* double-pointer */</span><span class="cp">                  \</span>
+<span class="cp">            UA_ValueSourceNotifications notifications;                  \</span>
+<span class="cp">        } external;                                                     \</span>
+<span class="cp">        UA_CallbackValueSource callback;                                \</span>
+<span class="cp">    } valueSource;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_NodeHead</span><span class="w"> </span><span class="n">head</span><span class="p">;</span>
@@ -697,7 +644,6 @@ not <code class="docutils literal notranslate"><span class="pre">NULL</span></co
 <span class="p">}</span><span class="w"> </span><span class="n">UA_VariableNode</span><span class="p">;</span>
 </pre></div>
 </div>
-</section>
 </section>
 <section id="variabletypenode">
 <h2>VariableTypeNode<a class="headerlink" href="#variabletypenode" title="Link to this heading"></a></h2>
