@@ -75,6 +75,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#signal-interrupt-manager">Signal Interrupt Manager</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#event-loop-configuration">Event Loop Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lwip-eventloop-implementation">LWIP EventLoop Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">TCP Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">UDP Connection Manager</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="plugin_certificategroup.html">CertificateGroup Plugin API</a></li>
@@ -529,7 +535,7 @@ within the interrupt callback.</p></li>
 <span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">deregisterInterrupt</span><span class="p">)(</span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span><span class="n">im</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">interruptHandle</span><span class="p">);</span>
 <span class="p">};</span>
 
-<span class="cp">#if defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32)</span>
+<span class="cp">#if (defined(UA_ARCHITECTURE_POSIX) &amp;&amp; !defined(UA_ARCHITECTURE_LWIP)) || defined(UA_ARCHITECTURE_WIN32)</span>
 </pre></div>
 </div>
 </section>
@@ -809,6 +815,178 @@ for the interruptHandle.</p>
 
 <span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_Zephyr_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#elif defined(UA_ARCHITECTURE_LWIP)</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_EventLoopConfiguration</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_EventLoopConfiguration</span><span class="w"> </span><span class="n">UA_EventLoopConfiguration</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="event-loop-configuration">
+<h2>Event Loop Configuration<a class="headerlink" href="#event-loop-configuration" title="Link to this heading"></a></h2>
+<p>Defines the configuration parameters and optional callback functions for managing
+the network interface within the EventLoop.</p>
+<p>The functions for initializing, polling, and shutting down the network interface
+are optional. If they are not provided, the initialization and management of the
+network interface must be handled externally.</p>
+<p>** Configuration Parameters for the EventLoop**</p>
+<dl class="simple">
+<dt>0:ipaddr [string]</dt><dd><p>IPv4 address of the network interface (optional).</p>
+</dd>
+<dt>0:netmask [string]</dt><dd><p>Netmask of the network interface (optional).</p>
+</dd>
+<dt>0:gateway [string]</dt><dd><p>Gateway of the network interface (optional).</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_EventLoopConfiguration</span><span class="w"> </span><span class="p">{</span>
+<span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">;</span>
+
+<span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">netifInit</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">ipaddr</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">netmask</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">gw</span><span class="p">);</span>
+<span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">netifPoll</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">netifShutdown</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="lwip-eventloop-implementation">
+<h2>LWIP EventLoop Implementation<a class="headerlink" href="#lwip-eventloop-implementation" title="Link to this heading"></a></h2>
+<p>This EventLoop is built on LWIP’s socket-like API.
+The configuration paramaters must be set before starting the EventLoop.</p>
+<p><strong>Clock configuration (Linux and BSDs only)</strong></p>
+<dl class="simple">
+<dt>0:clock-source [int32]</dt><dd><p>Clock source (default: CLOCK_REALTIME).</p>
+</dd>
+<dt>0:clock-source-monotonic [int32]:</dt><dd><p>Clock source used for time intervals. A non-monotonic source can be used as
+well. But expect accordingly longer sleep-times for timed events when the
+clock is set to the past. See the man-page of “clock_gettime” on how to get
+a clock source id for a character-device such as /dev/ptp0. (default:
+CLOCK_MONOTONIC_RAW)</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_LWIP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">,</span><span class="w"> </span><span class="n">UA_EventLoopConfiguration</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
+</pre></div>
+</div>
+<section id="id1">
+<h3>TCP Connection Manager<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Listens on the network and manages TCP connections. This should be available
+for all architectures.</p>
+<p>The <cite>openConnection</cite> callback is used to create both client and server
+sockets. A server socket listens and accepts incoming connections (creates an
+active connection). This is distinguished by the key-value parameters passed
+to <cite>openConnection</cite>. Note that a single call to <cite>openConnection</cite> for a server
+connection may actually create multiple connections (one per hostname /
+device).</p>
+<p>The <cite>connectionCallback</cite> of the server socket and <cite>context</cite> of the server
+socket is reused for each new connection. But the key-value parameters for
+the first callback are different between server and client connections.</p>
+<p><strong>Configuration parameters for the ConnectionManager (set before start)</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
+(default 64kB).</p>
+</dd>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
+becomes an upper bound for the message size. If undefined a fresh buffer
+is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+</dd>
+</dl>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string | array of string]</dt><dd><p>Hostname or IPv4/v6 address for the connection (scalar parameter required
+for active connections). For listen-connections the address contains the
+local hostnames or IP addresses for listening. If undefined, listen on all
+interfaces INADDR_ANY. (default: undefined)</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port of the target host (required).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Listen-connection or active-connection (default: false)</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+</dl>
+<p><strong>Active Connection Connection Callback Parameters (first callback only):</strong></p>
+<dl class="simple">
+<dt>0:remote-address [string]</dt><dd><p>Address of the remote side (hostname or IP address).</p>
+</dd>
+</dl>
+<p><strong>Listen Connection Connection Callback Parameters (first callback only):</strong></p>
+<dl class="simple">
+<dt>0:listen-address [string]</dt><dd><p>Local address (IP or hostname) for the new listen-connection.</p>
+</dd>
+<dt>0:listen-port [uint16]</dt><dd><p>Port on which the new connection listens.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an established TCP socket
+defined.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_LWIP_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>UDP Connection Manager<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Manages UDP connections. This should be available for all architectures. The
+configuration parameters have to set before calling _start to take effect.</p>
+<p><strong>Configuration parameters for the ConnectionManager (set before start)</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
+(default 64kB).</p>
+</dd>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
+becomes an upper bound for the message size. If undefined a fresh buffer
+is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+</dd>
+</dl>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:listen [boolean]</dt><dd><p>Use the connection for listening or for sending (default: false)</p>
+</dd>
+<dt>0:address [string | string array]</dt><dd><p>Hostname (or IPv4/v6 address) for sending or receiving. A scalar is
+required for sending. For listening a string array for the list-hostnames
+is possible as well (default: list on all hostnames).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port for sending or listening (required).</p>
+</dd>
+<dt>0:interface [string]</dt><dd><p>Network interface for listening or sending (e.g. when using multicast
+addresses). Can be either the IP address of the network interface
+or the interface name (e.g. ‘eth0’).</p>
+</dd>
+<dt>0:ttl [uint32]</dt><dd><p>Multicast time to live, (optional, default: 1 - meaning multicast is
+available only to the local subnet).</p>
+</dd>
+<dt>0:loopback [boolean]</dt><dd><p>Whether or not to use multicast loopback, enabling local interfaces
+belonging to the multicast group to receive packages. (default: enabled).</p>
+</dd>
+<dt>0:reuse [boolean]</dt><dd><p>Enables sharing of the same listening address on different sockets
+(default: disabled).</p>
+</dd>
+<dt>0:sockpriority [uint32]</dt><dd><p>The socket priority (optional) - only available on linux. packets with a
+higher priority may be processed first depending on the selected device
+queueing discipline. Setting a priority outside the range 0 to 6 requires
+the CAP_NET_ADMIN capability (on Linux).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+</dl>
+<p><strong>Connection Callback Parameters:</strong></p>
+<dl class="simple">
+<dt>0:remote-address [string]</dt><dd><p>Contains the remote IP address.</p>
+</dd>
+<dt>0:remote-port [uint16]</dt><dd><p>Contains the remote port.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an UDP connection defined.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_LWIP_UDP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 
 <span class="cp">#endif</span>
 </pre></div>
