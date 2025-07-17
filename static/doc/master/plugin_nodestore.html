@@ -559,6 +559,11 @@ registered by the application.</p>
 <span class="cm">     * memory being cleaned up. Don&#39;t forget to also set `value-&gt;hasValue` to</span>
 <span class="cm">     * true to indicate the presence of a value.</span>
 <span class="cm">     *</span>
+<span class="cm">     * To make an async read, return UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY.</span>
+<span class="cm">     * The result can then be set at a later time using</span>
+<span class="cm">     * UA_Server_setAsyncReadResult. Note that the server might cancel the async</span>
+<span class="cm">     * read by calling serverConfig-&gt;asyncOperationCancelCallback.</span>
+<span class="cm">     *</span>
 <span class="cm">     * @param server The server executing the callback</span>
 <span class="cm">     * @param sessionId The identifier of the session</span>
 <span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
@@ -584,6 +589,11 @@ registered by the application.</p>
 
 <span class="w">    </span><span class="cm">/* Write into a data source. This method pointer can be NULL if the</span>
 <span class="cm">     * operation is unsupported.</span>
+<span class="cm">     *</span>
+<span class="cm">     * To make an async write, return UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY.</span>
+<span class="cm">     * The result can then be set at a later time using</span>
+<span class="cm">     * UA_Server_setAsyncWriteResult. Note that the server might cancel the</span>
+<span class="cm">     * async read by calling serverConfig-&gt;asyncOperationCancelCallback.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param server The server executing the callback</span>
 <span class="cm">     * @param sessionId The identifier of the session</span>
@@ -661,12 +671,12 @@ registered by the application.</p>
 <section id="methodnode">
 <h2>MethodNode<a class="headerlink" href="#methodnode" title="Link to this heading"></a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
-<span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">methodContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">objectId</span><span class="p">,</span>
-<span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">objectContext</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">outputSize</span><span class="p">,</span>
-<span class="w">                     </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">methodId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">methodContext</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">objectContext</span><span class="p">,</span>
+<span class="w">                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
+<span class="w">                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">outputSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_NodeHead</span><span class="w"> </span><span class="n">head</span><span class="p">;</span>
@@ -674,9 +684,6 @@ registered by the application.</p>
 
 <span class="w">    </span><span class="cm">/* Members specific to open62541 */</span>
 <span class="w">    </span><span class="n">UA_MethodCallback</span><span class="w"> </span><span class="n">method</span><span class="p">;</span>
-<span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">async</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Indicates an async method call */</span>
-<span class="cp">#endif</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_MethodNode</span><span class="p">;</span>
 </pre></div>
 </div>

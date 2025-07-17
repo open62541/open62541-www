@@ -310,12 +310,13 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Async Operations</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~</span>
 <span class="cm">     * See the section for :ref:`async operations&lt;async-operations&gt;`. */</span>
-<span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
-<span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">asyncOperationTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in ms, 0 =&gt; unlimited */</span>
+<span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">asyncOperationTimeout</span><span class="p">;</span><span class="w">   </span><span class="cm">/* in ms, 0 =&gt; unlimited */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
-<span class="w">    </span><span class="cm">/* Notify workers when an async operation was enqueued */</span>
-<span class="w">    </span><span class="n">UA_Server_AsyncOperationNotifyCallback</span><span class="w"> </span><span class="n">asyncOperationNotifyCallback</span><span class="p">;</span>
-<span class="cp">#endif</span>
+
+<span class="w">    </span><span class="cm">/* Notifies the userland that an async operation has been canceled. The</span>
+<span class="cm">     * memory for setting the output value is then freed internally and should</span>
+<span class="cm">     * not be touched afterwards. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">asyncOperationCancelCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Discovery</span>
 <span class="cm">     * ~~~~~~~~~ */</span>
@@ -1643,65 +1644,26 @@ ready. See the examples in <code class="docutils literal notranslate"><span clas
 the usage.</p>
 <p>Note that the operation can time out (see the asyncOperationTimeout setting in
 the server config) also when it has been retrieved by the worker.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if UA_MULTITHREADING &gt;= 100</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* When the method callback answers with</span>
+<span class="cm"> * UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY, then an async operation is stored</span>
+<span class="cm"> * in the server. Within the defined timeout, the result can be set with the</span>
+<span class="cm"> * following. The output-array pointer is used as the key to lookup the async</span>
+<span class="cm"> * operation internally. Do not access the output-pointer after the timeout or</span>
+<span class="cm"> * after setting the result. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Server_setAsyncCallMethodResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
 
-<span class="cm">/* Set the async flag in a method node */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setMethodNodeAsync</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isAsync</span><span class="p">);</span>
+<span class="cm">/* See the UA_CallbackValueSource documentation */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Server_setAsyncReadResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
 
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_ASYNCOPERATIONTYPE_INVALID</span><span class="p">,</span><span class="w"> </span><span class="cm">/* 0, the default */</span>
-<span class="w">    </span><span class="n">UA_ASYNCOPERATIONTYPE_CALL</span>
-<span class="w">    </span><span class="cm">/* UA_ASYNCOPERATIONTYPE_READ, */</span>
-<span class="w">    </span><span class="cm">/* UA_ASYNCOPERATIONTYPE_WRITE, */</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_AsyncOperationType</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_CallMethodRequest</span><span class="w"> </span><span class="n">callMethodRequest</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* UA_ReadValueId readValueId; */</span>
-<span class="w">    </span><span class="cm">/* UA_WriteValue writeValue; */</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_AsyncOperationRequest</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">union</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_CallMethodResult</span><span class="w"> </span><span class="n">callMethodResult</span><span class="p">;</span>
-<span class="w">    </span><span class="cm">/* UA_DataValue readResult; */</span>
-<span class="w">    </span><span class="cm">/* UA_StatusCode writeResult; */</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_AsyncOperationResponse</span><span class="p">;</span>
-
-<span class="cm">/* Get the next async operation without blocking</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param type The type of the async operation</span>
-<span class="cm"> * @param request Receives pointer to the operation</span>
-<span class="cm"> * @param context Receives the pointer to the operation context</span>
-<span class="cm"> * @param timeout The timestamp when the operation times out and can</span>
-<span class="cm"> *        no longer be returned to the client. The response has to</span>
-<span class="cm"> *        be set in UA_Server_setAsyncOperationResult in any case.</span>
-<span class="cm"> * @return false if queue is empty, true else */</span>
-<span class="n">UA_Boolean</span>
-<span class="nf">UA_Server_getAsyncOperationNonBlocking</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                       </span><span class="n">UA_AsyncOperationType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
-<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AsyncOperationRequest</span><span class="w"> </span><span class="o">**</span><span class="n">request</span><span class="p">,</span>
-<span class="w">                                       </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">timeout</span><span class="p">);</span>
-
-<span class="cm">/* UA_Boolean */</span>
-<span class="cm">/* UA_Server_getAsyncOperationBlocking(UA_Server *server, */</span>
-<span class="cm">/*                                     UA_AsyncOperationType *type, */</span>
-<span class="cm">/*                                     const UA_AsyncOperationRequest **request, */</span>
-<span class="cm">/*                                     void **context, UA_DateTime *timeout); */</span>
-
-<span class="cm">/* Submit an async operation result</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param response Pointer to the operation result</span>
-<span class="cm"> * @param context Pointer to the operation context */</span>
-<span class="kt">void</span>
-<span class="nf">UA_Server_setAsyncOperationResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AsyncOperationResponse</span><span class="w"> </span><span class="o">*</span><span class="n">response</span><span class="p">,</span>
-<span class="w">                                  </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">);</span>
-
-<span class="cp">#endif </span><span class="cm">/* !UA_MULTITHREADING &gt;= 100 */</span>
+<span class="cm">/* See the UA_CallbackValueSource documentation. The value needs to be the</span>
+<span class="cm"> * pointer used in the write callback. The statuscode is the result signal to be</span>
+<span class="cm"> * returned asynchronously. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Server_setAsyncWriteResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
