@@ -113,8 +113,8 @@
 <p><strong>Warning!!</strong> The structures defined in this section are only relevant for
 the developers of custom Nodestores. The interaction with the information
 model is possible only via the OPC UA <a class="reference internal" href="core_concepts.html#services"><span class="std std-ref">Services</span></a>. So the following
-sections are purely informational so that users may have a clear mental
-model of the underlying representation.</p>
+sections are mainly for users that seek to understand the underlying
+representation – which is not directly accessible.</p>
 <section id="referencetype-bitfield-representation">
 <h2>ReferenceType Bitfield Representation<a class="headerlink" href="#referencetype-bitfield-representation" title="Link to this heading"></a></h2>
 <p>ReferenceTypes have an alternative represention as an index into a bitfield
@@ -286,7 +286,6 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">nameTreeEntry</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">;</span>
 
-
 <span class="cm">/* List of reference targets with the same reference type and direction. Uses</span>
 <span class="cm"> * either an array or a tree structure. The SDK will not change the type of</span>
 <span class="cm"> * reference target structure internally. The nodestore implementations may</span>
@@ -375,19 +374,8 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 </div>
 </section>
 <section id="variablenode">
-<span id="variable-node"></span><h2>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h2>
-<p>Variables store values as well as contraints for possible values. There are
-two options for storing the value: Internal in the VariableNode data
-structure itself, external with a double-pointer (to switch to an updated
-value with an atomic pointer-replacing operation) or with a callback
-registered by the application.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_INTERNAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_EXTERNAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_CALLBACK</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSourceType</span><span class="p">;</span>
-
-<span class="cp">#define UA_NODE_VARIABLEATTRIBUTES                                      \</span>
+<h2>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_NODE_VARIABLEATTRIBUTES                                      \</span>
 <span class="cp">    </span><span class="cm">/* Constraints on possible values */</span><span class="cp">                                \</span>
 <span class="cp">    UA_NodeId dataType;                                                 \</span>
 <span class="cp">    UA_Int32 valueRank;                                                 \</span>
@@ -525,12 +513,8 @@ Check the NodeClass before accessing specific content.</p>
 </section>
 <section id="nodestore">
 <h2>Nodestore<a class="headerlink" href="#nodestore" title="Link to this heading"></a></h2>
-<p>The following definitions are used for implementing custom node storage
-backends. <strong>Most users will want to use the default nodestore and don’t need
-to work with the nodestore API</strong>.</p>
-<p>Outside of custom nodestore implementations, users should not manually edit
-nodes. Please use the OPC UA services for that. Otherwise, all consistency
-checks are omitted. This can crash the application eventually.</p>
+<p>The following structurere defines the interaction between the server and
+Nodestore backends.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">visitorCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_Nodestore</span><span class="w"> </span><span class="p">{</span>
@@ -545,7 +529,7 @@ checks are omitted. This can crash the application eventually.</p>
 
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* ``Get`` returns a pointer to an immutable node. Call ``releaseNode`` to</span>
+<span class="w">    </span><span class="cm">/* _getNode returns a pointer to an immutable node. Call _releaseNode to</span>
 <span class="cm">     * indicate when the pointer is no longer accessed.</span>
 <span class="cm">     *</span>
 <span class="cm">     * It can be indicated if only a subset of the attributes and referencs need</span>
@@ -567,25 +551,25 @@ checks are omitted. This can crash the application eventually.</p>
 <span class="w">                               </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Similar to the normal ``getNode``. But it can take advantage of the</span>
+<span class="w">    </span><span class="cm">/* Similar to the normal _getNode. But it can take advantage of the</span>
 <span class="cm">     * NodePointer structure, e.g. if it contains a direct pointer. */</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeFromPtr</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* ``GetEditNode`` returns a pointer to a mutable version of the node. A</span>
+<span class="w">    </span><span class="cm">/* _getEditNode returns a pointer to a mutable version of the node. A</span>
 <span class="cm">     * plugin implementation that keeps all nodes in RAM can return the same</span>
-<span class="cm">     * pointer from ``GetNode`` and ``GetEditNode``. The differences are more</span>
+<span class="cm">     * pointer from _getNode and _getEditNode. The differences are more</span>
 <span class="cm">     * important if, for example, nodes are stored in a backend database. Then</span>
-<span class="cm">     * the ``GetEditNode`` version is used to indicate that modifications are</span>
+<span class="cm">     * the _getEditNode version is used to indicate that modifications are</span>
 <span class="cm">     * being made.</span>
 <span class="cm">     *</span>
-<span class="cm">     * Call ``releaseNode`` to indicate when editing is done and the pointer is</span>
+<span class="cm">     * Call _releaseNode to indicate when editing is done and the pointer is</span>
 <span class="cm">     * no longer used. Note that changes are not (necessarily) visible in other</span>
 <span class="cm">     * (const) node-pointers that were previously retrieved. Changes are however</span>
 <span class="cm">     * visible in all newly retrieved node-pointers for the given NodeId after</span>
-<span class="cm">     * calling ``releaseNode``.</span>
+<span class="cm">     * calling _releaseNode.</span>
 <span class="cm">     *</span>
 <span class="cm">     * The attribute-mask and reference-description indicate if only a subset of</span>
 <span class="cm">     * the attributes and referencs are to be modified. Other attributes and</span>
@@ -595,7 +579,7 @@ checks are omitted. This can crash the application eventually.</p>
 <span class="w">                             </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Similar to ``getEditNode``. But it can take advantage of the NodePointer</span>
+<span class="w">    </span><span class="cm">/* Similar to _getEditNode. But it can take advantage of the NodePointer</span>
 <span class="cm">     * structure, e.g. if it contains a direct pointer. */</span>
 <span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNodeFromPtr</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
