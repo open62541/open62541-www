@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nodestore Plugin API &mdash; open62541 (master) 1.4.12-undefined documentation</title>
+  <title>Nodestore Plugin API &mdash; open62541 (master) 1.4.13-undefined documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=bc08e462"></script>
+      <script src="_static/documentation_options.js?v=905b625b"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -60,11 +60,6 @@
 <li class="toctree-l1 current"><a class="reference internal" href="plugin.html">Plugin API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Nodestore Plugin API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#global-node-lifecycle">Global Node Lifecycle</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#node-type-lifecycle">Node Type Lifecycle</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#referencetype-bitfield-representation">ReferenceType Bitfield Representation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#node-pointer">Node Pointer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#base-node-attributes">Base Node Attributes</a></li>
@@ -118,122 +113,8 @@
 <p><strong>Warning!!</strong> The structures defined in this section are only relevant for
 the developers of custom Nodestores. The interaction with the information
 model is possible only via the OPC UA <a class="reference internal" href="core_concepts.html#services"><span class="std std-ref">Services</span></a>. So the following
-sections are purely informational so that users may have a clear mental
-model of the underlying representation.</p>
-<section id="node-lifecycle-constructors-destructors-and-node-contexts">
-<span id="node-lifecycle"></span><h2>Node Lifecycle: Constructors, Destructors and Node Contexts<a class="headerlink" href="#node-lifecycle-constructors-destructors-and-node-contexts" title="Link to this heading"></a></h2>
-<p>To finalize the instantiation of a node, a (user-defined) constructor
-callback is executed. There can be both a global constructor for all nodes
-and node-type constructor specific to the TypeDefinition of the new node
-(attached to an ObjectTypeNode or VariableTypeNode).</p>
-<p>In the hierarchy of ObjectTypes and VariableTypes, only the constructor of
-the (lowest) type defined for the new node is executed. Note that every
-Object and Variable can have only one <code class="docutils literal notranslate"><span class="pre">isTypeOf</span></code> reference. But type-nodes
-can technically have several <code class="docutils literal notranslate"><span class="pre">hasSubType</span></code> references to implement multiple
-inheritance. Issues of (multiple) inheritance in the constructor need to be
-solved by the user.</p>
-<p>When a node is destroyed, the node-type destructor is called before the
-global destructor. So the overall node lifecycle is as follows:</p>
-<ol class="arabic simple">
-<li><p>Global Constructor (set in the server config)</p></li>
-<li><p>Node-Type Constructor (for VariableType or ObjectTypes)</p></li>
-<li><p>(Usage-period of the Node)</p></li>
-<li><p>Node-Type Destructor</p></li>
-<li><p>Global Destructor</p></li>
-</ol>
-<p>The constructor and destructor callbacks can be set to <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and are not
-used in that case. If the node-type constructor fails, the global destructor
-will be called before removing the node. The destructors are assumed to never
-fail.</p>
-<p>Every node carries a user-context and a constructor-context pointer. The
-user-context is used to attach custom data to a node. But the (user-defined)
-constructors and destructors may replace the user-context pointer if they
-wish to do so. The initial value for the constructor-context is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.
-When the <code class="docutils literal notranslate"><span class="pre">AddNodes</span></code> service is used over the network, the user-context
-pointer of the new node is also initially set to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
-<section id="global-node-lifecycle">
-<h3>Global Node Lifecycle<a class="headerlink" href="#global-node-lifecycle" title="Link to this heading"></a></h3>
-<p>Global constructor and destructor callbacks used for every node type.
-To be set in the server config.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Can be NULL. May replace the nodeContext */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Can be NULL. The context cannot be replaced since the node is destroyed</span>
-<span class="cm">     * immediately afterwards anyway. */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Can be NULL. Called during recursive node instantiation. While mandatory</span>
-<span class="cm">     * child nodes are automatically created if not already present, optional child</span>
-<span class="cm">     * nodes are not. This callback can be used to define whether an optional child</span>
-<span class="cm">     * node should be created.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param sourceNodeId Source node from the type definition. If the new node</span>
-<span class="cm">     *        shall be created, it will be a copy of this node.</span>
-<span class="cm">     * @param targetParentNodeId Parent of the potential new child node</span>
-<span class="cm">     * @param referenceTypeId Identifies the reference type which that the parent</span>
-<span class="cm">     *        node has to the new node.</span>
-<span class="cm">     * @return Return UA_TRUE if the child node shall be instantiated,</span>
-<span class="cm">     *         UA_FALSE otherwise. */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">createOptionalChild</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sourceNodeId</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
-<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">referenceTypeId</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Can be NULL. Called when a node is to be copied during recursive</span>
-<span class="cm">     * node instantiation. Allows definition of the NodeId for the new node.</span>
-<span class="cm">     * If the callback is set to NULL or the resulting NodeId is UA_NODEID_NUMERIC(X,0)</span>
-<span class="cm">     * an unused nodeid in namespace X will be used. E.g. passing UA_NODEID_NULL will</span>
-<span class="cm">     * result in a NodeId in namespace 0.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param sourceNodeId Source node of the copy operation</span>
-<span class="cm">     * @param targetParentNodeId Parent node of the new node</span>
-<span class="cm">     * @param referenceTypeId Identifies the reference type which that the parent</span>
-<span class="cm">     *        node has to the new node. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateChildNodeId</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sourceNodeId</span><span class="p">,</span>
-<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
-<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
-<span class="w">                                         </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetNodeId</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
-</pre></div>
-</div>
-</section>
-<section id="node-type-lifecycle">
-<h3>Node Type Lifecycle<a class="headerlink" href="#node-type-lifecycle" title="Link to this heading"></a></h3>
-<p>Constructor and destructors for specific object and variable types.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Can be NULL. May replace the nodeContext */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
-<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Can be NULL. May replace the nodeContext. */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
-<span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_NodeTypeLifecycle</span><span class="p">;</span>
-</pre></div>
-</div>
-</section>
-</section>
+sections are mainly for users that seek to understand the underlying
+representation – which is not directly accessible.</p>
 <section id="referencetype-bitfield-representation">
 <h2>ReferenceType Bitfield Representation<a class="headerlink" href="#referencetype-bitfield-representation" title="Link to this heading"></a></h2>
 <p>ReferenceTypes have an alternative represention as an index into a bitfield
@@ -405,7 +286,6 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">nameTreeEntry</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReferenceTargetTreeElem</span><span class="p">;</span>
 
-
 <span class="cm">/* List of reference targets with the same reference type and direction. Uses</span>
 <span class="cm"> * either an array or a tree structure. The SDK will not change the type of</span>
 <span class="cm"> * reference target structure internally. The nodestore implementations may</span>
@@ -494,130 +374,8 @@ correctness of casting from <code class="docutils literal notranslate"><span cla
 </div>
 </section>
 <section id="variablenode">
-<span id="variable-node"></span><h2>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h2>
-<p>Variables store values as well as contraints for possible values. There are
-two options for storing the value: Internal in the VariableNode data
-structure itself, external with a double-pointer (to switch to an updated
-value with an atomic pointer-replacing operation) or with a callback
-registered by the application.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_INTERNAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_EXTERNAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_VALUESOURCETYPE_CALLBACK</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSourceType</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Notify the application before the value attribute is read. Ignored if</span>
-<span class="cm">     * NULL. It is possible to write into the value attribute during onRead</span>
-<span class="cm">     * (using the write service). The node is re-retrieved from the Nodestore</span>
-<span class="cm">     * afterwards so that changes are considered in the following read</span>
-<span class="cm">     * operation.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param handle Points to user-provided data for the callback.</span>
-<span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param data Points to the current node value.</span>
-<span class="cm">     * @param range Points to the numeric range the client wants to read from</span>
-<span class="cm">     *        (or NULL). */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">onRead</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
-<span class="w">                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
-<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Notify the application after writing the value attribute. Ignored if</span>
-<span class="cm">     * NULL. The node is re-retrieved after writing, so that the new value is</span>
-<span class="cm">     * visible in the callback.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @sessionId The identifier of the session</span>
-<span class="cm">     * @sessionContext Additional data attached to the session</span>
-<span class="cm">     *                 in the access control layer</span>
-<span class="cm">     * @param nodeid The identifier of the node.</span>
-<span class="cm">     * @param nodeUserContext Additional data attached to the node by</span>
-<span class="cm">     *        the user.</span>
-<span class="cm">     * @param nodeConstructorContext Additional data attached to the node</span>
-<span class="cm">     *        by the type constructor(s).</span>
-<span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
-<span class="cm">     *        NULL). */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">onWrite</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
-<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="p">;</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Copies the data from the source into the provided value.</span>
-<span class="cm">     *</span>
-<span class="cm">     * !! ZERO-COPY OPERATIONS POSSIBLE !!</span>
-<span class="cm">     * It is not required to return a copy of the actual content data. You can</span>
-<span class="cm">     * return a pointer to memory owned by the user. Memory can be reused</span>
-<span class="cm">     * between read callbacks of a DataSource, as the result is already encoded</span>
-<span class="cm">     * on the network buffer between each read operation.</span>
-<span class="cm">     *</span>
-<span class="cm">     * To use zero-copy reads, set the value of the `value-&gt;value` Variant</span>
-<span class="cm">     * without copying, e.g. with `UA_Variant_setScalar`. Then, also set</span>
-<span class="cm">     * `value-&gt;value.storageType` to `UA_VARIANT_DATA_NODELETE` to prevent the</span>
-<span class="cm">     * memory being cleaned up. Don&#39;t forget to also set `value-&gt;hasValue` to</span>
-<span class="cm">     * true to indicate the presence of a value.</span>
-<span class="cm">     *</span>
-<span class="cm">     * To make an async read, return UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY.</span>
-<span class="cm">     * The result can then be set at a later time using</span>
-<span class="cm">     * UA_Server_setAsyncReadResult. Note that the server might cancel the async</span>
-<span class="cm">     * read by calling serverConfig-&gt;asyncOperationCancelCallback.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param nodeId The identifier of the node being read from</span>
-<span class="cm">     * @param nodeContext Additional data attached to the node by the user</span>
-<span class="cm">     * @param includeSourceTimeStamp If true, then the datasource is expected to</span>
-<span class="cm">     *        set the source timestamp in the returned value</span>
-<span class="cm">     * @param range If not null, then the datasource shall return only a</span>
-<span class="cm">     *        selection of the (nonscalar) data. Set</span>
-<span class="cm">     *        UA_STATUSCODE_BADINDEXRANGEINVALID in the value if this does not</span>
-<span class="cm">     *        apply</span>
-<span class="cm">     * @param value The (non-null) DataValue that is returned to the client. The</span>
-<span class="cm">     *        data source sets the read data, the result status and optionally a</span>
-<span class="cm">     *        sourcetimestamp.</span>
-<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
-<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">includeSourceTimeStamp</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Write into a data source. This method pointer can be NULL if the</span>
-<span class="cm">     * operation is unsupported.</span>
-<span class="cm">     *</span>
-<span class="cm">     * To make an async write, return UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY.</span>
-<span class="cm">     * The result can then be set at a later time using</span>
-<span class="cm">     * UA_Server_setAsyncWriteResult. Note that the server might cancel the</span>
-<span class="cm">     * async read by calling serverConfig-&gt;asyncOperationCancelCallback.</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server The server executing the callback</span>
-<span class="cm">     * @param sessionId The identifier of the session</span>
-<span class="cm">     * @param sessionContext Additional data attached to the session in the</span>
-<span class="cm">     *        access control layer</span>
-<span class="cm">     * @param nodeId The identifier of the node being written to</span>
-<span class="cm">     * @param nodeContext Additional data attached to the node by the user</span>
-<span class="cm">     * @param range If not NULL, then the datasource shall return only a</span>
-<span class="cm">     *        selection of the (nonscalar) data. Set</span>
-<span class="cm">     *        UA_STATUSCODE_BADINDEXRANGEINVALID in the value if this does not</span>
-<span class="cm">     *        apply</span>
-<span class="cm">     * @param value The (non-NULL) DataValue that has been written by the client.</span>
-<span class="cm">     *        The data source contains the written data, the result status and</span>
-<span class="cm">     *        optionally a sourcetimestamp</span>
-<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
-<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
-<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_CallbackValueSource</span><span class="p">;</span>
-
-<span class="cp">#define UA_NODE_VARIABLEATTRIBUTES                                      \</span>
+<h2>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_NODE_VARIABLEATTRIBUTES                                      \</span>
 <span class="cp">    </span><span class="cm">/* Constraints on possible values */</span><span class="cp">                                \</span>
 <span class="cp">    UA_NodeId dataType;                                                 \</span>
 <span class="cp">    UA_Int32 valueRank;                                                 \</span>
@@ -670,15 +428,7 @@ registered by the application.</p>
 </section>
 <section id="methodnode">
 <h2>MethodNode<a class="headerlink" href="#methodnode" title="Link to this heading"></a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">methodId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">methodContext</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">objectContext</span><span class="p">,</span>
-<span class="w">                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
-<span class="w">                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">outputSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
-
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_NodeHead</span><span class="w"> </span><span class="n">head</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">executable</span><span class="p">;</span>
 
@@ -763,28 +513,23 @@ Check the NodeClass before accessing specific content.</p>
 </section>
 <section id="nodestore">
 <h2>Nodestore<a class="headerlink" href="#nodestore" title="Link to this heading"></a></h2>
-<p>The following definitions are used for implementing custom node storage
-backends. <strong>Most users will want to use the default nodestore and don’t need
-to work with the nodestore API</strong>.</p>
-<p>Outside of custom nodestore implementations, users should not manually edit
-nodes. Please use the OPC UA services for that. Otherwise, all consistency
-checks are omitted. This can crash the application eventually.</p>
+<p>The following structurere defines the interaction between the server and
+Nodestore backends.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_NodestoreVisitor</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">visitorCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_Nodestore</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Nodestore context and lifecycle */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* The following definitions are used to create empty nodes of the different</span>
 <span class="cm">     * node types. The memory is managed by the nodestore. Therefore, the node</span>
 <span class="cm">     * has to be removed via a special deleteNode function. (If the new node is</span>
 <span class="cm">     * not added to the nodestore.) */</span>
-<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">newNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="n">nodeClass</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">newNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="n">nodeClass</span><span class="p">);</span>
 
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* ``Get`` returns a pointer to an immutable node. Call ``releaseNode`` to</span>
+<span class="w">    </span><span class="cm">/* _getNode returns a pointer to an immutable node. Call _releaseNode to</span>
 <span class="cm">     * indicate when the pointer is no longer accessed.</span>
 <span class="cm">     *</span>
 <span class="cm">     * It can be indicated if only a subset of the attributes and referencs need</span>
@@ -801,59 +546,59 @@ checks are omitted. This can crash the application eventually.</p>
 <span class="cm">     * exist (for that node) are requested. Attributes and references in</span>
 <span class="cm">     * addition to those specified can be returned. For example, if the full</span>
 <span class="cm">     * node already is kept in memory by the Nodestore. */</span>
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Similar to the normal ``getNode``. But it can take advantage of the</span>
+<span class="w">    </span><span class="cm">/* Similar to the normal _getNode. But it can take advantage of the</span>
 <span class="cm">     * NodePointer structure, e.g. if it contains a direct pointer. */</span>
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeFromPtr</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeFromPtr</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* ``GetEditNode`` returns a pointer to a mutable version of the node. A</span>
+<span class="w">    </span><span class="cm">/* _getEditNode returns a pointer to a mutable version of the node. A</span>
 <span class="cm">     * plugin implementation that keeps all nodes in RAM can return the same</span>
-<span class="cm">     * pointer from ``GetNode`` and ``GetEditNode``. The differences are more</span>
+<span class="cm">     * pointer from _getNode and _getEditNode. The differences are more</span>
 <span class="cm">     * important if, for example, nodes are stored in a backend database. Then</span>
-<span class="cm">     * the ``GetEditNode`` version is used to indicate that modifications are</span>
+<span class="cm">     * the _getEditNode version is used to indicate that modifications are</span>
 <span class="cm">     * being made.</span>
 <span class="cm">     *</span>
-<span class="cm">     * Call ``releaseNode`` to indicate when editing is done and the pointer is</span>
+<span class="cm">     * Call _releaseNode to indicate when editing is done and the pointer is</span>
 <span class="cm">     * no longer used. Note that changes are not (necessarily) visible in other</span>
 <span class="cm">     * (const) node-pointers that were previously retrieved. Changes are however</span>
 <span class="cm">     * visible in all newly retrieved node-pointers for the given NodeId after</span>
-<span class="cm">     * calling ``releaseNode``.</span>
+<span class="cm">     * calling _releaseNode.</span>
 <span class="cm">     *</span>
 <span class="cm">     * The attribute-mask and reference-description indicate if only a subset of</span>
 <span class="cm">     * the attributes and referencs are to be modified. Other attributes and</span>
 <span class="cm">     * references shall not be changed. */</span>
-<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Similar to ``getEditNode``. But it can take advantage of the NodePointer</span>
+<span class="w">    </span><span class="cm">/* Similar to _getEditNode. But it can take advantage of the NodePointer</span>
 <span class="cm">     * structure, e.g. if it contains a direct pointer. */</span>
-<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNodeFromPtr</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEditNodeFromPtr</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodePointer</span><span class="w"> </span><span class="n">ptr</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attributeMask</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="n">references</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_BrowseDirection</span><span class="w"> </span><span class="n">referenceDirections</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Release a node that has been retrieved with ``getNode`` or</span>
 <span class="cm">     * ``getNodeFromPtr``. */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">releaseNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">releaseNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
 <span class="cm">     * deleteNode function or inserted / replaced into the nodestore). */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Inserts a new node into the nodestore. If the NodeId is zero, then a</span>
 <span class="cm">     * fresh numeric NodeId is assigned. If insertion fails, the node is</span>
 <span class="cm">     * deleted. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">insertNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">insertNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">addedNodeId</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* To replace a node, get an editable copy of the node, edit and replace</span>
@@ -861,20 +606,21 @@ checks are omitted. This can crash the application eventually.</p>
 <span class="cm">     * made, UA_STATUSCODE_BADINTERNALERROR is returned. If the NodeId is not</span>
 <span class="cm">     * found, UA_STATUSCODE_BADNODEIDUNKNOWN is returned. In both error cases,</span>
 <span class="cm">     * the editable node is deleted. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">replaceNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">replaceNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Removes a node from the nodestore. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Maps the ReferenceTypeIndex used for the references to the NodeId of the</span>
 <span class="cm">     * ReferenceType. The returned pointer is stable until the Nodestore is</span>
 <span class="cm">     * deleted. */</span>
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getReferenceTypeId</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">refTypeIndex</span><span class="p">);</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getReferenceTypeId</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span>
+<span class="w">                                            </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">refTypeIndex</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Execute a callback for every node in the nodestore. */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nsCtx</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodestoreVisitor</span><span class="w"> </span><span class="n">visitor</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodestoreVisitor</span><span class="w"> </span><span class="n">visitor</span><span class="p">,</span>
 <span class="w">                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_Nodestore</span><span class="p">;</span>
+<span class="p">};</span>
 
 <span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
 <span class="cm"> * and so on). The attributes are copied. Note that the attributes structs do</span>
