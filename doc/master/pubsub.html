@@ -56,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#publisherid">PublisherId</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pubsub-components">PubSub Components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#global-pubsub-configuration">Global PubSub Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pubsub-custom-state-machine">PubSub Custom State Machine</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pubsubconnection">PubSubConnection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#publisheddataset">PublishedDataSet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#datasetfield">DataSetField</a></li>
@@ -244,7 +245,7 @@ assigned during creation.</p>
 <span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_READERGROUP</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_DATASETREADER</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_PUBLISHEDDATASET</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_SUBSCRIBEDDDATASET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_SUBSCRIBEDDDATASET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubComponentType</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -357,6 +358,52 @@ It configures behavior that is valid for all PubSubComponents.</p>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicies</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_PubSubConfiguration</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="pubsub-custom-state-machine">
+<h2>PubSub Custom State Machine<a class="headerlink" href="#pubsub-custom-state-machine" title="Link to this heading"></a></h2>
+<p>All PubSubComponents (Connection, Reader, ReaderGroup, …) have a two
+configuration items in common: A void context-pointer and a callback to
+override the default state machine with a custom implementation.</p>
+<p>When a custom state machine is set, then internally no sockets are opened and
+no periodic callbacks are registered. All “active behavior” has to be
+managed/configured entirely in the custom state machine.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The custom state machine callback is optional (can be NULL). It gets called</span>
+<span class="cm"> * with a request to change the state targetState. The state pointer contains</span>
+<span class="cm"> * the old (and afterwards the new) state. The notification stateChangeCallback</span>
+<span class="cm"> * is called afterwards. When a bad statuscode is returned, the component must</span>
+<span class="cm"> * be set to an ERROR state. */</span>
+<span class="cp">#define UA_PUBSUB_COMPONENT_CONTEXT                                   \</span>
+<span class="cp">    void *context;                                                    \</span>
+<span class="cp">    UA_StatusCode (*customStateMachine)(UA_Server *server,            \</span>
+<span class="cp">                                        const UA_NodeId componentId,  \</span>
+<span class="cp">                                        void *componentContext,       \</span>
+<span class="cp">                                        UA_PubSubState *state,        \</span>
+<span class="cp">                                        UA_PubSubState targetState);  \</span>
+</pre></div>
+</div>
+<p>The following methods are used to retrieve the metadata of PubSubComponents.
+So gar they are implemented to operate only on the components with a state
+machine (connection, ReaderGroup, Reder, WriterGroup, Writer).</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Get the component-type enum from the identifier */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPubSubComponentType</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">componentId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_PubSubComponentType</span><span class="w"> </span><span class="o">*</span><span class="n">outType</span><span class="p">);</span>
+
+<span class="cm">/* Get the parent of a PubSubComponent (PubSubConnections have no parent).</span>
+<span class="cm"> * Returns a deep copy of the parent&#39;s NodeId. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPubSubComponentParent</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">componentId</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outParent</span><span class="p">);</span>
+
+<span class="cm">/* Get the list of child-components. Allocates the output array. For</span>
+<span class="cm"> * PubSubConnections, both the ReaderGroups and WriterGroups attached to it are</span>
+<span class="cm"> * returned. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getPubSubComponentChildren</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">componentId</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outChildrenSize</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">**</span><span class="n">outChildren</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
