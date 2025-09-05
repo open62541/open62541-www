@@ -1335,6 +1335,71 @@ operation output are then no longer valid.</p>
 <span class="w">                              </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
 </pre></div>
 </div>
+<p>The server supports asynchronous “local” read/write/call operations. The user
+supplies a result-callback that gets called either synchronously (if the
+operation terminates right away) or asynchronously at a later time. The
+result-callback is called exactly one time for each operation, also if the
+operation is cancelled. In this case a StatusCode like
+<code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADTIMEOUT</span></code> or <code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADSHUTDOWN</span></code> is set.</p>
+<p>If an operation returns asynchronously, then the result-callback is executed
+only in the next iteration of the Eventloop. An exception to this is
+UA_Server_cancelAsync, which can optionally call the result-callback right
+away (e.g. as part of a cleanup where the context of the result-callback gets
+removed).</p>
+<p>Async operations incur a small overhead since memory is allocated to persist
+the operation over time.</p>
+<p>The operation timeout is defined in milliseconds. A timeout of zero means
+infinite.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerAsyncReadResultCallback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerAsyncWriteResultCallback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerAsyncMethodResultCallback</span><span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallMethodResult</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_read_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReadValueId</span><span class="w"> </span><span class="o">*</span><span class="n">operation</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestamps</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">UA_ServerAsyncReadResultCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_write_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_WriteValue</span><span class="w"> </span><span class="o">*</span><span class="n">operation</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_ServerAsyncWriteResultCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_call_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallMethodRequest</span><span class="w"> </span><span class="o">*</span><span class="n">operation</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">UA_ServerAsyncMethodResultCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+<p>Local async operations can be manually cancelled (besides an internal cancel
+due to a timeout or server shutdown). The local async operations to be
+cancelled are selected by matching their asyncOpContext pointer. This can
+cancel multiple operations that use the same context pointer.</p>
+<p>For operations where the async result was not yet set, the
+asyncOperationCancelCallback from the server-config gets called and the
+cancel-status is set in the operation result.</p>
+<p>For async operations where the result has already been set, but not yet
+notified with the result-callback (to be done in the next EventLoop
+iteration), the asyncOperationCancelCallback is not called and no cancel
+status is set in the result.</p>
+<p>Each operation’s result-callback gets called exactly once. When the operation
+is cancelled, the result-callback can be called synchronously using the
+synchronousResultCallback flag. Otherwise the result gets returned “normally”
+in the next EventLoop iteration. The synchronous option ensures that all
+(matching) async operations are fully cancelled right away. This can be
+important in a cleanup situation where the asyncOpContext is no longer valid
+in the future.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="nf">UA_Server_cancelAsync</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">synchronousResultCallback</span><span class="p">);</span>
+</pre></div>
+</div>
 </section>
 <section id="events">
 <span id="id4"></span><h2>Events<a class="headerlink" href="#events" title="Link to this heading"></a></h2>
