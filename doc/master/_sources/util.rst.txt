@@ -71,6 +71,24 @@ server/client.
    UA_Guid
    UA_Guid_random(void);   /* no cryptographic entropy */
    
+Translate between Namespace and internal DataType definitions
+-------------------------------------------------------------
+
+.. code-block:: c
+
+   
+   UA_StatusCode
+   UA_DataType_fromStructureDefinition(UA_DataType *type,
+                                       const UA_StructureDefinition *sd,
+                                       const UA_NodeId typeId,
+                                       const UA_String typeName,
+                                       const UA_DataTypeArray *customTypes);
+   
+   UA_StatusCode
+   UA_DataType_toStructureDefinition(const UA_DataType *type,
+                                     UA_StructureDefinition *sd);
+   
+   
 Key Value Map
 -------------
 Helper functions to work with configuration parameters in an array of
@@ -112,6 +130,14 @@ NULL for that argument and treat it as an empty map.
    UA_KeyValueMap_set(UA_KeyValueMap *map,
                       const UA_QualifiedName key,
                       const UA_Variant *value);
+   
+   /* The same as _set, but inserts a shallow copy of the value. Set
+    * UA_VARIANT_DATA_NODELETE if the value should not be _cleared together with
+    * the map. */
+   UA_StatusCode
+   UA_KeyValueMap_setShallow(UA_KeyValueMap *map,
+                             const UA_QualifiedName key,
+                             UA_Variant *value);
    
    /* Helper function for scalar insertion that internally calls
     * `UA_KeyValueMap_set` */
