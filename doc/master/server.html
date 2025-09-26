@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 (master) 1.4.13-undefined documentation</title>
+  <title>Server &mdash; open62541 (master) 1.5.0-rc1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=905b625b"></script>
+      <script src="_static/documentation_options.js?v=d0ec56a3"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -52,6 +52,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-notification">Application Notification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#session-handling">Session Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#attribute-service-set">Attribute Service Set</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#method-service-set">Method Service Set</a></li>
@@ -266,6 +267,24 @@ be registered with a cyclic repetition interval.</p>
 
 <span class="cp">#define UA_Server_removeRepeatedCallback(server, callbackId) \</span>
 <span class="cp">    UA_Server_removeCallback(server, callbackId)</span>
+</pre></div>
+</div>
+</section>
+<section id="application-notification">
+<h2>Application Notification<a class="headerlink" href="#application-notification" title="Link to this heading"></a></h2>
+<p>The server defines callbacks to notify the application on defined triggering
+points. These callbacks are executed with the (re-entrant) server-mutex held.</p>
+<p>The different types of callback are disambiguated by their type enum. Besides
+the global notification callback (which is always triggered), the server
+configuration contains specialized callbacks that trigger only for specific
+notifications. This can reduce the burden of high-frequency notifications.</p>
+<p>If a specialized notification callback is set, it always gets called before
+the global notification callback for the same triggering point.</p>
+<p>See the section on the <span class="xref std std-ref">Application Notification</span> enum for more
+documentation on the notifications and their defined payload.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerNotificationCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                              </span><span class="n">UA_ApplicationNotificationType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span>
+<span class="w">                                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">payload</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1934,18 +1953,7 @@ The usual usage is as follows:</p>
 <li><p>After shutdown of the server, clean up the configuration (free memory)</p></li>
 </ol>
 <p>The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide a good starting point for this.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/certificategroup.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/nodestore.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/eventloop.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/accesscontrol.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/securitypolicy.h&gt;</span>
-
-<span class="cp">#ifdef UA_ENABLE_HISTORIZING</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/historydatabase.h&gt;</span>
-<span class="cp">#endif</span>
-
-<span class="k">struct</span><span class="w"> </span><span class="nc">UA_ServerConfig</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ServerConfig</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Used to attach custom data to a server config. This can</span>
 <span class="cm">                    * then be retrieved e.g. in a callback that forwards a</span>
 <span class="cm">                    * pointer to the server. */</span>
@@ -2018,6 +2026,15 @@ The usual usage is as follows:</p>
 <span class="cm">     * be destroyed when the config is cleaned up. */</span>
 <span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The EventLoop is not deleted with the config */</span>
+
+<span class="w">    </span><span class="cm">/* Application Notification</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * The notification callbacks can be NULL. The global callback receives all</span>
+<span class="cm">     * notifications. The specialized callbacks receive only the subset</span>
+<span class="cm">     * indicated by their name. */</span>
+<span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">globalNotificationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">lifecycleNotificationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">serviceNotificationCallback</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Networking</span>
 <span class="cm">     * ~~~~~~~~~~</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Common Definitions &mdash; open62541 (master) 1.4.13-undefined documentation</title>
+  <title>Common Definitions &mdash; open62541 (master) 1.5.0-rc1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=905b625b"></script>
+      <script src="_static/documentation_options.js?v=d0ec56a3"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -61,6 +61,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#eventnotifier">EventNotifier</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rule-handling">Rule Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#order">Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-notification">Application Notification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#connection-state">Connection State</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistic-counters">Statistic Counters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lifecycle-states">Lifecycle States</a></li>
@@ -245,6 +246,43 @@ specification.</p>
 </pre></div>
 </div>
 </section>
+<section id="application-notification">
+<span id="id4"></span><h2>Application Notification<a class="headerlink" href="#application-notification" title="Link to this heading"></a></h2>
+<p>The ApplicationNotification enum indicates the type of notification for the
+server/client in which the corresponding callback is configured.</p>
+<p>The notification comes with a key-value map for the payload. Future
+additional payload members are added to the end of the payload. So that the
+names, type and also index of the payload members is stable.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Lifetime notifications, no payload */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STARTED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_SHUTDOWN</span><span class="p">,</span><span class="w"> </span><span class="cm">/* preparing shutdown */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPING</span><span class="p">,</span><span class="w"> </span><span class="cm">/* shutdown begins now */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPED</span><span class="p">,</span>
+
+<span class="w">    </span><span class="cm">/* Processing of a service request or response. The server-side processing</span>
+<span class="cm">     * of a request can be asynchronous. The existence of a yet-unfinished async</span>
+<span class="cm">     * operation from the request is signaled with the _SERVICE_ASYNC enum. The</span>
+<span class="cm">     * _SERVICE_END enum is signalled eventually, once all async operations from</span>
+<span class="cm">     * the service request are completed.</span>
+<span class="cm">     *</span>
+<span class="cm">     * 0:securechannel-id [UInt32]</span>
+<span class="cm">     *    Identifier of the SecureChannel to which the Session is connected.</span>
+<span class="cm">     * 0:session-id [NodeId]</span>
+<span class="cm">     *    Identifier of the Session for/from which the Service is requested.</span>
+<span class="cm">     *    This is the ns=0;i=0 NodeId if no Session is bound to the receiving</span>
+<span class="cm">     *    SecureChannel.</span>
+<span class="cm">     * 0:request-id [UInt32]</span>
+<span class="cm">     *    Identifier of the RequestId for the Request/Response pair.</span>
+<span class="cm">     * 0:service-type [NodeId]</span>
+<span class="cm">     *    DataType identifier for the Request (server) or Response (client). */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_BEGIN</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_ASYNC</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_END</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_ApplicationNotificationType</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
 <section id="connection-state">
 <h2>Connection State<a class="headerlink" href="#connection-state" title="Link to this heading"></a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
@@ -258,7 +296,6 @@ specification.</p>
 <span class="w">    </span><span class="n">UA_CONNECTIONSTATE_BLOCKING</span><span class="p">,</span><span class="w">   </span><span class="cm">/* Listening disabled (e.g. max connections reached) */</span>
 <span class="w">    </span><span class="n">UA_CONNECTIONSTATE_REOPENING</span><span class="w">   </span><span class="cm">/* Listening resumed after being blocked */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ConnectionState</span><span class="p">;</span>
-
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_SECURECHANNELSTATE_CLOSED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
