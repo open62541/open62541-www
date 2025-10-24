@@ -260,6 +260,73 @@ names, type and also index of the payload members is stable.</p>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPING</span><span class="p">,</span><span class="w"> </span><span class="cm">/* shutdown begins now */</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPED</span><span class="p">,</span>
 
+<span class="w">    </span><span class="cm">/* (Server only) Give background information after a SecureChannel is opened</span>
+<span class="cm">     * or closed.</span>
+<span class="cm">     *</span>
+<span class="cm">     * 0:securechannel-id [UInt32]</span>
+<span class="cm">     *    Identifier of the SecureChannel to which the Session is connected.</span>
+<span class="cm">     * 0:connection-manager-name [String]</span>
+<span class="cm">     *    Name of the ConnectionManager (configured in the EventLoop) from which</span>
+<span class="cm">     *    the connction was opened.</span>
+<span class="cm">     * 0:connection-id [UInt64]</span>
+<span class="cm">     *    Identifier of the connection in the context of the EventLoop. This is</span>
+<span class="cm">     *    often the socket identifier, but that is not necessarily the case.</span>
+<span class="cm">     * 0:remote-addresss [String]</span>
+<span class="cm">     *   Address (hostname or IP that opened the SecureChannel.</span>
+<span class="cm">     *</span>
+<span class="cm">     * 0:protocol-version [UInt32]</span>
+<span class="cm">     *   The version of the UACP protocol requested by the Client.</span>
+<span class="cm">     * 0:recv-buffer-size [UInt32]</span>
+<span class="cm">     *   The largest buffer (chunk size) we can receive over the channel.</span>
+<span class="cm">     * 0:recv-max-message-size [UInt32]</span>
+<span class="cm">     *   The maximum size of received messages.</span>
+<span class="cm">     * 0:recv-max-chunk-count [UInt32]</span>
+<span class="cm">     *   The maximum number of chunks for received messages.</span>
+<span class="cm">     * 0:send-buffer-size [UInt32]</span>
+<span class="cm">     *   The largest buffer (chunk size) we can send over the channel.</span>
+<span class="cm">     * 0:send-max-message-size [UInt32]</span>
+<span class="cm">     *   The maximum size of sent messages.</span>
+<span class="cm">     * 0:send-max-chunk-count [UInt32]</span>
+<span class="cm">     *   The maximum number of chunks for sent messages.</span>
+<span class="cm">     * 0:endpoint-url</span>
+<span class="cm">     *   The target EndpointUri (for the server) indicated by the client.</span>
+<span class="cm">     *</span>
+<span class="cm">     * 0:security-mode [MessageSecurityMode]</span>
+<span class="cm">     *   The SecurityChannel can be unsigned, signed or signed+encrypted.</span>
+<span class="cm">     * 0:security-policy-uri [String]</span>
+<span class="cm">     *   Uri of the SecurityPolicy for this SecyrityChannel.</span>
+<span class="cm">     * 0:remote-certificate [ByteString]</span>
+<span class="cm">     *   Certificate used by the remote side during OpenSecureChannel. */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_CLOSED</span><span class="p">,</span>
+
+<span class="w">    </span><span class="cm">/* (Server only) Give background information for Sessions. The _DEACTIVATE</span>
+<span class="cm">     * notification occurs when a Sesssion is unbound from its original</span>
+<span class="cm">     * SecureChannel. Either because the SecureChannel is closed or because the</span>
+<span class="cm">     * session is activated on another SecureChannel.</span>
+<span class="cm">     *</span>
+<span class="cm">     * 0:session-id [NodeId]</span>
+<span class="cm">     *   Identifier of the Session.</span>
+<span class="cm">     * 0:securechannel-id [UInt32]</span>
+<span class="cm">     *   Identifier of the SecureChannel on which the Session is activated.</span>
+<span class="cm">     *   Zero if the Session is not bound to any SecureChannel.</span>
+<span class="cm">     * 0:session-name [String]</span>
+<span class="cm">     *   Name of the Session as defined by the client.</span>
+<span class="cm">     * 0:client-description [ApplicationDescription]</span>
+<span class="cm">     *   Name of the Session as defined by the client.</span>
+<span class="cm">     * 0:client-user-id [String]</span>
+<span class="cm">     *   User identifier used to activate the session. This is extracted from</span>
+<span class="cm">     *   the UserIdentityToken (e.g. username but not the password).</span>
+<span class="cm">     * 0:locale-ids [Array of String]</span>
+<span class="cm">     *   List of preferred languages.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Any additional attributes set via UA_Server_setSessionAttribute are</span>
+<span class="cm">     * appended to the above list. */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_CREATED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_ACTIVATED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_DEACTIVATED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_CLOSED</span><span class="p">,</span>
+
 <span class="w">    </span><span class="cm">/* Processing of a service request or response. The server-side processing</span>
 <span class="cm">     * of a request can be asynchronous. The existence of a yet-unfinished async</span>
 <span class="cm">     * operation from the request is signaled with the _SERVICE_ASYNC enum. The</span>
@@ -305,13 +372,7 @@ names, type and also index of the payload members is stable.</p>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_CREATED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_MODIFIED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_PUBLISHINGMODE</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* (Server only) Signals the deletion of a Subscription.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:session-id [NodeId]</span>
-<span class="cm">     *    Identifier of the Session for which the Subscription is created.</span>
-<span class="cm">     * 0:subscription-id [UInt32]</span>
-<span class="cm">     *    Identifier of the subscription (unique for the Session). */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_TRANSFERRED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_DELETED</span><span class="p">,</span>
 
 <span class="w">    </span><span class="cm">/* (Server only) Signals the creation or modification of a MonitoredItem.</span>
@@ -349,17 +410,6 @@ names, type and also index of the payload members is stable.</p>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_CREATED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MODIFIED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MONITORINGMODE</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* (Server only) Signals the deletion of a MonitoredItem.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:session-id [NodeId]</span>
-<span class="cm">     *    Identifier of the Session for which the Subscription is created.</span>
-<span class="cm">     *    If the subscription is not bound to any Session, then the NodeId</span>
-<span class="cm">     *    ns=0;i=0 is returned.</span>
-<span class="cm">     * 0:subscription-id [UInt32]</span>
-<span class="cm">     *    Identifier of the subscription (unique for the Session).</span>
-<span class="cm">     * 0:monitoreditem-id [UInt32]</span>
-<span class="cm">     *    Identifier of the MonitoredItem (unique for the Subscription). */</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_DELETE</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ApplicationNotificationType</span><span class="p">;</span>
 </pre></div>
