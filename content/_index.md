@@ -1,5 +1,39 @@
 ---
 title: Home
+client_logos:
+  - name: "fortiss GmbH"
+    logo: "/images/fortiss.png"
+    url: "https://www.fortiss.org/"
+  - name: "basysKom GmbH"
+    logo: "/images/basyskom.png"
+    url: "https://www.basyskom.de/en/lp/expert-opc-ua-consulting-and-dev-services/"
+  - name: "BTC"
+    logo: "/images/btc.png"
+    url: "https://www.btc-ag.com/"
+  - name: "Wind River"
+    logo: "/images/windriver.png"
+    url: "https://www.windriver.com/"
+  - name: "HMS"
+    logo: "/images/hms.png"
+    url: "https://www.hms-networks.com/"
+  - name: "Linutronix"
+    logo: "/images/linutronix.png"
+    url: "https://linutronix.de/"
+  - name: "Hilscher"
+    logo: "/images/hilscher.png"
+    url: "https://www.hilscher.com/en/"
+  - name: "umati"
+    logo: "/images/umati.jpg"
+    url: "https://umati.org/"
+  - name: "TU Dresden"
+    logo: "/images/tud_plt.png"
+    url: "https://tu-dresden.de/"
+  - name: "RWTH Aachen"
+    logo: "/images/rwth.png"
+    url: "https://www.rwth-aachen.de/"
+  - name: "Fraunhofer IOSB"
+    logo: "/images/iosb.png"
+    url: "https://www.iosb.fraunhofer.de/"
 ---
 
 {{< hero 
@@ -9,6 +43,8 @@ title: Home
     primary_button_url="/download"
     secondary_button_text="Code on GitHub"
     secondary_button_url="https://github.com/open62541/open62541"
+    tertiary_button_text="Official Support"
+    tertiary_button_url="https://www.o6-automation.com/services"
     background_image="/images/header.jpg"
     particles="true"
     gradient-from="rgba(0,131,143,0.85)"
@@ -16,10 +52,7 @@ title: Home
     gradient-angle="135"
 >}}
 
-{{< features-section 
-    title="Features"
-    description="open62541 is a modern, open-source OPC UA implementation"
->}}
+{{< features-section >}}
 
 {{< feature
     title="Open"
@@ -51,4 +84,20 @@ title: Home
     imagePosition="right"
 >}}
 
+{{< feature
+    title="Professional Support"
+    description="Get expert assistance with implementation, consulting, and custom development from the official maintainers."
+    badge="Commercial Support"
+    badgeColor="#dc2626"
+    image="/images/feature-1.svg"
+    features="Direct support from maintainers,Custom feature development,Training and consulting,SLA-backed service options"
+    imagePosition="left"
+    buttonText="Get Support"
+    buttonLink="https://www.o6-automation.com/services"
+>}}
+
 {{< /features-section >}}
+
+{{< client-logos title="open62541 Contributors" animate="true" >}}
+
+{{< maintainer-partners >}}
