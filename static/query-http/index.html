@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=.8">
+    <meta name="color-scheme" content="light dark" />
+    <title>OPC UA EventFilter Query Language</title>
+    <link rel="stylesheet" href="pico.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="query.js"></script> 
+    <script type="text/javascript">
+      function pretty(j) {
+          if(j[0] != '{') {
+              return j;
+          }
+          while(j.substring(j.length - 1) != '}') {
+              j = j.substring(0, j.length - 1);
+          }
+              
+          try {
+            var jsonObj = JSON.parse(j);
+            return JSON.stringify(jsonObj, null, '\t');
+          } catch(err) {
+              return j;
+          }
+      }
+
+      parse_fun = Module.cwrap('parse', 'string', ['string'])
+
+      window.addEventListener('DOMContentLoaded', function() {
+        document.getElementById("submitForm").addEventListener('submit',
+          function(e){
+            e.preventDefault();
+            var out = parse_fun(document.getElementById("query").value);
+            document.getElementById("result").value = pretty(out);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <header class="container"><h1>OPC UA EventFilter Query Language</h1></header>
+    <p class="container">
+      OPC UA Event Filters provide powerful constructs for the server-side selection of relevant events. This feature is
+      however underused in practice, also because of the complexity of Event Filters. Event Filters are expressed in a
+      "byte-code" encoding. Assembling this encoding by hand is difficult and error-prone.
+      <br>
+      <br>
+      This tool helps by converting from a formal query language to byte-code encoding. You can read more
+      <a
+        href="https://github.com/open62541/open62541/blob/7e8ec6206a89b93f9566ea47856120387809cae2/doc/eventfilter_query/ETFA2024%20-%20A%20Query%20Language%20for%20OPC%20UA%20Event%20Filters.pdf">
+        here
+      </a>.
+    </p>
+    <main class="container">
+      <div class="grid">
+        <div>
+          <h3>Query Input</h3>
+          <form id="submitForm">
+            <textarea id="query" rows ="25" placeholder="Enter query here..."></textarea>
+            <br/>
+            <input type="submit" value="Submit">
+          </form>
+        </div>
+        <div>
+          <h3>Result</h3>
+          <textarea id="result" rows="25"></textarea>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
