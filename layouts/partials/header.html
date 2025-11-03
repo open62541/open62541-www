@@ -1,0 +1,188 @@
+{{/* 
+  Custom header partial for open62541
+  Based on: themes/hugo-saasify-theme/layouts/partials/header.html
+  Changes: 
+    1. Added support for params.header.hideTitle configuration option (line 20-22)
+    2. Added GitHub icon support for buttons when .icon is true (lines 55-58, 65-68, 117-120, 127-130)
+*/}}
+{{ $headerConfig := .Site.Params.header }}
+{{ $dropdownConfig := $headerConfig.menu.dropdown }}
+<div class="mobile-menu-wrapper">
+    <input type="checkbox" id="nav-toggle" class="nav-toggle">
+    <header class="fixed w-full top-0 z-50 {{ with $headerConfig.background }}{{ . }}{{ else }}bg-white/80 backdrop-blur-sm{{ end }} {{ with $headerConfig.border }}{{ . }}{{ else }}border-b border-gray-100{{ end }}">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+            <nav class="flex items-center justify-between h-20">
+                <!-- Logo and Title -->
+                <a href="{{ "/" | relLangURL }}" class="flex items-center space-x-4">
+                    {{ with $headerConfig.logo }}
+                        <img src="{{ .src | relURL }}" alt="{{ $.Site.Title }}" class="{{ with .class }}{{ . }}{{ else }}h-12{{ end }}">
+                    {{ else }}
+                        <span class="text-3xl font-bold text-gray-900">{{ .Site.Title }}</span>
+                    {{ end }}
+                    {{/* CUSTOM: Only show title if hideTitle is not set */}}
+                    {{ if and .Site.Title (not $headerConfig.hideTitle) }}
+                        <span class="text-3xl font-semibold text-gray-800">{{ .Site.Title }}</span>
+                    {{ end }}
+                </a>
+
+                <!-- Navigation -->
+                <div class="hidden md:flex items-center {{ with $headerConfig.menu.spacing }}{{ . }}{{ else }}space-x-8{{ end }}">
+                    {{ range .Site.Menus.main }}
+                        {{ if .Params.has_submenu }}
+                        <div class="relative group">
+                            <button class="flex items-center {{ with $headerConfig.menu.linkClass }}{{ . }}{{ else }}text-base text-gray-900 hover:text-primary-600 font-bold transition duration-200{{ end }}">
+                                {{ .Name }}
+                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 {{ $dropdownConfig.width | default "w-72" }} opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out">
+                                <div class="{{ $dropdownConfig.container_padding | default "py-6" }} {{ $dropdownConfig.background | default "bg-white" }} {{ $dropdownConfig.border | default "border border-gray-100" }} {{ $dropdownConfig.shadow | default "shadow-xl" }} {{ $dropdownConfig.radius | default "rounded-lg" }}">
+                                    {{ range .Params.submenu }}
+                                    <a href="{{ .url }}" class="block {{ $dropdownConfig.item_padding | default "px-8 py-3" }} {{ $dropdownConfig.text_size | default "text-sm" }} {{ $dropdownConfig.text_color | default "text-gray-700" }} {{ $dropdownConfig.hover_background | default "hover:bg-gray-50" }}">{{ .name }}</a>
+                                    {{ end }}
+                                </div>
+                            </div>
+                        </div>
+                        {{ else }}
+                        <a href="{{ .URL }}" class="{{ with $headerConfig.menu.linkClass }}{{ . }}{{ else }}text-base text-gray-900 hover:text-primary-600 font-bold transition duration-200{{ end }}">{{ .Name }}</a>
+                        {{ end }}
+                    {{ end }}
+
+                    <!-- Language Switcher -->
+                    {{ partial "language-switcher" . }}
+                </div>
+
+                <!-- CTA Buttons -->
+                {{ if not $headerConfig.hideButtons }}
+                <div class="hidden md:flex items-center space-x-4">
+                    {{ with $headerConfig.buttons.signIn }}
+                    <a href="{{ .url | default "#" }}" class="{{ with .class }}{{ . }}{{ else }}inline-flex items-center justify-center px-6 py-3 rounded-lg font-bold transition duration-200 ease-in-out border-2 border-gray-200 hover:border-primary-600 hover:text-primary-600{{ end }}">
+                        {{ if .icon }}
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        {{ end }}
+                        {{ .text | default "Sign in" }}
+                    </a>
+                    {{ end }}
+                    
+                    {{ with $headerConfig.buttons.getStarted }}
+                    <a href="{{ .url | default "#" }}" class="{{ with .class }}{{ . }}{{ else }}inline-flex items-center justify-center px-6 py-3 rounded-lg font-bold transition duration-200 ease-in-out bg-primary-600 text-white hover:bg-primary-700 hover:scale-105{{ end }}">
+                        {{ if .icon }}
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        {{ end }}
+                        {{ .text | default "Get Started" }}
+                    </a>
+                    {{ end }}
+                </div>
+                {{ end }}
+
+                <!-- Mobile Menu Toggle -->
+                <div class="md:hidden">
+                    <label for="nav-toggle" class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 transition-colors cursor-pointer">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </label>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="nav-content md:hidden w-full fixed left-0 right-0 top-20 bg-white border-t border-gray-100 shadow-lg max-h-[calc(100vh-5rem)] overflow-y-auto">
+            <div class="w-full px-6 py-4">
+                {{ range .Site.Menus.main }}
+                    {{ if .Params.has_submenu }}
+                    <div class="py-2">
+                        <div class="text-xl text-gray-900 font-bold mb-2">{{ .Name }}</div>
+                        <div class="pl-4">
+                            {{ range .Params.submenu }}
+                            <a href="{{ .url }}" class="block text-gray-700 hover:text-primary-600 py-2">{{ .name }}</a>
+                            {{ end }}
+                        </div>
+                    </div>
+                    {{ else }}
+                    <a href="{{ .URL }}" class="{{ with $headerConfig.menu.mobileLinkClass }}{{ . }}{{ else }}block text-xl text-gray-900 hover:text-primary-600 font-bold transition duration-200 py-2{{ end }}">{{ .Name }}</a>
+                    {{ end }}
+                {{ end }}
+
+                <!-- Mobile Language Switcher -->
+                {{ if hugo.IsMultilingual }}
+                <div class="py-4 border-t border-gray-200 mt-4">
+                    <div class="text-lg text-gray-600 font-semibold mb-2">{{ i18n "language" }}</div>
+                    {{ range .Site.Languages }}
+                    {{ if eq $.Site.Language.Lang .Lang }}
+                    <span class="block py-2 text-primary-600 font-bold">{{ .LanguageName }}</span>
+                    {{ else }}
+                    {{ $langURL := printf "/%s/" .Lang }}
+                    <a href="{{ $langURL }}" class="language-switch-link block py-2 text-gray-700 hover:text-primary-600" data-lang="{{ .Lang }}">
+                        {{ .LanguageName }}
+                    </a>
+                    {{ end }}
+                    {{ end }}
+                </div>
+                {{ end }}
+
+                {{ if not $headerConfig.hideButtons }}
+                <div class="pt-4 space-y-4">
+                    {{ with $headerConfig.buttons.signIn }}
+                    <a href="{{ .url | default "#" }}" class="{{ with .mobileClass }}{{ . }}{{ else }}block text-center px-6 py-3 rounded-lg font-bold transition duration-200 ease-in-out border-2 border-gray-200 hover:border-primary-600 hover:text-primary-600{{ end }}">
+                        {{ if .icon }}
+                        <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        {{ end }}
+                        {{ .text | default "Sign in" }}
+                    </a>
+                    {{ end }}
+                    
+                    {{ with $headerConfig.buttons.getStarted }}
+                    <a href="{{ .url | default "#" }}" class="{{ with .mobileClass }}{{ . }}{{ else }}block text-center px-6 py-3 rounded-lg font-bold transition duration-200 ease-in-out bg-primary-600 text-white hover:bg-primary-700 hover:scale-105{{ end }}">
+                        {{ if .icon }}
+                        <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        {{ end }}
+                        {{ .text | default "Get Started" }}
+                    </a>
+                    {{ end }}
+                </div>
+                {{ end }}
+            </div>
+        </div>
+    </header>
+
+    <style>
+        .mobile-menu-wrapper {
+            position: relative;
+        }
+        .nav-toggle {
+            display: none;
+        }
+        .nav-content {
+            display: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-toggle:checked ~ header .nav-content {
+            display: block;
+        }
+    </style>
+
+    <script>
+        (function() {
+            var navToggle = document.getElementById('nav-toggle');
+            if (navToggle) {
+                navToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+        })();
+    </script>
+</div>
