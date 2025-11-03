@@ -1,0 +1,154 @@
+{{ $headline := .Get "headline" }}
+{{ $sub_headline := .Get "sub_headline" }}
+{{ $primary_button_text := .Get "primary_button_text" }}
+{{ $primary_button_url := .Get "primary_button_url" }}
+{{ $secondary_button_text := .Get "secondary_button_text" }}
+{{ $secondary_button_url := .Get "secondary_button_url" }}
+{{ $hero_image := .Get "hero_image" }}
+{{ $background_image := .Get "background_image" }}
+{{ $particles := .Get "particles" }}
+{{ $gradient_from := .Get "gradient-from" }}
+{{ $gradient_to := .Get "gradient-to" }}
+{{ $gradient_angle := .Get "gradient-angle" | default "180" }}
+
+<section class="relative overflow-hidden" style="{{ if $gradient_from }}background:linear-gradient({{ $gradient_angle }}deg,{{ $gradient_from }},{{ $gradient_to | default $gradient_from }}){{ else }}background: linear-gradient(180deg, #f9fafb, #ffffff){{ end }}">
+    {{ if $background_image }}
+    <div class="absolute inset-0 z-0">
+        <img src="{{ $background_image | relURL }}" alt="Background" class="w-full h-full object-cover">
+    </div>
+    {{ end }}
+    
+    {{ if $particles }}
+    <div id="particles-js" class="absolute inset-0 z-10"></div>
+    {{ end }}
+    
+    <div class="container relative z-20 py-24 md:py-32">
+        <div class="max-w-3xl mx-auto text-center">
+            <div class="space-y-8">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white">
+                    {{ $headline | safeHTML }}
+                </h1>
+                <p class="text-2xl md:text-3xl text-white/90">
+                    {{ $sub_headline | safeHTML }}
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center relative z-30">
+                    {{ if and $primary_button_text $primary_button_url }}
+                    <a href="{{ $primary_button_url }}" class="inline-flex items-center justify-center px-8 py-4 rounded-lg font-bold transition duration-200 ease-in-out bg-white text-primary-600 hover:bg-gray-100 hover:scale-105 relative z-40">
+                        {{ $primary_button_text }}
+                    </a>
+                    {{ end }}
+                    {{ if and $secondary_button_text $secondary_button_url }}
+                    <a href="{{ $secondary_button_url }}" class="inline-flex items-center justify-center px-8 py-4 rounded-lg font-bold transition duration-200 ease-in-out border-2 border-white text-white hover:bg-white/10 hover:scale-105 relative z-40">
+                        {{ $secondary_button_text }}
+                    </a>
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{ if $particles }}
+<!-- Particles.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('particles-js', {
+            particles: {
+                number: {
+                    value: 80,
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: '#ffffff'
+                },
+                shape: {
+                    type: 'circle',
+                    stroke: {
+                        width: 0,
+                        color: '#000000'
+                    }
+                },
+                opacity: {
+                    value: 0.5,
+                    random: false,
+                    anim: {
+                        enable: false,
+                        speed: 1,
+                        opacity_min: 0.1,
+                        sync: false
+                    }
+                },
+                size: {
+                    value: 3,
+                    random: true,
+                    anim: {
+                        enable: false,
+                        speed: 40,
+                        size_min: 0.1,
+                        sync: false
+                    }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#ffffff',
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false,
+                    attract: {
+                        enable: false,
+                        rotateX: 600,
+                        rotateY: 1200
+                    }
+                }
+            },
+            interactivity: {
+                detect_on: 'window',
+                events: {
+                    onhover: {
+                        enable: true,
+                        mode: 'grab'
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: 'push'
+                    },
+                    resize: true
+                },
+                modes: {
+                    grab: {
+                        distance: 140,
+                        line_linked: {
+                            opacity: 1
+                        }
+                    },
+                    push: {
+                        particles_nb: 4
+                    }
+                }
+            },
+            retina_detect: true
+        });
+        
+        // Make the particles canvas capture pointer events but not block clicks
+        var particlesCanvas = document.querySelector('#particles-js canvas');
+        if (particlesCanvas) {
+            particlesCanvas.style.pointerEvents = 'auto';
+        }
+    }
+});
+</script>
+{{ end }}
