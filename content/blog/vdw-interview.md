@@ -5,7 +5,6 @@ author: "Götz Görisch"
 description: "Interview with Götz Görisch from the (VDW – Verein Deutscher Werkzeugmaschinenfabriken e.V.) about future M2M communication and OPC UA."
 categories: ["Interviews", "Community"]
 tags: ["umati", "vdw", "machine-tools"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 ## 1. Who are you and what is your role at VDW?

@@ -5,7 +5,6 @@ author: "open62541 Team"
 description: "In November a 2 day workshop about OPC UA, open62541 and open source licensing took place."
 categories: ["Events", "Training"]
 tags: ["workshop", "osadl", "training"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 **Workshop OPC UA with open62541**

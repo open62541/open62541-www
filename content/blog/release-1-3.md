@@ -5,7 +5,6 @@ author: "open62541 Team"
 description: "First release of the 1.3 release series of open62541 now available."
 categories: ["Releases"]
 tags: ["release", "v1.3", "features"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 **Release notes Version 1.3:**

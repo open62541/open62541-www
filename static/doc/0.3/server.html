@@ -1,0 +1,1441 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Server &mdash; open62541 0.3.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.3.1',
+              LANGUAGE:'en',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Client" href="client.html" />
+    <link rel="prev" title="Information Modelling" href="nodestore.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#repeated-callbacks">Repeated Callbacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-and-writing-node-attributes">Reading and Writing Node Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#browsing">Browsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#information-model-callbacks">Information Model Callbacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-source-callback">Data Source Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#value-callback">Value Callback</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-callbacks">Method Callbacks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#node-addition-and-deletion">Node Addition and Deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reference-management">Reference Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deprecated-server-api">Deprecated Server API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ua-job-api">UA_Job API</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html">Docs</a> &raquo;</li>
+        
+      <li>Server</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/server.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="server">
+<span id="id1"></span><h1>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="server-configuration">
+<span id="id2"></span><h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The configuration structure is passed to the server during initialization.
+The server expects that the configuration is not modified during runtime.
+Currently, only one server can use a configuration at a time. During
+shutdown, the server will clean up the parts of the configuration that are
+modified at runtime through the provided API.</p>
+<p>Examples for configurations are provided in the <code class="docutils literal notranslate"><span class="pre">/plugins</span></code> folder.
+The usual usage is as follows:</p>
+<ol class="arabic simple">
+<li>Create a server configuration with default settings as a starting point</li>
+<li>Modifiy the configuration, e.g. by adding a server certificate</li>
+<li>Instantiate a server with it</li>
+<li>After shutdown of the server, clean up the configuration (free memory)</li>
+</ol>
+<p>The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide a good starting point for this.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_UInt32</span> <span class="n">min</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">max</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_UInt32Range</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_Duration</span> <span class="n">min</span><span class="p">;</span>
+    <span class="n">UA_Duration</span> <span class="n">max</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_DurationRange</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">UA_ServerConfig</span> <span class="p">{</span>
+    <span class="n">UA_UInt16</span> <span class="n">nThreads</span><span class="p">;</span> <span class="cm">/* only if multithreading is enabled */</span>
+    <span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">;</span>
+
+    <span class="cm">/* Server Description */</span>
+    <span class="n">UA_BuildInfo</span> <span class="n">buildInfo</span><span class="p">;</span>
+    <span class="n">UA_ApplicationDescription</span> <span class="n">applicationDescription</span><span class="p">;</span>
+    <span class="n">UA_ByteString</span> <span class="n">serverCertificate</span><span class="p">;</span>
+
+    <span class="cm">/* MDNS Discovery */</span>
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+    <span class="n">UA_String</span> <span class="n">mdnsServerName</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">serverCapabilitiesSize</span><span class="p">;</span>
+    <span class="n">UA_String</span> <span class="o">*</span><span class="n">serverCapabilities</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+    <span class="cm">/* Custom DataTypes */</span>
+    <span class="kt">size_t</span> <span class="n">customDataTypesSize</span><span class="p">;</span>
+    <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section on <a class="reference internal" href="types.html#generic-types"><span class="std std-ref">Generic Type Handling</span></a>. Examples for working
+with custom data types are provided in
+<code class="docutils literal notranslate"><span class="pre">/examples/custom_datatype/</span></code>.</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Nodestore */</span>
+<span class="n">UA_Nodestore</span> <span class="n">nodestore</span><span class="p">;</span>
+
+<span class="cm">/* Networking */</span>
+<span class="kt">size_t</span> <span class="n">networkLayersSize</span><span class="p">;</span>
+<span class="n">UA_ServerNetworkLayer</span> <span class="o">*</span><span class="n">networkLayers</span><span class="p">;</span>
+<span class="n">UA_String</span> <span class="n">customHostname</span><span class="p">;</span>
+
+<span class="cm">/* Available endpoints */</span>
+<span class="kt">size_t</span> <span class="n">endpointsSize</span><span class="p">;</span>
+<span class="n">UA_Endpoint</span> <span class="o">*</span><span class="n">endpoints</span><span class="p">;</span>
+
+<span class="cm">/* Node Lifecycle callbacks */</span>
+<span class="n">UA_GlobalNodeLifecycle</span> <span class="n">nodeLifecycle</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section for <a class="reference internal" href="#node-lifecycle"><span class="std std-ref">node lifecycle
+handling</span></a>.</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Access Control */</span>
+<span class="n">UA_AccessControl</span> <span class="n">accessControl</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">See the section for <a class="reference internal" href="plugin_access_control.html#access-control"><span class="std std-ref">access-control
+handling</span></a>.</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>    <span class="cm">/* Certificate Verification */</span>
+    <span class="n">UA_CertificateVerification</span> <span class="n">certificateVerification</span><span class="p">;</span>
+
+    <span class="cm">/* Limits for SecureChannels */</span>
+    <span class="n">UA_UInt16</span> <span class="n">maxSecureChannels</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxSecurityTokenLifetime</span><span class="p">;</span> <span class="cm">/* in ms */</span>
+
+    <span class="cm">/* Limits for Sessions */</span>
+    <span class="n">UA_UInt16</span> <span class="n">maxSessions</span><span class="p">;</span>
+    <span class="n">UA_Double</span> <span class="n">maxSessionTimeout</span><span class="p">;</span> <span class="cm">/* in ms */</span>
+
+    <span class="cm">/* Operation limits */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerRead</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerWrite</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerMethodCall</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerBrowse</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerRegisterNodes</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerTranslateBrowsePathsToNodeIds</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNodesPerNodeManagement</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxMonitoredItemsPerCall</span><span class="p">;</span>
+
+    <span class="cm">/* Limits for Requests */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxReferencesPerNode</span><span class="p">;</span>
+
+    <span class="cm">/* Limits for Subscriptions */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxSubscriptionsPerSession</span><span class="p">;</span>
+    <span class="n">UA_DurationRange</span> <span class="n">publishingIntervalLimits</span><span class="p">;</span> <span class="cm">/* in ms (must not be less than 5) */</span>
+    <span class="n">UA_UInt32Range</span> <span class="n">lifeTimeCountLimits</span><span class="p">;</span>
+    <span class="n">UA_UInt32Range</span> <span class="n">keepAliveCountLimits</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxNotificationsPerPublish</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxRetransmissionQueueSize</span><span class="p">;</span> <span class="cm">/* 0 -&gt; unlimited size */</span>
+
+    <span class="cm">/* Limits for MonitoredItems */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxMonitoredItemsPerSubscription</span><span class="p">;</span>
+    <span class="n">UA_DurationRange</span> <span class="n">samplingIntervalLimits</span><span class="p">;</span> <span class="cm">/* in ms (must not be less than 5) */</span>
+    <span class="n">UA_UInt32Range</span> <span class="n">queueSizeLimits</span><span class="p">;</span> <span class="cm">/* Negotiated with the client */</span>
+
+    <span class="cm">/* Limits for PublishRequests */</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxPublishReqPerSession</span><span class="p">;</span>
+
+    <span class="cm">/* Discovery */</span>
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+    <span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
+<span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
+<span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
+<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
+<span class="cm">     * ervery 10 seconds. The server will still be removed depending on the</span>
+<span class="cm">     * state of the semaphore file. */</span>
+    <span class="n">UA_UInt32</span> <span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
+<span class="cp">#endif</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="server-lifecycle">
+<span id="id3"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Server</span> <span class="o">*</span> <span class="nf">UA_Server_new</span><span class="p">(</span><span class="k">const</span> <span class="n">UA_ServerConfig</span> <span class="o">*</span><span class="n">config</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="cm">/* Runs the main loop of the server. In each iteration, this calls into the</span>
+<span class="cm"> * networklayers to see if messages have arrived.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param running The loop is run as long as *running is true.</span>
+<span class="cm"> *        Otherwise, the server shuts down.</span>
+<span class="cm"> * @return Returns the statuscode of the UA_Server_run_shutdown method */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_run</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">volatile</span> <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">running</span><span class="p">);</span>
+
+<span class="cm">/* The prologue part of UA_Server_run (no need to use if you call</span>
+<span class="cm"> * UA_Server_run) */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_run_startup</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="cm">/* Executes a single iteration of the server&#39;s main loop.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param waitInternal Should we wait for messages in the networklayer?</span>
+<span class="cm"> *        Otherwise, the timouts for the networklayers are set to zero.</span>
+<span class="cm"> *        The default max wait time is 50millisec.</span>
+<span class="cm"> * @return Returns how long we can wait until the next scheduled</span>
+<span class="cm"> *         callback (in ms) */</span>
+<span class="n">UA_UInt16</span>
+<span class="nf">UA_Server_run_iterate</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">waitInternal</span><span class="p">);</span>
+
+<span class="cm">/* The epilogue part of UA_Server_run (no need to use if you call</span>
+<span class="cm"> * UA_Server_run) */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="repeated-callbacks">
+<h2>Repeated Callbacks<a class="headerlink" href="#repeated-callbacks" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_ServerCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="cm">/* Add a callback for cyclic repetition to the server.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param callback The callback that shall be added.</span>
+<span class="cm"> * @param interval The callback shall be repeatedly executed with the given interval</span>
+<span class="cm"> *        (in ms). The interval must be larger than 5ms. The first execution</span>
+<span class="cm"> *        occurs at now() + interval at the latest.</span>
+<span class="cm"> * @param callbackId Set to the identifier of the repeated callback . This can be used to cancel</span>
+<span class="cm"> *        the callback later on. If the pointer is null, the identifier is not set.</span>
+<span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned.</span>
+<span class="cm"> *         An error code otherwise. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addRepeatedCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_ServerCallback</span> <span class="n">callback</span><span class="p">,</span>
+                              <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_changeRepeatedCallbackInterval</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">,</span>
+                                         <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">);</span>
+
+<span class="cm">/* Remove a repeated callback.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param callbackId The id of the callback that shall be removed.</span>
+<span class="cm"> * @return Upon success, UA_STATUSCODE_GOOD is returned.</span>
+<span class="cm"> *         An error code otherwise. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeRepeatedCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt64</span> <span class="n">callbackId</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reading-and-writing-node-attributes">
+<h2>Reading and Writing Node Attributes<a class="headerlink" href="#reading-and-writing-node-attributes" title="Permalink to this headline">¶</a></h2>
+<p>The functions for reading and writing node attributes call the regular read
+and write service in the background that are also used over the network.</p>
+<p>The following attributes cannot be read, since the local “admin” user always
+has full rights.</p>
+<ul class="simple">
+<li>UserWriteMask</li>
+<li>UserAccessLevel</li>
+<li>UserExecutable</li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Read an attribute of a node. The specialized functions below provide a more</span>
+<span class="cm"> * concise syntax.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param item ReadValueIds contain the NodeId of the target node, the id of the</span>
+<span class="cm"> *             attribute to read and (optionally) an index range to read parts</span>
+<span class="cm"> *             of an array only. See the section on NumericRange for the format</span>
+<span class="cm"> *             used for array ranges.</span>
+<span class="cm"> * @param timestamps Which timestamps to return for the attribute.</span>
+<span class="cm"> * @return Returns a DataValue that contains either an error code, or a variant</span>
+<span class="cm"> *         with the attribute value and the timestamps. */</span>
+<span class="n">UA_DataValue</span>
+<span class="nf">UA_Server_read</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_ReadValueId</span> <span class="o">*</span><span class="n">item</span><span class="p">,</span>
+               <span class="n">UA_TimestampsToReturn</span> <span class="n">timestamps</span><span class="p">);</span>
+
+<span class="cm">/* Don&#39;t use this function. There are typed versions for every supported</span>
+<span class="cm"> * attribute. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Server_read</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                 <span class="n">UA_AttributeId</span> <span class="n">attributeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">v</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readNodeId</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                     <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_NODEID</span><span class="p">,</span> <span class="n">outNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readNodeClass</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                        <span class="n">UA_NodeClass</span> <span class="o">*</span><span class="n">outNodeClass</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_NODECLASS</span><span class="p">,</span>
+                            <span class="n">outNodeClass</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readBrowseName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="n">UA_QualifiedName</span> <span class="o">*</span><span class="n">outBrowseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_BROWSENAME</span><span class="p">,</span>
+                            <span class="n">outBrowseName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readDisplayName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">outDisplayName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span>
+                            <span class="n">outDisplayName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readDescription</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">outDescription</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DESCRIPTION</span><span class="p">,</span>
+                            <span class="n">outDescription</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readWriteMask</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                        <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">outWriteMask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_WRITEMASK</span><span class="p">,</span>
+                            <span class="n">outWriteMask</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readIsAbstract</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outIsAbstract</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ISABSTRACT</span><span class="p">,</span>
+                            <span class="n">outIsAbstract</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readSymmetric</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                        <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outSymmetric</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_SYMMETRIC</span><span class="p">,</span>
+                            <span class="n">outSymmetric</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readInverseName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="n">UA_LocalizedText</span> <span class="o">*</span><span class="n">outInverseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_INVERSENAME</span><span class="p">,</span>
+                            <span class="n">outInverseName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readContainsNoLoop</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                             <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outContainsNoLoops</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_CONTAINSNOLOOPS</span><span class="p">,</span>
+                            <span class="n">outContainsNoLoops</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readEventNotifier</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                            <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">outEventNotifier</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EVENTNOTIFIER</span><span class="p">,</span>
+                            <span class="n">outEventNotifier</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readValue</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                    <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">outValue</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span> <span class="n">outValue</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readDataType</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                       <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outDataType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DATATYPE</span><span class="p">,</span>
+                            <span class="n">outDataType</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readValueRank</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                        <span class="n">UA_Int32</span> <span class="o">*</span><span class="n">outValueRank</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUERANK</span><span class="p">,</span>
+                            <span class="n">outValueRank</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Returns a variant with an int32 array */</span>
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readArrayDimensions</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                              <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">outArrayDimensions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ARRAYDIMENSIONS</span><span class="p">,</span>
+                            <span class="n">outArrayDimensions</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readAccessLevel</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="n">UA_Byte</span> <span class="o">*</span><span class="n">outAccessLevel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ACCESSLEVEL</span><span class="p">,</span>
+                            <span class="n">outAccessLevel</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readMinimumSamplingInterval</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                      <span class="n">UA_Double</span> <span class="o">*</span><span class="n">outMinimumSamplingInterval</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                            <span class="n">UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</span><span class="p">,</span>
+                            <span class="n">outMinimumSamplingInterval</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readHistorizing</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outHistorizing</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_HISTORIZING</span><span class="p">,</span>
+                            <span class="n">outHistorizing</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_readExecutable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="n">UA_Boolean</span> <span class="o">*</span><span class="n">outExecutable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_read</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EXECUTABLE</span><span class="p">,</span>
+                            <span class="n">outExecutable</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The following node attributes cannot be changed once a node has been created:</p>
+<ul class="simple">
+<li>NodeClass</li>
+<li>NodeId</li>
+<li>Symmetric</li>
+<li>ContainsNoLoop</li>
+</ul>
+<p>The following attributes cannot be written from the server, as they are
+specific to the different users and set by the access control callback:</p>
+<ul class="simple">
+<li>UserWriteMask</li>
+<li>UserAccessLevel</li>
+<li>UserExecutable</li>
+</ul>
+<p>Historizing is currently unsupported</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Overwrite an attribute of a node. The specialized functions below provide a</span>
+<span class="cm"> * more concise syntax.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @param value WriteValues contain the NodeId of the target node, the id of the</span>
+<span class="cm"> *              attribute to overwritten, the actual value and (optionally) an</span>
+<span class="cm"> *              index range to replace parts of an array only. of an array only.</span>
+<span class="cm"> *              See the section on NumericRange for the format used for array</span>
+<span class="cm"> *              ranges.</span>
+<span class="cm"> * @return Returns a status code. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_write</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_WriteValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="cm">/* Don&#39;t use this function. There are typed versions with no additional</span>
+<span class="cm"> * overhead. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Server_write</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                  <span class="k">const</span> <span class="n">UA_AttributeId</span> <span class="n">attributeId</span><span class="p">,</span>
+                  <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attr_type</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attr</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeBrowseName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_BROWSENAME</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUALIFIEDNAME</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">browseName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeDisplayName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_LocalizedText</span> <span class="n">displayName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">displayName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeDescription</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_LocalizedText</span> <span class="n">description</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DESCRIPTION</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">description</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeWriteMask</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_UInt32</span> <span class="n">writeMask</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_WRITEMASK</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">writeMask</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeIsAbstract</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="n">isAbstract</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ISABSTRACT</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">isAbstract</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeInverseName</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_LocalizedText</span> <span class="n">inverseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_INVERSENAME</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">inverseName</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeEventNotifier</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="n">UA_Byte</span> <span class="n">eventNotifier</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EVENTNOTIFIER</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">eventNotifier</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeValue</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_Variant</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIANT</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">value</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeDataType</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">dataType</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_DATATYPE</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">dataType</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeValueRank</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="k">const</span> <span class="n">UA_Int32</span> <span class="n">valueRank</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUERANK</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">valueRank</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeArrayDimensions</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_Variant</span> <span class="n">arrayDimensions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIANT</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">arrayDimensions</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeAccessLevel</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_Byte</span> <span class="n">accessLevel</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_ACCESSLEVEL</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">accessLevel</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeMinimumSamplingInterval</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                       <span class="k">const</span> <span class="n">UA_Double</span> <span class="n">miniumSamplingInterval</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span>
+                             <span class="n">UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">],</span>
+                             <span class="o">&amp;</span><span class="n">miniumSamplingInterval</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_writeExecutable</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_Boolean</span> <span class="n">executable</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_write</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">UA_ATTRIBUTEID_EXECUTABLE</span><span class="p">,</span>
+                             <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">executable</span><span class="p">);</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="browsing">
+<h2>Browsing<a class="headerlink" href="#browsing" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_BrowseResult</span>
+<span class="nf">UA_Server_browse</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="n">maxrefs</span><span class="p">,</span>
+                 <span class="k">const</span> <span class="n">UA_BrowseDescription</span> <span class="o">*</span><span class="n">descr</span><span class="p">);</span>
+
+<span class="n">UA_BrowseResult</span>
+<span class="nf">UA_Server_browseNext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">releaseContinuationPoint</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">continuationPoint</span><span class="p">);</span>
+
+<span class="n">UA_BrowsePathResult</span>
+<span class="nf">UA_Server_translateBrowsePathToNodeIds</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                       <span class="k">const</span> <span class="n">UA_BrowsePath</span> <span class="o">*</span><span class="n">browsePath</span><span class="p">);</span>
+
+<span class="cp">#ifndef HAVE_NODEITER_CALLBACK</span>
+<span class="cp">#define HAVE_NODEITER_CALLBACK</span>
+<span class="cm">/* Iterate over all nodes referenced by parentNodeId by calling the callback</span>
+<span class="cm"> * function for each child node (in ifdef because GCC/CLANG handle include order</span>
+<span class="cm"> * differently) */</span>
+<span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span> <span class="n">childId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isInverse</span><span class="p">,</span>
+                           <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_forEachChildNodeCall</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                               <span class="n">UA_NodeIteratorCallback</span> <span class="n">callback</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="discovery">
+<h2>Discovery<a class="headerlink" href="#discovery" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Register the given server instance at the discovery server.</span>
+<span class="cm"> * This should be called periodically.</span>
+<span class="cm"> * The semaphoreFilePath is optional. If the given file is deleted,</span>
+<span class="cm"> * the server will automatically be unregistered. This could be</span>
+<span class="cm"> * for example a pid file which is deleted if the server crashes.</span>
+<span class="cm"> *</span>
+<span class="cm"> * When the server shuts down you need to call unregister.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server</span>
+<span class="cm"> * @param discoveryServerUrl if set to NULL, the default value</span>
+<span class="cm"> *        &#39;opc.tcp://localhost:4840&#39; will be used</span>
+<span class="cm"> * @param semaphoreFilePath optional parameter pointing to semaphore file. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_register_discovery</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">,</span>
+                             <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">semaphoreFilePath</span><span class="p">);</span>
+
+<span class="cm">/* Unregister the given server instance from the discovery server.</span>
+<span class="cm"> * This should only be called when the server is shutting down.</span>
+<span class="cm"> * @param server</span>
+<span class="cm"> * @param discoveryServerUrl if set to NULL, the default value</span>
+<span class="cm"> *        &#39;opc.tcp://localhost:4840&#39; will be used */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_unregister_discovery</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">);</span>
+
+ <span class="cm">/* Adds a periodic callback to register the server with the LDS (local discovery server)</span>
+<span class="cm">  * periodically. The interval between each register call is given as second parameter.</span>
+<span class="cm">  * It should be 10 minutes by default (= 10*60*1000).</span>
+<span class="cm">  *</span>
+<span class="cm">  * The delayFirstRegisterMs parameter indicates the delay for the first register call.</span>
+<span class="cm">  * If it is 0, the first register call will be after intervalMs milliseconds,</span>
+<span class="cm">  * otherwise the server&#39;s first register will be after delayFirstRegisterMs.</span>
+<span class="cm">  *</span>
+<span class="cm">  * When you manually unregister the server, you also need to cancel the</span>
+<span class="cm">  * periodic callback, otherwise it will be automatically be registered again.</span>
+<span class="cm">  *</span>
+<span class="cm">  * If you call this method multiple times for the same discoveryServerUrl, the older</span>
+<span class="cm">  * periodic callback will be removed.</span>
+<span class="cm">  *</span>
+<span class="cm">  * @param server</span>
+<span class="cm">  * @param discoveryServerUrl if set to NULL, the default value</span>
+<span class="cm">  *        &#39;opc.tcp://localhost:4840&#39; will be used</span>
+<span class="cm">  * @param intervalMs</span>
+<span class="cm">  * @param delayFirstRegisterMs</span>
+<span class="cm">  * @param periodicCallbackId */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addPeriodicServerRegisterCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">discoveryServerUrl</span><span class="p">,</span>
+                                            <span class="n">UA_UInt32</span> <span class="n">intervalMs</span><span class="p">,</span>
+                                            <span class="n">UA_UInt32</span> <span class="n">delayFirstRegisterMs</span><span class="p">,</span>
+                                            <span class="n">UA_UInt64</span> <span class="o">*</span><span class="n">periodicCallbackId</span><span class="p">);</span>
+
+<span class="cm">/* Callback for RegisterServer. Data is passed from the register call */</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Server_registerServerCallback</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_RegisteredServer</span> <span class="o">*</span><span class="n">registeredServer</span><span class="p">,</span>
+                                                 <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
+
+<span class="cm">/* Set the callback which is called if another server registeres or unregisters</span>
+<span class="cm"> * with this instance. If called multiple times, previous data will be</span>
+<span class="cm"> * overwritten.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server</span>
+<span class="cm"> * @param cb the callback</span>
+<span class="cm"> * @param data data passed to the callback</span>
+<span class="cm"> * @return UA_STATUSCODE_SUCCESS on success */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Server_setRegisterServerCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Server_registerServerCallback</span> <span class="n">cb</span><span class="p">,</span>
+                                    <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
+
+<span class="cm">/* Callback for server detected through mDNS. Data is passed from the register</span>
+<span class="cm"> * call</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param isServerAnnounce indicates if the server has just been detected. If</span>
+<span class="cm"> *        set to false, this means the server is shutting down.</span>
+<span class="cm"> * @param isTxtReceived indicates if we already received the corresponding TXT</span>
+<span class="cm"> *        record with the path and caps data */</span>
+<span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Server_serverOnNetworkCallback</span><span class="p">)(</span><span class="k">const</span> <span class="n">UA_ServerOnNetwork</span> <span class="o">*</span><span class="n">serverOnNetwork</span><span class="p">,</span>
+                                                  <span class="n">UA_Boolean</span> <span class="n">isServerAnnounce</span><span class="p">,</span>
+                                                  <span class="n">UA_Boolean</span> <span class="n">isTxtReceived</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
+
+<span class="cm">/* Set the callback which is called if another server is found through mDNS or</span>
+<span class="cm"> * deleted. It will be called for any mDNS message from the remote server, thus</span>
+<span class="cm"> * it may be called multiple times for the same instance. Also the SRV and TXT</span>
+<span class="cm"> * records may arrive later, therefore for the first call the server</span>
+<span class="cm"> * capabilities may not be set yet. If called multiple times, previous data will</span>
+<span class="cm"> * be overwritten.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server</span>
+<span class="cm"> * @param cb the callback</span>
+<span class="cm"> * @param data data passed to the callback</span>
+<span class="cm"> * @return UA_STATUSCODE_SUCCESS on success */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Server_setServerOnNetworkCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                     <span class="n">UA_Server_serverOnNetworkCallback</span> <span class="n">cb</span><span class="p">,</span>
+                                     <span class="kt">void</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_DISCOVERY_MULTICAST */</span><span class="cp"></span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_DISCOVERY */</span><span class="cp"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="information-model-callbacks">
+<h2>Information Model Callbacks<a class="headerlink" href="#information-model-callbacks" title="Permalink to this headline">¶</a></h2>
+<p>There are three places where a callback from an information model to
+user-defined code can happen.</p>
+<ul class="simple">
+<li>Custom node constructors and destructors</li>
+<li>Linking VariableNodes with an external data source</li>
+<li>MethodNode callbacks</li>
+</ul>
+<div class="section" id="node-lifecycle-constructors-destructors-and-node-contexts">
+<span id="node-lifecycle"></span><h3>Node Lifecycle: Constructors, Destructors and Node Contexts<a class="headerlink" href="#node-lifecycle-constructors-destructors-and-node-contexts" title="Permalink to this headline">¶</a></h3>
+<p>To finalize the instantiation of a node, a (user-defined) constructor
+callback is executed. There can be both a global constructor for all nodes
+and node-type constructor specific to the TypeDefinition of the new node
+(attached to an ObjectTypeNode or VariableTypeNode).</p>
+<p>In the hierarchy of ObjectTypes and VariableTypes, only the constructor of
+the (lowest) type defined for the new node is executed. Note that every
+Object and Variable can have only one <code class="docutils literal notranslate"><span class="pre">isTypeOf</span></code> reference. But type-nodes
+can technically have several <code class="docutils literal notranslate"><span class="pre">hasSubType</span></code> references to implement multiple
+inheritance. Issues of (multiple) inheritance in the constructor need to be
+solved by the user.</p>
+<p>When a node is destroyed, the node-type destructor is called before the
+global destructor. So the overall node lifecycle is as follows:</p>
+<ol class="arabic simple">
+<li>Global Constructor (set in the server config)</li>
+<li>Node-Type Constructor (for VariableType or ObjectTypes)</li>
+<li>(Usage-period of the Node)</li>
+<li>Node-Type Destructor</li>
+<li>Global Destructor</li>
+</ol>
+<p>The constructor and destructor callbacks can be set to <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and are not
+used in that case. If the node-type constructor fails, the global destructor
+will be called before removing the node. The destructors are assumed to never
+fail.</p>
+<p>Every node carries a user-context and a constructor-context pointer. The
+user-context is used to attach custom data to a node. But the (user-defined)
+constructors and destructors may replace the user-context pointer if they
+wish to do so. The initial value for the constructor-context is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.
+When the <code class="docutils literal notranslate"><span class="pre">AddNodes</span></code> service is used over the network, the user-context
+pointer of the new node is also initially set to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* To be set in the server config. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+    <span class="cm">/* Can be NULL. The context cannot be replaced since the node is destroyed</span>
+<span class="cm">     * immediately afterwards anyway. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Can be NULL. May replace the nodeContext */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">constructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+    <span class="cm">/* Can be NULL. May replace the nodeContext. */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">destructor</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span> <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_NodeTypeLifecycle</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setNodeTypeLifecycle</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                               <span class="n">UA_NodeTypeLifecycle</span> <span class="n">lifecycle</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_getNodeContext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="kt">void</span> <span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+<span class="cm">/* Careful! The user has to ensure that the destructor callbacks still work. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setNodeContext</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="data-source-callback">
+<span id="datasource"></span><h3>Data Source Callback<a class="headerlink" href="#data-source-callback" title="Permalink to this headline">¶</a></h3>
+<p>The server has a unique way of dealing with the content of variables. Instead
+of storing a variant attached to the variable node, the node can point to a
+function with a local data provider. Whenever the value attribute is read,
+the function will be called and asked to provide a UA_DataValue return value
+that contains the value content and additional timestamps.</p>
+<p>It is expected that the read callback is implemented. The write callback can
+be set to a null-pointer.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Copies the data from the source into the provided value.</span>
+<span class="cm">     *</span>
+<span class="cm">     * !! ZERO-COPY OPERATIONS POSSIBLE !!</span>
+<span class="cm">     * It is not required to return a copy of the actual content data. You can</span>
+<span class="cm">     * return a pointer to memory owned by the user. Memory can be reused</span>
+<span class="cm">     * between read callbacks of a DataSource, as the result is already encoded</span>
+<span class="cm">     * on the network buffer between each read operation.</span>
+<span class="cm">     *</span>
+<span class="cm">     * To use zero-copy reads, set the value of the `value-&gt;value` Variant</span>
+<span class="cm">     * without copying, e.g. with `UA_Variant_setScalar`. Then, also set</span>
+<span class="cm">     * `value-&gt;value.storageType` to `UA_VARIANT_DATA_NODELETE` to prevent the</span>
+<span class="cm">     * memory being cleaned up. Don&#39;t forget to also set `value-&gt;hasValue` to</span>
+<span class="cm">     * true to indicate the presence of a value.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param handle An optional pointer to user-defined data for the</span>
+<span class="cm">     *        specific data source</span>
+<span class="cm">     * @param nodeid Id of the read node</span>
+<span class="cm">     * @param includeSourceTimeStamp If true, then the datasource is expected to</span>
+<span class="cm">     *        set the source timestamp in the returned value</span>
+<span class="cm">     * @param range If not null, then the datasource shall return only a</span>
+<span class="cm">     *        selection of the (nonscalar) data. Set</span>
+<span class="cm">     *        UA_STATUSCODE_BADINDEXRANGEINVALID in the value if this does not</span>
+<span class="cm">     *        apply.</span>
+<span class="cm">     * @param value The (non-null) DataValue that is returned to the client. The</span>
+<span class="cm">     *        data source sets the read data, the result status and optionally a</span>
+<span class="cm">     *        sourcetimestamp.</span>
+<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
+<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
+<span class="cm">     *         then no releasing of the value is done. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">includeSourceTimeStamp</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+    <span class="cm">/* Write into a data source. This method pointer can be NULL if the</span>
+<span class="cm">     * operation is unsupported.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param handle An optional pointer to user-defined data for the</span>
+<span class="cm">     *        specific data source</span>
+<span class="cm">     * @param nodeid Id of the node being written to</span>
+<span class="cm">     * @param data The data to be written into the data source</span>
+<span class="cm">     * @param range An optional data range. If the data source is scalar or does</span>
+<span class="cm">     *        not support writing of ranges, then an error code is returned.</span>
+<span class="cm">     * @return Returns a status code that is returned to the user */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                           <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_DataSource</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setVariableNode_dataSource</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                     <span class="k">const</span> <span class="n">UA_DataSource</span> <span class="n">dataSource</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="value-callback">
+<span id="id4"></span><h3>Value Callback<a class="headerlink" href="#value-callback" title="Permalink to this headline">¶</a></h3>
+<p>Value Callbacks can be attached to variable and variable type nodes. If
+not <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, they are called before reading and after writing respectively.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="cm">/* Called before the value attribute is read. It is possible to write into the</span>
+<span class="cm">     * value attribute during onRead (using the write service). The node is</span>
+<span class="cm">     * re-opened afterwards so that changes are considered in the following read</span>
+<span class="cm">     * operation.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param handle Points to user-provided data for the callback.</span>
+<span class="cm">     * @param nodeid The identifier of the node.</span>
+<span class="cm">     * @param data Points to the current node value.</span>
+<span class="cm">     * @param range Points to the numeric range the client wants to read from</span>
+<span class="cm">     *        (or NULL). */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onRead</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                   <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
+                   <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                   <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+    <span class="cm">/* Called after writing the value attribute. The node is re-opened after</span>
+<span class="cm">     * writing so that the new value is visible in the callback.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param server The server executing the callback</span>
+<span class="cm">     * @sessionId The identifier of the session</span>
+<span class="cm">     * @sessionContext Additional data attached to the session</span>
+<span class="cm">     *                 in the access control layer</span>
+<span class="cm">     * @param nodeid The identifier of the node.</span>
+<span class="cm">     * @param nodeUserContext Additional data attached to the node by</span>
+<span class="cm">     *        the user.</span>
+<span class="cm">     * @param nodeConstructorContext Additional data attached to the node</span>
+<span class="cm">     *        by the type constructor(s).</span>
+<span class="cm">     * @param range Points to the numeric range the client wants to write to (or</span>
+<span class="cm">     *        NULL). */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">onWrite</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NumericRange</span> <span class="o">*</span><span class="n">range</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_DataValue</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">UA_ValueCallback</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setVariableNode_valueCallback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                                        <span class="k">const</span> <span class="n">UA_ValueCallback</span> <span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="method-callbacks">
+<h3>Method Callbacks<a class="headerlink" href="#method-callbacks" title="Permalink to this headline">¶</a></h3>
+<p>Method callbacks are set to <cite>NULL</cite> (not executable) when a method node is added
+over the network. In theory, it is possible to add a callback via
+<code class="docutils literal notranslate"><span class="pre">UA_Server_setMethodNode_callback</span></code> within the global constructor when adding
+methods over the network is really wanted.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">UA_StatusCode</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">methodId</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">methodContext</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">objectId</span><span class="p">,</span>
+                     <span class="kt">void</span> <span class="o">*</span><span class="n">objectContext</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">inputSize</span><span class="p">,</span>
+                     <span class="k">const</span> <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">input</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">outputSize</span><span class="p">,</span>
+                     <span class="n">UA_Variant</span> <span class="o">*</span><span class="n">output</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_setMethodNode_callback</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                 <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">methodNodeId</span><span class="p">,</span>
+                                 <span class="n">UA_MethodCallback</span> <span class="n">methodCallback</span><span class="p">);</span>
+<span class="n">UA_CallMethodResult</span>
+<span class="nf">UA_Server_call</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_CallMethodRequest</span> <span class="o">*</span><span class="n">request</span><span class="p">);</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="node-addition-and-deletion">
+<span id="addnodes"></span><h2>Node Addition and Deletion<a class="headerlink" href="#node-addition-and-deletion" title="Permalink to this headline">¶</a></h2>
+<p>When creating dynamic node instances at runtime, chances are that you will
+not care about the specific NodeId of the new node, as long as you can
+reference it later. When passing numeric NodeIds with a numeric identifier 0,
+the stack evaluates this as “select a random unassigned numeric NodeId in
+that namespace”. To find out which NodeId was actually assigned to the new
+node, you may pass a pointer <cite>outNewNodeId</cite>, which will (after a successful
+node insertion) contain the nodeId of the new node. You may also pass a
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code> pointer if this result is not needed.</p>
+<p>See the Section <a class="reference internal" href="#node-lifecycle"><span class="std std-ref">Node Lifecycle: Constructors, Destructors and Node Contexts</span></a> on constructors and on attaching
+user-defined data to nodes.</p>
+<p>The methods for node addition and deletion take mostly const arguments that
+are not modified. When creating a node, a deep copy of the node identifier,
+node attributes, etc. is created. Therefore, it is possible to call for
+example <code class="docutils literal notranslate"><span class="pre">UA_Server_addVariablenode</span></code> with a value attribute (a
+<a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>) pointing to a memory location on the stack. If you need
+changes to a variable value to manifest at a specific memory location, please
+use a <a class="reference internal" href="#datasource"><span class="std std-ref">Data Source Callback</span></a> or a <a class="reference internal" href="#value-callback"><span class="std std-ref">Value Callback</span></a>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Protect against redundant definitions for server/client */</span>
+<span class="cp">#ifndef UA_DEFAULT_ATTRIBUTES_DEFINED</span>
+<span class="cp">#define UA_DEFAULT_ATTRIBUTES_DEFINED</span>
+<span class="cm">/* The default for variables is &quot;BaseDataType&quot; for the datatype, -2 for the</span>
+<span class="cm"> * valuerank and a read-accesslevel. */</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">UA_VariableAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_VariableTypeAttributes</span> <span class="n">UA_VariableTypeAttributes_default</span><span class="p">;</span>
+<span class="cm">/* Methods are executable by default */</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">UA_MethodAttributes_default</span><span class="p">;</span>
+<span class="cm">/* The remaining attribute definitions are currently all zeroed out */</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">UA_ObjectAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ObjectTypeAttributes</span> <span class="n">UA_ObjectTypeAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ReferenceTypeAttributes</span> <span class="n">UA_ReferenceTypeAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_DataTypeAttributes</span> <span class="n">UA_DataTypeAttributes_default</span><span class="p">;</span>
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">UA_ViewAttributes_default</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="cm">/* Don&#39;t use this function. There are typed versions as inline functions. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Server_addNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">parentNodeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">typeDefinition</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_NodeAttributes</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+                    <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
+                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addVariableNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addVariableTypeNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                              <span class="k">const</span> <span class="n">UA_VariableTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                              <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VARIABLETYPE</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
+                               <span class="n">browseName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span>
+                               <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLETYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addObjectNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_ObjectAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">typeDefinition</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addObjectTypeNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                            <span class="k">const</span> <span class="n">UA_ObjectTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                            <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_OBJECTTYPE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTTYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addViewNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                      <span class="k">const</span> <span class="n">UA_ViewAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                      <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_VIEW</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VIEWATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addReferenceTypeNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="n">UA_ReferenceTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                               <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_REFERENCETYPE</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span>
+                               <span class="n">browseName</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+                               <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCETYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addDataTypeNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_DataTypeAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">__UA_Server_addNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODECLASS_DATATYPE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">parentNodeId</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="n">UA_NodeAttributes</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+                               <span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATATYPEATTRIBUTES</span><span class="p">],</span>
+                               <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addDataSourceVariableNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_VariableAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                                    <span class="k">const</span> <span class="n">UA_DataSource</span> <span class="n">dataSource</span><span class="p">,</span>
+                                    <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addMethodNodeEx</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">attr</span><span class="p">,</span> <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span>
+                          <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span> <span class="o">*</span><span class="n">inputArguments</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">inputArgumentsRequestedNewNodeId</span><span class="p">,</span>
+                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">inputArgumentsOutNewNodeId</span><span class="p">,</span>
+                          <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span> <span class="o">*</span><span class="n">outputArguments</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">outputArgumentsRequestedNewNodeId</span><span class="p">,</span>
+                          <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outputArgumentsOutNewNodeId</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addMethodNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_MethodAttributes</span> <span class="n">attr</span><span class="p">,</span>
+                        <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span>
+                        <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span> <span class="o">*</span><span class="n">inputArguments</span><span class="p">,</span>
+                        <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span> <span class="o">*</span><span class="n">outputArguments</span><span class="p">,</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Server_addMethodNodeEx</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>  <span class="n">parentNodeId</span><span class="p">,</span>
+                                     <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">browseName</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span>
+                                     <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="n">inputArguments</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
+                                     <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="n">outputArguments</span><span class="p">,</span> <span class="n">UA_NODEID_NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span>
+                                     <span class="n">nodeContext</span><span class="p">,</span> <span class="n">outNewNodeId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The method pair UA_Server_addNode_begin and _finish splits the AddNodes
+service in two parts. This is useful if the node shall be modified before
+finish the instantiation. For example to add children with specific NodeIds.
+Otherwise, mandatory children (e.g. of an ObjectType) are added with
+pseudo-random unique NodeIds. Existing children are detected during the
+_finish part via their matching BrowseName.</p>
+<dl class="docutils">
+<dt>The _begin method:</dt>
+<dd><ul class="first last simple">
+<li>prepares the node and adds it to the nodestore</li>
+<li>copies some unassigned attributes from the TypeDefinition node internally</li>
+<li>adds the references to the parent (and the TypeDefinition if applicable)</li>
+<li>performs type-checking of variables.</li>
+</ul>
+</dd>
+</dl>
+<p>You can add an object node without a parent if you set the parentNodeId and
+referenceTypeId to UA_NODE_ID_NULL. Then you need to add the parent reference
+and hasTypeDef reference yourself before calling the _finish method.
+Not that this is only allowed for object nodes.</p>
+<dl class="docutils">
+<dt>The _finish method:</dt>
+<dd><ul class="first last simple">
+<li>copies mandatory children</li>
+<li>calls the node constructor(s) at the end</li>
+<li>may remove the node if it encounters an error.</li>
+</ul>
+</dd>
+</dl>
+<p>The special UA_Server_addMethodNode_finish method needs to be used for
+method nodes, since there you need to explicitly specifiy the input
+and output arguments which are added in the finish step (if not yet already there)</p>
+<p><code class="docutils literal notranslate"><span class="pre">VariableAttributes</span></code> for variables, <code class="docutils literal notranslate"><span class="pre">ObjectAttributes</span></code> for objects, and
+so on. Missing attributes are taken from the TypeDefinition node if
+applicable.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addNode_begin</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeClass</span> <span class="n">nodeClass</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">requestedNewNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">parentNodeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_QualifiedName</span> <span class="n">browseName</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">typeDefinition</span><span class="p">,</span>
+                        <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">attr</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_DataType</span> <span class="o">*</span><span class="n">attributeType</span><span class="p">,</span>
+                        <span class="kt">void</span> <span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addMethodNode_finish</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                         <span class="n">UA_MethodCallback</span> <span class="n">method</span><span class="p">,</span>
+                         <span class="kt">size_t</span> <span class="n">inputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">inputArguments</span><span class="p">,</span>
+                         <span class="kt">size_t</span> <span class="n">outputArgumentsSize</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_Argument</span><span class="o">*</span> <span class="n">outputArguments</span><span class="p">);</span>
+
+<span class="cm">/* Deletes a node and optionally all references leading to the node. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_deleteNode</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">nodeId</span><span class="p">,</span>
+                     <span class="n">UA_Boolean</span> <span class="n">deleteReferences</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reference-management">
+<h2>Reference Management<a class="headerlink" href="#reference-management" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addReference</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">sourceId</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">refTypeId</span><span class="p">,</span>
+                       <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="n">targetId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_deleteReference</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">sourceNodeId</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_NodeId</span> <span class="n">referenceTypeId</span><span class="p">,</span> <span class="n">UA_Boolean</span> <span class="n">isForward</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="n">UA_ExpandedNodeId</span> <span class="n">targetNodeId</span><span class="p">,</span>
+                          <span class="n">UA_Boolean</span> <span class="n">deleteBidirectional</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a new namespace to the server. Returns the index of the new namespace */</span>
+<span class="n">UA_UInt16</span> <span class="nf">UA_Server_addNamespace</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">name</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="deprecated-server-api">
+<h2>Deprecated Server API<a class="headerlink" href="#deprecated-server-api" title="Permalink to this headline">¶</a></h2>
+<p>This file contains outdated API definitions that are kept for backwards
+compatibility. Please switch to the new API, as the following definitions
+will be removed eventually.</p>
+<div class="section" id="ua-job-api">
+<h3>UA_Job API<a class="headerlink" href="#ua-job-api" title="Permalink to this headline">¶</a></h3>
+<p>UA_Job was replaced since it unnecessarily exposed server internals to the
+end-user. Please use plain UA_ServerCallbacks instead. The following UA_Job
+definition contains just the fraction of the original struct that was useful
+to end-users.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_JOBTYPE_METHODCALL</span>
+<span class="p">}</span> <span class="n">UA_JobType</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_JobType</span> <span class="n">type</span><span class="p">;</span>
+    <span class="k">union</span> <span class="p">{</span>
+        <span class="k">struct</span> <span class="p">{</span>
+            <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">;</span>
+            <span class="n">UA_ServerCallback</span> <span class="n">method</span><span class="p">;</span>
+        <span class="p">}</span> <span class="n">methodCall</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">job</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_Job</span><span class="p">;</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_addRepeatedJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Job</span> <span class="n">job</span><span class="p">,</span>
+                         <span class="n">UA_UInt32</span> <span class="n">interval</span><span class="p">,</span> <span class="n">UA_Guid</span> <span class="o">*</span><span class="n">jobId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Server_addRepeatedCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">job</span><span class="p">.</span><span class="n">job</span><span class="p">.</span><span class="n">methodCall</span><span class="p">.</span><span class="n">method</span><span class="p">,</span>
+                                         <span class="n">job</span><span class="p">.</span><span class="n">job</span><span class="p">.</span><span class="n">methodCall</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span>
+                                         <span class="p">(</span><span class="n">UA_UInt64</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">jobId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">UA_DEPRECATED</span> <span class="k">static</span> <span class="n">UA_INLINE</span> <span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_removeRepeatedJob</span><span class="p">(</span><span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_Guid</span> <span class="n">jobId</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">UA_Server_removeRepeatedCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span>
+                                            <span class="o">*</span><span class="p">(</span><span class="n">UA_UInt64</span><span class="o">*</span><span class="p">)(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">jobId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="client.html" class="btn btn-neutral float-right" title="Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nodestore.html" class="btn btn-neutral float-left" title="Information Modelling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2018, The open62541 authors
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

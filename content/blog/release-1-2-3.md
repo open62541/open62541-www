@@ -5,7 +5,6 @@ author: "open62541 Team"
 description: "Third patch release for the 1.2 release family of open62541 is now available."
 categories: ["Releases"]
 tags: ["release", "v1.2.3", "bugfix"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 **Release notes:**

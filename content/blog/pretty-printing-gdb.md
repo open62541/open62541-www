@@ -5,7 +5,6 @@ author: "Dr.-Ing. Julius Pfrommer"
 description: "Introduction of a little nice feature that adds a lot of convenience for developers on Linux. It's the pretty-printing of OPC UA data types."
 categories: ["Features", "Development"]
 tags: ["debugging", "gdb", "development-tools"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 A little known feature that adds a lot of convenience for developers on Linux is the pretty-printing of OPC UA data types. It reduces visual noise and makes the introspection of local variables much more convenient.

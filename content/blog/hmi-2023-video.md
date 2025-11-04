@@ -5,7 +5,6 @@ author: "open62541 Team"
 description: "The open62541 project exhibited again this year at the booth of the OPC Foundation on the Hannover Fair 23."
 categories: ["Events", "News"]
 tags: ["trade-show", "hannover-fair", "opc-foundation"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 The open62541 project exhibited again this year at the booth of the OPC Foundation on the Hannover Fair 23. The organization and representation of the project was done by Dr. Julius Pfrommer and Andreas Ebner from Fraunhofer IOSB.

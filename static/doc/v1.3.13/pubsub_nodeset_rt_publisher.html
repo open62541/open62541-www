@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publisher Realtime example using custom nodes &mdash; open62541 1.3.13 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=37ccb8f4"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Subscriber Realtime example using custom nodes" href="pubsub_nodeset_rt_subscriber.html" />
+    <link rel="prev" title="Realtime Loopback Example" href="pubsub_TSN_loopback.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541
+              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing open62541</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_datatypes.html">Working with Data Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_firststeps.html">Building a Simple Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variable.html">Adding Variables to a Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_datasource.html">Connecting a Variable with a Physical Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_variabletype.html">Working with Variable Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_object.html">Working with Objects and Object Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_method.html">Adding Methods to Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_monitoreditems.html">Observing Attributes with Local MonitoredItems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_events.html">Generating events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_server_alarms_conditions.html">Using Alarms and Conditions Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_client_firststeps.html">Building a Simple Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_publish.html">Working with Publish/Subscribe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_subscribe.html">Subscribing Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pubsub_TSN_publisher.html">Realtime Publish Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pubsub_TSN_loopback.html">Realtime Loopback Example</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Publisher Realtime example using custom nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pubsub_nodeset_rt_subscriber.html">Subscriber Realtime example using custom nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html#node-pointer">Node Pointer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Publisher Realtime example using custom nodes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pubsub_nodeset_rt_publisher.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="publisher-realtime-example-using-custom-nodes">
+<span id="pubsub-nodeset-tutorial"></span><h1>Publisher Realtime example using custom nodes<a class="headerlink" href="#publisher-realtime-example-using-custom-nodes" title="Link to this heading">¶</a></h1>
+<p>The purpose of this example file is to use the custom nodes of the XML
+file(pubDataModel.xml) for publisher. This Publisher example uses the two
+custom nodes (PublisherCounterVariable and Pressure) created using the XML
+file(pubDataModel.xml) for publishing the packet. The pubDataModel.csv will
+contain the nodeids of custom nodes(object and variables) and the nodeids of
+the custom nodes are harcoded inside the addDataSetField API. This example
+uses two threads namely the Publisher and UserApplication. The Publisher
+thread is used to publish data at every cycle. The UserApplication thread
+serves the functionality of the Control loop, which increments the
+counterdata to be published by the Publisher and also writes the published
+data in a csv along with transmission timestamp.</p>
+<p>Run steps of the Publisher application as mentioned below:</p>
+<p><code class="docutils literal notranslate"><span class="pre">./bin/examples/pubsub_nodeset_rt_publisher</span> <span class="pre">-i</span> <span class="pre">&lt;iface&gt;</span></code></p>
+<p>For more information run <code class="docutils literal notranslate"><span class="pre">./bin/examples/pubsub_nodeset_rt_publisher</span> <span class="pre">-h</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define _GNU_SOURCE</span>
+
+<span class="cm">/* For thread operations */</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pthread.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/server_config_default.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/log_stdout.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/types_generated.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;open62541/plugin/pubsub_ethernet.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ua_pubsub.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;open62541/namespace_example_publisher_generated.h&quot;</span>
+
+<span class="cm">/* to find load of each thread</span>
+<span class="cm"> * ps -L -o pid,pri,%cpu -C pubsub_nodeset_rt_publisher */</span>
+
+<span class="cm">/* Configurable Parameters */</span>
+<span class="cm">/* Cycle time in milliseconds */</span>
+<span class="cp">#define             DEFAULT_CYCLE_TIME                    0.25</span>
+<span class="cm">/* Qbv offset */</span>
+<span class="cp">#define             QBV_OFFSET                            25 * 1000</span>
+<span class="cp">#define             DEFAULT_SOCKET_PRIORITY               3</span>
+<span class="cp">#define             PUBLISHER_ID                          2234</span>
+<span class="cp">#define             WRITER_GROUP_ID                       101</span>
+<span class="cp">#define             DATA_SET_WRITER_ID                    62541</span>
+<span class="cp">#define             PUBLISHING_MAC_ADDRESS                &quot;opc.eth:</span><span class="c1">//01-00-5E-7F-00-01:8.3&quot;</span>
+<span class="cp">#define             PORT_NUMBER                           62541</span>
+
+<span class="cm">/* Non-Configurable Parameters */</span>
+<span class="cm">/* Milli sec and sec conversion to nano sec */</span>
+<span class="cp">#define             MILLI_SECONDS                         1000 * 1000</span>
+<span class="cp">#define             SECONDS                               1000 * 1000 * 1000</span>
+<span class="cp">#define             SECONDS_SLEEP                         5</span>
+<span class="cp">#define             DEFAULT_PUB_SCHED_PRIORITY            78</span>
+<span class="cp">#define             DEFAULT_PUBSUB_CORE                   2</span>
+<span class="cp">#define             DEFAULT_USER_APP_CORE                 3</span>
+<span class="cp">#define             MAX_MEASUREMENTS                      30000000</span>
+<span class="cp">#define             SECONDS_INCREMENT                     1</span>
+<span class="cp">#define             CLOCKID                               CLOCK_TAI</span>
+<span class="cp">#define             ETH_TRANSPORT_PROFILE                 &quot;http:</span><span class="c1">//opcfoundation.org/UA-Profile/Transport/pubsub-eth-uadp&quot;</span>
+<span class="cp">#define             DEFAULT_USERAPPLICATION_SCHED_PRIORITY 75</span>
+
+<span class="cm">/* Below mentioned parameters can be provided as input using command line arguments</span>
+<span class="cm"> * If user did not provide the below mentioned parameters as input through command line</span>
+<span class="cm"> * argument then default value will be used */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Double</span><span class="w">  </span><span class="n">cycleTimeMsec</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">DEFAULT_CYCLE_TIME</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">consolePrint</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">UA_FALSE</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w">   </span><span class="n">socketPriority</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">DEFAULT_SOCKET_PRIORITY</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w">   </span><span class="n">pubPriority</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">DEFAULT_PUB_SCHED_PRIORITY</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w">   </span><span class="n">userAppPriority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEFAULT_USERAPPLICATION_SCHED_PRIORITY</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w">   </span><span class="n">pubSubCore</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">DEFAULT_PUBSUB_CORE</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w">   </span><span class="n">userAppCore</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">DEFAULT_USER_APP_CORE</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">useSoTxtime</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+
+<span class="cm">/* User application Pub will wakeup at the 30% of cycle time and handles the */</span>
+<span class="cm">/* user data write in Information model */</span>
+<span class="cm">/* First 30% is left for subscriber for future use*/</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Double</span><span class="w">  </span><span class="n">userAppWakeupPercentage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.3</span><span class="p">;</span>
+<span class="cm">/* Publisher will sleep for 60% of cycle time and then prepares the */</span>
+<span class="cm">/* transmission packet within 40% */</span>
+<span class="cm">/* after some prototyping and analyzing it */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Double</span><span class="w">  </span><span class="n">pubWakeupPercentage</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mf">0.6</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">fileWrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_FALSE</span><span class="p">;</span>
+
+<span class="cm">/* If the Hardcoded publisher MAC addresses need to be changed,</span>
+<span class="cm"> * change PUBLISHING_MAC_ADDRESS</span>
+<span class="cm"> */</span>
+
+<span class="cm">/* Set server running as true */</span>
+<span class="n">UA_Boolean</span><span class="w">          </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="n">UA_UInt16</span><span class="w">           </span><span class="n">nsIdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="cm">/* Variables corresponding to PubSub connection creation,</span>
+<span class="cm"> * published data set and writer group */</span>
+<span class="n">UA_NodeId</span><span class="w">           </span><span class="n">connectionIdent</span><span class="p">;</span>
+<span class="n">UA_NodeId</span><span class="w">           </span><span class="n">publishedDataSetIdent</span><span class="p">;</span>
+<span class="n">UA_NodeId</span><span class="w">           </span><span class="n">writerGroupIdent</span><span class="p">;</span>
+<span class="cm">/* Variables for counter data handling in address space */</span>
+<span class="n">UA_UInt64</span><span class="w">           </span><span class="o">*</span><span class="n">pubCounterData</span><span class="p">;</span>
+<span class="n">UA_DataValue</span><span class="w">        </span><span class="o">*</span><span class="n">pubDataValueRT</span><span class="p">;</span>
+<span class="cm">/* Variables for counter data handling in address space */</span>
+<span class="n">UA_Double</span><span class="w">           </span><span class="o">*</span><span class="n">pressureData</span><span class="p">;</span>
+<span class="n">UA_DataValue</span><span class="w">        </span><span class="o">*</span><span class="n">pressureValueRT</span><span class="p">;</span>
+
+<span class="cm">/* File to store the data and timestamps for different traffic */</span>
+<span class="kt">FILE</span><span class="w">               </span><span class="o">*</span><span class="n">fpPublisher</span><span class="p">;</span>
+<span class="kt">char</span><span class="w">               </span><span class="o">*</span><span class="n">fileName</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;publisher_T1.csv&quot;</span><span class="p">;</span>
+<span class="cm">/* Array to store published counter data */</span>
+<span class="n">UA_UInt64</span><span class="w">           </span><span class="n">publishCounterValue</span><span class="p">[</span><span class="n">MAX_MEASUREMENTS</span><span class="p">];</span>
+<span class="n">UA_Double</span><span class="w">           </span><span class="n">pressureValues</span><span class="p">[</span><span class="n">MAX_MEASUREMENTS</span><span class="p">];</span>
+<span class="kt">size_t</span><span class="w">              </span><span class="n">measurementsPublisher</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="cm">/* Array to store timestamp */</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">timespec</span><span class="w">     </span><span class="n">publishTimestamp</span><span class="p">[</span><span class="n">MAX_MEASUREMENTS</span><span class="p">];</span>
+
+<span class="cm">/* Thread for publisher */</span>
+<span class="n">pthread_t</span><span class="w">           </span><span class="n">pubthreadID</span><span class="p">;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">timespec</span><span class="w">     </span><span class="n">dataModificationTime</span><span class="p">;</span>
+
+<span class="cm">/* Thread for user application*/</span>
+<span class="n">pthread_t</span><span class="w">           </span><span class="n">userApplicationThreadID</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="n">UA_Server</span><span class="o">*</span><span class="w">                   </span><span class="n">ServerRun</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">serverConfigStruct</span><span class="p">;</span>
+
+<span class="cm">/* Structure to define thread parameters */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="n">UA_Server</span><span class="o">*</span><span class="w">                   </span><span class="n">server</span><span class="p">;</span>
+<span class="kt">void</span><span class="o">*</span><span class="w">                        </span><span class="n">data</span><span class="p">;</span>
+<span class="n">UA_ServerCallback</span><span class="w">            </span><span class="n">callback</span><span class="p">;</span>
+<span class="n">UA_Duration</span><span class="w">                  </span><span class="n">interval_ms</span><span class="p">;</span>
+<span class="n">UA_UInt64</span><span class="o">*</span><span class="w">                   </span><span class="n">callbackId</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">threadArg</span><span class="p">;</span>
+
+<span class="cm">/* Publisher thread routine for ETF */</span>
+<span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">publisherETF</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">);</span>
+<span class="cm">/* User application thread routine */</span>
+<span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">userApplicationPub</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">);</span>
+<span class="cm">/* To create multi-threads */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">pthread_t</span><span class="w"> </span><span class="nf">threadCreation</span><span class="p">(</span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">threadPriority</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">coreAffinity</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="kr">thread</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">),</span>
+<span class="w">                                </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">applicationName</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">serverConfig</span><span class="p">);</span>
+
+<span class="cm">/* Stop signal */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">sign</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;received ctrl-c&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_FALSE</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Nanosecond field handling</strong></p>
+<p>Nanosecond field in timespec is checked for overflowing and one second
+is added to seconds field and nanosecond field is set to zero</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">timeSpecValue</span><span class="o">-&gt;</span><span class="n">tv_nsec</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">SECONDS</span><span class="w"> </span><span class="mi">-1</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="cm">/* Move to next second and remove it from ns field */</span>
+<span class="w">        </span><span class="n">timeSpecValue</span><span class="o">-&gt;</span><span class="n">tv_sec</span><span class="w">  </span><span class="o">+=</span><span class="w"> </span><span class="n">SECONDS_INCREMENT</span><span class="p">;</span>
+<span class="w">        </span><span class="n">timeSpecValue</span><span class="o">-&gt;</span><span class="n">tv_nsec</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">SECONDS</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Custom callback handling</strong></p>
+<p>Custom callback thread handling overwrites the default timer based
+callback function with the custom (user-specified) callback interval.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a callback for cyclic repetition */</span>
+<span class="k">static</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="nf">addPubSubApplicationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_ServerCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">callbackId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Initialize arguments required for the thread to run */</span>
+<span class="w">    </span><span class="n">threadArg</span><span class="w"> </span><span class="o">*</span><span class="n">threadArguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">threadArg</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">UA_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">threadArg</span><span class="p">));</span>
+
+<span class="w">    </span><span class="cm">/* Pass the value required for the threads */</span>
+<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">server</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">server</span><span class="p">;</span>
+<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">data</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">callback</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">interval_ms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">;</span>
+<span class="w">    </span><span class="n">threadArguments</span><span class="o">-&gt;</span><span class="n">callbackId</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">callbackId</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Create the publisher thread with the required priority and core affinity */</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">threadNamePub</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Publisher&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pubthreadID</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="n">threadCreation</span><span class="p">(</span><span class="n">pubPriority</span><span class="p">,</span><span class="w"> </span><span class="n">pubSubCore</span><span class="p">,</span><span class="w"> </span><span class="n">publisherETF</span><span class="p">,</span><span class="w"> </span><span class="n">threadNamePub</span><span class="p">,</span><span class="w"> </span><span class="n">threadArguments</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="nf">changePubSubApplicationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span><span class="w"> </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Callback interval need not be modified as it is thread based implementation.</span>
+<span class="cm">     * The thread uses nanosleep for calculating cycle time and modification in</span>
+<span class="cm">     * nanosleep value changes cycle time */</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/* Remove the callback added for cyclic repetition */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">removePubSubApplicationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">identifier</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">){</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">callbackId</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">pthread_join</span><span class="p">(</span><span class="n">callbackId</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
+<span class="w">        </span><span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+<span class="w">                       </span><span class="s">&quot;Pthread Join Failed thread: %ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">callbackId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>External data source handling</strong></p>
+<p>If the external data source is written over the information model, the
+externalDataWriteCallback will be triggered. The user has to take care and assure
+that the write leads not to synchronization issues and race conditions.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="nf">externalDataWriteCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">){</span>
+<span class="w">    </span><span class="c1">//node values are updated by using variables in the memory</span>
+<span class="w">    </span><span class="c1">//UA_Server_write is not used for updating node values.</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="nf">externalDataReadNotificationCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeid</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">){</span>
+<span class="w">    </span><span class="c1">//allow read without any preparation</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>PubSub connection handling</strong></p>
+<p>Create a new ConnectionConfig. The addPubSubConnection function takes the
+config and creates a new connection. The Connection identifier is
+copied to the NodeId parameter.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">addPubSubConnection</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="o">*</span><span class="n">networkAddressUrlPub</span><span class="p">){</span>
+<span class="w">    </span><span class="cm">/* Details about the connection configuration and handling are located</span>
+<span class="cm">     * in the pubsub connection tutorial */</span>
+<span class="w">    </span><span class="n">UA_PubSubConnectionConfig</span><span class="w"> </span><span class="n">connectionConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">connectionConfig</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">connectionConfig</span><span class="p">));</span>
+<span class="w">    </span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">name</span><span class="w">                                   </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;Publisher Connection&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">enabled</span><span class="w">                                </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="n">networkAddressUrl</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">networkAddressUrlPub</span><span class="p">;</span>
+<span class="w">    </span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">transportProfileUri</span><span class="w">                    </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">ETH_TRANSPORT_PROFILE</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">networkAddressUrl</span><span class="p">,</span>
+<span class="w">                         </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NETWORKADDRESSURLDATATYPE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">publisherId</span><span class="p">.</span><span class="n">numeric</span><span class="w">                    </span><span class="o">=</span><span class="w"> </span><span class="n">PUBLISHER_ID</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Connection options are given as Key/Value Pairs - Sockprio and Txtime */</span>
+<span class="w">    </span><span class="n">UA_KeyValuePair</span><span class="w"> </span><span class="n">connectionOptions</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">    </span><span class="n">connectionOptions</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sockpriority&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">sockPriority</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_UInt32</span><span class="p">)</span><span class="n">socketPriority</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">connectionOptions</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">sockPriority</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">connectionOptions</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;enablesotxtime&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">enableTxTime</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">connectionOptions</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">enableTxTime</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">connectionProperties</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">connectionOptions</span><span class="p">;</span>
+<span class="w">    </span><span class="n">connectionConfig</span><span class="p">.</span><span class="n">connectionPropertiesSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Server_addPubSubConnection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">connectionConfig</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">connectionIdent</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>PublishedDataSet handling</strong></p>
+<p>Details about the connection configuration and handling are located
+in the pubsub connection tutorial</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">addPublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_PublishedDataSetConfig</span><span class="w"> </span><span class="n">publishedDataSetConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">publishedDataSetConfig</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_PublishedDataSetConfig</span><span class="p">));</span>
+<span class="w">    </span><span class="n">publishedDataSetConfig</span><span class="p">.</span><span class="n">publishedDataSetType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_PUBSUB_DATASET_PUBLISHEDITEMS</span><span class="p">;</span>
+<span class="w">    </span><span class="n">publishedDataSetConfig</span><span class="p">.</span><span class="n">name</span><span class="w">                 </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;Demo PDS&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_addPublishedDataSet</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">publishedDataSetConfig</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">publishedDataSetIdent</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>DataSetField handling</strong></p>
+<p>The DataSetField (DSF) is part of the PDS and describes exactly one
+published field.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* This example only uses two addDataSetField which uses the custom nodes of the XML file</span>
+<span class="cm"> * (pubDataModel.xml) */</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">addDataSetField</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dataSetFieldIdent</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_DataSetFieldConfig</span><span class="w"> </span><span class="n">dsfConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dsfConfig</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_DataSetFieldConfig</span><span class="p">));</span>
+<span class="w">    </span><span class="n">pubCounterData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_UInt64_new</span><span class="p">();</span>
+<span class="w">    </span><span class="o">*</span><span class="n">pubCounterData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pubDataValueRT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_DataValue_new</span><span class="p">();</span>
+<span class="w">    </span><span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pubDataValueRT</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">pubCounterData</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT64</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">pubDataValueRT</span><span class="o">-&gt;</span><span class="n">hasValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Set the value backend of the above create node to &#39;external value source&#39; */</span>
+<span class="w">    </span><span class="n">UA_ValueBackend</span><span class="w"> </span><span class="n">valueBackend</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend</span><span class="p">.</span><span class="n">backendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_VALUEBACKENDTYPE_EXTERNAL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pubDataValueRT</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">callback</span><span class="p">.</span><span class="n">userWrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">externalDataWriteCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">callback</span><span class="p">.</span><span class="n">notificationRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">externalDataReadNotificationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* If user need to change the nodeid of the custom nodes in the application then it must be</span>
+<span class="cm">     * changed inside the xml and .csv file inside examples\pubsub_realtime\nodeset\*/</span>
+<span class="w">    </span><span class="cm">/* The nodeid of the Custom node PublisherCounterVariable is 2005 which is used below */</span>
+<span class="w">    </span><span class="n">UA_Server_setVariableNode_valueBackend</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">nsIdx</span><span class="p">,</span><span class="w"> </span><span class="mi">2005</span><span class="p">),</span><span class="w"> </span><span class="n">valueBackend</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* setup RT DataSetField config */</span>
+<span class="w">    </span><span class="n">dsfConfig</span><span class="p">.</span><span class="n">field</span><span class="p">.</span><span class="n">variable</span><span class="p">.</span><span class="n">rtValueSource</span><span class="p">.</span><span class="n">rtInformationModelNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="n">dsfConfig</span><span class="p">.</span><span class="n">field</span><span class="p">.</span><span class="n">variable</span><span class="p">.</span><span class="n">publishParameters</span><span class="p">.</span><span class="n">publishedVariable</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">nsIdx</span><span class="p">,</span><span class="w"> </span><span class="mi">2005</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_addDataSetField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">publishedDataSetIdent</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dsfConfig</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dataSetFieldIdent</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dataSetFieldIdent1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_DataSetFieldConfig</span><span class="w"> </span><span class="n">dsfConfig1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dsfConfig1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_DataSetFieldConfig</span><span class="p">));</span>
+<span class="w">    </span><span class="n">pressureData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Double_new</span><span class="p">();</span>
+<span class="w">    </span><span class="o">*</span><span class="n">pressureData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">17.07</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pressureValueRT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_DataValue_new</span><span class="p">();</span>
+<span class="w">    </span><span class="n">UA_Variant_setScalar</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pressureValueRT</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">pressureData</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">pressureValueRT</span><span class="o">-&gt;</span><span class="n">hasValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Set the value backend of the above create node to &#39;external value source&#39; */</span>
+<span class="w">    </span><span class="n">UA_ValueBackend</span><span class="w"> </span><span class="n">valueBackend1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend1</span><span class="p">.</span><span class="n">backendType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_VALUEBACKENDTYPE_EXTERNAL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend1</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">pressureValueRT</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend1</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">callback</span><span class="p">.</span><span class="n">userWrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">externalDataWriteCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">valueBackend1</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">external</span><span class="p">.</span><span class="n">callback</span><span class="p">.</span><span class="n">notificationRead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">externalDataReadNotificationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* The nodeid of the Custom node Pressure is 2006 which is used below */</span>
+<span class="w">    </span><span class="n">UA_Server_setVariableNode_valueBackend</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">nsIdx</span><span class="p">,</span><span class="w"> </span><span class="mi">2006</span><span class="p">),</span><span class="w"> </span><span class="n">valueBackend1</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* setup RT DataSetField config */</span>
+<span class="w">    </span><span class="n">dsfConfig1</span><span class="p">.</span><span class="n">field</span><span class="p">.</span><span class="n">variable</span><span class="p">.</span><span class="n">rtValueSource</span><span class="p">.</span><span class="n">rtInformationModelNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">    </span><span class="n">dsfConfig1</span><span class="p">.</span><span class="n">field</span><span class="p">.</span><span class="n">variable</span><span class="p">.</span><span class="n">publishParameters</span><span class="p">.</span><span class="n">publishedVariable</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="n">nsIdx</span><span class="p">,</span><span class="w"> </span><span class="mi">2006</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_addDataSetField</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">publishedDataSetIdent</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dsfConfig1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dataSetFieldIdent1</span><span class="p">);</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>WriterGroup handling</strong></p>
+<p>The WriterGroup (WG) is part of the connection and contains the primary
+configuration parameters for the message creation.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">addWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_WriterGroupConfig</span><span class="w"> </span><span class="n">writerGroupConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">writerGroupConfig</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_WriterGroupConfig</span><span class="p">));</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">name</span><span class="w">               </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;Demo WriterGroup&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">publishingInterval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cycleTimeMsec</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">enabled</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="n">UA_FALSE</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">encodingMimeType</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">UA_PUBSUB_ENCODING_UADP</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">writerGroupId</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="n">WRITER_GROUP_ID</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">rtLevel</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="n">UA_PUBSUB_RT_FIXED_SIZE</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">pubsubManagerCallback</span><span class="p">.</span><span class="n">addCustomCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">addPubSubApplicationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">pubsubManagerCallback</span><span class="p">.</span><span class="n">changeCustomCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">changePubSubApplicationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">pubsubManagerCallback</span><span class="p">.</span><span class="n">removeCustomCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">removePubSubApplicationCallback</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">messageSettings</span><span class="p">.</span><span class="n">encoding</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="n">UA_EXTENSIONOBJECT_DECODED</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">messageSettings</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UADPWRITERGROUPMESSAGEDATATYPE</span><span class="p">];</span>
+<span class="w">    </span><span class="cm">/* The configuration flags for the messages are encapsulated inside the</span>
+<span class="cm">     * message- and transport settings extension objects. These extension</span>
+<span class="cm">     * objects are defined by the standard. e.g.</span>
+<span class="cm">     * UadpWriterGroupMessageDataType */</span>
+<span class="w">    </span><span class="n">UA_UadpWriterGroupMessageDataType</span><span class="w"> </span><span class="o">*</span><span class="n">writerGroupMessage</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">UA_UadpWriterGroupMessageDataType_new</span><span class="p">();</span>
+<span class="w">    </span><span class="cm">/* Change message settings of writerGroup to send PublisherId,</span>
+<span class="cm">     * WriterGroupId in GroupHeader and DataSetWriterId in PayloadHeader</span>
+<span class="cm">     * of NetworkMessage */</span>
+<span class="w">    </span><span class="n">writerGroupMessage</span><span class="o">-&gt;</span><span class="n">networkMessageContentMask</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)(</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_PUBLISHERID</span><span class="w"> </span><span class="o">|</span>
+<span class="w">                                                              </span><span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_GROUPHEADER</span><span class="w"> </span><span class="o">|</span>
+<span class="w">                                                              </span><span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_WRITERGROUPID</span><span class="w"> </span><span class="o">|</span>
+<span class="w">                                                              </span><span class="p">(</span><span class="n">UA_UadpNetworkMessageContentMask</span><span class="p">)</span><span class="n">UA_UADPNETWORKMESSAGECONTENTMASK_PAYLOADHEADER</span><span class="p">);</span>
+<span class="w">    </span><span class="n">writerGroupConfig</span><span class="p">.</span><span class="n">messageSettings</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">writerGroupMessage</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Server_addWriterGroup</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">connectionIdent</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">writerGroupConfig</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">writerGroupIdent</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_setWriterGroupOperational</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">writerGroupIdent</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_UadpWriterGroupMessageDataType_delete</span><span class="p">(</span><span class="n">writerGroupMessage</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>DataSetWriter handling</strong></p>
+<p>A DataSetWriter (DSW) is the glue between the WG and the PDS. The DSW is
+linked to exactly one PDS and contains additional information for the
+message generation.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">addDataSetWriter</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">dataSetWriterIdent</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_DataSetWriterConfig</span><span class="w"> </span><span class="n">dataSetWriterConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dataSetWriterConfig</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_DataSetWriterConfig</span><span class="p">));</span>
+<span class="w">    </span><span class="n">dataSetWriterConfig</span><span class="p">.</span><span class="n">name</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;Demo DataSetWriter&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">dataSetWriterConfig</span><span class="p">.</span><span class="n">dataSetWriterId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DATA_SET_WRITER_ID</span><span class="p">;</span>
+<span class="w">    </span><span class="n">dataSetWriterConfig</span><span class="p">.</span><span class="n">keyFrameCount</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Server_addDataSetWriter</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">writerGroupIdent</span><span class="p">,</span><span class="w"> </span><span class="n">publishedDataSetIdent</span><span class="p">,</span>
+<span class="w">                               </span><span class="o">&amp;</span><span class="n">dataSetWriterConfig</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dataSetWriterIdent</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Published data handling</strong></p>
+<p>The published data is updated in the array using this function</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">updateMeasurementsPublisher</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">timespec</span><span class="w"> </span><span class="n">start_time</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">counterValue</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">pressureValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">publishTimestamp</span><span class="p">[</span><span class="n">measurementsPublisher</span><span class="p">]</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="n">start_time</span><span class="p">;</span>
+<span class="w">    </span><span class="n">publishCounterValue</span><span class="p">[</span><span class="n">measurementsPublisher</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">counterValue</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pressureValues</span><span class="p">[</span><span class="n">measurementsPublisher</span><span class="p">]</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">pressureValue</span><span class="p">;</span>
+<span class="w">    </span><span class="n">measurementsPublisher</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Publisher thread routine</strong></p>
+<p>The Publisher thread sleeps for 60% of the cycletime (250us) and prepares the tranmission packet within 40% of
+cycletime. The data published by this thread in one cycle is subscribed by the subscriber thread of pubsub_nodeset_rt_subscriber in the
+next cycle (two cycle timing model).</p>
+<p>The publisherETF function is the routine used by the publisher thread.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">publisherETF</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">timespec</span><span class="w">   </span><span class="n">nextnanosleeptime</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ServerCallback</span><span class="w"> </span><span class="n">pubCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="o">*</span><span class="w">        </span><span class="n">server</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_WriterGroup</span><span class="o">*</span><span class="w">   </span><span class="n">currentWriterGroup</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt64</span><span class="w">         </span><span class="n">interval_ns</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt64</span><span class="w">         </span><span class="n">transmission_time</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Initialise value for nextnanosleeptime timespec */</span>
+<span class="w">    </span><span class="n">nextnanosleeptime</span><span class="p">.</span><span class="n">tv_nsec</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">threadArg</span><span class="w"> </span><span class="o">*</span><span class="n">threadArgumentsPublisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">threadArg</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">arg</span><span class="p">;</span>
+<span class="w">    </span><span class="n">server</span><span class="w">                              </span><span class="o">=</span><span class="w"> </span><span class="n">threadArgumentsPublisher</span><span class="o">-&gt;</span><span class="n">server</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pubCallback</span><span class="w">                         </span><span class="o">=</span><span class="w"> </span><span class="n">threadArgumentsPublisher</span><span class="o">-&gt;</span><span class="n">callback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">currentWriterGroup</span><span class="w">                  </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_WriterGroup</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">threadArgumentsPublisher</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>
+<span class="w">    </span><span class="n">interval_ns</span><span class="w">                         </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_UInt64</span><span class="p">)(</span><span class="n">threadArgumentsPublisher</span><span class="o">-&gt;</span><span class="n">interval_ms</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MILLI_SECONDS</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Get current time and compute the next nanosleeptime */</span>
+<span class="w">    </span><span class="n">clock_gettime</span><span class="p">(</span><span class="n">CLOCKID</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nextnanosleeptime</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* Variable to nano Sleep until 1ms before a 1 second boundary */</span>
+<span class="w">    </span><span class="n">nextnanosleeptime</span><span class="p">.</span><span class="n">tv_sec</span><span class="w">                      </span><span class="o">+=</span><span class="w"> </span><span class="n">SECONDS_SLEEP</span><span class="p">;</span>
+<span class="w">    </span><span class="n">nextnanosleeptime</span><span class="p">.</span><span class="n">tv_nsec</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__syscall_slong_t</span><span class="p">)(</span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pubWakeupPercentage</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MILLI_SECONDS</span><span class="p">);</span>
+<span class="w">    </span><span class="n">nanoSecondFieldConversion</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nextnanosleeptime</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Define Ethernet ETF transport settings */</span>
+<span class="w">    </span><span class="n">UA_EthernetWriterGroupTransportDataType</span><span class="w"> </span><span class="n">ethernettransportSettings</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ethernettransportSettings</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_EthernetWriterGroupTransportDataType</span><span class="p">));</span>
+<span class="w">    </span><span class="n">ethernettransportSettings</span><span class="p">.</span><span class="n">transmission_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Encapsulate ETF config in transportSettings */</span>
+<span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
+<span class="w">    </span><span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">transportSettings</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">UA_ExtensionObject</span><span class="p">));</span>
+<span class="w">    </span><span class="cm">/* TODO: transportSettings encoding and type to be defined */</span>
+<span class="w">    </span><span class="n">transportSettings</span><span class="p">.</span><span class="n">content</span><span class="p">.</span><span class="n">decoded</span><span class="p">.</span><span class="n">data</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ethernettransportSettings</span><span class="p">;</span>
+<span class="w">    </span><span class="n">currentWriterGroup</span><span class="o">-&gt;</span><span class="n">config</span><span class="p">.</span><span class="n">transportSettings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">roundOffCycleTime</span><span class="w">                  </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_UInt64</span><span class="p">)((</span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MILLI_SECONDS</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">pubWakeupPercentage</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MILLI_SECONDS</span><span class="p">));</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">running</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">clock_nanosleep</span><span class="p">(</span><span class="n">CLOCKID</span><span class="p">,</span><span class="w"> </span><span class="n">TIMER_ABSTIME</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nextnanosleeptime</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">        </span><span class="n">transmission_time</span><span class="w">                           </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">UA_UInt64</span><span class="p">)</span><span class="n">nextnanosleeptime</span><span class="p">.</span><span class="n">tv_sec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">SECONDS</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">UA_UInt64</span><span class="p">)</span><span class="n">nextnanosleeptime</span><span class="p">.</span><span class="n">tv_nsec</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">roundOffCycleTime</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">QBV_OFFSET</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ethernettransportSettings</span><span class="p">.</span><span class="n">transmission_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transmission_time</span><span class="p">;</span>
+<span class="w">        </span><span class="n">pubCallback</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">currentWriterGroup</span><span class="p">);</span>
+<span class="w">        </span><span class="n">nextnanosleeptime</span><span class="p">.</span><span class="n">tv_nsec</span><span class="w">                   </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="n">__syscall_slong_t</span><span class="p">)</span><span class="n">interval_ns</span><span class="p">;</span>
+<span class="w">        </span><span class="n">nanoSecondFieldConversion</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nextnanosleeptime</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">UA_free</span><span class="p">(</span><span class="n">threadArgumentsPublisher</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>UserApplication thread routine</strong></p>
+<p>The userapplication thread will wakeup at 30% of cycle time and handles the userdata in the Information Model.
+This thread is used to increment the counterdata that will be published by the Publisher thread and also writes the published data in a csv.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="nf">userApplicationPub</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">arg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">timespec</span><span class="w"> </span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Get current time and compute the next nanosleeptime */</span>
+<span class="w">    </span><span class="n">clock_gettime</span><span class="p">(</span><span class="n">CLOCKID</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* Variable to nano Sleep until 1ms before a 1 second boundary */</span>
+<span class="w">    </span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">.</span><span class="n">tv_sec</span><span class="w">                      </span><span class="o">+=</span><span class="w"> </span><span class="n">SECONDS_SLEEP</span><span class="p">;</span>
+<span class="w">    </span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">.</span><span class="n">tv_nsec</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">__syscall_slong_t</span><span class="p">)(</span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">userAppWakeupPercentage</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MILLI_SECONDS</span><span class="p">);</span>
+<span class="w">    </span><span class="n">nanoSecondFieldConversion</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">);</span>
+<span class="w">    </span><span class="o">*</span><span class="n">pubCounterData</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">running</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">clock_nanosleep</span><span class="p">(</span><span class="n">CLOCKID</span><span class="p">,</span><span class="w"> </span><span class="n">TIMER_ABSTIME</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">        </span><span class="o">*</span><span class="n">pubCounterData</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">pubCounterData</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="o">*</span><span class="n">pressureData</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">pressureData</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="n">clock_gettime</span><span class="p">(</span><span class="n">CLOCKID</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dataModificationTime</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">fileWrite</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">consolePrint</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">))</span>
+<span class="w">            </span><span class="n">updateMeasurementsPublisher</span><span class="p">(</span><span class="n">dataModificationTime</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">pubCounterData</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">pressureData</span><span class="p">);</span>
+<span class="w">        </span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">.</span><span class="n">tv_nsec</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">(</span><span class="n">__syscall_slong_t</span><span class="p">)(</span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">MILLI_SECONDS</span><span class="p">);</span>
+<span class="w">        </span><span class="n">nanoSecondFieldConversion</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nextnanosleeptimeUserApplication</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Thread creation</strong></p>
+<p>The threadcreation functionality creates thread with given threadpriority, coreaffinity. The function returns the threadID of the newly
+created thread.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="n">pthread_t</span><span class="w"> </span><span class="nf">threadCreation</span><span class="p">(</span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">threadPriority</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">coreAffinity</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="kr">thread</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="p">),</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">applicationName</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">serverConfig</span><span class="p">){</span>
+
+<span class="w">    </span><span class="cm">/* Core affinity set */</span>
+<span class="w">    </span><span class="kt">cpu_set_t</span><span class="w">           </span><span class="n">cpuset</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pthread_t</span><span class="w">           </span><span class="n">threadID</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">sched_param</span><span class="w">  </span><span class="n">schedParam</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Int32</span><span class="w">         </span><span class="n">returnValue</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Int32</span><span class="w">         </span><span class="n">errorSetAffinity</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Return the ID for thread */</span>
+<span class="w">    </span><span class="n">threadID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pthread_self</span><span class="p">();</span>
+<span class="w">    </span><span class="n">schedParam</span><span class="p">.</span><span class="n">sched_priority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPriority</span><span class="p">;</span>
+<span class="w">    </span><span class="n">returnValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pthread_setschedparam</span><span class="p">(</span><span class="n">threadID</span><span class="p">,</span><span class="w"> </span><span class="n">SCHED_FIFO</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">schedParam</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">returnValue</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="s">&quot;pthread_setschedparam: failed</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>\
+<span class="w">                </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">pthread_setschedparam:%s Thread priority is %d </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span>\
+<span class="w">                </span><span class="n">applicationName</span><span class="p">,</span><span class="w"> </span><span class="n">schedParam</span><span class="p">.</span><span class="n">sched_priority</span><span class="p">);</span>
+<span class="w">    </span><span class="n">CPU_ZERO</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cpuset</span><span class="p">);</span>
+<span class="w">    </span><span class="n">CPU_SET</span><span class="p">((</span><span class="kt">size_t</span><span class="p">)</span><span class="n">coreAffinity</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cpuset</span><span class="p">);</span>
+<span class="w">    </span><span class="n">errorSetAffinity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pthread_setaffinity_np</span><span class="p">(</span><span class="n">threadID</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">cpu_set_t</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cpuset</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">errorSetAffinity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pthread_setaffinity_np: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">strerror</span><span class="p">(</span><span class="n">errorSetAffinity</span><span class="p">));</span>
+<span class="w">        </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">returnValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">threadID</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="kr">thread</span><span class="p">,</span><span class="w"> </span><span class="n">serverConfig</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">returnValue</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="s">&quot;:%s Cannot create thread</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">applicationName</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">CPU_ISSET</span><span class="p">((</span><span class="kt">size_t</span><span class="p">)</span><span class="n">coreAffinity</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cpuset</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="s">&quot;%s CPU CORE: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">applicationName</span><span class="p">,</span><span class="w"> </span><span class="n">coreAffinity</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">threadID</span><span class="p">;</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Usage function</strong></p>
+<p>The usage function gives the list of options that can be configured in the application.</p>
+<p>./bin/examples/pubsub_nodeset_rt_publisher -h gives the list of options for running the application.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">usage</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">appname</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot;usage: %s [options]</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -i [name]     use network interface &#39;name&#39;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -C [num]      cycle time in milli seconds (default %lf)</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -p            Do you need to print the data in console output</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -s [num]      set SO_PRIORITY to &#39;num&#39; (default %d)</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -P [num]      Publisher priority value (default %d)</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -U [num]      User application priority value (default %d)</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -c [num]      run on CPU for publisher&#39;num&#39;(default %d)</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -u [num]      run on CPU for userApplication&#39;num&#39;(default %d)</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -t            do not use SO_TXTIME</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -m [mac_addr] ToDO:dst MAC address</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot; -h            prints this message and exits</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">appname</span><span class="p">,</span><span class="w"> </span><span class="n">DEFAULT_CYCLE_TIME</span><span class="p">,</span><span class="w"> </span><span class="n">DEFAULT_SOCKET_PRIORITY</span><span class="p">,</span><span class="w"> </span><span class="n">DEFAULT_PUB_SCHED_PRIORITY</span><span class="p">,</span><span class="w"> </span>\
+<span class="w">        </span><span class="n">DEFAULT_USERAPPLICATION_SCHED_PRIORITY</span><span class="p">,</span><span class="w"> </span><span class="n">DEFAULT_PUBSUB_CORE</span><span class="p">,</span><span class="w"> </span><span class="n">DEFAULT_USER_APP_CORE</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Main Server code</strong></p>
+<p>The main function contains publisher threads running</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
+<span class="w">    </span><span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="n">stopHandler</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_Int32</span><span class="w">         </span><span class="n">returnValue</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w">             </span><span class="o">*</span><span class="n">interface</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w">             </span><span class="o">*</span><span class="n">progname</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Int32</span><span class="w">         </span><span class="n">argInputs</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w">    </span><span class="n">retval</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w">       </span><span class="o">*</span><span class="n">server</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_new</span><span class="p">();</span>
+<span class="w">    </span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_getConfig</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">pthread_t</span><span class="w">        </span><span class="n">userThreadID</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ServerConfig_setMinimal</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">PORT_NUMBER</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Files namespace_example_publisher_generated.h and namespace_example_publisher_generated.c are created from</span>
+<span class="cm">     * pubDataModel.xml in the /src_generated directory by CMake */</span>
+<span class="w">    </span><span class="cm">/* Loading the user created variables into the information model from the generated .c and .h files */</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">namespace_example_publisher_generated</span><span class="p">(</span><span class="n">server</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">UA_STATUSCODE_GOOD</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Could not add the example nodeset. &quot;</span>
+<span class="w">                     </span><span class="s">&quot;Check previous output for any error.&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">nsIdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_Server_addNamespace</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;http://yourorganisation.org/test/&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">UA_NetworkAddressUrlDataType</span><span class="w"> </span><span class="n">networkAddressUrlPub</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Process the command line arguments */</span>
+<span class="w">    </span><span class="cm">/* For more information run ./bin/examples/pubsub_nodeset_rt_publisher -h */</span>
+<span class="w">    </span><span class="n">progname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strrchr</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">progname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">progname</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">progname</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">EOF</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="p">(</span><span class="n">argInputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getopt</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;i:C:f:ps:P:U:c:u:tm:h:&quot;</span><span class="p">)))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">argInputs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;i&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">interface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">optarg</span><span class="p">;</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;C&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atof</span><span class="p">(</span><span class="n">optarg</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;f&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">fileName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">optarg</span><span class="p">;</span>
+<span class="w">                </span><span class="n">fileWrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">                </span><span class="n">fpPublisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fopen</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;w&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;p&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">consolePrint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">;</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;s&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">socketPriority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="n">optarg</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;P&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">pubPriority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="n">optarg</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;U&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">userAppPriority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="n">optarg</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;c&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">pubSubCore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="n">optarg</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;u&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">userAppCore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">atoi</span><span class="p">(</span><span class="n">optarg</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;t&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">useSoTxtime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_FALSE</span><span class="p">;</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;m&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="cm">/*ToDo:Need to handle for mac address*/</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;h&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">usage</span><span class="p">(</span><span class="n">progname</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;?&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">usage</span><span class="p">(</span><span class="n">progname</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cycleTimeMsec</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.125</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;%f Bad cycle time&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cycleTimeMsec</span><span class="p">);</span>
+<span class="w">        </span><span class="n">usage</span><span class="p">(</span><span class="n">progname</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">interface</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Need a network interface to run&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">usage</span><span class="p">(</span><span class="n">progname</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">networkAddressUrlPub</span><span class="p">.</span><span class="n">networkInterface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">interface</span><span class="p">);</span>
+<span class="w">    </span><span class="n">networkAddressUrlPub</span><span class="p">.</span><span class="n">url</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="n">PUBLISHING_MAC_ADDRESS</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* It is possible to use multiple PubSubTransportLayers on runtime.</span>
+<span class="cm">     * The correct factory is selected on runtime by the standard defined</span>
+<span class="cm">     * PubSub TransportProfileUri&#39;s. */</span>
+<span class="w">    </span><span class="n">UA_ServerConfig_addPubSubTransportLayer</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">UA_PubSubTransportLayerEthernet</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">addPubSubConnection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">networkAddressUrlPub</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addPublishedDataSet</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addDataSetField</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addWriterGroup</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">addDataSetWriter</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Server_freezeWriterGroupConfiguration</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">writerGroupIdent</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">serverConfigStruct</span><span class="w"> </span><span class="o">*</span><span class="n">serverConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">serverConfig</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">serverConfigStruct</span><span class="o">*</span><span class="p">)</span><span class="n">UA_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">serverConfigStruct</span><span class="p">));</span>
+<span class="w">    </span><span class="n">serverConfig</span><span class="o">-&gt;</span><span class="n">ServerRun</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">server</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">threadNameUserApplication</span><span class="p">[</span><span class="mi">22</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;UserApplicationPub&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="n">userThreadID</span><span class="w">                       </span><span class="o">=</span><span class="w"> </span><span class="n">threadCreation</span><span class="p">(</span><span class="n">userAppPriority</span><span class="p">,</span><span class="w"> </span><span class="n">userAppCore</span><span class="p">,</span><span class="w"> </span><span class="n">userApplicationPub</span><span class="p">,</span><span class="w"> </span><span class="n">threadNameUserApplication</span><span class="p">,</span><span class="w"> </span><span class="n">serverConfig</span><span class="p">);</span>
+<span class="w">    </span><span class="n">retval</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+<span class="w">    </span><span class="n">returnValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pthread_join</span><span class="p">(</span><span class="n">pubthreadID</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">returnValue</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Pthread Join Failed for publisher thread:%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">returnValue</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">returnValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pthread_join</span><span class="p">(</span><span class="n">userThreadID</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">returnValue</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Pthread Join Failed for User thread:%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">returnValue</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fileWrite</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="cm">/* Write the published data in a file */</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">pubLoopVariable</span><span class="w">               </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">pubLoopVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">pubLoopVariable</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">measurementsPublisher</span><span class="p">;</span>
+<span class="w">             </span><span class="n">pubLoopVariable</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">fprintf</span><span class="p">(</span><span class="n">fpPublisher</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;%ld,%ld.%09ld,%lf</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">publishCounterValue</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">],</span>
+<span class="w">                    </span><span class="n">publishTimestamp</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">].</span><span class="n">tv_sec</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">publishTimestamp</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">].</span><span class="n">tv_nsec</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">pressureValues</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">fclose</span><span class="p">(</span><span class="n">fpPublisher</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">consolePrint</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UA_TRUE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">pubLoopVariable</span><span class="w">               </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">pubLoopVariable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">pubLoopVariable</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">measurementsPublisher</span><span class="p">;</span>
+<span class="w">             </span><span class="n">pubLoopVariable</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">             </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%ld,%ld.%09ld,%lf</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">publishCounterValue</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">],</span>
+<span class="w">                    </span><span class="n">publishTimestamp</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">].</span><span class="n">tv_sec</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">publishTimestamp</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">].</span><span class="n">tv_nsec</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">pressureValues</span><span class="p">[</span><span class="n">pubLoopVariable</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_free</span><span class="p">(</span><span class="n">serverConfig</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_free</span><span class="p">(</span><span class="n">pubCounterData</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* Free external data source */</span>
+<span class="w">    </span><span class="n">UA_free</span><span class="p">(</span><span class="n">pubDataValueRT</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_free</span><span class="p">(</span><span class="n">pressureData</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* Free external data source */</span>
+<span class="w">    </span><span class="n">UA_free</span><span class="p">(</span><span class="n">pressureValueRT</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pubsub_TSN_loopback.html" class="btn btn-neutral float-left" title="Realtime Loopback Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pubsub_nodeset_rt_subscriber.html" class="btn btn-neutral float-right" title="Subscriber Realtime example using custom nodes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

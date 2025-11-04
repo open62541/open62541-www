@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Networking &mdash; open62541 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="open62541 0.2.0 documentation" href="index.html"/>
+        <link rel="up" title="Internals" href="internal.html"/>
+        <link rel="next" title="Logging" href="log.html"/>
+        <link rel="prev" title="Nodestore" href="nodestore.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="namespace_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="nodestore.html">Nodestore</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Networking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#connection-config">Connection Config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connection-structure">Connection Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#endpointurl-helper">EndpointURL Helper</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="log.html">Logging</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html">Docs</a> &raquo;</li>
+        
+          <li><a href="internal.html">Internals</a> &raquo;</li>
+        
+      <li>Networking</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/connection.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="networking">
+<h1>Networking<a class="headerlink" href="#networking" title="Permalink to this headline">¶</a></h1>
+<p>Client-server connection is represented by a <cite>UA_Connection</cite> structure. In
+order to allow for different operating systems and connection types. For
+this, <cite>UA_Connection</cite> stores a pointer to user-defined data and
+function-pointers to interact with the underlying networking implementation.</p>
+<p>An example networklayer for TCP communication is contained in the plugins
+folder. The networklayer forwards messages with <cite>UA_Connection</cite> structures to
+the main open62541 library. The library can then return messages vie TCP
+without being aware of the underlying transport technology.</p>
+<div class="section" id="connection-config">
+<h2>Connection Config<a class="headerlink" href="#connection-config" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="n">UA_UInt32</span> <span class="n">protocolVersion</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">sendBufferSize</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">recvBufferSize</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxMessageSize</span><span class="p">;</span>
+    <span class="n">UA_UInt32</span> <span class="n">maxChunkCount</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">UA_ConnectionConfig</span><span class="p">;</span>
+
+<span class="k">extern</span> <span class="k">const</span> <span class="n">UA_ConnectionConfig</span> <span class="n">UA_ConnectionConfig_standard</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="connection-structure">
+<h2>Connection Structure<a class="headerlink" href="#connection-structure" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_CONNECTION_OPENING</span><span class="p">,</span>     <span class="cm">/* The socket is open, but the HEL/ACK handshake</span>
+<span class="cm">                                  is not done */</span>
+    <span class="n">UA_CONNECTION_ESTABLISHED</span><span class="p">,</span> <span class="cm">/* The socket is open and the connection</span>
+<span class="cm">                                  configured */</span>
+    <span class="n">UA_CONNECTION_CLOSED</span><span class="p">,</span>      <span class="cm">/* The socket has been closed and the connection</span>
+<span class="cm">                                  will be deleted */</span>
+<span class="p">}</span> <span class="n">UA_ConnectionState</span><span class="p">;</span>
+
+<span class="cm">/* Forward declarations */</span>
+<span class="k">struct</span> <span class="n">UA_Connection</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_Connection</span> <span class="n">UA_Connection</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">UA_SecureChannel</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">UA_SecureChannel</span> <span class="n">UA_SecureChannel</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">UA_Connection</span> <span class="p">{</span>
+    <span class="n">UA_ConnectionState</span> <span class="n">state</span><span class="p">;</span>
+    <span class="n">UA_ConnectionConfig</span> <span class="n">localConf</span><span class="p">;</span>
+    <span class="n">UA_ConnectionConfig</span> <span class="n">remoteConf</span><span class="p">;</span>
+    <span class="n">UA_SecureChannel</span> <span class="o">*</span><span class="n">channel</span><span class="p">;</span>       <span class="cm">/* The securechannel that is attached to</span>
+<span class="cm">                                        this connection */</span>
+    <span class="n">UA_Int32</span> <span class="n">sockfd</span><span class="p">;</span>                 <span class="cm">/* Most connectivity solutions run on</span>
+<span class="cm">                                        sockets. Having the socket id here</span>
+<span class="cm">                                        simplifies the design. */</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">;</span>                    <span class="cm">/* A pointer to internal data */</span>
+    <span class="n">UA_ByteString</span> <span class="n">incompleteMessage</span><span class="p">;</span> <span class="cm">/* A half-received message (TCP is a</span>
+<span class="cm">                                        streaming protocol) is stored here */</span>
+
+    <span class="cm">/* Get a buffer for sending */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">getSendBuffer</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">length</span><span class="p">,</span>
+                                   <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+
+    <span class="cm">/* Release the send buffer manually */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">releaseSendBuffer</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+
+    <span class="cm">/* Sends a message over the connection. The message buffer is always freed,</span>
+<span class="cm">     * even if sending fails.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param connection The connection</span>
+<span class="cm">     * @param buf The message buffer</span>
+<span class="cm">     * @return Returns an error code or UA_STATUSCODE_GOOD. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">send</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+
+    <span class="cm">/* Receive a message from the remote connection</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param connection The connection</span>
+<span class="cm">     * @param response The response string. It is allocated by the connection</span>
+<span class="cm">     *        and needs to be freed with connection-&gt;releaseBuffer</span>
+<span class="cm">     * @param timeout Timeout of the recv operation in milliseconds</span>
+<span class="cm">     * @return Returns UA_STATUSCODE_BADCOMMUNICATIONERROR if the recv operation</span>
+<span class="cm">     *         can be repeated, UA_STATUSCODE_GOOD if it succeeded and</span>
+<span class="cm">     *         UA_STATUSCODE_BADCONNECTIONCLOSED if the connection was</span>
+<span class="cm">     *         closed. */</span>
+    <span class="n">UA_StatusCode</span> <span class="p">(</span><span class="o">*</span><span class="n">recv</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">response</span><span class="p">,</span>
+                          <span class="n">UA_UInt32</span> <span class="n">timeout</span><span class="p">);</span>
+
+    <span class="cm">/* Release the buffer of a received message */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">releaseRecvBuffer</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">,</span> <span class="n">UA_ByteString</span> <span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+
+    <span class="cm">/* Close the connection */</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">close</span><span class="p">)(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="kt">void</span> <span class="nf">UA_Connection_deleteMembers</span><span class="p">(</span><span class="n">UA_Connection</span> <span class="o">*</span><span class="n">connection</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="endpointurl-helper">
+<h2>EndpointURL Helper<a class="headerlink" href="#endpointurl-helper" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cm">/* Split the given endpoint url into hostname and port</span>
+<span class="cm"> * @param endpointUrl The endpoint URL to split up</span>
+<span class="cm"> * @param hostname the target array for hostname. Has to be at least 256 size.</span>
+<span class="cm"> *        If an IPv6 address is given, hostname contains e.g.</span>
+<span class="cm"> *        &#39;[2001:0db8:85a3::8a2e:0370:7334]&#39;</span>
+<span class="cm"> * @param port set to the port of the url or 0</span>
+<span class="cm"> * @param path pointing to the end of given endpointUrl or to NULL if no</span>
+<span class="cm"> *        path given. The starting &#39;/&#39; is NOT included in path</span>
+<span class="cm"> * @return UA_STATUSCODE_BADOUTOFRANGE if url too long,</span>
+<span class="cm"> *         UA_STATUSCODE_BADATTRIBUTEIDINVALID if url not starting with</span>
+<span class="cm"> *         &#39;opc.tcp://&#39;, UA_STATUSCODE_GOOD on success</span>
+<span class="cm"> */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_EndpointUrl_split</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">hostname</span><span class="p">,</span>
+                     <span class="n">UA_UInt16</span> <span class="o">*</span> <span class="n">port</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span> <span class="n">path</span><span class="p">);</span>
+
+<span class="cm">/* Convert given byte string to a positive number. Returns the number of valid</span>
+<span class="cm"> * digits. Stops if a non-digit char is found and returns the number of digits</span>
+<span class="cm"> * up to that point. */</span>
+<span class="kt">size_t</span>
+<span class="nf">UA_readNumber</span><span class="p">(</span><span class="n">UA_Byte</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">buflen</span><span class="p">,</span> <span class="n">UA_UInt32</span> <span class="o">*</span><span class="n">number</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="log.html" class="btn btn-neutral float-right" title="Logging" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nodestore.html" class="btn btn-neutral" title="Nodestore" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

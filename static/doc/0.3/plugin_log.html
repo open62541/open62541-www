@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Logging Plugin API &mdash; open62541 0.3.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.3.1',
+              LANGUAGE:'en',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Access Control Plugin API" href="plugin_access_control.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodestore.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="internal.html">Internals</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plugin_network.html">Networking Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_access_control.html">Access Control Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Logging Plugin API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#convenience-macros-for-complex-types">Convenience macros for complex types</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html">Docs</a> &raquo;</li>
+        
+          <li><a href="internal.html">Internals</a> &raquo;</li>
+        
+      <li>Logging Plugin API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/plugin_log.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="logging-plugin-api">
+<h1>Logging Plugin API<a class="headerlink" href="#logging-plugin-api" title="Permalink to this headline">¶</a></h1>
+<p>Servers and clients must define a logger in their configuration. The logger
+is just a function pointer. Every log-message consists of a log-level, a
+log-category and a string message content. The timestamp of the log-message
+is created within the logger.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_LOGLEVEL_TRACE</span><span class="p">,</span>
+    <span class="n">UA_LOGLEVEL_DEBUG</span><span class="p">,</span>
+    <span class="n">UA_LOGLEVEL_INFO</span><span class="p">,</span>
+    <span class="n">UA_LOGLEVEL_WARNING</span><span class="p">,</span>
+    <span class="n">UA_LOGLEVEL_ERROR</span><span class="p">,</span>
+    <span class="n">UA_LOGLEVEL_FATAL</span>
+<span class="p">}</span> <span class="n">UA_LogLevel</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">UA_LOGCATEGORY_NETWORK</span><span class="p">,</span>
+    <span class="n">UA_LOGCATEGORY_SECURECHANNEL</span><span class="p">,</span>
+    <span class="n">UA_LOGCATEGORY_SESSION</span><span class="p">,</span>
+    <span class="n">UA_LOGCATEGORY_SERVER</span><span class="p">,</span>
+    <span class="n">UA_LOGCATEGORY_CLIENT</span><span class="p">,</span>
+    <span class="n">UA_LOGCATEGORY_USERLAND</span><span class="p">,</span>
+    <span class="n">UA_LOGCATEGORY_SECURITYPOLICY</span>
+<span class="p">}</span> <span class="n">UA_LogCategory</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The message string and following varargs are formatted according to the rules
+of the printf command. Do not call the logger directly. Instead, make use of
+the convenience macros that take the minimum log-level defined in ua_config.h
+into account.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">UA_Logger</span><span class="p">)(</span><span class="n">UA_LogLevel</span> <span class="n">level</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span>
+                          <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="kt">va_list</span> <span class="n">args</span><span class="p">);</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="nf">UA_FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="kt">void</span>
+<span class="n">UA_LOG_TRACE</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
+<span class="cp">#if UA_LOGLEVEL &lt;= 100</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_TRACE</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="nf">UA_FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="kt">void</span>
+<span class="n">UA_LOG_DEBUG</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
+<span class="cp">#if UA_LOGLEVEL &lt;= 200</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_DEBUG</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="nf">UA_FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="kt">void</span>
+<span class="n">UA_LOG_INFO</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
+<span class="cp">#if UA_LOGLEVEL &lt;= 300</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_INFO</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="nf">UA_FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="kt">void</span>
+<span class="n">UA_LOG_WARNING</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
+<span class="cp">#if UA_LOGLEVEL &lt;= 400</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_WARNING</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="nf">UA_FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="kt">void</span>
+<span class="n">UA_LOG_ERROR</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
+<span class="cp">#if UA_LOGLEVEL &lt;= 500</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_ERROR</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_INLINE</span> <span class="nf">UA_FORMAT</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="kt">void</span>
+<span class="n">UA_LOG_FATAL</span><span class="p">(</span><span class="n">UA_Logger</span> <span class="n">logger</span><span class="p">,</span> <span class="n">UA_LogCategory</span> <span class="n">category</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">,</span> <span class="p">...)</span> <span class="p">{</span>
+<span class="cp">#if UA_LOGLEVEL &lt;= 600</span>
+    <span class="kt">va_list</span> <span class="n">args</span><span class="p">;</span> <span class="n">va_start</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">logger</span><span class="p">(</span><span class="n">UA_LOGLEVEL_FATAL</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">args</span><span class="p">);</span>
+    <span class="n">va_end</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+<span class="cp">#endif</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="convenience-macros-for-complex-types">
+<h2>Convenience macros for complex types<a class="headerlink" href="#convenience-macros-for-complex-types" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_PRINTF_GUID_FORMAT &quot;%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x&quot;</span>
+<span class="cp">#define UA_PRINTF_GUID_DATA(GUID) (GUID).data1, (GUID).data2, (GUID).data3, \</span>
+<span class="cp">        (GUID).data4[0], (GUID).data4[1], (GUID).data4[2], (GUID).data4[3], \</span>
+<span class="cp">        (GUID).data4[4], (GUID).data4[5], (GUID).data4[6], (GUID).data4[7]</span>
+
+<span class="cp">#define UA_PRINTF_STRING_FORMAT &quot;\&quot;%.*s\&quot;&quot;</span>
+<span class="cp">#define UA_PRINTF_STRING_DATA(STRING) (int)(STRING).length, (STRING).data</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="plugin_access_control.html" class="btn btn-neutral float-left" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2018, The open62541 authors
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

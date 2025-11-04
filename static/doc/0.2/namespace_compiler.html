@@ -1,0 +1,589 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>XML Nodeset Compiler &mdash; open62541 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="open62541 0.2.0 documentation" href="index.html"/>
+        <link rel="next" title="Internals" href="internal.html"/>
+        <link rel="prev" title="Standard-Defined Constants" href="constants.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="toc.html" class="icon icon-home"> open62541
+          
+
+          
+            
+            <img src="_static/open62541_html.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="information_modelling.html">Information Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Standard-Defined Constants</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">XML Nodeset Compiler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-object-instances">Creating object instances</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internals</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="toc.html">Docs</a> &raquo;</li>
+        
+      <li>XML Nodeset Compiler</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/namespace_compiler.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="xml-nodeset-compiler">
+<h1>XML Nodeset Compiler<a class="headerlink" href="#xml-nodeset-compiler" title="Permalink to this headline">¶</a></h1>
+<p>When writing an application, it is more comfortable to create information models using some GUI tools. Most tools can export data according the OPC UA Nodeset XML schema. open62541 contains a python based namespace compiler that can transform these information model definitions into a working server.</p>
+<p>Note that the namespace compiler you can find in the <em>tools</em> subfolder is <em>not</em> an XML transformation tool but a compiler. That means that it will create an internal representation when parsing the XML files and attempt to understand and verify the correctness of this representation in order to generate C Code.</p>
+<p>We take the following information model snippet as the starting point of the following tutorial:</p>
+<div class="highlight-xml"><div class="highlight"><pre><span></span><span class="nt">&lt;UANodeSet</span> <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>
+           <span class="na">xmlns:uax=</span><span class="s">&quot;http://opcfoundation.org/UA/2008/02/Types.xsd&quot;</span>
+           <span class="na">xmlns=</span><span class="s">&quot;http://opcfoundation.org/UA/2011/03/UANodeSet.xsd&quot;</span>
+           <span class="na">xmlns:s1=</span><span class="s">&quot;http://yourorganisation.org/example_nodeset/&quot;</span>
+           <span class="na">xmlns:xsd=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;NamespaceUris&gt;</span>
+        <span class="nt">&lt;Uri&gt;</span>http://yourorganisation.org/example_nodeset/<span class="nt">&lt;/Uri&gt;</span>
+    <span class="nt">&lt;/NamespaceUris&gt;</span>
+    <span class="nt">&lt;Aliases&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>i=1<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;UInt32&quot;</span><span class="nt">&gt;</span>i=7<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>i=12<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=37<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=40<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasSubtype&quot;</span><span class="nt">&gt;</span>i=45<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasProperty&quot;</span><span class="nt">&gt;</span>i=46<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>i=47<span class="nt">&lt;/Alias&gt;</span>
+        <span class="nt">&lt;Alias</span> <span class="na">Alias=</span><span class="s">&quot;Argument&quot;</span><span class="nt">&gt;</span>i=296<span class="nt">&lt;/Alias&gt;</span>
+    <span class="nt">&lt;/Aliases&gt;</span>
+    <span class="nt">&lt;Extensions&gt;</span>
+        <span class="nt">&lt;Extension&gt;</span>
+            <span class="nt">&lt;ModelInfo</span> <span class="na">Tool=</span><span class="s">&quot;UaModeler&quot;</span> <span class="na">Hash=</span><span class="s">&quot;Zs8w1AQI71W8P/GOk3k/xQ==&quot;</span>
+                       <span class="na">Version=</span><span class="s">&quot;1.3.4&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/Extension&gt;</span>
+    <span class="nt">&lt;/Extensions&gt;</span>
+    <span class="nt">&lt;UAReferenceType</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=4001&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:providesInputTo&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>providesInputTo<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasSubtype&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                i=33
+            <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+        <span class="nt">&lt;InverseName</span> <span class="na">Locale=</span><span class="s">&quot;en_US&quot;</span><span class="nt">&gt;</span>inputProcidedBy<span class="nt">&lt;/InverseName&gt;</span>
+    <span class="nt">&lt;/UAReferenceType&gt;</span>
+    <span class="nt">&lt;UAObjectType</span> <span class="na">IsAbstract=</span><span class="s">&quot;true&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=1001&quot;</span>
+                  <span class="na">BrowseName=</span><span class="s">&quot;1:FieldDevice&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>FieldDevice<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasSubtype&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                i=58
+            <span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAObjectType&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;String&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1001&quot;</span>
+                <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6001&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:ManufacturerName&quot;</span>
+                <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>ManufacturerName<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=1001
+            <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;String&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1001&quot;</span>
+                <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6002&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:ModelName&quot;</span>
+                <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>ModelName<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=1001
+            <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAObjectType</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:Pump&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>Pump<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6003<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=6004<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasSubtype&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=1001
+            <span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=7001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span><span class="nt">&gt;</span>ns=1;i=7002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAObjectType&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;Boolean&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span>
+                <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6003&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:isOn&quot;</span> <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span>
+                <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>isOn<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=1002
+            <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;UInt32&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span>
+                <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6004&quot;</span> <span class="na">BrowseName=</span><span class="s">&quot;1:MotorRPM&quot;</span>
+                <span class="na">UserAccessLevel=</span><span class="s">&quot;3&quot;</span> <span class="na">AccessLevel=</span><span class="s">&quot;3&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>MotorRPM<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=63<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=1002
+            <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAMethod</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=7001&quot;</span>
+              <span class="na">BrowseName=</span><span class="s">&quot;1:startPump&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>startPump<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span><span class="nt">&gt;</span>ns=1;i=6005<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=1002
+            <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAMethod&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;Argument&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=7001&quot;</span> <span class="na">ValueRank=</span><span class="s">&quot;1&quot;</span>
+                <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6005&quot;</span> <span class="na">ArrayDimensions=</span><span class="s">&quot;1&quot;</span>
+                <span class="na">BrowseName=</span><span class="s">&quot;OutputArguments&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>OutputArguments<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span>
+                       <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=7001<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=68<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+        <span class="nt">&lt;Value&gt;</span>
+            <span class="nt">&lt;ListOfExtensionObject&gt;</span>
+                <span class="nt">&lt;ExtensionObject&gt;</span>
+                    <span class="nt">&lt;TypeId&gt;</span>
+                        <span class="nt">&lt;Identifier&gt;</span>i=297<span class="nt">&lt;/Identifier&gt;</span>
+                    <span class="nt">&lt;/TypeId&gt;</span>
+                    <span class="nt">&lt;Body&gt;</span>
+                        <span class="nt">&lt;Argument&gt;</span>
+                            <span class="nt">&lt;Name&gt;</span>started<span class="nt">&lt;/Name&gt;</span>
+                            <span class="nt">&lt;DataType&gt;</span>
+                                <span class="nt">&lt;Identifier&gt;</span>i=1<span class="nt">&lt;/Identifier&gt;</span>
+                            <span class="nt">&lt;/DataType&gt;</span>
+                            <span class="nt">&lt;ValueRank&gt;</span>-1<span class="nt">&lt;/ValueRank&gt;</span>
+                            <span class="nt">&lt;ArrayDimensions&gt;&lt;/ArrayDimensions&gt;</span>
+                            <span class="nt">&lt;Description/&gt;</span>
+                        <span class="nt">&lt;/Argument&gt;</span>
+                    <span class="nt">&lt;/Body&gt;</span>
+                <span class="nt">&lt;/ExtensionObject&gt;</span>
+            <span class="nt">&lt;/ListOfExtensionObject&gt;</span>
+        <span class="nt">&lt;/Value&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+    <span class="nt">&lt;UAMethod</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=1002&quot;</span> <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=7002&quot;</span>
+              <span class="na">BrowseName=</span><span class="s">&quot;1:stopPump&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>stopPump<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span><span class="nt">&gt;</span>ns=1;i=6006<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasComponent&quot;</span>
+                       <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>ns=1;i=1002<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+    <span class="nt">&lt;/UAMethod&gt;</span>
+    <span class="nt">&lt;UAVariable</span> <span class="na">DataType=</span><span class="s">&quot;Argument&quot;</span> <span class="na">ParentNodeId=</span><span class="s">&quot;ns=1;i=7002&quot;</span> <span class="na">ValueRank=</span><span class="s">&quot;1&quot;</span>
+                <span class="na">NodeId=</span><span class="s">&quot;ns=1;i=6006&quot;</span> <span class="na">ArrayDimensions=</span><span class="s">&quot;1&quot;</span>
+                <span class="na">BrowseName=</span><span class="s">&quot;OutputArguments&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;DisplayName&gt;</span>OutputArguments<span class="nt">&lt;/DisplayName&gt;</span>
+        <span class="nt">&lt;References&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasModellingRule&quot;</span><span class="nt">&gt;</span>i=78<span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasProperty&quot;</span> <span class="na">IsForward=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+                ns=1;i=7002
+            <span class="nt">&lt;/Reference&gt;</span>
+            <span class="nt">&lt;Reference</span> <span class="na">ReferenceType=</span><span class="s">&quot;HasTypeDefinition&quot;</span><span class="nt">&gt;</span>i=68<span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;/References&gt;</span>
+        <span class="nt">&lt;Value&gt;</span>
+            <span class="nt">&lt;ListOfExtensionObject&gt;</span>
+                <span class="nt">&lt;ExtensionObject&gt;</span>
+                    <span class="nt">&lt;TypeId&gt;</span>
+                        <span class="nt">&lt;Identifier&gt;</span>i=297<span class="nt">&lt;/Identifier&gt;</span>
+                    <span class="nt">&lt;/TypeId&gt;</span>
+                    <span class="nt">&lt;Body&gt;</span>
+                        <span class="nt">&lt;Argument&gt;</span>
+                            <span class="nt">&lt;Name&gt;</span>stopped<span class="nt">&lt;/Name&gt;</span>
+                            <span class="nt">&lt;DataType&gt;</span>
+                                <span class="nt">&lt;Identifier&gt;</span>i=1<span class="nt">&lt;/Identifier&gt;</span>
+                            <span class="nt">&lt;/DataType&gt;</span>
+                            <span class="nt">&lt;ValueRank&gt;</span>-1<span class="nt">&lt;/ValueRank&gt;</span>
+                            <span class="nt">&lt;ArrayDimensions&gt;&lt;/ArrayDimensions&gt;</span>
+                            <span class="nt">&lt;Description/&gt;</span>
+                        <span class="nt">&lt;/Argument&gt;</span>
+                    <span class="nt">&lt;/Body&gt;</span>
+                <span class="nt">&lt;/ExtensionObject&gt;</span>
+            <span class="nt">&lt;/ListOfExtensionObject&gt;</span>
+        <span class="nt">&lt;/Value&gt;</span>
+    <span class="nt">&lt;/UAVariable&gt;</span>
+<span class="nt">&lt;/UANodeSet&gt;</span>
+</pre></div>
+</div>
+<p><strong>TODO</strong> Some modelers prepends the namespace qualifier “uax:” to some fields - this is not supported by the namespace compiler, who has strict aliasing rules concerning field names. If a datatype defines a field called “Argument”, the compiler expects to find “&lt;Argument&gt;” tags, not “&lt;uax:Argument&gt;”.</p>
+<p>In its simplest form, an invokation of the namespace compiler will look like this:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ python ./generate_open62541CCode.py &lt;Opc.Ua.NodeSet2.xml&gt; myNS.xml myNS
+</pre></div>
+</div>
+<p>The first argument points to the XML definition of the standard-defined namespace 0. Namespace 0 is assumed to be loaded beforehand and provides defintions for data type, reference types, and so. The second argument points to the user-defined information model, whose nodes will be added to the abstract syntax tree. The script will then creates the files <code class="docutils literal"><span class="pre">myNS.c</span></code> and <code class="docutils literal"><span class="pre">myNS.h</span></code> containing the C code necessary to instantiate those namespaces.</p>
+<p>Although it is possible to run the compiler this way, it is highly discouraged. If you care to examine the CMakeLists.txt (toplevel directory), you will find that compiling the stack with <code class="docutils literal"><span class="pre">DUA_ENABLE_GENERATE_NAMESPACE0</span></code> will execute the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/generate_open62541CCode.py
+  -i ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_AssumeExternal.txt
+  -s description -b ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_Blacklist.txt
+  ${PROJECT_SOURCE_DIR}/tools/schema/namespace0/${GENERATE_NAMESPACE0_FILE}
+  ${PROJECT_BINARY_DIR}/src_generated/ua_namespaceinit_generated
+</pre></div>
+</div>
+<p>Albeit a bit more complicated than the previous description, you can see that a the namespace 0 XML file is loaded in the line before the last, and that the output will be in <code class="docutils literal"><span class="pre">ua_namespaceinit_generated.c/h</span></code>. In order to take advantage of the namespace compiler, we will simply append our nodeset to this call and have cmake care for the rest. Modify the CMakeLists.txt line above to contain the relative path to your own XML file like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/generate_open62541CCode.py
+  -i ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_AssumeExternal.txt
+  -s description -b ${PROJECT_SOURCE_DIR}/tools/pyUANamespace/NodeID_Blacklist.txt
+  ${PROJECT_SOURCE_DIR}/tools/schema/namespace0/${GENERATE_NAMESPACE0_FILE}
+  ${PROJECT_SOURCE_DIR}/&lt;relative&gt;/&lt;path&gt;/&lt;to&gt;/&lt;your&gt;/&lt;namespace&gt;.xml
+  ${PROJECT_BINARY_DIR}/src_generated/ua_namespaceinit_generated
+</pre></div>
+</div>
+<p>Always make sure that your XML file comes <em>after</em> namespace 0. Also, take into consideration that any node ID’s you specify that already exist in previous files will overwrite the previous file (yes, you could intentionally overwrite the NS0 Server node if you wanted to). The namespace compiler will now automatically embedd you namespace definitions into the namespace of the server. So in total, all that was necessary was:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Creating your namespace XML description</li>
+<li>Adding the relative path to the file into CMakeLists.txt</li>
+<li>Compiling the stack</li>
+</ul>
+</div></blockquote>
+<p>After adding your XML file to CMakeLists.txt, rerun cmake in your build directory and enable <code class="docutils literal"><span class="pre">DUA_ENABLE_GENERATE_NAMESPACE0</span></code>. Make especially sure that you are using the option <code class="docutils literal"><span class="pre">CMAKE_BUILD_TYPE=Debug</span></code>. The generated namespace contains more than 30000 lines of code and many strings. Optimizing this amount of code with -O2 or -Os options will require several hours on most PCs! Also make sure to enable <code class="docutils literal"><span class="pre">-DUA_ENABLE_METHODCALLS</span></code>, as namespace 0 does contain methods that need to be encoded</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ cmake -DCMAKE_BUILD_TYPE<span class="o">=</span>Debug -DUA_ENABLE_METHODCALLS<span class="o">=</span>On <span class="se">\</span>
+        -BUILD_EXAMPLECLIENT<span class="o">=</span>On -BUILD_EXAMPLESERVER<span class="o">=</span>On <span class="se">\</span>
+        -DUA_ENABLE_GENERATE_NAMESPACE0<span class="o">=</span>On ../
+$ make
+</pre></div>
+</div>
+<p>At this point, the make process will most likely hang for 30-60s until the namespace is parsed, checked, linked and finally generated (be patient). If you specified <code class="docutils literal"><span class="pre">-DCMAKE_BUILD_TYPE=Debug</span></code>, you are looking at about 5-10 seconds of waiting. A release build can take a lot longer.</p>
+<p>If you open the header <code class="docutils literal"><span class="pre">src_generated/ua_namespaceinit_generated.h</span></code> and take a short look at the generated defines, you will notice the following definitions have been created:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#define UA_NS1ID_PROVIDESINPUTTO</span>
+<span class="cp">#define UA_NS1ID_FIELDDEVICE</span>
+<span class="cp">#define UA_NS1ID_PUMP</span>
+<span class="cp">#define UA_NS1ID_STARTPUMP</span>
+<span class="cp">#define UA_NS1ID_STOPPUMP</span>
+</pre></div>
+</div>
+<p>These definitions are generated for all types, but not variables, objects or views (as their names may be ambiguous and may not a be unique identifier). You can use these definitions in your code for numeric nodeids in namespace 1.</p>
+<p>Now switch back to your own source directory and update your libopen62541 library (in case you have not linked it into the build folder). Compile our example server as follows:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ gcc -g -std<span class="o">=</span>c99 -Wl,-rpath,<span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span> -I ./include -L . -DUA_ENABLE_METHODCALLS -o server ./server.c -lopen62541
+</pre></div>
+</div>
+<p>Note that we need to also define the method-calls here, as the header files may choose to ommit functions such as UA_Server_addMethodNode() if they believe you do not use them. If you run the server, you should now see a new dataType in the browse path <code class="docutils literal"><span class="pre">/Types/ObjectTypes/BaseObjectType/FieldDevice</span></code> when viewing the nodes in UAExpert.</p>
+<dl class="docutils">
+<dt>A minor list of some of the things that can go wrong:</dt>
+<dd><ul class="first last simple">
+<li>Your file was not found. The namespace compiler will complain, print a help message, and exit.</li>
+<li>A structure/DataType you created with a value was not encoded. The namespace compiler can currently not handle nested extensionObjects.</li>
+<li>Nodes are not or wrongly encoded or you get nodeId errors.  The namespace compiler can currently not encode bytestring or guid node id’s and external server uris are not supported either.</li>
+<li>You get compiler complaints for non-existant variants. Check that you have removed any namespace qualifiers (like “uax:”) from the XML file.</li>
+<li>You get “invalid reference to addMethodNode” style errors. Make sure <code class="docutils literal"><span class="pre">-DUA_ENABLE_METHODCALLS=On</span></code> is defined.</li>
+</ul>
+</dd>
+</dl>
+<div class="section" id="creating-object-instances">
+<h2>Creating object instances<a class="headerlink" href="#creating-object-instances" title="Permalink to this headline">¶</a></h2>
+<p>One of the key benefits of defining object types is being able to create object instances fairly easily. Object instantiation is handled automatically when the typedefinition NodeId points to a valid ObjectType node. All Attributes and Methods contained in the objectType definition will be instantiated along with the object node.</p>
+<p>While variables are copied from the objetType definition (allowing the user for example to attach new dataSources to them), methods are always only linked. This paradigm is identical to languages like C++: The method called is always the same piece of code, but the first argument is a pointer to an object. Likewise, in OPC UA, only one methodCallback can be attached to a specific methodNode. If that methodNode is called, the parent objectId will be passed to the method - it is the methods job to derefence which object instance it belongs to in that moment.</p>
+<p>One of the problems arising from the server internally “building” new nodes as described in the type is that the user does not know which template creates which instance. This can be a problem - for example if a specific dataSource should be attached to each variableNode called “samples” later on. Unfortunately, we only know which template variable’s Id the dataSource will be attached to - we do not know the nodeId of the instance of that variable. To easily cover usecases where variable instances Y derived from a definition template X should need to be manipulated in some maner, the stack provides an instantiation callback: Each time a new node is instantiated, the callback gets notified about the relevant data; the callback can then either manipulate the new node itself or just create a map/record for later use.</p>
+<p>Let’s look at an example that will create a pump instance given the newly defined objectType:</p>
+<div class="highlight-c"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&quot;open62541.h&quot;</span><span class="cp"></span>
+
+<span class="n">UA_Boolean</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">stopHandler</span><span class="p">(</span><span class="kt">int</span> <span class="n">signal</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">running</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="n">UA_StatusCode</span>
+<span class="nf">pumpInstantiationCallback</span><span class="p">(</span><span class="n">UA_NodeId</span> <span class="n">objectId</span><span class="p">,</span> <span class="n">UA_NodeId</span> <span class="n">definitionId</span><span class="p">,</span>
+                          <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Created new node ns=%d;i=%d according to template ns=%d;i=%d &quot;</span>
+         <span class="s">&quot;(handle was %d)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">objectId</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="p">,</span>
+         <span class="n">objectId</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">,</span> <span class="n">definitionId</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="p">,</span>
+         <span class="n">definitionId</span><span class="p">.</span><span class="n">identifier</span><span class="p">.</span><span class="n">numeric</span><span class="p">,</span> <span class="o">*</span><span class="p">((</span><span class="n">UA_Int32</span> <span class="o">*</span><span class="p">)</span> <span class="n">handle</span><span class="p">));</span>
+  <span class="k">return</span> <span class="n">UA_STATUSCODE_GOOD</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGINT</span><span class="p">,</span>  <span class="n">stopHandler</span><span class="p">);</span>
+  <span class="n">signal</span><span class="p">(</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">stopHandler</span><span class="p">);</span>
+
+  <span class="n">UA_ServerConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">UA_ServerConfig_standard</span><span class="p">;</span>
+  <span class="n">UA_ServerNetworkLayer</span> <span class="n">nl</span><span class="p">;</span>
+  <span class="n">nl</span> <span class="o">=</span> <span class="n">UA_ServerNetworkLayerTCP</span><span class="p">(</span><span class="n">UA_ConnectionConfig_standard</span><span class="p">,</span> <span class="mi">4840</span><span class="p">);</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">networkLayers</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">nl</span><span class="p">;</span>
+  <span class="n">config</span><span class="p">.</span><span class="n">networkLayersSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">UA_Server</span> <span class="o">*</span><span class="n">server</span> <span class="o">=</span> <span class="n">UA_Server_new</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+
+  <span class="n">UA_NodeId</span> <span class="n">createdNodeId</span><span class="p">;</span>
+  <span class="n">UA_Int32</span> <span class="n">myHandle</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;</span>
+  <span class="n">UA_ObjectAttributes</span> <span class="n">object_attr</span><span class="p">;</span>
+  <span class="n">UA_ObjectAttributes_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">object_attr</span><span class="p">);</span>
+
+  <span class="n">object_attr</span><span class="p">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;A pump!&quot;</span><span class="p">);</span>
+  <span class="n">object_attr</span><span class="p">.</span><span class="n">displayName</span> <span class="o">=</span> <span class="n">UA_LOCALIZEDTEXT</span><span class="p">(</span><span class="s">&quot;en_US&quot;</span><span class="p">,</span><span class="s">&quot;Pump1&quot;</span><span class="p">);</span>
+
+  <span class="n">UA_InstantiationCallback</span> <span class="n">theAnswerCallback</span><span class="p">;</span>
+  <span class="n">theAnswerCallback</span><span class="p">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">pumpInstantiationCallback</span><span class="p">;</span>
+  <span class="n">theAnswerCallback</span><span class="p">.</span><span class="n">handle</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">myHandle</span><span class="p">};</span>
+
+  <span class="n">UA_Server_addObjectNode</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">DEMOID</span><span class="p">),</span>
+                          <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_OBJECTSFOLDER</span><span class="p">),</span>
+                          <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS0ID_ORGANIZES</span><span class="p">),</span>
+                          <span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;Pump1&quot;</span><span class="p">),</span>
+                          <span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UA_NS1ID_PUMPTYPE</span><span class="p">),</span>
+                          <span class="n">object_attr</span><span class="p">,</span> <span class="n">theAnswerCallback</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">createdNodeId</span><span class="p">);</span>
+
+  <span class="n">UA_Server_run</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">running</span><span class="p">);</span>
+  <span class="n">UA_Server_delete</span><span class="p">(</span><span class="n">server</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Make sure you have updated the headers and libs in your project, then recompile and run the server. Make especially sure you have added <code class="docutils literal"><span class="pre">ua_namespaceinit_generated.h</span></code> to your include folder and that you have removed any references to header in <code class="docutils literal"><span class="pre">server</span></code>. The only include you are going to need is <code class="docutils literal"><span class="pre">ua_types.h</span></code>.</p>
+<p>As you can see instantiating an object is not much different from creating an object node. The main difference is that you <em>must</em> use an objectType node as typeDefinition and you (may) pass a callback function (<code class="docutils literal"><span class="pre">pumpInstantiationCallback</span></code>) and a handle (<code class="docutils literal"><span class="pre">myHandle</span></code>). You should already be familiar with callbacks and handles from our previous tutorial and you can easily derive how the callback is used by running the server binary, which produces the following output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1505</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6001</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1506</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6002</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1507</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6003</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1508</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6004</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1510</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6001</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1511</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6002</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1512</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6003</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">Created</span> <span class="n">new</span> <span class="n">node</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">1513</span> <span class="n">according</span> <span class="n">to</span> <span class="n">template</span> <span class="n">ns</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">=</span><span class="mi">6004</span> <span class="p">(</span><span class="n">handle</span> <span class="n">was</span> <span class="mi">42</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you start the server and inspect the nodes with UA Expert, you will find two pumps in the objects folder, which look like this:</p>
+<p>As you can see the pump has inherited it’s parents attributes (ManufacturerName and ModelName). You may also notice that the callback was not called for the methods, even though they are obviously where they are supposed to be. Methods, in contrast to objects and variables, are never cloned but instead only linked. The reason is that you will quite propably attach a method callback to a central method, not each object. Objects are instantiated if they are <em>below</em> the object you are creating, so any object (like an object called associatedServer of ServerType) that is part of pump will be instantiated as well. Objects <em>above</em> you object are never instantiated, so the same ServerType object in Fielddevices would have been ommitted (the reason is that the recursive instantiation function protects itself from infinite recursions, which are hard to track when first ascending, then redescending into a tree).</p>
+<p>For each object and variable created by the call, the callback was invoked. The callback gives you the nodeId of the new node along with the Id of the Type template used to create it. You can thereby effectively use setAttributeValue() functions (or others) to adapt the properties of these new nodes, as they can be identified by there templates.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="internal.html" class="btn btn-neutral float-right" title="Internals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="constants.html" class="btn btn-neutral" title="Standard-Defined Constants" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, The open62541 authors.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.2.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

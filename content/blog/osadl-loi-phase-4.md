@@ -5,7 +5,6 @@ author: "open62541 Team"
 description: "Call for participation in phase #4 of Open Source OPC UA open62541 support project"
 categories: ["Announcements", "Community"]
 tags: ["osadl", "funding", "development"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 **OSADL LoI Project #4:**

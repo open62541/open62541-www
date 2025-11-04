@@ -5,7 +5,6 @@ author: "Andreas Ebner, Noel Graf, Florian Düwel"
 description: "Take part in our three day OPC UA training and learn from the main developers of the open62541 OPC UA library."
 categories: ["Training", "Events"]
 tags: ["training", "workshop", "opc-ua"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 **✨ Developer training for OPC UA and open62541: Your key to industrial communication! ✨**

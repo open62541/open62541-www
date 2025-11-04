@@ -1,0 +1,767 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Loop Subsystem &mdash; open62541 (1.4.14) 1.4.14 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=80179c7f"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Public Key Infrastructure Integration" href="plugin_pki.html" />
+    <link rel="prev" title="Access Control Plugin API" href="plugin_accesscontrol.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (1.4.14)
+              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="plugin.html">Plugin API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_nodestore.html">Node Store Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">Access Control Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Event Loop Subsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#timer-policies">Timer Policies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#event-loop">Event Loop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#event-source">Event Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connection-manager">Connection Manager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interrupt-manager">Interrupt Manager</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#posix-specific-implementation">POSIX-Specific Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tcp-connection-manager">TCP Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#udp-connection-manager">UDP Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ethernet-connection-manager">Ethernet Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mqtt-connection-manager">MQTT Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#signal-interrupt-manager">Signal Interrupt Manager</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_pki.html">Public Key Infrastructure Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html">SecurityPolicy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html#pubsub-securitypolicy">PubSub SecurityPolicy</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (1.4.14)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="plugin.html">Plugin API</a></li>
+      <li class="breadcrumb-item active">Event Loop Subsystem</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/plugin_eventloop.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="event-loop-subsystem">
+<h1>Event Loop Subsystem<a class="headerlink" href="#event-loop-subsystem" title="Link to this heading"></a></h1>
+<p>An OPC UA-enabled application can have several clients and servers. And
+server can serve different transport-level protocols for OPC UA. The
+EventLoop is a central module that provides a unified control-flow for all of
+these. Hence, several applications can share an EventLoop.</p>
+<p>The EventLoop and the ConnectionManager implementation is
+architecture-specific. The goal is to have a single call to “poll” (epoll,
+kqueue, …) in the EventLoop that covers all ConnectionManagers. Hence the
+EventLoop plugin implementation must know implementation details of the
+ConnectionManager implementations. So the EventLoop can extract socket
+information, etc. from the ConnectionManagers.</p>
+<section id="timer-policies">
+<h2>Timer Policies<a class="headerlink" href="#timer-policies" title="Link to this heading"></a></h2>
+<p>A timer comes with a cyclic interval in which a callback is executed. If an
+application is congested the interval can be missed. Two different policies
+can be used when this happens. Either schedule the next execution after the
+interval has elapsed again from the current time onwards or stay within the
+regular interval with respect to the original basetime.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_TIMER_HANDLE_CYCLEMISS_WITH_CURRENTTIME</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_TIMER_HANDLE_CYCLEMISS_WITH_BASETIME</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_TimerPolicy</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="event-loop">
+<h2>Event Loop<a class="headerlink" href="#event-loop" title="Link to this heading"></a></h2>
+<p>The EventLoop implementation is part of the selected architecture. For
+example, “Win32/POSIX” stands for a Windows environment with an EventLoop
+that uses the POSIX API. Several EventLoops can be instantiated in parallel.
+But the globally defined functions are the same everywhere.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_Callback</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">);</span>
+
+<span class="cm">/* Delayed callbacks are executed not when they are registered, but in the</span>
+<span class="cm"> * following EventLoop cycle */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Singly-linked list */</span>
+<span class="w">    </span><span class="n">UA_Callback</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_EVENTLOOPSTATE_FRESH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTLOOPSTATE_STOPPED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTLOOPSTATE_STARTED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTLOOPSTATE_STOPPING</span><span class="w"> </span><span class="cm">/* Stopping in progress, needs EventLoop</span>
+<span class="cm">                                * cycles to finish */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_EventLoopState</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_EventLoop</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Configuration</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~</span>
+<span class="cm">     * The configuration should be set before the EventLoop is started */</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">;</span><span class="w"> </span><span class="cm">/* See the implementation-specific documentation */</span>
+
+<span class="w">    </span><span class="cm">/* EventLoop Lifecycle</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * The EventLoop state also controls the state of the configured</span>
+<span class="cm">     * EventSources. Stopping the EventLoop gracefully closes e.g. the open</span>
+<span class="cm">     * network connections. The only way to process incoming events is to call</span>
+<span class="cm">     * the &#39;run&#39; method. Events are then triggering their respective callbacks</span>
+<span class="cm">     * from within that method.*/</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">UA_EventLoopState</span><span class="w"> </span><span class="n">state</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Only read the state from outside */</span>
+
+<span class="w">    </span><span class="cm">/* Start the EventLoop and start all already registered EventSources */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Stop all EventSources. This is asynchronous and might need a few</span>
+<span class="cm">     * iterations of the main-loop to succeed. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">stop</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Process events for at most &quot;timeout&quot; ms or until an unrecoverable error</span>
+<span class="cm">     * occurs. If timeout==0, then only already received events are</span>
+<span class="cm">     * processed. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">run</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Clean up the EventLoop and free allocated memory. Can fail if the</span>
+<span class="cm">     * EventLoop is not stopped. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* EventLoop Time Domain</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Each EventLoop instance can manage its own time domain. This affects the</span>
+<span class="cm">     * execution of timed/cyclic callbacks and time-based sending of network</span>
+<span class="cm">     * packets (if this is implemented). Managing independent time domains is</span>
+<span class="cm">     * important when different parts of a system a synchronized to different</span>
+<span class="cm">     * external (network-wide) clocks.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Note that the logger configured in the EventLoop generates timestamps</span>
+<span class="cm">     * internally as well. If the logger uses a different time domain than the</span>
+<span class="cm">     * EventLoop, discrepancies may appear in the logs.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The time domain of the EventLoop is exposed via the following functons.</span>
+<span class="cm">     * See `open62541/types.h` for the documentation of their equivalent</span>
+<span class="cm">     * globally defined functions. */</span>
+
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">dateTime_now</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">dateTime_nowMonotonic</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_Int64</span><span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">dateTime_localTimeUtcOffset</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Timed Callbacks</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Cyclic callbacks are executed regularly with an interval. A timed</span>
+<span class="cm">     * callback is executed only once. The timer subsystem always uses the</span>
+<span class="cm">     * monotonic clock. */</span>
+
+<span class="w">    </span><span class="cm">/* Time of the next cyclic callback. Returns the max DateTime if no cyclic</span>
+<span class="cm">     * callback is registered. Returns the current monotonic time if a delayed</span>
+<span class="cm">     * callback is registered for immediate execution. */</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">nextCyclicTime</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* The execution interval is in ms. Returns the callbackId if the pointer is</span>
+<span class="cm">     * non-NULL. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">addCyclicCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Callback</span><span class="w"> </span><span class="n">cb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">,</span>
+<span class="w">                         </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">modifyCyclicCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">interval_ms</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">baseTime</span><span class="p">,</span>
+<span class="w">                            </span><span class="n">UA_TimerPolicy</span><span class="w"> </span><span class="n">timerPolicy</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeCyclicCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">callbackId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Like a cyclic callback, but executed only once */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">addTimedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Callback</span><span class="w"> </span><span class="n">cb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">date</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">callbackId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Delayed Callbacks</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Delayed callbacks are executed once in the next iteration of the</span>
+<span class="cm">     * EventLoop and then deregistered automatically. A typical use case is to</span>
+<span class="cm">     * delay a resource cleanup to a point where it is known that the resource</span>
+<span class="cm">     * has no remaining users.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The delayed callbacks are processed in each of the cycle of the EventLoop</span>
+<span class="cm">     * between the handling of timed cyclic callbacks and polling for (network)</span>
+<span class="cm">     * events. The memory for the delayed callback is *NOT* automatically freed</span>
+<span class="cm">     * after the execution. */</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addDelayedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeDelayedCallback</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">dc</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* EventSources</span>
+<span class="cm">     * ~~~~~~~~~~~~</span>
+<span class="cm">     * EventSources are stored in a singly-linked list for direct access. But</span>
+<span class="cm">     * only the below methods shall be used for adding and removing - this</span>
+<span class="cm">     * impacts the lifecycle of the EventSource. For example it may be</span>
+<span class="cm">     * auto-started if the EventLoop is already running. */</span>
+
+<span class="w">    </span><span class="cm">/* Linked list of EventSources */</span>
+<span class="w">    </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">eventSources</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Register the ES. Immediately starts the ES if the EventLoop is already</span>
+<span class="cm">     * started. Otherwise the ES is started together with the EventLoop. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">registerEventSource</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">es</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Stops the EventSource before deregistrering it */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">deregisterEventSource</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">es</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Locking</span>
+<span class="cm">     * ~~~~~~~</span>
+<span class="cm">     *</span>
+<span class="cm">     * For multi-threading the EventLoop is protected by a mutex. The mutex is</span>
+<span class="cm">     * expected to be recursive (can be taken more than once from the same</span>
+<span class="cm">     * thread). A common approach to avoid deadlocks is to establish an absolute</span>
+<span class="cm">     * ordering between the locks. Where the &quot;lower&quot; locks needs to be taken</span>
+<span class="cm">     * before the &quot;upper&quot; lock. The EventLoop-mutex is exposed here to allow it</span>
+<span class="cm">     * to be taken from the outside. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">lock</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">unlock</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="event-source">
+<h2>Event Source<a class="headerlink" href="#event-source" title="Link to this heading"></a></h2>
+<p>Event Sources are attached to an EventLoop. Typically the event source and
+the EventLoop are developed together and share a private API in the
+background.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCESTATE_FRESH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCESTATE_STOPPED</span><span class="p">,</span><span class="w">      </span><span class="cm">/* Registered but stopped */</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCESTATE_STARTING</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCESTATE_STARTED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCESTATE_STOPPING</span><span class="w">      </span><span class="cm">/* Stopping in progress, needs</span>
+<span class="cm">                                       * EventLoop cycles to finish */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_EventSourceState</span><span class="p">;</span>
+
+<span class="cm">/* Type-tag for proper casting of the difference EventSource (e.g. when they are</span>
+<span class="cm"> * looked up via UA_EventLoop_findEventSource). */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCETYPE_CONNECTIONMANAGER</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_EVENTSOURCETYPE_INTERRUPTMANAGER</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_EventSourceType</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_EventSource</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Singly-linked list for use by the</span>
+<span class="cm">                                  * application that registered the ES */</span>
+
+<span class="w">    </span><span class="n">UA_EventSourceType</span><span class="w"> </span><span class="n">eventSourceType</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Configuration</span>
+<span class="cm">     * ~~~~~~~~~~~~~ */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span><span class="w">                 </span><span class="cm">/* Unique name of the ES */</span>
+<span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span><span class="w">        </span><span class="cm">/* EventLoop where the ES is registered */</span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Lifecycle</span>
+<span class="cm">     * ~~~~~~~~~ */</span>
+<span class="w">    </span><span class="n">UA_EventSourceState</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">)(</span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">es</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">stop</span><span class="p">)(</span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">es</span><span class="p">);</span><span class="w"> </span><span class="cm">/* Asynchronous. Iterate theven EventLoop</span>
+<span class="cm">                                       * until the EventSource is stopped. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_EventSource</span><span class="w"> </span><span class="o">*</span><span class="n">es</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="connection-manager">
+<h2>Connection Manager<a class="headerlink" href="#connection-manager" title="Link to this heading"></a></h2>
+<p>Every Connection is created by a ConnectionManager. Every ConnectionManager
+belongs to just one application. A ConnectionManager can act purely as a
+passive “Factory” for Connections. But it can also be stateful. For example,
+it can keep a session to an MQTT broker open which is used by individual
+connections that are each bound to an MQTT topic.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The ConnectionCallback is the only interface from the connection back to</span>
+<span class="cm"> * the application.</span>
+<span class="cm"> *</span>
+<span class="cm"> * - The connectionId is initially unknown to the target application and</span>
+<span class="cm"> *   &quot;announced&quot; to the application when first used first in this callback.</span>
+<span class="cm"> *</span>
+<span class="cm"> * - The context is attached to the connection. Initially a default context</span>
+<span class="cm"> *   is set. The context can be replaced within the callback (via the</span>
+<span class="cm"> *   double-pointer).</span>
+<span class="cm"> *</span>
+<span class="cm"> * - The state argument indicates the lifecycle of the connection. Every</span>
+<span class="cm"> *   connection calls the callback a last time with UA_CONNECTIONSTATE_CLOSING.</span>
+<span class="cm"> *   Protocols individually can forward diagnostic information relevant to the</span>
+<span class="cm"> *   state as part of the key-value parameters.</span>
+<span class="cm"> *</span>
+<span class="cm"> * - The parameters are a key-value list with additional information. The</span>
+<span class="cm"> *   possible keys and their meaning are documented for the individual</span>
+<span class="cm"> *   ConnectionManager implementations.</span>
+<span class="cm"> *</span>
+<span class="cm"> * - The msg ByteString is the message (or packet) received on the</span>
+<span class="cm"> *   connection. Can be empty. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ConnectionManager_connectionCallback</span><span class="p">)</span>
+<span class="w">     </span><span class="p">(</span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span><span class="n">cm</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">connectionId</span><span class="p">,</span>
+<span class="w">      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">connectionContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ConnectionState</span><span class="w"> </span><span class="n">state</span><span class="p">,</span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">msg</span><span class="p">);</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_ConnectionManager</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Every ConnectionManager is treated like an EventSource from the</span>
+<span class="cm">     * perspective of the EventLoop. */</span>
+<span class="w">    </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="n">eventSource</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Name of the protocol supported by the ConnectionManager. For example</span>
+<span class="cm">     * &quot;mqtt&quot;, &quot;udp&quot;, &quot;mqtt&quot;. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">protocol</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Open a Connection</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Connecting is asynchronous. The connection-callback is called when the</span>
+<span class="cm">     * connection is open (status=GOOD) or aborted (status!=GOOD) when</span>
+<span class="cm">     * connecting failed.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Some ConnectionManagers can also passively listen for new connections.</span>
+<span class="cm">     * Configuration parameters for this are passed via the key-value list. The</span>
+<span class="cm">     * `context` pointer of the listening connection is also set as the initial</span>
+<span class="cm">     * context of newly opened connections.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The parameters describe the connection. For example hostname and port</span>
+<span class="cm">     * (for TCP). Other protocols (e.g. MQTT, AMQP, etc.) may required</span>
+<span class="cm">     * additional arguments to open a connection in the key-value list.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The provided context is set as the initial context attached to this</span>
+<span class="cm">     * connection. It is already set before the first call to</span>
+<span class="cm">     * connectionCallback.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The connection can be opened synchronously or asynchronously.</span>
+<span class="cm">     *</span>
+<span class="cm">     * - For synchronous connection, the connectionCallback is called with the</span>
+<span class="cm">     *   status UA_CONNECTIONSTATE_ESTABLISHED immediately from within the</span>
+<span class="cm">     *   openConnection operation.</span>
+<span class="cm">     *</span>
+<span class="cm">     * - In the asynchronous case the connectionCallback is called immediately</span>
+<span class="cm">     *   from within the openConnection operation with the status</span>
+<span class="cm">     *   UA_CONNECTIONSTATE_OPENING. The connectionCallback is called with the</span>
+<span class="cm">     *   status UA_CONNECTIONSTATE_ESTABLISHED once the connection has fully</span>
+<span class="cm">     *   opened.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Note that a single call to openConnection might open multiple</span>
+<span class="cm">     * connections. For example listening on IPv4 and IPv6 for a single</span>
+<span class="cm">     * hostname. Each protocol implementation documents whether multiple</span>
+<span class="cm">     * connections might be opened at once. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">openConnection</span><span class="p">)(</span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span><span class="n">cm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">,</span>
+<span class="w">                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_ConnectionManager_connectionCallback</span><span class="w"> </span><span class="n">connectionCallback</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Send a message over a Connection</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Sending is asynchronous. That is, the function returns before the message</span>
+<span class="cm">     * is ACKed from remote. The memory for the buffer is expected to be</span>
+<span class="cm">     * allocated with allocNetworkBuffer and is released internally (also if</span>
+<span class="cm">     * sending fails).</span>
+<span class="cm">     *</span>
+<span class="cm">     * Some ConnectionManagers can accept additional parameters for sending. For</span>
+<span class="cm">     * example a tx-time for sending in time-synchronized TSN settings. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">sendWithConnection</span><span class="p">)(</span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span><span class="n">cm</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">connectionId</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Close a Connection</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * When a connection is closed its `connectionCallback` is called with</span>
+<span class="cm">     * (status=BadConnectionClosed, msg=empty). Then the connection is cleared</span>
+<span class="cm">     * up inside the ConnectionManager. This is the case both for connections</span>
+<span class="cm">     * that are actively closed and those that are closed remotely. The return</span>
+<span class="cm">     * code is non-good only if the connection is already closed. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">closeConnection</span><span class="p">)(</span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span><span class="n">cm</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">connectionId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Buffer Management</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Each ConnectionManager allocates and frees his own memory for the network</span>
+<span class="cm">     * buffers. This enables, for example, zero-copy neworking mechanisms. The</span>
+<span class="cm">     * connectionId is part of the API to enable cases where memory is</span>
+<span class="cm">     * statically allocated for every connection */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">allocNetworkBuffer</span><span class="p">)(</span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span><span class="n">cm</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">connectionId</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">bufSize</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">freeNetworkBuffer</span><span class="p">)(</span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span><span class="n">cm</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">connectionId</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">buf</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="interrupt-manager">
+<h2>Interrupt Manager<a class="headerlink" href="#interrupt-manager" title="Link to this heading"></a></h2>
+<p>The Interrupt Manager allows to register to listen for system interrupts.
+Triggering the interrupt calls the callback associated with it.</p>
+<p>The implementations of the interrupt manager for the different platforms
+shall be designed such that:</p>
+<ul class="simple">
+<li><p>Registered interrupts are only intercepted from within the running EventLoop</p></li>
+<li><p>Processing an interrupt in the EventLoop is handled similarly to handling a
+network event: all methods and also memory allocation are available from
+within the interrupt callback.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Interrupts can have additional key-value &#39;instanceInfos&#39; for each individual</span>
+<span class="cm"> * triggering. See the architecture-specific documentation. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_InterruptCallback</span><span class="p">)(</span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span><span class="n">im</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">interruptHandle</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">interruptContext</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">instanceInfos</span><span class="p">);</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_InterruptManager</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Every InterruptManager is treated like an EventSource from the</span>
+<span class="cm">     * perspective of the EventLoop. */</span>
+<span class="w">    </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="n">eventSource</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Register an interrupt. The handle and context information is passed</span>
+<span class="cm">     * through to the callback.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The interruptHandle is a numerical identifier of the interrupt. In some</span>
+<span class="cm">     * cases, such as POSIX signals, this is enough information to register</span>
+<span class="cm">     * callback. For other interrupt systems (architectures) additional</span>
+<span class="cm">     * parameters may be required and can be passed in via the parameters</span>
+<span class="cm">     * key-value list. See the implementation-specific documentation.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The interruptContext is opaque user-defined information and passed</span>
+<span class="cm">     * through to the callback without modification. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">registerInterrupt</span><span class="p">)(</span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span><span class="n">im</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">interruptHandle</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">UA_InterruptCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">interruptContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Remove a registered interrupt. Returns no error code if the interrupt is</span>
+<span class="cm">     * already deregistered. */</span>
+<span class="w">    </span><span class="kt">void</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">deregisterInterrupt</span><span class="p">)(</span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span><span class="n">im</span><span class="p">,</span><span class="w"> </span><span class="kt">uintptr_t</span><span class="w"> </span><span class="n">interruptHandle</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="posix-specific-implementation">
+<h2>POSIX-Specific Implementation<a class="headerlink" href="#posix-specific-implementation" title="Link to this heading"></a></h2>
+<p>The POSIX compatibility of WIN32 is ‘close enough’. So a joint implementation
+is provided.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32)</span>
+
+<span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
+</pre></div>
+</div>
+<section id="tcp-connection-manager">
+<h3>TCP Connection Manager<a class="headerlink" href="#tcp-connection-manager" title="Link to this heading"></a></h3>
+<p>Listens on the network and manages TCP connections. This should be available
+for all architectures.</p>
+<p>The <cite>openConnection</cite> callback is used to create both client and server
+sockets. A server socket listens and accepts incoming connections (creates an
+active connection). This is distinguished by the key-value parameters passed
+to <cite>openConnection</cite>. Note that a single call to <cite>openConnection</cite> for a server
+connection may actually create multiple connections (one per hostname /
+device).</p>
+<p>The <cite>connectionCallback</cite> of the server socket and <cite>context</cite> of the server
+socket is reused for each new connection. But the key-value parameters for
+the first callback are different between server and client connections.</p>
+<p>The following list defines the parameters and their type. Note that some
+parameters are only set for the first callback when a new connection opens.</p>
+<p><strong>Configuration parameters for the entire ConnectionManager:</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is allocated for receiving messages (default 64kB).</p>
+</dd>
+</dl>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string | array of string]</dt><dd><p>Hostname or IPv4/v6 address for the connection (scalar parameter required
+for active connections). For listen-connections the address contains the
+local hostnames or IP addresses for listening. If undefined, listen on all
+interfaces INADDR_ANY. (default: undefined)</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port of the target host (required).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Listen-connection or active-connection (default: false)</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+</dl>
+<p><strong>Active Connection Connection Callback Parameters (first callback only):</strong></p>
+<dl class="simple">
+<dt>0:remote-address [string]</dt><dd><p>Address of the remote side (hostname or IP address).</p>
+</dd>
+</dl>
+<p><strong>Listen Connection Connection Callback Parameters (first callback only):</strong></p>
+<dl class="simple">
+<dt>0:listen-address [string]</dt><dd><p>Local address (IP or hostname) for the new listen-connection.</p>
+</dd>
+<dt>0:listen-port [uint16]</dt><dd><p>Port on which the new connection listens.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an established TCP socket
+defined.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_POSIX_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="udp-connection-manager">
+<h3>UDP Connection Manager<a class="headerlink" href="#udp-connection-manager" title="Link to this heading"></a></h3>
+<p>Manages UDP connections. This should be available for all architectures. The
+configuration parameters have to set before calling _start to take effect.</p>
+<p><strong>Configuration Parameters:</strong></p>
+<dl class="simple">
+<dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is allocated for receiving messages (default
+64kB).</p>
+</dd>
+</dl>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:listen [boolean]</dt><dd><p>Use the connection for listening or for sending (default: false)</p>
+</dd>
+<dt>0:address [string | string array]</dt><dd><p>Hostname (or IPv4/v6 address) for sending or receiving. A scalar is
+required for sending. For listening a string array for the list-hostnames
+is possible as well (default: list on all hostnames).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port for sending or listening (required).</p>
+</dd>
+<dt>0:interface [string]</dt><dd><p>Network interface for listening or sending (e.g. when using multicast
+addresses). Can be either the IP address of the network interface
+or the interface name (e.g. ‘eth0’).</p>
+</dd>
+<dt>0:ttl [uint32]</dt><dd><p>Multicast time to live, (optional, default: 1 - meaning multicast is
+available only to the local subnet).</p>
+</dd>
+<dt>0:loopback [boolean]</dt><dd><p>Whether or not to use multicast loopback, enabling local interfaces
+belonging to the multicast group to receive packages. (default: enabled).</p>
+</dd>
+<dt>0:reuse [boolean]</dt><dd><p>Enables sharing of the same listening address on different sockets
+(default: disabled).</p>
+</dd>
+<dt>0:sockpriority [uint32]</dt><dd><p>The socket priority (optional) - only available on linux. packets with a
+higher priority may be processed first depending on the selected device
+queueing discipline. Setting a priority outside the range 0 to 6 requires
+the CAP_NET_ADMIN capability (on Linux).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+</dl>
+<p><strong>Connection Callback Parameters:</strong></p>
+<dl class="simple">
+<dt>0:remote-address [string]</dt><dd><p>Contains the remote IP address.</p>
+</dd>
+<dt>0:remote-port [uint16]</dt><dd><p>Contains the remote port.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an UDP connection defined.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_POSIX_UDP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#if defined(__linux__) </span><span class="cm">/* Linux only so far */</span>
+</pre></div>
+</div>
+</section>
+<section id="ethernet-connection-manager">
+<h3>Ethernet Connection Manager<a class="headerlink" href="#ethernet-connection-manager" title="Link to this heading"></a></h3>
+<p>Listens on the network and manages UDP connections. This should be available
+for all architectures. The configuration parameters have to set before
+calling _start to take effect.</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:listen [bool]</dt><dd><p>The connection is either for sending or for listening (default: false).</p>
+</dd>
+<dt>0:interface [string]</dt><dd><p>The name of the Ethernet interface to use (required).</p>
+</dd>
+<dt>0:address [string]</dt><dd><p>MAC target address consisting of six groups of hexadecimal digits
+separated by hyphens such as 01-23-45-67-89-ab. For sending this is a
+required parameter. For listening this is a multicast address that the
+connections tries to register for.</p>
+</dd>
+<dt>0:ethertype [uint16]</dt><dd><p>EtherType for sending and receiving frames (optional). For listening
+connections, this filters out all frames with different EtherTypes.</p>
+</dd>
+<dt>0:promiscuous [bool]</dt><dd><p>Receive frames also for different target addresses. Defined only for
+listening connections (default: false).</p>
+</dd>
+<dt>0:vid [uint16]</dt><dd><p>12-bit VLAN identifier (optional for send connections).</p>
+</dd>
+<dt>0:pcp [byte]</dt><dd><p>3-bit priority code point (optional for send connections).</p>
+</dd>
+<dt>0:dei [bool]</dt><dd><p>1-bit drop eligible indicator (optional for seond connections).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an Ethernet connection defined.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_POSIX_Ethernet</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+<section id="mqtt-connection-manager">
+<h3>MQTT Connection Manager<a class="headerlink" href="#mqtt-connection-manager" title="Link to this heading"></a></h3>
+<p>The MQTT ConnectionManager reuses the TCP ConnectionManager that is
+configured in the EventLoop. Hence the MQTT ConnectionManager is platform
+agnostic and does not require porting. An MQTT connection is for a
+combination of broker and topic. The MQTT ConnectionManager can group
+connections to the same broker in the background. Hence adding multiple
+connections for the same broker is “cheap”. To have individual control,
+separate connections are created for each topic and for each direction
+(publishing / subscribing).</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string]</dt><dd><p>Hostname or IPv4/v6 address of the MQTT broker (required).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port of the MQTT broker (default: 1883).</p>
+</dd>
+<dt>0:username [string]</dt><dd><p>Username to use (default: none)</p>
+</dd>
+<dt>0:password [string]</dt><dd><p>Password to use (default: none)</p>
+</dd>
+<dt>0:keep-alive [uint16]</dt><dd><p>Number of seconds for the keep-alive (ping) (default: 400).</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
+creating any connection but solely validating the provided parameters
+(default: false)</p>
+</dd>
+<dt>0:topic [string]</dt><dd><p>Topic to which the connection is associated (required).</p>
+</dd>
+<dt>0:subscribe [bool]</dt><dd><p>Subscribe to the topic (default: false). Otherwise it is only possible to
+publish on the topic. Subscribed topics can also be published to.</p>
+</dd>
+</dl>
+<p><strong>Connection Callback Parameters:</strong></p>
+<dl class="simple">
+<dt>0:topic [string]</dt><dd><p>The value set during connect.</p>
+</dd>
+<dt>0:subscribe [bool]</dt><dd><p>The value set during connect.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<p>No additional parameters for sending over an Ethernet connection defined.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_MQTT</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="signal-interrupt-manager">
+<h3>Signal Interrupt Manager<a class="headerlink" href="#signal-interrupt-manager" title="Link to this heading"></a></h3>
+<p>Create an instance of the interrupt manager that handles POSX signals. This
+interrupt manager takes the numerical interrupt identifiers from &lt;signal.h&gt;
+for the interruptHandle.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_InterruptManager_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* defined(UA_ARCHITECTURE_POSIX) || defined(UA_ARCHITECTURE_WIN32) */</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plugin_accesscontrol.html" class="btn btn-neutral float-left" title="Access Control Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plugin_pki.html" class="btn btn-neutral float-right" title="Public Key Infrastructure Integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Async Services &mdash; open62541 1.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=02f2166e"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Subscriptions" href="client_subscriptions.html" />
+    <link rel="prev" title="Highlevel Client Functionality" href="client_highlevel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541
+              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.4
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="client.html">Client</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client.html#client-configuration">Client Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#client-lifecycle">Client Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#connection-attrbiutes">Connection Attrbiutes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#connect-to-a-server">Connect to a Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#discovery">Discovery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#asynchronous-services">Asynchronous Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html#timed-callbacks">Timed Callbacks</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="client.html#client-utility-functions">Client Utility Functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="client_highlevel.html">Highlevel Client Functionality</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Async Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#asynchronous-operations">Asynchronous Operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#read-attribute">Read Attribute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#write-attribute">Write Attribute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-calling">Method Calling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#node-management">Node Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html">Subscriptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="client_subscriptions.html#monitoreditems">MonitoredItems</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="client.html">Client</a></li>
+      <li class="breadcrumb-item active">Async Services</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/client_highlevel_async.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="async-services">
+<span id="client-async"></span><h1>Async Services<a class="headerlink" href="#async-services" title="Link to this heading">¶</a></h1>
+<p>Call OPC UA Services asynchronously with a callback. The (optional) requestId
+output can be used to cancel the service while it is still pending.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ReadResponse</span><span class="w"> </span><span class="o">*</span><span class="n">rr</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_sendAsyncReadRequest</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ReadRequest</span><span class="w"> </span><span class="o">*</span><span class="n">request</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadCallback</span><span class="w"> </span><span class="n">readCallback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_AsyncService</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">readCallback</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READRESPONSE</span><span class="p">],</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncWriteCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_WriteResponse</span><span class="w"> </span><span class="o">*</span><span class="n">wr</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_sendAsyncWriteRequest</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_WriteRequest</span><span class="w"> </span><span class="o">*</span><span class="n">request</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncWriteCallback</span><span class="w"> </span><span class="n">writeCallback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_AsyncService</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_WRITEREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">writeCallback</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_WRITERESPONSE</span><span class="p">],</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncBrowseCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_BrowseResponse</span><span class="w"> </span><span class="o">*</span><span class="n">wr</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_sendAsyncBrowseRequest</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_BrowseRequest</span><span class="w"> </span><span class="o">*</span><span class="n">request</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncBrowseCallback</span><span class="w"> </span><span class="n">browseCallback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_AsyncService</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSEREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">browseCallback</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSERESPONSE</span><span class="p">],</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncBrowseNextCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_BrowseNextResponse</span><span class="w"> </span><span class="o">*</span><span class="n">wr</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_sendAsyncBrowseNextRequest</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_BrowseNextRequest</span><span class="w"> </span><span class="o">*</span><span class="n">request</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncBrowseNextCallback</span><span class="w"> </span><span class="n">browseNextCallback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_AsyncService</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSENEXTREQUEST</span><span class="p">],</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">browseNextCallback</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BROWSENEXTRESPONSE</span><span class="p">],</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="asynchronous-operations">
+<h1>Asynchronous Operations<a class="headerlink" href="#asynchronous-operations" title="Link to this heading">¶</a></h1>
+<p>Many Services can be called with an array of operations. For example, a
+request to the Read Service contains an array of ReadValueId, each
+corresponding to a single read operation. For convenience, wrappers are
+provided to call single operations for the most common Services.</p>
+<p>All async operations have a callback of the following structure: The returned
+StatusCode is split in two parts. The status indicates the overall success of
+the request and the operation. The result argument is non-NULL only if the
+status is no good.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncOperationCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="read-attribute">
+<h1>Read Attribute<a class="headerlink" href="#read-attribute" title="Link to this heading">¶</a></h1>
+<p>Asynchronously read a single attribute. The attribute is unpacked from the
+response as the datatype of the attribute is known ahead of time. Value
+attributes are variants.</p>
+<p>Note that the last argument (value pointer) of the callbacks can be NULL if
+the status of the operation is not good.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Reading a single attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">attribute</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReadValueId</span><span class="w"> </span><span class="o">*</span><span class="n">rvi</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_TimestampsToReturn</span><span class="w"> </span><span class="n">timestampsToReturn</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single Value attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadValueAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readValueAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadValueAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single DataType attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadDataTypeAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">dataType</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readDataTypeAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadDataTypeAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single ArrayDimensions attribute. If the status is good, the variant</span>
+<span class="cm"> * carries an UInt32 array. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientReadArrayDimensionsAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">arrayDimensions</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readArrayDimensionsAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientReadArrayDimensionsAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single NodeClass attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadNodeClassAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="o">*</span><span class="n">nodeClass</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readNodeClassAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadNodeClassAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single BrowseName attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadBrowseNameAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">browseName</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readBrowseNameAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadBrowseNameAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single DisplayName attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadDisplayNameAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">displayName</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readDisplayNameAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadDisplayNameAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single Description attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadDescriptionAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readDescriptionAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadDescriptionAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single WriteMask attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadWriteMaskAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">writeMask</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readWriteMaskAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadWriteMaskAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single UserWriteMask attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadUserWriteMaskAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">writeMask</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readUserWriteMaskAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadUserWriteMaskAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single IsAbstract attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadIsAbstractAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">isAbstract</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readIsAbstractAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadIsAbstractAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single Symmetric attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadSymmetricAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">symmetric</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readSymmetricAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadSymmetricAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single InverseName attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadInverseNameAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">inverseName</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readInverseNameAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadInverseNameAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single ContainsNoLoops attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadContainsNoLoopsAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">containsNoLoops</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readContainsNoLoopsAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadContainsNoLoopsAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single EventNotifier attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadEventNotifierAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">eventNotifier</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readEventNotifierAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadEventNotifierAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single ValueRank attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadValueRankAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w"> </span><span class="o">*</span><span class="n">valueRank</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readValueRankAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadValueRankAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single AccessLevel attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadAccessLevelAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">accessLevel</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readAccessLevelAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadAccessLevelAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single AccessLevelEx attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadAccessLevelExAttributeCallback</span><span class="p">)(</span>
+<span class="w">      </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">accessLevelEx</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readAccessLevelExAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadAccessLevelExAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single UserAccessLevel attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadUserAccessLevelAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">userAccessLevel</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readUserAccessLevelAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadUserAccessLevelAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single MinimumSamplingInterval attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadMinimumSamplingIntervalAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="o">*</span><span class="n">minimumSamplingInterval</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readMinimumSamplingIntervalAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadMinimumSamplingIntervalAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single Historizing attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadHistorizingAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">historizing</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readHistorizingAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadHistorizingAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single Executable attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadExecutableAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">executable</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readExecutableAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadExecutableAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+
+<span class="cm">/* Read a single UserExecutable attribute */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncReadUserExecutableAttributeCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">userExecutable</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_readUserExecutableAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncReadUserExecutableAttributeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">requestId</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="write-attribute">
+<h1>Write Attribute<a class="headerlink" href="#write-attribute" title="Link to this heading">¶</a></h1>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_AttributeId</span><span class="w"> </span><span class="n">attributeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">in</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">inDataType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeValueAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncWriteCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_VALUE</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIANT</span><span class="p">],</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span>
+<span class="w">        </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeNodeIdAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_NODEID</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeNodeClassAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_NODECLASS</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODECLASS</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeBrowseNameAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_BROWSENAME</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_QUALIFIEDNAME</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeDisplayNameAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_DISPLAYNAME</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeDescriptionAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_DESCRIPTION</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeWriteMaskAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_WRITEMASK</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeUserWriteMaskAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_USERWRITEMASK</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeIsAbstractAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_ISABSTRACT</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeSymmetricAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_SYMMETRIC</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeInverseNameAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_INVERSENAME</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_LOCALIZEDTEXT</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeContainsNoLoopsAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_CONTAINSNOLOOPS</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeEventNotifierAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_EVENTNOTIFIER</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeDataTypeAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_DATATYPE</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_NODEID</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeValueRankAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Int32</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_VALUERANK</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_INT32</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeAccessLevelAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_ACCESSLEVEL</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeAccessLevelExAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_ACCESSLEVELEX</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT32</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeUserAccessLevelAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_USERACCESSLEVEL</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BYTE</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeMinimumSamplingIntervalAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Double</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_MINIMUMSAMPLINGINTERVAL</span><span class="p">,</span>
+<span class="w">        </span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DOUBLE</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeHistorizingAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_HISTORIZING</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeExecutableAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_EXECUTABLE</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_writeUserExecutableAttribute_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_writeAttribute_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ATTRIBUTEID_USEREXECUTABLE</span><span class="p">,</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_BOOLEAN</span><span class="p">],</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="method-calling">
+<h1>Method Calling<a class="headerlink" href="#method-calling" title="Link to this heading">¶</a></h1>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_call_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">methodId</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">);</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncCallCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_CallResponse</span><span class="w"> </span><span class="o">*</span><span class="n">cr</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_call_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">methodId</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncCallCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_call_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">objectId</span><span class="p">,</span><span class="w"> </span><span class="n">methodId</span><span class="p">,</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="node-management">
+<h1>Node Management<a class="headerlink" href="#node-management" title="Link to this heading">¶</a></h1>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="p">)(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_AddNodesResponse</span><span class="w"> </span><span class="o">*</span><span class="n">ar</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeClass</span><span class="w"> </span><span class="n">nodeClass</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">attributeType</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncServiceCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">);</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addVariableNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_VariableAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_VARIABLE</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">        </span><span class="n">typeDefinition</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLEATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addVariableTypeNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_VariableTypeAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_VARIABLETYPE</span><span class="p">,</span>
+<span class="w">        </span><span class="n">requestedNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VARIABLETYPEATTRIBUTES</span><span class="p">],</span>
+<span class="w">        </span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addObjectNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ObjectAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_OBJECT</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addObjectTypeNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ObjectTypeAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_OBJECTTYPE</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_OBJECTTYPEATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addViewNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ViewAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_VIEW</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_VIEWATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addReferenceTypeNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReferenceTypeAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_REFERENCETYPE</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCETYPEATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addDataTypeNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_DATATYPE</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
+<span class="w">        </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATATYPEATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_addMethodNode_async</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_MethodAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientAsyncAddNodesCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">reqId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">__UA_Client_addNode_async</span><span class="p">(</span>
+<span class="w">        </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODECLASS_METHOD</span><span class="p">,</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NODEID_NULL</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeAttributes</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">attr</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_METHODATTRIBUTES</span><span class="p">],</span><span class="w"> </span><span class="n">outNewNodeId</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">UA_ClientAsyncServiceCallback</span><span class="p">)</span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">reqId</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="client_highlevel.html" class="btn btn-neutral float-left" title="Highlevel Client Functionality" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="client_subscriptions.html" class="btn btn-neutral float-right" title="Subscriptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

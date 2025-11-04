@@ -5,7 +5,6 @@ author: "open62541 Team"
 description: "This is the June 2022 Community Newsletter."
 categories: ["News", "Community"]
 tags: ["newsletter", "hannover-fair", "development"]
-featured_image: "/images/blog/blog-5.jpg"
 ---
 
 ## open62541 @ Hannover Fair
