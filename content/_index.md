@@ -9,7 +9,7 @@ client_logos:
     url: "https://www.basyskom.de/en/lp/expert-opc-ua-consulting-and-dev-services/"
   - name: "BTC"
     logo: "/images/btc.png"
-    url: "https://www.btc-ag.com/"
+    url: "https://www.bluetimeconcept.com/"
   - name: "Wind River"
     logo: "/images/windriver.png"
     url: "https://www.windriver.com/"
