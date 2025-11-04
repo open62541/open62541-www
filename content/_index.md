@@ -54,44 +54,40 @@ client_logos:
 
 {{< features-section >}}
 
-{{< feature
-    title="Open"
-    description="Royalty free and open source. Based solely on the IEC 62541 standard."
+{{< feature-card 
+    title="Open Source" 
     badge="Open Source"
     badgeColor="#00838F"
     image="/images/home/open.jpg"
+    description="Open62541 is licensed under the Mozilla Public License v2.0 (MPLv2). So the *open62541 OPC UA stack* is free of charge – even for commercial use."
     features="Royalty free on GitHub,Open source MPL v2.0 license,Based on IEC 62541 standard,Active community development"
-    imagePosition="right"
 >}}
 
-{{< feature
-    title="Portable"
-    description="Written in C99 with minimal dependencies. Runs everywhere from embedded systems to cloud servers."
+{{< feature-card 
+    title="Portable" 
     badge="Cross-Platform"
-    badgeColor="#16a34a"
+    badgeColor="#059669"
     image="/images/home/portable.jpg"
+    description="Written in C99 with minimal dependencies. Runs everywhere from embedded systems to cloud servers."
     features="Written in C99,Architecture-specific plugins,Runs on Windows Linux RTOS and Android,Small memory footprint"
-    imagePosition="left"
 >}}
 
-{{< feature
-    title="Certified"
-    description="Certified example implementation compliant with the OPC UA Standard UA Server Profile 2017."
+{{< feature-card 
+    title="Certified" 
     badge="OPC UA Certified"
-    badgeColor="#7c3aed"
+    badgeColor="#6366f1"
     image="/images/home/certified.png"
+    description="Certified example implementation compliant with the OPC UA Standard UA Server Profile 2017."
     features="Standard UA Server Profile 2017,Ensured compliance with OPC UA specifications,Lightweight follow-up certification,Future-proof architecture and design"
-    imagePosition="right"
 >}}
 
-{{< feature
-    title="Professional Support"
-    description="Get expert assistance with implementation, consulting, and custom development from the official maintainers."
+{{< feature-card 
+    title="Professional Support" 
     badge="Commercial Support"
-    badgeColor="#dc2626"
+    badgeColor="#0284c7"
     image="/images/home/professional.png"
+    description="Get expert assistance with implementation, consulting, and custom development from the official maintainers."
     features="Direct support from maintainers,Custom feature development,Training and consulting,SLA-backed service options"
-    imagePosition="left"
     buttonText="Get Support"
     buttonLink="https://www.o6-automation.com/services"
 >}}
