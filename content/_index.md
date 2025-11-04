@@ -59,7 +59,7 @@ client_logos:
     description="Royalty free and open source. Based solely on the IEC 62541 standard."
     badge="Open Source"
     badgeColor="#00838F"
-    image="/images/feature-1.svg"
+    image="/images/home/open.jpg"
     features="Royalty free on GitHub,Open source MPL v2.0 license,Based on IEC 62541 standard,Active community development"
     imagePosition="right"
 >}}
@@ -69,18 +69,18 @@ client_logos:
     description="Written in C99 with minimal dependencies. Runs everywhere from embedded systems to cloud servers."
     badge="Cross-Platform"
     badgeColor="#16a34a"
-    image="/images/feature-2.svg"
-    features="Written in C99,Architecture-specific plugins,Runs on Windows Linux VxWorks QNX Android,Small memory footprint"
+    image="/images/home/portable.jpg"
+    features="Written in C99,Architecture-specific plugins,Runs on Windows Linux RTOS and Android,Small memory footprint"
     imagePosition="left"
 >}}
 
 {{< feature
     title="Certified"
-    description="Officially certified against the OPC UA Micro Embedded Device Server Profile."
+    description="Certified example implementation compliant with the OPC UA Standard UA Server Profile 2017."
     badge="OPC UA Certified"
     badgeColor="#7c3aed"
-    image="/images/feature-3.svg"
-    features="Micro Embedded Device Server Profile,Client/server communication,Subscriptions and method calls,Security encryption support"
+    image="/images/home/certified.png"
+    features="Standard UA Server Profile 2017,Ensured compliance with OPC UA specifications,Lightweight follow-up certification,Future-proof architecture and design"
     imagePosition="right"
 >}}
 
@@ -89,7 +89,7 @@ client_logos:
     description="Get expert assistance with implementation, consulting, and custom development from the official maintainers."
     badge="Commercial Support"
     badgeColor="#dc2626"
-    image="/images/feature-1.svg"
+    image="/images/home/professional.png"
     features="Direct support from maintainers,Custom feature development,Training and consulting,SLA-backed service options"
     imagePosition="left"
     buttonText="Get Support"
