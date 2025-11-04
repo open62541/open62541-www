@@ -1,0 +1,543 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building open62541 &mdash; open62541 (1.4.14) 1.4.14 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=80179c7f"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data Types" href="types.html" />
+    <link rel="prev" title="Core Concepts of OPC UA" href="core_concepts.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (1.4.14)
+              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building open62541</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-library">Building the Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#building-with-cmake-on-ubuntu-or-debian">Building with CMake on Ubuntu or Debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-with-cmake-on-windows">Building with CMake on Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-on-os-x">Building on OS X</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-on-openbsd">Building on OpenBSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-options">Build Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#main-build-options">Main Build Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#select-build-artefacts">Select build artefacts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detailed-sdk-features">Detailed SDK Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pubsub-build-options">PubSub Build Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug-build-options">Debug Build Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#minimizing-the-binary-size">Minimizing the binary size</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#prebuilt-packages">Prebuilt packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arch">Arch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openbsd">OpenBSD</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-examples">Building the Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (1.4.14)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Building open62541</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/building.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-open62541">
+<span id="building"></span><h1>Building open62541<a class="headerlink" href="#building-open62541" title="Link to this heading"></a></h1>
+<section id="building-the-library">
+<h2>Building the Library<a class="headerlink" href="#building-the-library" title="Link to this heading"></a></h2>
+<p>open62541 uses CMake to build the library and binaries. CMake generates a
+Makefile or a Visual Studio project. This is then used to perform the actual
+build.</p>
+<section id="building-with-cmake-on-ubuntu-or-debian">
+<h3>Building with CMake on Ubuntu or Debian<a class="headerlink" href="#building-with-cmake-on-ubuntu-or-debian" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>git<span class="w"> </span>build-essential<span class="w"> </span>gcc<span class="w"> </span>pkg-config<span class="w"> </span>cmake<span class="w"> </span>python3
+
+<span class="c1"># enable additional features</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>cmake-curses-gui<span class="w">     </span><span class="c1"># for the ccmake graphical interface</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libmbedtls-dev<span class="w">       </span><span class="c1"># for encryption support</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>check<span class="w"> </span>libsubunit-dev<span class="w"> </span><span class="c1"># for unit tests</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python3-sphinx<span class="w"> </span>graphviz<span class="w">  </span><span class="c1"># for documentation generation</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>python3-sphinx-rtd-theme<span class="w"> </span><span class="c1"># documentation style</span>
+
+<span class="nb">cd</span><span class="w"> </span>open62541
+mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make
+
+<span class="c1"># select additional features</span>
+ccmake<span class="w"> </span>..
+make
+
+<span class="c1"># build documentation</span>
+make<span class="w"> </span>doc<span class="w"> </span><span class="c1"># html documentation</span>
+make<span class="w"> </span>doc_pdf<span class="w"> </span><span class="c1"># pdf documentation (requires LaTeX)</span>
+</pre></div>
+</div>
+<p>You can install open62541 using the well known <cite>make install</cite> command. This
+allows you to use pre-built libraries and headers for your own project. In order
+to use open62541 as a shared library (.dll or .so) make sure to activate the
+<code class="docutils literal notranslate"><span class="pre">BUILD_SHARED_LIBS</span></code> CMake option.</p>
+<p>To override the default installation directory use <code class="docutils literal notranslate"><span class="pre">cmake</span>
+<span class="pre">-DCMAKE_INSTALL_PREFIX=/some/path</span></code>. Based on the SDK Features you selected, as
+described in <span class="xref std std-ref">build_options</span>, these features will also be included in the
+installation. Thus we recommend to enable as many non-experimental features as
+possible for the installed binary.</p>
+<p>In your own CMake project you can then include the open62541 library. A simple
+CMake project definition looks as follows:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.5</span><span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span><span class="s2">&quot;open62541SampleApplication&quot;</span><span class="p">)</span>
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">main</span><span class="w"> </span><span class="s">main.c</span><span class="p">)</span>
+
+<span class="c"># Linux/Unix configuration using pkg-config</span>
+<span class="nb">find_package</span><span class="p">(</span><span class="s">PkgConfig</span><span class="p">)</span>
+<span class="nb">pkg_check_modules</span><span class="p">(</span><span class="s">open62541</span><span class="w"> </span><span class="s">REQUIRED</span><span class="w"> </span><span class="s">open62541</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">main</span><span class="w"> </span><span class="s">open62541</span><span class="p">)</span>
+
+<span class="c"># Alternative CMake-based library definition.</span>
+<span class="c"># This might not be included in some package distributions.</span>
+<span class="c">#</span>
+<span class="c">#   find_package(open62541 REQUIRED)</span>
+<span class="c">#   target_link_libraries(main open62541::open62541)</span>
+</pre></div>
+</div>
+</section>
+<section id="building-with-cmake-on-windows">
+<h3>Building with CMake on Windows<a class="headerlink" href="#building-with-cmake-on-windows" title="Link to this heading"></a></h3>
+<p>Here we explain the build process for Visual Studio (2013 or newer). To build
+with MinGW, just replace the compiler selection in the call to CMake.</p>
+<ul class="simple">
+<li><p>Download and install</p>
+<ul>
+<li><p>Python 3.x: <a class="reference external" href="https://python.org/downloads">https://python.org/downloads</a></p></li>
+<li><p>CMake: <a class="reference external" href="http://www.cmake.org/cmake/resources/software.html">http://www.cmake.org/cmake/resources/software.html</a></p></li>
+<li><p>Microsoft Visual Studio: <a class="reference external" href="https://www.visualstudio.com/products/visual-studio-community-vs">https://www.visualstudio.com/products/visual-studio-community-vs</a></p></li>
+</ul>
+</li>
+<li><p>Download the open62541 sources (using git or as a zipfile from github)</p></li>
+<li><p>Open a command shell (cmd) and run</p></li>
+</ul>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">cd</span> <span class="p">&lt;</span>path-to<span class="p">&gt;</span>\open62541
+<span class="k">mkdir</span> build
+<span class="k">cd</span> build
+<span class="p">&lt;</span>path-to<span class="p">&gt;</span>\cmake.exe .. -G <span class="s2">&quot;Visual Studio 14 2015&quot;</span>
+<span class="p">:</span><span class="c1">: You can use use cmake-gui for a graphical user-interface to select features</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Then open <code class="file docutils literal notranslate"><span class="pre">buildopen62541.sln</span></code> in Visual Studio 2015 and build as usual</p></li>
+</ul>
+</section>
+<section id="building-on-os-x">
+<h3>Building on OS X<a class="headerlink" href="#building-on-os-x" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Download and install</p>
+<ul>
+<li><p>Xcode: <a class="reference external" href="https://itunes.apple.com/us/app/xcode/id497799835?ls=1&amp;mt=12">https://itunes.apple.com/us/app/xcode/id497799835?ls=1&amp;mt=12</a></p></li>
+<li><p>Homebrew: <a class="reference external" href="http://brew.sh/">http://brew.sh/</a></p></li>
+<li><p>Pip (a package manager for Python, may be preinstalled): <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">easy_install</span> <span class="pre">pip</span></code></p></li>
+</ul>
+</li>
+<li><p>Run the following in a shell</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>cmake
+pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span><span class="c1"># for documentation generation</span>
+pip<span class="w"> </span>install<span class="w"> </span>sphinx_rtd_theme<span class="w"> </span><span class="c1"># documentation style</span>
+brew<span class="w"> </span>install<span class="w"> </span>graphviz<span class="w"> </span><span class="c1"># for graphics in the documentation</span>
+brew<span class="w"> </span>install<span class="w"> </span>check<span class="w"> </span><span class="c1"># for unit tests</span>
+</pre></div>
+</div>
+<p>Follow Ubuntu instructions without the <code class="docutils literal notranslate"><span class="pre">apt-get</span></code> commands as these are taken care of by the above packages.</p>
+</section>
+<section id="building-on-openbsd">
+<h3>Building on OpenBSD<a class="headerlink" href="#building-on-openbsd" title="Link to this heading"></a></h3>
+<p>The procedure below works on OpenBSD 5.8 with gcc version 4.8.4, cmake version
+3.2.3 and Python version 2.7.10.</p>
+<ul class="simple">
+<li><p>Install a recent gcc, python and cmake:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pkg_add<span class="w"> </span>gcc<span class="w"> </span>python<span class="w"> </span>cmake
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Tell the system to actually use the recent gcc (it gets installed as egcc on OpenBSD):</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CC</span><span class="o">=</span>egcc<span class="w"> </span><span class="nv">CXX</span><span class="o">=</span>eg++
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Now procede as described for Ubuntu/Debian:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>open62541
+mkdir<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make
+</pre></div>
+</div>
+</section>
+<section id="building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian">
+<h3>Building Debian Packages inside Docker Container with CMake on Ubuntu or Debian<a class="headerlink" href="#building-debian-packages-inside-docker-container-with-cmake-on-ubuntu-or-debian" title="Link to this heading"></a></h3>
+<p>This is how to build the Debian packages.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assume a fresh checkout of open62541 in the ~/open62541 directory</span>
+<span class="nb">cd</span><span class="w"> </span>~/open62541
+
+<span class="c1"># Create the debian packaging definitions</span>
+python3<span class="w"> </span>./tools/prepare_packaging.py
+
+<span class="c1"># Build the package (generated packages and source will be in the ~ folder)</span>
+debuild
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-options">
+<h2>Build Options<a class="headerlink" href="#build-options" title="Link to this heading"></a></h2>
+<p>The open62541 project uses CMake to manage the build options, for code
+generation and to generate build projects for the different systems and IDEs.
+The tools <em>ccmake</em> or <em>cmake-gui</em> can be used to graphically set the build
+options.</p>
+<p>Most options can be changed manually in <code class="file docutils literal notranslate"><span class="pre">ua_config.h</span></code> (<code class="file docutils literal notranslate"><span class="pre">open62541.h</span></code>
+for the single-file release) after the code generation. But usually there is no
+need to adjust them.</p>
+<section id="main-build-options">
+<h3>Main Build Options<a class="headerlink" href="#main-build-options" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>CMAKE_BUILD_TYPE</strong></dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RelWithDebInfo</span></code> -O2 optimization with debug symbols</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Release</span></code> -O2 optimization without debug symbols</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Debug</span></code> -O0 optimization with debug symbols</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MinSizeRel</span></code> -Os optimization without debug symbols</p></li>
+</ul>
+</dd>
+<dt><strong>BUILD_SHARED_LIBS</strong></dt><dd><p>Build a shared library (dll/so) or (an archive of) object files for linking
+into a static binary. Shared libraries are recommended for a system-wide
+install. Note that this option modifies the <code class="file docutils literal notranslate"><span class="pre">ua_config.h</span></code> file that is
+also included in <code class="file docutils literal notranslate"><span class="pre">open62541.h</span></code> for the single-file distribution.</p>
+</dd>
+<dt><strong>UA_LOGLEVEL</strong></dt><dd><p>The SDK logs events of the level defined in <code class="docutils literal notranslate"><span class="pre">UA_LOGLEVEL</span></code> and above only.
+The logging event levels are as follows:</p>
+<ul class="simple">
+<li><p>600: Fatal</p></li>
+<li><p>500: Error</p></li>
+<li><p>400: Warning</p></li>
+<li><p>300: Info</p></li>
+<li><p>200: Debug</p></li>
+<li><p>100: Trace</p></li>
+</ul>
+<p>This compilation flag defines which log levels get compiled into the code. In
+addition, the implementations of <a class="reference internal" href="plugin_log.html#logging"><span class="std std-ref">Logging Plugin API</span></a> allow to set a filter for the
+logging level at runtime. So the logging level can be changed in the
+configuration without recompiling.</p>
+</dd>
+<dt><strong>UA_MULTITHREADING</strong></dt><dd><blockquote>
+<div><p>Level of multi-threading support. The supported levels are currently as follows:</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>0-99: Multithreading support disabled.</p></li>
+<li><p>&gt;=100: API functions marked with the UA_THREADSAFE-macro are protected internally with mutexes.
+Multiple threads are allowed to call these functions of the SDK at the same time without causing race conditions.
+Furthermore, this level support the handling of asynchronous method calls from external worker threads.</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="select-build-artefacts">
+<h3>Select build artefacts<a class="headerlink" href="#select-build-artefacts" title="Link to this heading"></a></h3>
+<p>By default only the main library shared object libopen62541.so (open62541.dll)
+or static linking archive open62541.a (open62541.lib) is built. Additional
+artifacts can be specified by the following options:</p>
+<dl class="simple">
+<dt><strong>UA_BUILD_EXAMPLES</strong></dt><dd><p>Compile example servers and clients from <code class="file docutils literal notranslate"><span class="pre">examples/*.c</span></code>.</p>
+</dd>
+<dt><strong>UA_BUILD_UNIT_TESTS</strong></dt><dd><p>Compile unit tests. The tests can be executed with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>.
+An individual test can be executed with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span> <span class="pre">ARGS=&quot;-R</span> <span class="pre">&lt;test_name&gt;</span> <span class="pre">-V&quot;</span></code>.
+The list of available tests can be displayed with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span> <span class="pre">ARGS=&quot;-N&quot;</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="detailed-sdk-features">
+<h3>Detailed SDK Features<a class="headerlink" href="#detailed-sdk-features" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>UA_ENABLE_SUBSCRIPTIONS</strong></dt><dd><p>Enable subscriptions</p>
+</dd>
+<dt><strong>UA_ENABLE_SUBSCRIPTIONS_EVENTS</strong></dt><dd><p>Enable the use of events for subscriptions. This is a new feature and currently marked as EXPERIMENTAL.</p>
+</dd>
+<dt><strong>UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS (EXPERIMENTAL)</strong></dt><dd><p>Enable the use of A&amp;C for subscriptions. This is a new feature build upon events and currently marked as EXPERIMENTAL.</p>
+</dd>
+<dt><strong>UA_ENABLE_METHODCALLS</strong></dt><dd><p>Enable the Method service set</p>
+</dd>
+<dt><strong>UA_ENABLE_PARSING</strong></dt><dd><p>Enable parsing human readable formats of builtin data types (Guid, NodeId, etc.).
+Utility functions that are not essential to the SDK.</p>
+</dd>
+<dt><strong>UA_ENABLE_NODEMANAGEMENT</strong></dt><dd><p>Enable dynamic addition and removal of nodes at runtime</p>
+</dd>
+<dt><strong>UA_ENABLE_AMALGAMATION</strong></dt><dd><p>Compile a single-file release into the files <code class="file docutils literal notranslate"><span class="pre">open62541.c</span></code> and <code class="file docutils literal notranslate"><span class="pre">open62541.h</span></code>. Not recommended for installation.</p>
+</dd>
+<dt><strong>UA_ENABLE_IMMUTABLE_NODES</strong></dt><dd><p>Nodes in the information model are not edited but copied and replaced. The
+replacement is done with atomic operations so that the information model is
+always consistent and can be accessed from an interrupt or parallel thread
+(depends on the node storage plugin implementation).</p>
+</dd>
+<dt><strong>UA_ENABLE_COVERAGE</strong></dt><dd><p>Measure the coverage of unit tests</p>
+</dd>
+<dt><strong>UA_ENABLE_DISCOVERY</strong></dt><dd><p>Enable Discovery Service (LDS)</p>
+</dd>
+<dt><strong>UA_ENABLE_DISCOVERY_MULTICAST</strong></dt><dd><p>Enable Discovery Service with multicast support (LDS-ME)</p>
+</dd>
+<dt><strong>UA_ENABLE_DISCOVERY_SEMAPHORE</strong></dt><dd><p>Enable Discovery Semaphore support</p>
+</dd>
+<dt><strong>UA_ENABLE_ENCRYPTION</strong></dt><dd><p>Enable encryption support and specify the used encryption backend. The possible
+options are:
+- <code class="docutils literal notranslate"><span class="pre">OFF</span></code> No encryption support. (default)
+- <code class="docutils literal notranslate"><span class="pre">MBEDTLS</span></code> Encryption support using mbed TLS
+- <code class="docutils literal notranslate"><span class="pre">OPENSSL</span></code> Encryption support using OpenSSL
+- <code class="docutils literal notranslate"><span class="pre">LIBRESSL</span></code> EXPERIMENTAL: Encryption support using LibreSSL</p>
+</dd>
+<dt><strong>UA_ENABLE_ENCRYPTION_TPM2</strong></dt><dd><dl class="simple">
+<dt>Enable TPM hardware for encryption. The possible options are:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">OFF</span></code> No TPM encryption support. (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ON</span></code> TPM encryption support</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt><strong>UA_NAMESPACE_ZERO</strong></dt><dd><p>Namespace zero contains the standard-defined nodes. The full namespace zero
+may not be required for all applications. The selectable options are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MINIMAL</span></code>: A barebones namespace zero that is compatible with most
+clients. But this namespace 0 is so small that it does not pass the CTT
+(Conformance Testing Tools of the OPC Foundation).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">REDUCED</span></code>: Small namespace zero that passes the CTT.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FULL</span></code>: Full namespace zero generated from the official XML definitions.</p></li>
+</ul>
+<p>The advanced build option <code class="docutils literal notranslate"><span class="pre">UA_FILE_NS0</span></code> can be used to override the XML
+file used for namespace zero generation.</p>
+</dd>
+</dl>
+<p>Some options are marked as advanced. The advanced options need to be toggled to
+be visible in the cmake GUIs.</p>
+<dl class="simple">
+<dt><strong>UA_ENABLE_TYPEDESCRIPTION</strong></dt><dd><p>Add the type and member names to the UA_DataType structure. Enabled by default.</p>
+</dd>
+<dt><strong>UA_ENABLE_STATUSCODE_DESCRIPTIONS</strong></dt><dd><p>Compile the human-readable name of the StatusCodes into the binary. Enabled by default.</p>
+</dd>
+<dt><strong>UA_ENABLE_FULL_NS0</strong></dt><dd><p>Use the full NS0 instead of a minimal Namespace 0 nodeset
+<code class="docutils literal notranslate"><span class="pre">UA_FILE_NS0</span></code> is used to specify the file for NS0 generation from namespace0 folder. Default value is <code class="docutils literal notranslate"><span class="pre">Opc.Ua.NodeSet2.xml</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="pubsub-build-options">
+<h3>PubSub Build Options<a class="headerlink" href="#pubsub-build-options" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><strong>UA_ENABLE_PUBSUB</strong></dt><dd><p>Enable the experimental OPC UA PubSub support. The option will include the
+PubSub UDP multicast plugin. Disabled by default.</p>
+</dd>
+<dt><strong>UA_ENABLE_PUBSUB_FILE_CONFIG</strong></dt><dd><p>Enable loading OPC UA PubSub configuration from File/ByteString. Enabling
+PubSub informationmodel methods also will add a method to the
+Publish/Subscribe object which allows configuring PubSub at runtime.</p>
+</dd>
+<dt><strong>UA_ENABLE_PUBSUB_INFORMATIONMODEL</strong></dt><dd><p>Enable the information model representation of the PubSub configuration. For
+more details take a look at the following section <cite>PubSub Information Model
+Representation</cite>. Disabled by default.</p>
+</dd>
+<dt><strong>UA_ENABLE_PUBSUB_MONITORING</strong></dt><dd><p>Enable the experimental PubSub monitoring. This feature provides a basic
+framework to implement monitoring/timeout checks for PubSub components.
+Initially the MessageReceiveTimeout check of a DataSetReader is provided. It
+uses the internal server callback implementation. The monitoring backend can
+be changed by the application to satisfy realtime requirements. Disabled by
+default.</p>
+</dd>
+</dl>
+</section>
+<section id="debug-build-options">
+<h3>Debug Build Options<a class="headerlink" href="#debug-build-options" title="Link to this heading"></a></h3>
+<p>This group contains build options mainly useful for development of the library itself.</p>
+<dl class="simple">
+<dt><strong>UA_DEBUG</strong></dt><dd><p>Enable assertions and additional definitions not intended for production builds</p>
+</dd>
+<dt><strong>UA_DEBUG_DUMP_PKGS</strong></dt><dd><p>Dump every package received by the server as hexdump format</p>
+</dd>
+</dl>
+</section>
+<section id="minimizing-the-binary-size">
+<h3>Minimizing the binary size<a class="headerlink" href="#minimizing-the-binary-size" title="Link to this heading"></a></h3>
+<p>The size of the generated binary can be reduced considerably by adjusting the
+build configuration. With open62541, it is possible to configure minimal servers
+that require less than 100kB of RAM and ROM.</p>
+<p>The following options influence the ROM requirements:</p>
+<p>First, in CMake, the build type can be set to <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE=MinSizeRel</span></code>.
+This sets the compiler flags to minimize the binary size. The build type also
+strips out debug information. Second, the binary size can be reduced by removing
+features via the build-flags described above.</p>
+<p>Second, setting <code class="docutils literal notranslate"><span class="pre">UA_NAMESPACE_ZERO</span></code> to <code class="docutils literal notranslate"><span class="pre">MINIMAL</span></code> reduces the size of the
+builtin information model. Setting this option can reduce the binary size by
+half in some cases.</p>
+<p>Third, some features might not be needed and can be disabled to reduce the
+binary footprint. Examples for this are Subscriptions or encrypted
+communication.</p>
+<p>Last, logging messages take up a lot of space in the binary and might not be
+needed in embedded scenarios. Setting <code class="docutils literal notranslate"><span class="pre">UA_LOGLEVEL</span></code> to a value above 600
+(<code class="docutils literal notranslate"><span class="pre">FATAL</span></code>) disables all logging. In addition, the feature-flags
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_TYPEDESCRIPTION</span></code> and <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_STATUSCODE_DESCRIPTIONS</span></code> add static
+information to the binary that is only used for human-readable logging and
+debugging.</p>
+<p>The RAM requirements of a server are mostly due to the following settings:</p>
+<ul class="simple">
+<li><p>The size of the information model</p></li>
+<li><p>The number of connected clients</p></li>
+<li><p>The configured maximum message size that is preallocated</p></li>
+</ul>
+</section>
+</section>
+<section id="prebuilt-packages">
+<h2>Prebuilt packages<a class="headerlink" href="#prebuilt-packages" title="Link to this heading"></a></h2>
+<section id="debian">
+<h3>Debian<a class="headerlink" href="#debian" title="Link to this heading"></a></h3>
+<p>Debian packages can be found in our official PPA:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Daily Builds (based on master branch): <a class="reference external" href="https://launchpad.net/~open62541-team/+archive/ubuntu/daily">https://launchpad.net/~open62541-team/+archive/ubuntu/daily</a></p></li>
+<li><p>Release Builds (starting with Version 0.4): <a class="reference external" href="https://launchpad.net/~open62541-team/+archive/ubuntu/ppa">https://launchpad.net/~open62541-team/+archive/ubuntu/ppa</a></p></li>
+</ul>
+</div></blockquote>
+<p>Install them with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>add-apt-repository<span class="w"> </span>ppa:open62541-team/ppa
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libopen62541-1-dev
+</pre></div>
+</div>
+</section>
+<section id="arch">
+<h3>Arch<a class="headerlink" href="#arch" title="Link to this heading"></a></h3>
+<p>Arch packages are available in the AUR:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Stable Builds: <a class="reference external" href="https://aur.archlinux.org/packages/open62541/">https://aur.archlinux.org/packages/open62541/</a></p></li>
+<li><p>Unstable Builds (current master): <a class="reference external" href="https://aur.archlinux.org/packages/open62541-git/">https://aur.archlinux.org/packages/open62541-git/</a></p></li>
+<li><p>In order to add custom build options (<span class="xref std std-ref">build_options</span>), you can set the environment variable <code class="docutils literal notranslate"><span class="pre">OPEN62541_CMAKE_FLAGS</span></code></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="openbsd">
+<h3>OpenBSD<a class="headerlink" href="#openbsd" title="Link to this heading"></a></h3>
+<p>Starting with OpenBSD 6.7 the ports directory misc/open62541 can
+build the released version of open62541.
+Install the binary package from the OpenBSD mirrors:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pkg_add<span class="w"> </span>open62541
+</pre></div>
+</div>
+</section>
+</section>
+<section id="building-the-examples">
+<h2>Building the Examples<a class="headerlink" href="#building-the-examples" title="Link to this heading"></a></h2>
+<p>Make sure that you have installed the shared library as explained in the
+previous steps. Then the build system should automatically find the includes and
+the shared library.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>/path-to/examples/tutorial_server_firststeps.c<span class="w"> </span>.<span class="w"> </span><span class="c1"># copy the example server</span>
+gcc<span class="w"> </span>-std<span class="o">=</span>c99<span class="w"> </span>-o<span class="w"> </span>server<span class="w"> </span>tutorial_server_firststeps.c<span class="w"> </span>-lopen62541
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="core_concepts.html" class="btn btn-neutral float-left" title="Core Concepts of OPC UA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="types.html" class="btn btn-neutral float-right" title="Data Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
