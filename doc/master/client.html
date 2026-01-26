@@ -6,17 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 (master) 1.5.0-rc1 documentation</title>
+  <title>Client &mdash; open62541 (master) 1.5.0-rc2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d0ec56a3"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=e714dcc9"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -635,19 +635,9 @@ documentation on the notifications and their defined payload.</p>
 </section>
 <section id="client-configuration">
 <span id="client-config"></span><h2>Client Configuration<a class="headerlink" href="#client-configuration" title="Link to this heading"></a></h2>
-<p>The client configuration is used for setting connection parameters and
-additional settings used by the client.
-The configuration should not be modified after it is passed to a client.
-Currently, only one client can use a configuration at a time.</p>
-<p>Examples for configurations are provided in the <code class="docutils literal notranslate"><span class="pre">/plugins</span></code> folder.
-The usual usage is as follows:</p>
-<ol class="arabic simple">
-<li><p>Create a client configuration with default settings as a starting point</p></li>
-<li><p>Modifiy the configuration, e.g. modifying the timeout</p></li>
-<li><p>Instantiate a client with it</p></li>
-<li><p>After shutdown of the client, clean up the configuration (free memory)</p></li>
-</ol>
-<p>The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide a good starting point for this.</p>
+<p>The configuration used for setting connection parameters and additional
+client settings. The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide examples for many of the
+client settings.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">clientContext</span><span class="p">;</span><span class="w"> </span><span class="cm">/* User-defined pointer attached to the client */</span>
 <span class="w">    </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logging</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Plugin for log output */</span>
@@ -658,14 +648,10 @@ The usual usage is as follows:</p>
 <span class="cm">     * setting a non-null &quot;timeoutHint&quot; in the request header. */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* The description must be internally consistent.</span>
-<span class="cm">     * - The ApplicationUri set in the ApplicationDescription must match the</span>
-<span class="cm">     *   URI set in the certificate */</span>
+<span class="w">    </span><span class="cm">/* Self-description of the client.</span>
+<span class="cm">     * The ApplicationUri set in the ApplicationDescription must match the URI</span>
+<span class="cm">     * set in the certificate */</span>
 <span class="w">    </span><span class="n">UA_ApplicationDescription</span><span class="w"> </span><span class="n">clientDescription</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* The endpoint for the client to connect to.</span>
-<span class="cm">     * Such as &quot;opc.tcp://host:port&quot;. */</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Connection configuration</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~</span>
@@ -673,35 +659,98 @@ The usual usage is as follows:</p>
 <span class="cm">     * client has when connecting to a server. If no connection can be made</span>
 <span class="cm">     * under these restrictions, then the connection will abort with an error</span>
 <span class="cm">     * message. */</span>
-<span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">userIdentityToken</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Configured User-Identity Token */</span>
-<span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w">  </span><span class="cm">/* None, Sign, SignAndEncrypt. The</span>
-<span class="cm">                                           * default is &quot;invalid&quot;. This</span>
-<span class="cm">                                           * indicates the client to select any</span>
-<span class="cm">                                           * matching endpoint. */</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* SecurityPolicy for the SecureChannel. An</span>
-<span class="cm">                                  * empty string indicates the client to select</span>
-<span class="cm">                                  * any matching SecurityPolicy. */</span>
 
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noSession</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Only open a SecureChannel, but no Session */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noReconnect</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t reconnect SecureChannel when the connection</span>
-<span class="cm">                             * is lost without explicitly closing. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The URI for the client to connect to</span>
+<span class="cm">                            * (&quot;opc.tcp://host:port&quot;) */</span>
+
+<span class="w">    </span><span class="cm">/* Session config */</span>
+<span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">userIdentityToken</span><span class="p">;</span><span class="w"> </span><span class="cm">/* UserIdentityToken containing e.g.</span>
+<span class="cm">                                           * username+pwd for authentication.</span>
+<span class="cm">                                           * Set by the _connect API. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">sessionName</span><span class="p">;</span><span class="w">         </span><span class="cm">/* Client-defined session name */</span>
+<span class="w">    </span><span class="n">UA_LocaleId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionLocaleIds</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Preferred locales of the client */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">sessionLocaleIdsSize</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Basic connection behavior */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noSession</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Only open a SecureChannel, but no Session */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noReconnect</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Don&#39;t reconnect SecureChannel when the connection</span>
+<span class="cm">                              * is lost without explicitly closing. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noNewSession</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t automatically create a new Session when</span>
 <span class="cm">                              * the intial one is lost. Instead abort the</span>
 <span class="cm">                              * connection when the Session is lost. */</span>
 
-<span class="w">    </span><span class="cm">/* If either endpoint or userTokenPolicy has been set, then they are used</span>
-<span class="cm">     * directly. Otherwise this information comes from the GetEndpoints response</span>
-<span class="cm">     * from the server (filtered and selected for the SecurityMode, etc.). */</span>
+<span class="w">    </span><span class="cm">/* Advanced Connection Settings */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">secureChannelLifeTime</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Lifetime in ms (then the channel needs</span>
+<span class="cm">                                      * to be renewed) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestedSessionTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Session timeout in ms */</span>
+<span class="w">    </span><span class="n">UA_ConnectionConfig</span><span class="w"> </span><span class="n">localConnectionConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">connectivityCheckInterval</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Connectivity check interval in ms.</span>
+<span class="cm">                                          * 0 -&gt; background task disabled */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpReuseAddr</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Specific to OPC UA with TCP transport. */</span>
+
+<span class="w">    </span><span class="cm">/* Endpoint Selection</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * The Endpoint and UserTokenPolicy define the encryption for the</span>
+<span class="cm">     * SecureChannel and for the UserIdentityToken (e.g. to encrypt</span>
+<span class="cm">     * username/password). They can be set directly or selected by the client</span>
+<span class="cm">     * from the GetEndpoints response via filter criteria. */</span>
+
+<span class="w">    </span><span class="cm">/* Direct definition of Endpoint and UserTokenPolicy. Note that an Endpoint</span>
+<span class="cm">     * can define multiple UserTokenPolicies to select. */</span>
 <span class="w">    </span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="n">endpoint</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UserTokenPolicy</span><span class="w"> </span><span class="n">userTokenPolicy</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* If the EndpointDescription has not been defined, the ApplicationURI</span>
-<span class="cm">     * filters the servers considered in the FindServers service and the</span>
-<span class="cm">     * Endpoints considered in the GetEndpoints service. */</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">applicationUri</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Endpoint filtering */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">applicationUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Filters the servers considered in the</span>
+<span class="cm">                               * FindServers service and the Endpoints</span>
+<span class="cm">                               * considered in the GetEndpoints service. */</span>
+<span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w"> </span><span class="cm">/* None, Sign, SignAndEncrypt. The</span>
+<span class="cm">                                          * default is &quot;invalid&quot;. This lets the</span>
+<span class="cm">                                          * client select any matching</span>
+<span class="cm">                                          * endpoint. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* SecurityPolicy for the SecureChannel. An</span>
+<span class="cm">                                  * empty string indicates the client to select</span>
+<span class="cm">                                  * any avaialble SecurityPolicy. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">authSecurityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* For authentication (UserIdentityToken).</span>
+<span class="cm">                                      * The empty string lets the client select</span>
+<span class="cm">                                      * any matching policy. */</span>
 
-<span class="w">    </span><span class="cm">/* The following settings are specific to OPC UA with TCP transport. */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpReuseAddr</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Security Configuration</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Additional settings and the plugins providing encryption support. */</span>
+
+<span class="w">    </span><span class="cm">/* Available SecurityPolicies (Plugins) */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityPoliciesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicies</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Certificate Verification Plugin */</span>
+<span class="w">    </span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="n">certificateVerification</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Additional SecurityPolicies for authentication (e.g. to encrypt the</span>
+<span class="cm">     * password). The SecurityPolicies for SecureChannels (above) are also</span>
+<span class="cm">     * usable for authentication. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Allow clients without encryption support to connect with username and</span>
+<span class="cm">     * password. This requires to transmit the password in plain text over the</span>
+<span class="cm">     * network which is why this option is disabled by default. Make sure you</span>
+<span class="cm">     * really need this before enabling plain text passwords. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">allowNonePolicyPassword</span><span class="p">;</span>
+
+<span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
+<span class="w">    </span><span class="cm">/* Limits for TrustList */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxTrustListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in bytes, 0 =&gt; unlimited */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxRejectedListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
+
+<span class="w">    </span><span class="cm">/* If the private key is in PEM format and password protected, this callback</span>
+<span class="cm">     * is called during initialization to get the password to decrypt the</span>
+<span class="cm">     * private key. The memory containing the password is freed by the client</span>
+<span class="cm">     * after use. The callback should be set early, other parts of the client</span>
+<span class="cm">     * config setup may depend on it. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">privateKeyPasswordCallback</span><span class="p">)(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="p">,</span>
+<span class="w">                                                </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">);</span>
+<span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Custom Data Types</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~</span>
@@ -713,6 +762,7 @@ The usual usage is as follows:</p>
 <span class="cm">     *</span>
 <span class="cm">     * See the section on :ref:`generic-types`. Examples for working with custom</span>
 <span class="cm">     * data types are provided in ``/examples/custom_datatype/``. */</span>
+
 <span class="w">    </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customDataTypes</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Namespace Mapping</span>
@@ -737,53 +787,21 @@ The usual usage is as follows:</p>
 <span class="cm">     * - When the client connects, the namespace array of the server is read.</span>
 <span class="cm">     *   All previously unknown namespaces are added from this to the internal</span>
 <span class="cm">     *   array of the client. */</span>
+
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">namespaces</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">namespacesSize</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* Advanced Client Configuration</span>
-<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */</span>
-
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">secureChannelLifeTime</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Lifetime in ms (then the channel needs</span>
-<span class="cm">                                        to be renewed) */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestedSessionTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Session timeout in ms */</span>
-<span class="w">    </span><span class="n">UA_ConnectionConfig</span><span class="w"> </span><span class="n">localConnectionConfig</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">connectivityCheckInterval</span><span class="p">;</span><span class="w">     </span><span class="cm">/* Connectivity check interval in ms.</span>
-<span class="cm">                                              * 0 = background task disabled */</span>
 
 <span class="w">    </span><span class="cm">/* Application Notification</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~</span>
 <span class="cm">     * The notification callbacks can be NULL. The global callback receives all</span>
 <span class="cm">     * notifications. The specialized callbacks receive only the subset</span>
 <span class="cm">     * indicated by their name. */</span>
+
 <span class="w">    </span><span class="n">UA_ClientNotificationCallback</span><span class="w"> </span><span class="n">globalNotificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ClientNotificationCallback</span><span class="w"> </span><span class="n">lifecycleNotificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ClientNotificationCallback</span><span class="w"> </span><span class="n">serviceNotificationCallback</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* EventLoop */</span>
-<span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The EventLoop is not deleted with the config */</span>
-
-<span class="w">    </span><span class="cm">/* Available SecurityPolicies */</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityPoliciesSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicies</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* Certificate Verification Plugin */</span>
-<span class="w">    </span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="n">certificateVerification</span><span class="p">;</span>
-
-<span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
-<span class="w">    </span><span class="cm">/* Limits for TrustList */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxTrustListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in bytes, 0 =&gt; unlimited */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxRejectedListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
-<span class="cp">#endif</span>
-
-<span class="w">    </span><span class="cm">/* Available SecurityPolicies for Authentication. The policy defined by the</span>
-<span class="cm">     * AccessControl is selected. If no policy is defined, the policy of the</span>
-<span class="cm">     * secure channel is selected.*/</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* SecurityPolicyUri for the Authentication. */</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">authSecurityPolicyUri</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Below are the old state-change callbacks */</span>
 
 <span class="w">    </span><span class="cm">/* Callback for state changes. The client state is differentated into the</span>
 <span class="cm">     * SecureChannel state and the Session state. The connectStatus is set if</span>
@@ -797,13 +815,10 @@ The usual usage is as follows:</p>
 
 <span class="w">    </span><span class="cm">/* When connectivityCheckInterval is greater than 0, every</span>
 <span class="cm">     * connectivityCheckInterval (in ms), an async read request is performed on</span>
-<span class="cm">     * the server. inactivityCallback is called when the client receive no</span>
-<span class="cm">     * response for this read request The connection can be closed, this in an</span>
+<span class="cm">     * the server. inactivityCallback is called when the client receives no</span>
+<span class="cm">     * response for this read request. The connection can be closed, this in an</span>
 <span class="cm">     * attempt to recreate a healthy connection. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">inactivityCallback</span><span class="p">)(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
-
-<span class="w">    </span><span class="cm">/* Number of PublishResponse queued up in the server */</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">outStandingPublishRequests</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* If the client does not receive a PublishResponse after the defined delay</span>
 <span class="cm">     * of ``(sub-&gt;publishingInterval * sub-&gt;maxKeepAliveCount) +</span>
@@ -813,25 +828,20 @@ The usual usage is as follows:</p>
 <span class="w">                                           </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">subscriptionId</span><span class="p">,</span>
 <span class="w">                                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">subContext</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Session config */</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">sessionName</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_LocaleId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionLocaleIds</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">sessionLocaleIdsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Advanced Settings</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~ */</span>
 
-<span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
-<span class="w">    </span><span class="cm">/* If the private key is in PEM format and password protected, this callback</span>
-<span class="cm">     * is called during initialization to get the password to decrypt the</span>
-<span class="cm">     * private key. The memory containing the password is freed by the client</span>
-<span class="cm">     * after use. The callback should be set early, other parts of the client</span>
-<span class="cm">     * config setup may depend on it. */</span>
-<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">privateKeyPasswordCallback</span><span class="p">)(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="p">,</span>
-<span class="w">                                                </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">);</span>
-<span class="cp">#endif</span>
+<span class="w">    </span><span class="cm">/* Number of PublishResponse queued up in the server */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">outStandingPublishRequests</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* EventLoop */</span>
+<span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don&#39;t delete the EventLoop with the config */</span>
 <span class="p">};</span>
 
-<span class="cm">/* Makes a partial deep copy of the clientconfig. The copies of the plugins</span>
-<span class="cm"> * (logger, eventloop, securitypolicy) are shallow. Therefore calling _clear on</span>
-<span class="cm"> * the dst object will also delete the plugins in src object. */</span>
+<span class="cm">/* Makes a deep copy of the config. Only The copies of the plugins (logger,</span>
+<span class="cm"> * eventloop, securitypolicy) are shallow. Therefore calling _clear on dst will</span>
+<span class="cm"> * also delete the plugins of src. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_ClientConfig_copy</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
 

@@ -6,17 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Utility Definitions &mdash; open62541 (master) 1.5.0-rc1 documentation</title>
+  <title>Utility Definitions &mdash; open62541 (master) 1.5.0-rc2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d0ec56a3"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=e714dcc9"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -58,7 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#range-definition">Range Definition</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#event-filter-parsing">Event-Filter Parsing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#random-number-generator">Random Number Generator</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#translate-between-namespace-and-internal-datatype-definitions">Translate between Namespace and internal DataType definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#translate-between-datatypedescription-and-ua-datatype">Translate between DataTypeDescription and UA_DataType</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#key-value-map">Key Value Map</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#binary-connection-config-parameters">Binary Connection Config Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#default-node-attributes">Default Node Attributes</a></li>
@@ -133,8 +133,7 @@
 </section>
 <section id="event-filter-parsing">
 <span id="eventfilter"></span><h2>Event-Filter Parsing<a class="headerlink" href="#event-filter-parsing" title="Link to this heading"></a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_PARSING</span>
-<span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_EVENTS</span>
 <span class="cp">#ifdef UA_ENABLE_JSON_ENCODING</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
@@ -145,7 +144,6 @@
 <span class="nf">UA_EventFilter_parse</span><span class="p">(</span><span class="n">UA_EventFilter</span><span class="w"> </span><span class="o">*</span><span class="n">filter</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">content</span><span class="p">,</span>
 <span class="w">                     </span><span class="n">UA_EventFilterParserOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
-<span class="cp">#endif</span>
 <span class="cp">#endif</span>
 <span class="cp">#endif</span>
 </pre></div>
@@ -172,20 +170,22 @@ server/client.</p>
 </pre></div>
 </div>
 </section>
-<section id="translate-between-namespace-and-internal-datatype-definitions">
-<h2>Translate between Namespace and internal DataType definitions<a class="headerlink" href="#translate-between-namespace-and-internal-datatype-definitions" title="Link to this heading"></a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The generated UA_DataType faithfully generates the padding of</span>
-<span class="cm"> * the corresponding C-structures. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_DataType_fromStructureDefinition</span><span class="p">(</span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_StructureDefinition</span><span class="w"> </span><span class="o">*</span><span class="n">sd</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeId</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">typeName</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customTypes</span><span class="p">);</span>
+<section id="translate-between-datatypedescription-and-ua-datatype">
+<h2>Translate between DataTypeDescription and UA_DataType<a class="headerlink" href="#translate-between-datatypedescription-and-ua-datatype" title="Link to this heading"></a></h2>
+<p>The ExtensionObject for the description is either of</p>
+<ul class="simple">
+<li><p>SimpleTypeDescription</p></li>
+<li><p>EnumDescription</p></li>
+<li><p>StructureDescription</p></li>
+</ul>
+<p>The generated UA_DataType faithfully generates the padding of the
+corresponding C-structures.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_DataType_fromDescription</span><span class="p">(</span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">descr</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">customTypes</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_DataType_toStructureDefinition</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
-<span class="w">                                  </span><span class="n">UA_StructureDefinition</span><span class="w"> </span><span class="o">*</span><span class="n">sd</span><span class="p">);</span>
+<span class="nf">UA_DataType_toDescription</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">descr</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -462,8 +462,7 @@ that matches any BrowseName.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;!HasChild&gt;Truck</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;HasChild&gt;</span></code></p></li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_PARSING</span>
-<span class="n">UA_StatusCode</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
 <span class="nf">UA_RelativePath_parse</span><span class="p">(</span><span class="n">UA_RelativePath</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
 
 <span class="cm">/* Supports the lookup of non-standard ReferenceTypes by their browse name in</span>
@@ -472,7 +471,6 @@ that matches any BrowseName.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_RelativePath_parseWithServer</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_RelativePath</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
-<span class="cp">#endif</span>
 
 <span class="cm">/* The out-string can be pre-allocated. Then the size is adjusted or an error</span>
 <span class="cm"> * returned. If the out-string is NULL, then memory is allocated for it. */</span>
@@ -529,8 +527,7 @@ attribute.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">/3:Truck/5:Wheel</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">#BrowseName</span></code></p></li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_PARSING</span>
-<span class="n">UA_StatusCode</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
 <span class="nf">UA_ReadValueId_parse</span><span class="p">(</span><span class="n">UA_ReadValueId</span><span class="w"> </span><span class="o">*</span><span class="n">rvi</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
 
@@ -541,7 +538,6 @@ attribute.</p></li>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_SimpleAttributeOperand_parse</span><span class="p">(</span><span class="n">UA_SimpleAttributeOperand</span><span class="w"> </span><span class="o">*</span><span class="n">sao</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
-<span class="cp">#endif</span>
 
 <span class="cm">/* The out-string can be pre-allocated. Then the size is adjusted or an error</span>
 <span class="cm"> * returned. If the out-string is NULL, then memory is allocated for it. */</span>
