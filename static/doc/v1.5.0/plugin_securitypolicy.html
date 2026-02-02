@@ -1,0 +1,568 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecurityPolicy Plugin API &mdash; open62541 (1.5.0) 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=e0a75244"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="CertificateGroup Plugin API" href="plugin_certificategroup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (1.5.0)
+              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="plugin.html">Plugin API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plugin_log.html">Logging Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_nodestore.html">Nodestore Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_accesscontrol.html">AccessControl Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_eventloop.html">EventLoop Plugin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin_certificategroup.html">CertificateGroup Plugin API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">SecurityPolicy Plugin API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pubsub-securitypolicy">PubSub SecurityPolicy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (1.5.0)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="plugin.html">Plugin API</a></li>
+      <li class="breadcrumb-item active">SecurityPolicy Plugin API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/plugin_securitypolicy.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="securitypolicy-plugin-api">
+<h1>SecurityPolicy Plugin API<a class="headerlink" href="#securitypolicy-plugin-api" title="Link to this heading"></a></h1>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">uri</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Verifies the signature of the message using the provided keys in the</span>
+<span class="cm">     * context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The channelContext that contains the key to verify</span>
+<span class="cm">     *        the supplied message with.</span>
+<span class="cm">     * @param message The message to which the signature is supposed to belong.</span>
+<span class="cm">     * @param signature The signature of the message, that should be verified. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">verify</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                            </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">message</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signature</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Signs the given message using this policys signing algorithm and the</span>
+<span class="cm">     * provided keys in the context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The channelContext that contains the key to sign</span>
+<span class="cm">     *        the supplied message with.</span>
+<span class="cm">     * @param message The message to sign.</span>
+<span class="cm">     * @param signature An output buffer to which the signature is written. The</span>
+<span class="cm">     *        buffer needs to be allocated by the caller. The necessary size can</span>
+<span class="cm">     *        be acquired with the signatureSize attribute of this module. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">sign</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">message</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signature</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Gets the signature size that depends on the local (private) key.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The channelContext that contains the</span>
+<span class="cm">     *        certificate/key.</span>
+<span class="cm">     * @return The size of the local signature. Returns 0 if no local</span>
+<span class="cm">     *         certificate was set. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getLocalSignatureSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Gets the signature size that depends on the remote (public) key.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The size of the remote signature. Returns 0 if no</span>
+<span class="cm">     *         remote certificate was set previousely. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getRemoteSignatureSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Gets the local signing key length.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The length of the signing key in bytes. Returns 0 if no length</span>
+<span class="cm">     *         can be found. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getLocalKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Gets the local signing key length.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The length of the signing key in bytes. Returns 0 if no length</span>
+<span class="cm">     *         can be found. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getRemoteKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_SecurityPolicySignatureAlgorithm</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">uri</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Encrypt the given data in place. For asymmetric encryption, the block</span>
+<span class="cm">     * size for plaintext and cypher depend on the remote key (certificate).</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The channelContext which contains information about</span>
+<span class="cm">     *        the keys to encrypt data.</span>
+<span class="cm">     * @param data The data that is encrypted. The encrypted data will overwrite</span>
+<span class="cm">     *        the data that was supplied. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">encrypt</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Decrypts the given ciphertext in place. For asymmetric encryption, the</span>
+<span class="cm">     * block size for plaintext and cypher depend on the local private key.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The channelContext which contains information about</span>
+<span class="cm">     *        the keys needed to decrypt the message.</span>
+<span class="cm">     * @param data The data to decrypt. The decryption is done in place. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">decrypt</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Returns the length of the key used to encrypt messages in bits. For</span>
+<span class="cm">     * asymmetric encryption the key length is for the local private key.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The length of the local key. Returns 0 if no</span>
+<span class="cm">     *         key length is known. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getLocalKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Returns the length of the key to encrypt messages in bits. Depends on the</span>
+<span class="cm">     * key (certificate) from the remote side.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The length of the remote key. Returns 0 if no</span>
+<span class="cm">     *         key length is known. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getRemoteKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Returns the size of encrypted blocks for sending. For asymmetric</span>
+<span class="cm">     * encryption this depends on the remote key (certificate). For symmetric</span>
+<span class="cm">     * encryption the local and remote encrypted block size are identical.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The size of encrypted blocks in bytes. Returns 0 if no key length</span>
+<span class="cm">     *         is known. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getRemoteBlockSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Returns the size of plaintext blocks for sending. For asymmetric</span>
+<span class="cm">     * encryption this depends on the remote key (certificate). For symmetric</span>
+<span class="cm">     * encryption the local and remote plaintext block size are identical.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The size of plaintext blocks in bytes. Returns 0 if no key length</span>
+<span class="cm">     *         is known. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getRemotePlainTextBlockSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_SecurityPolicyEncryptionAlgorithm</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_NONE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_RSA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_ECC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_SecurityPolicyType</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_SecurityPolicy</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">policyContext</span><span class="p">;</span><span class="w">     </span><span class="cm">/* Context data */</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Logger to be used by the plugin */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">policyUri</span><span class="p">;</span><span class="w">     </span><span class="cm">/* SecurityPolicyUri */</span>
+
+<span class="w">    </span><span class="cm">/* Value indicating the crypto strength of the policy, with zero for</span>
+<span class="cm">     * deprecated or none */</span>
+<span class="w">    </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">securityLevel</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* For special handling of SecurityPolicies using ECC (Elliptic Curve</span>
+<span class="cm">     * Cryptography) */</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicyType</span><span class="w"> </span><span class="n">policyType</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* The local certificate is specific for each SecurityPolicy since it</span>
+<span class="cm">     * depends on the used key length. */</span>
+<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">localCertificate</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Function pointers grouped into modules */</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicySignatureAlgorithm</span><span class="w"> </span><span class="n">asymSignatureAlgorithm</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicyEncryptionAlgorithm</span><span class="w"> </span><span class="n">asymEncryptionAlgorithm</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicySignatureAlgorithm</span><span class="w"> </span><span class="n">symSignatureAlgorithm</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicyEncryptionAlgorithm</span><span class="w"> </span><span class="n">symEncryptionAlgorithm</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicySignatureAlgorithm</span><span class="w"> </span><span class="n">certSignatureAlgorithm</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Create a new channel context. The caller needs to call delete on the</span>
+<span class="cm">     * received object to free allocated memory. Memory is only allocated if the</span>
+<span class="cm">     * function succeeds so there is no need to manually free the memory pointed</span>
+<span class="cm">     * to by *channelContext or to call delete in case of failure.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The policy for which the channelContext is created.</span>
+<span class="cm">     * @param remoteCertificate The remote certificate contains the remote</span>
+<span class="cm">     *        asymmetric key. The certificate will be verified and then stored</span>
+<span class="cm">     *        in the context so that its details may be accessed.</span>
+<span class="cm">     * @param channelContext The initialized channelContext that is passed to</span>
+<span class="cm">     *        functions that work on a context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">newChannelContext</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">remoteCertificate</span><span class="p">,</span>
+<span class="w">                                </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Deletes the the channel context. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteChannelContext</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the local encrypting key in the supplied context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param key The local encrypting key to store in the context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setLocalSymEncryptingKey</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                              </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">key</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the local signing key in the supplied context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param key The local signing key to store in the context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setLocalSymSigningKey</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">key</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the local initialization vector in the supplied context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param iv The local initialization vector to store in the context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setLocalSymIv</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">iv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the remote encrypting key in the supplied context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param key The remote encrypting key to store in the context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setRemoteSymEncryptingKey</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">key</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the remote signing key in the supplied context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param key The remote signing key to store in the context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setRemoteSymSigningKey</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                            </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">key</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the remote initialization vector in the supplied context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param iv The remote initialization vector to store in the context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setRemoteSymIv</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">iv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Compares the supplied certificate with the remote certificate stored in</span>
+<span class="cm">     * the channel context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The channel context data that contains the</span>
+<span class="cm">     *        certificate to compare to.</span>
+<span class="cm">     * @param certificate The certificate to compare to the one stored in the context.</span>
+<span class="cm">     * @return If the certificates match UA_STATUSCODE_GOOD is returned. If they</span>
+<span class="cm">     *         don&#39;t match or an errror occurred an error code is returned. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">compareCertificate</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Generate the keys for symmetric encryption. For information on what</span>
+<span class="cm">     * parameters this function receives in what situation, refer to the OPC UA</span>
+<span class="cm">     * specification Part 6, &quot;Deriving keys&quot;.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context of the SecureChannel</span>
+<span class="cm">     * @param secret Usually from the nonce. See part 6.</span>
+<span class="cm">     * @param seed Usually from the nonce. See part 6.</span>
+<span class="cm">     * @param out An output to write the data to. The length defines the maximum</span>
+<span class="cm">     *        number of output bytes that are produced. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateKey</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">secret</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">seed</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Random generator for generating nonces.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context of the SecureChannel</span>
+<span class="cm">     * @param out Pointer to a buffer to store the nonce in. Needs to be</span>
+<span class="cm">     *        allocated by the caller. The buffer is filled with random data. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateNonce</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* The length of the nonce used in the SecureChannel */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nonceLength</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Generates a thumbprint for the specified certificate.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The policy that generates the thumbprint.</span>
+<span class="cm">     * @param certificate The certificate to make a thumbprint of.</span>
+<span class="cm">     * @param thumbprint an output buffer for the resulting thumbprint. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">makeCertThumbprint</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">thumbprint</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Compares the supplied certificate with the certificate in the</span>
+<span class="cm">     * SecurityPolicy context.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The policy data that contains the certificate</span>
+<span class="cm">     *        to compare to.</span>
+<span class="cm">     * @param thumbprint The certificate thumbprint to compare to the one stored</span>
+<span class="cm">     *        in the context.</span>
+<span class="cm">     * @return If the thumbprints match UA_STATUSCODE_GOOD is returned. If they</span>
+<span class="cm">     *         don&#39;t match or an error occurred an error code is returned. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">compareCertThumbprint</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">thumbprint</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Updates the ApplicationInstanceCertificate and the corresponding private</span>
+<span class="cm">     * key at runtime. This overwrites the localCertificate member of the</span>
+<span class="cm">     * SecurityPolicy structure and updates the context internally. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">updateCertificate</span><span class="p">)(</span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">privateKey</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Creates a PKCS #10 DER encoded certificate request signed with the</span>
+<span class="cm">     * server&#39;s private key.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to work on.</span>
+<span class="cm">     * @param subjectName The subject name to use in the Certificate Request. If</span>
+<span class="cm">     *        not specified the SubjectName from the current Certificate is</span>
+<span class="cm">     *        used.</span>
+<span class="cm">     * @param nonce Additional entropy that the caller can provide. It shall be</span>
+<span class="cm">     *        at least 32 bytes long.</span>
+<span class="cm">     * @param params A KeyVaue list that can be used for additional parameters</span>
+<span class="cm">     *        later.</span>
+<span class="cm">     * @param csr Returns the created CSR. If the passed byte string is not</span>
+<span class="cm">     *        empty, nothing is created.</span>
+<span class="cm">     * @param newPrivateKey Returns the private key if a new one needs to be</span>
+<span class="cm">     *        generated. Alternatively, an existing key can be provided, which</span>
+<span class="cm">     *        will be used as the CSR key in the security policy. This is</span>
+<span class="cm">     *        necessary if the CSR was created under a different security policy</span>
+<span class="cm">     *        and the current one only requires an update. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">createSigningRequest</span><span class="p">)(</span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">subjectName</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">,</span>
+<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">params</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">csr</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">newPrivateKey</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Deletes the dynamic content of the policy */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<section id="pubsub-securitypolicy">
+<h2>PubSub SecurityPolicy<a class="headerlink" href="#pubsub-securitypolicy" title="Link to this heading"></a></h2>
+<p>For PubSub encryption, the message nonce is part of the (unencrypted)
+SecurityHeader. The nonce is required for the de- and encryption and has to
+be set in the channel context before de/encrypting.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_PubSubSecurityPolicy</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">policyContext</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">policyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The policy uri that identifies the implemented</span>
+<span class="cm">                          * algorithms */</span>
+
+<span class="w">    </span><span class="cm">/* Create the context for the WriterGroup / ReaderGroup. The keys and nonce</span>
+<span class="cm">     * can be NULL here. Then they have to be set before the first encryption or</span>
+<span class="cm">     * signing operation. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">newGroupContext</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signingKey</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">encryptingKey</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">keyNonce</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">gContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Delete the WriterGroup SecurityPolicy context */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteGroupContext</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* See UA_SecurityPolicy for the following method signatures */</span>
+
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">verify</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                            </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">message</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signature</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">sign</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">message</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signature</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getSignatureSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getSignatureKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEncryptionKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">encrypt</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">decrypt</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Set the keys and nonce for the WriterGroup. This is returned from the</span>
+<span class="cm">     * GetSecurityKeys method of a Security Key Service (SKS). Otherwise, set</span>
+<span class="cm">     * manually via out-of-band transmission of the keys. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setSecurityKeys</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signingKey</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">encryptingKey</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">keyNonce</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Generate the keys for symmetric encryption.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param gContext The group context.</span>
+<span class="cm">     * @param secret Usually from the nonce. See part 6.</span>
+<span class="cm">     * @param seed Usually from the nonce. See part 6.</span>
+<span class="cm">     * @param out An output to write the data to. The length defines the maximum</span>
+<span class="cm">     *        number of output bytes that are produced. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateKey</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">secret</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">seed</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Random generator for generating nonces.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param wgContext The context of the SecureChannel</span>
+<span class="cm">     * @param out Pointer to a buffer to store the nonce in. Needs to be</span>
+<span class="cm">     *        allocated by the caller. The buffer is filled with random data. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateNonce</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* The length of the nonce used in the SecureChannel */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nonceLength</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* The nonce is contained in the NetworkMessage SecurityHeader. Set before</span>
+<span class="cm">     * each en-/decryption step. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setMessageNonce</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Deletes the dynamic content of the policy */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plugin_certificategroup.html" class="btn btn-neutral float-left" title="CertificateGroup Plugin API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
