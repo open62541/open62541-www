@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 (master) 1.5.0-rc2 documentation</title>
+  <title>Server &mdash; open62541 (master) 1.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e714dcc9"></script>
+      <script src="_static/documentation_options.js?v=e0a75244"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -1195,6 +1195,47 @@ callbacks to be registered.</p>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Due to the history of development, the DataTypeAttributes structure used in
+the AddNodes Service does not describe the layout of the DataType. But the
+(newer) structures for describing DataTypes do:</p>
+<ul class="simple">
+<li><p>SimpleTypeDescription</p></li>
+<li><p>EnumDescription</p></li>
+<li><p>StructureDescription</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">UA_Server_addDataTypeFromDescription</span></code> function translates the
+DataTypeDescription into a UA_DataType structure and adds it to an internal
+array of the server. Then the DataType is automatically decoded in messages
+received by the server. Also the <code class="docutils literal notranslate"><span class="pre">DataTypeDefinition</span></code> attribute of the
+corresponding DataTypeNode can then be read via the Read service.</p>
+<p>The memory layout of the internally generated <code class="docutils literal notranslate"><span class="pre">UA_DataType</span></code> corresponds to
+the matching C-structure including padding.</p>
+<p>Note that a DataTypeDescription can be added only once during the lifetime of
+the server. This protects against existing instances of the DataType to
+having their layout changed.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Use the DataType description to create an internal UA_DataType entry in the</span>
+<span class="cm"> * server */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Server_addDataTypeFromDescription</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">);</span>
+
+<span class="cm">/* The same as UA_Server_addDataTypeFromDescription, but with the description</span>
+<span class="cm"> * already converted into a UA_DataType. Makes a copy of the UA_DataType</span>
+<span class="cm"> * internally. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Server_addDataType</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
+<span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
+
+<span class="cm">/* Get the entry to the linked list of custom datatypes. This includes both the</span>
+<span class="cm"> * datatypes from serverConfig-&gt;customDataTypes and the internal custom data</span>
+<span class="cm"> * types from UA_Server_addDataType.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Attention! The output pointer is only valid until the next call to</span>
+<span class="cm"> * UA_Server_addDataType. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span>
+<span class="n">UA_Server_getDataTypes</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
