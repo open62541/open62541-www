@@ -89,6 +89,12 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="#role-based-access-control-rbac">Role-Based Access Control (RBAC)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ua-rolepermissionentry">UA_RolePermissionEntry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ua-rolepermissions">UA_RolePermissions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ua-role">UA_Role</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -2494,6 +2500,92 @@ The usual usage is as follows:</p>
 </pre></div>
 </div>
 </section>
+</section>
+</section>
+<section id="role-based-access-control-rbac">
+<h1>Role-Based Access Control (RBAC)<a class="headerlink" href="#role-based-access-control-rbac" title="Link to this heading"></a></h1>
+<p>Role-Based Access Control implementation per OPC UA Part 18.</p>
+<p><strong>WARNING</strong>: This feature is EXPERIMENTAL and NOT FOR PRODUCTION USE.
+The RBAC implementation is under active development and the API may change.
+Use only for testing and development purposes.</p>
+<p>RBAC allows fine-grained access control by assigning roles to sessions and
+defining permissions per role on individual nodes or entire namespaces.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_RBAC</span>
+</pre></div>
+</div>
+<section id="ua-rolepermissionentry">
+<h2>UA_RolePermissionEntry<a class="headerlink" href="#ua-rolepermissionentry" title="Link to this heading"></a></h2>
+<p>Maps a role to its permissions. Used in both node-level and namespace-level
+permission configurations.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">permissions</span><span class="p">;</span><span class="w">      </span><span class="cm">/* Bitmask of UA_PermissionType values */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_RolePermissionEntry</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="ua-rolepermissions">
+<h2>UA_RolePermissions<a class="headerlink" href="#ua-rolepermissions" title="Link to this heading"></a></h2>
+<p>Container for role permission entries with reference counting.
+Multiple nodes can share the same RolePermissions configuration
+through the refCount mechanism.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">entriesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_RolePermissionEntry</span><span class="w"> </span><span class="o">*</span><span class="n">entries</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">refCount</span><span class="p">;</span><span class="w">            </span><span class="cm">/* Number of nodes referencing this configuration */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_RolePermissions</span><span class="p">;</span>
+
+<span class="cm">/* UA_RolePermissions Type Management */</span>
+<span class="kt">void</span>
+<span class="nf">UA_RolePermissions_init</span><span class="p">(</span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_RolePermissions_clear</span><span class="p">(</span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_RolePermissions_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="ua-role">
+<h2>UA_Role<a class="headerlink" href="#ua-role" title="Link to this heading"></a></h2>
+<p>Represents an OPC UA role with identity mapping rules and optional
+application/endpoint restrictions per OPC UA Part 18.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">;</span><span class="w">              </span><span class="cm">/* BrowseName of the role */</span>
+
+<span class="w">    </span><span class="cm">/* Identity Mapping Rules - determine which sessions get this role */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">identityMappingRulesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_IdentityMappingRuleType</span><span class="w"> </span><span class="o">*</span><span class="n">identityMappingRules</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Application restrictions  (empty list = ignore) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">applicationsExclude</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">applicationsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">applications</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Endpoint restrictions (empty list = ignore) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">endpointsExclude</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">endpointsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_EndpointType</span><span class="w"> </span><span class="o">*</span><span class="n">endpoints</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_Role</span><span class="p">;</span>
+
+<span class="cm">/* UA_Role Type Management */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Role_init</span><span class="p">(</span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_Role_clear</span><span class="p">(</span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Role_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Role_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">r1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">r2</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
+</pre></div>
+</div>
 </section>
 </section>
 
