@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 (master) 1.5.0 documentation</title>
+  <title>Client &mdash; open62541 (master) 1.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e0a75244"></script>
+      <script src="_static/documentation_options.js?v=44dfd65d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -734,9 +734,11 @@ client settings.</p>
 <span class="w">    </span><span class="cm">/* Certificate Verification Plugin */</span>
 <span class="w">    </span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="n">certificateVerification</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Additional SecurityPolicies for authentication (e.g. to encrypt the</span>
-<span class="cm">     * password). The SecurityPolicies for SecureChannels (above) are also</span>
-<span class="cm">     * usable for authentication. */</span>
+<span class="w">    </span><span class="cm">/* SecurityPolicies for authentication with an x509 certificate. The</span>
+<span class="cm">     * UserIdentityToken contains only the certificate. The certificate gets</span>
+<span class="cm">     * matched against the SecurityPolicy instance from this array. Only the</span>
+<span class="cm">     * SecurityPolicy instance carries the private key. See</span>
+<span class="cm">     * UA_ClientConfig_setAuthenticationCert. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
 
@@ -869,6 +871,26 @@ client settings.</p>
 <span class="nf">UA_ClientConfig_setAuthenticationUsername</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
 <span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">username</span><span class="p">,</span>
 <span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">);</span>
+
+<span class="cm">/* This method operates on the client config in two ways:</span>
+<span class="cm"> *</span>
+<span class="cm"> * - Sets the certificate as a X509IdentityToken for authentication.</span>
+<span class="cm"> * - Replaces the authSecurityPolicies array with new instances of the available</span>
+<span class="cm"> *   SecurityPolicies using the certificate and associated private-key.</span>
+<span class="cm"> *</span>
+<span class="cm"> * During session activation, the certificate from the X509IdentityToken gets</span>
+<span class="cm"> * matched to a SecurityPolicy for the UserTokenPolicy supported by the server.</span>
+<span class="cm"> * The SecurityPolicy (with the private key) is then used for a signature that</span>
+<span class="cm"> * proves ownership of the certificate.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This method is implemented in the /plugins directory as it depends on the</span>
+<span class="cm"> * platform-specific crypto implementations. */</span>
+<span class="cp">#if defined(UA_ENABLE_ENCRYPTION_OPENSSL) || defined(UA_ENABLE_ENCRYPTION_MBEDTLS)</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_ClientConfig_setAuthenticationCert</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificateAuth</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">privateKeyAuth</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
