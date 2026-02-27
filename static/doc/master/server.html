@@ -83,18 +83,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reverse-connect">Reverse Connect</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#role-based-access-control-rbac-type-definitions">Role-Based Access Control (RBAC) - Type Definitions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ua-rolepermission">UA_RolePermission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ua-rolepermissionset">UA_RolePermissionSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ua-role">UA_Role</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#update-the-server-certificate-at-runtime">Update the Server Certificate at Runtime</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#role-based-access-control-rbac">Role-Based Access Control (RBAC)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#ua-rolepermissionentry">UA_RolePermissionEntry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ua-rolepermissions">UA_RolePermissions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ua-role">UA_Role</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="#role-based-access-control-rbac-api">Role-Based Access Control (RBAC) - API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -2085,6 +2086,92 @@ objects.</p>
 </pre></div>
 </div>
 </section>
+</section>
+<section id="role-based-access-control-rbac-type-definitions">
+<h1>Role-Based Access Control (RBAC) - Type Definitions<a class="headerlink" href="#role-based-access-control-rbac-type-definitions" title="Link to this heading"></a></h1>
+<p>Role-Based Access Control implementation per OPC UA Part 18.</p>
+<p><strong>WARNING</strong>: This feature is EXPERIMENTAL and NOT FOR PRODUCTION USE.
+The RBAC implementation is under active development and the API may change.
+Use only for testing and development purposes.</p>
+<p>RBAC allows fine-grained access control by assigning roles to sessions and
+defining permissions per role on individual nodes or entire namespaces.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_RBAC</span>
+</pre></div>
+</div>
+<section id="ua-rolepermission">
+<h2>UA_RolePermission<a class="headerlink" href="#ua-rolepermission" title="Link to this heading"></a></h2>
+<p>Maps a single role to its permissions bitmask. Used in the server
+configuration to define presets and in the public API to set or query
+role permissions on nodes.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_PermissionType</span><span class="w"> </span><span class="n">permissions</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_RolePermission</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="ua-rolepermissionset">
+<h2>UA_RolePermissionSet<a class="headerlink" href="#ua-rolepermissionset" title="Link to this heading"></a></h2>
+<p>A set of role-permission mappings. Used in the server configuration
+to define initial role-permission presets.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolePermissionsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_RolePermission</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissions</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_RolePermissionSet</span><span class="p">;</span>
+
+<span class="cm">/* UA_RolePermissionSet Type Management */</span>
+<span class="kt">void</span>
+<span class="nf">UA_RolePermissionSet_init</span><span class="p">(</span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">rps</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_RolePermissionSet_clear</span><span class="p">(</span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">rps</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_RolePermissionSet_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="ua-role">
+<h2>UA_Role<a class="headerlink" href="#ua-role" title="Link to this heading"></a></h2>
+<p>Represents an OPC UA role with identity mapping rules and optional
+application/endpoint restrictions per OPC UA Part 18.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">;</span><span class="w">              </span><span class="cm">/* BrowseName of the role */</span>
+
+<span class="w">    </span><span class="cm">/* Identity Mapping Rules - determine which sessions get this role */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">identityMappingRulesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_IdentityMappingRuleType</span><span class="w"> </span><span class="o">*</span><span class="n">identityMappingRules</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Application restrictions  (empty list = ignore) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">applicationsExclude</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">applicationsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">applications</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Endpoint restrictions (empty list = ignore) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">endpointsExclude</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">endpointsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_EndpointType</span><span class="w"> </span><span class="o">*</span><span class="n">endpoints</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_Role</span><span class="p">;</span>
+
+<span class="cm">/* UA_Role Type Management */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Role_init</span><span class="p">(</span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
+
+<span class="kt">void</span>
+<span class="nf">UA_Role_clear</span><span class="p">(</span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Role_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_Role_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">r1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">r2</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
+</pre></div>
+</div>
+</section>
 <section id="server-configuration">
 <span id="id5"></span><h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Link to this heading"></a></h2>
 <p>The configuration structure is passed to the server during initialization.
@@ -2426,6 +2513,31 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">privateKeyPasswordCallback</span><span class="p">)(</span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">sc</span><span class="p">,</span>
 <span class="w">                                                </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">);</span>
 <span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ENABLE_RBAC</span>
+<span class="w">    </span><span class="cm">/* Initial Role-Permission Presets</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Array of initial role-permission presets. Each entry is a set of</span>
+<span class="cm">     * UA_RolePermission mappings that define which roles get which</span>
+<span class="cm">     * permissions on nodes that reference this preset.</span>
+<span class="cm">     *</span>
+<span class="cm">     * During server startup, these presets are copied into the server&#39;s</span>
+<span class="cm">     * internal role-permissions array. The preset entries form the initial</span>
+<span class="cm">     * configuration with the following guarantees:</span>
+<span class="cm">     *</span>
+<span class="cm">     * - Preset entries are **never deleted** during server runtime.</span>
+<span class="cm">     * - Their position (index) in the internal array is **kept stable**,</span>
+<span class="cm">     *   ensuring that nodes assigned to a preset continue to reference</span>
+<span class="cm">     *   the same configuration throughout the server&#39;s lifetime.</span>
+<span class="cm">     * - Custom nodestore implementations should be aware of these</span>
+<span class="cm">     *   index-stability guarantees when managing node permission storage.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Additional role-permission sets can be added at runtime through</span>
+<span class="cm">     * the server API (UA_Server_setNodeRolePermissions). Runtime entries</span>
+<span class="cm">     * may be garbage-collected when no longer referenced by any node. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolePermissionPresetsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissionPresets</span><span class="p">;</span>
+<span class="cp">#endif</span>
 <span class="p">};</span>
 
 <span class="kt">void</span>
@@ -2508,91 +2620,76 @@ The usual usage is as follows:</p>
 </section>
 </section>
 </section>
-<section id="role-based-access-control-rbac">
-<h1>Role-Based Access Control (RBAC)<a class="headerlink" href="#role-based-access-control-rbac" title="Link to this heading"></a></h1>
-<p>Role-Based Access Control implementation per OPC UA Part 18.</p>
+<section id="role-based-access-control-rbac-api">
+<h1>Role-Based Access Control (RBAC) - API<a class="headerlink" href="#role-based-access-control-rbac-api" title="Link to this heading"></a></h1>
 <p><strong>WARNING</strong>: This feature is EXPERIMENTAL and NOT FOR PRODUCTION USE.
 The RBAC implementation is under active development and the API may change.
 Use only for testing and development purposes.</p>
-<p>RBAC allows fine-grained access control by assigning roles to sessions and
-defining permissions per role on individual nodes or entire namespaces.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_RBAC</span>
 </pre></div>
 </div>
-<section id="ua-rolepermissionentry">
-<h2>UA_RolePermissionEntry<a class="headerlink" href="#ua-rolepermissionentry" title="Link to this heading"></a></h2>
-<p>Maps a role to its permissions. Used in both node-level and namespace-level
-permission configurations.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">permissions</span><span class="p">;</span><span class="w">      </span><span class="cm">/* Bitmask of UA_PermissionType values */</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_RolePermissionEntry</span><span class="p">;</span>
-</pre></div>
-</div>
-</section>
-<section id="ua-rolepermissions">
-<h2>UA_RolePermissions<a class="headerlink" href="#ua-rolepermissions" title="Link to this heading"></a></h2>
-<p>Container for role permission entries with reference counting.
-Multiple nodes can share the same RolePermissions configuration
-through the refCount mechanism.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">entriesSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_RolePermissionEntry</span><span class="w"> </span><span class="o">*</span><span class="n">entries</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">refCount</span><span class="p">;</span><span class="w">            </span><span class="cm">/* Number of nodes referencing this configuration */</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_RolePermissions</span><span class="p">;</span>
+<p>Functions for managing role permissions on individual nodes.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Set role permissions for a node.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Assigns the given set of role-permission mappings to the specified node.</span>
+<span class="cm"> * If an identical permission configuration already exists internally, the</span>
+<span class="cm"> * node will reference the existing configuration (deduplication). Otherwise,</span>
+<span class="cm"> * a new internal entry is created.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param nodeId The NodeId of the node</span>
+<span class="cm"> * @param rolePermissionsSize Number of role-permission entries</span>
+<span class="cm"> * @param rolePermissions Array of role-permission mappings</span>
+<span class="cm"> * @param recursive If true, also set for all hierarchically referenced</span>
+<span class="cm"> *        child nodes</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_setNodeRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolePermissionsSize</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_RolePermission</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissions</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
 
-<span class="cm">/* UA_RolePermissions Type Management */</span>
-<span class="kt">void</span>
-<span class="nf">UA_RolePermissions_init</span><span class="p">(</span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">);</span>
+<span class="cm">/* Get the role permissions of a node.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Returns a copy of the role-permission mappings currently assigned to</span>
+<span class="cm"> * the node. The output array and its entries are allocated and must be</span>
+<span class="cm"> * freed by the caller.</span>
+<span class="cm"> *</span>
+<span class="cm"> * If the node has no specific role permissions assigned, the output size</span>
+<span class="cm"> * is set to 0 and the output pointer to NULL.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param nodeId The NodeId of the node</span>
+<span class="cm"> * @param rolePermissionsSize Output: number of entries</span>
+<span class="cm"> * @param rolePermissions Output: array of role-permission mappings</span>
+<span class="cm"> *        (caller must free each entry&#39;s roleId and the array itself)</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getNodeRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissionsSize</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_RolePermission</span><span class="w"> </span><span class="o">**</span><span class="n">rolePermissions</span><span class="p">);</span>
 
-<span class="kt">void</span>
-<span class="nf">UA_RolePermissions_clear</span><span class="p">(</span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">rp</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_RolePermissions_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_RolePermissions</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
-</pre></div>
-</div>
-</section>
-<section id="ua-role">
-<h2>UA_Role<a class="headerlink" href="#ua-role" title="Link to this heading"></a></h2>
-<p>Represents an OPC UA role with identity mapping rules and optional
-application/endpoint restrictions per OPC UA Part 18.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">;</span><span class="w">              </span><span class="cm">/* BrowseName of the role */</span>
-
-<span class="w">    </span><span class="cm">/* Identity Mapping Rules - determine which sessions get this role */</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">identityMappingRulesSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_IdentityMappingRuleType</span><span class="w"> </span><span class="o">*</span><span class="n">identityMappingRules</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* Application restrictions  (empty list = ignore) */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">applicationsExclude</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">applicationsSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">applications</span><span class="p">;</span>
-
-<span class="w">    </span><span class="cm">/* Endpoint restrictions (empty list = ignore) */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">endpointsExclude</span><span class="p">;</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">endpointsSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_EndpointType</span><span class="w"> </span><span class="o">*</span><span class="n">endpoints</span><span class="p">;</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_Role</span><span class="p">;</span>
-
-<span class="cm">/* UA_Role Type Management */</span>
-<span class="kt">void</span>
-<span class="nf">UA_Role_init</span><span class="p">(</span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
-
-<span class="kt">void</span>
-<span class="nf">UA_Role_clear</span><span class="p">(</span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Role_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
-
-<span class="n">UA_Boolean</span>
-<span class="nf">UA_Role_equal</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">r1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">r2</span><span class="p">);</span>
+<span class="cm">/* Remove role permissions from a node.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Resets the node to have no specific role permissions. Default access</span>
+<span class="cm"> * control behavior then applies. The internal reference count for the</span>
+<span class="cm"> * previously assigned permission configuration is decremented.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param nodeId The NodeId of the node</span>
+<span class="cm"> * @param recursive If true, also remove from all hierarchically referenced</span>
+<span class="cm"> *        child nodes</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_removeNodeRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
 </pre></div>
 </div>
-</section>
 </section>
 
 
