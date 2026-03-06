@@ -942,6 +942,11 @@ During the creation of a MonitoredItem, the server may return changed
 adjusted parameters. Check the returned ``UA_CreateMonitoredItemsResponse``
 to get the current parameters.
 
+Be aware that the client may process incoming notifications before receiving
+the CreateMonitoredItemsResponse. This is due to the behavior of some server
+SDKs. Without this "early processing" we would miss the initial value, which
+can be an issue if the value changes at a slow rate.
+
 .. code-block:: c
 
    
@@ -960,7 +965,8 @@ to get the current parameters.
    }
    
 The clientHandle parameter cannot be set by the user, any value will be
-replaced by the client before sending the request to the server.
+replaced by the client with a unique internal ClientHandle value before
+sending the request to the server.
 
 .. code-block:: c
 
@@ -1235,6 +1241,10 @@ the regular service to read several attributes at once.
    UA_Client_readUserExecutableAttribute(UA_Client *client,
                                          const UA_NodeId nodeId,
                                          UA_Boolean *out);
+   
+   UA_THREADSAFE UA_StatusCode
+   UA_Client_readDatatypeDefinitionAttribute(UA_Client* client, const UA_NodeId nodeId,
+                                             UA_StructureDefinition *out);
    
 Historical Access
 ~~~~~~~~~~~~~~~~~
