@@ -2544,6 +2544,18 @@ The usual usage is as follows:</p>
 <span class="cm">     * may be garbage-collected when no longer referenced by any node. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolePermissionPresetsSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissionPresets</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Initial Role Definitions</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="cm">     * Array of initial role definitions. During server startup, these roles</span>
+<span class="cm">     * are copied into the server&#39;s internal role registry. Config roles are</span>
+<span class="cm">     * treated as **protected**: they cannot be removed at runtime via</span>
+<span class="cm">     * UA_Server_removeRole.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Additional roles can be added at runtime through UA_Server_addRole.</span>
+<span class="cm">     * Runtime-added roles can be removed via UA_Server_removeRole. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">roles</span><span class="p">;</span>
 <span class="cp">#endif</span>
 <span class="p">};</span>
 
@@ -2693,6 +2705,63 @@ Use only for testing and development purposes.</p>
 <span class="n">UA_Server_removeNodeRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Functions for managing the server’s role registry. Roles define which
+sessions get which access rights. Config-provided roles are protected
+and cannot be removed at runtime.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a role to the server&#39;s role registry.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The role&#39;s BrowseName (roleName) is the primary unique identifier,</span>
+<span class="cm"> * per OPC UA Part 18 Section 4.2. A role with the same roleName must</span>
+<span class="cm"> * not already exist.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param role The role definition to add (deep-copied)</span>
+<span class="cm"> * @param outRoleNodeId Output: the NodeId of the new role (caller</span>
+<span class="cm"> *        must clear). May be NULL.</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success,</span>
+<span class="cm"> *         UA_STATUSCODE_BADALREADYEXISTS if a role with the same</span>
+<span class="cm"> *         roleName already exists */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_addRole</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outRoleNodeId</span><span class="p">);</span>
+
+<span class="cm">/* Remove a role from the server&#39;s role registry.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Config-provided (protected) roles cannot be removed.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param roleName The BrowseName (QualifiedName) of the role to remove</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success,</span>
+<span class="cm"> *         UA_STATUSCODE_BADUSERACCESSDENIED if the role is protected,</span>
+<span class="cm"> *         UA_STATUSCODE_BADNOTFOUND if the role does not exist */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_removeRole</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">);</span>
+
+<span class="cm">/* Get a copy of a role by its BrowseName.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param roleName The BrowseName (QualifiedName) of the role</span>
+<span class="cm"> * @param outRole Output: deep copy of the role (caller must clear)</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success,</span>
+<span class="cm"> *         UA_STATUSCODE_BADNOTFOUND if the role does not exist */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getRole</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">outRole</span><span class="p">);</span>
+
+<span class="cm">/* Get the BrowseNames of all registered roles.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param rolesSize Output: number of roles</span>
+<span class="cm"> * @param roleNames Output: array of role BrowseNames (caller must</span>
+<span class="cm"> *        clear each entry and free the array)</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getRoles</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">rolesSize</span><span class="p">,</span>
+<span class="w">                   </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">**</span><span class="n">roleNames</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
 </pre></div>
