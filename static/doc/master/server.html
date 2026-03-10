@@ -2765,6 +2765,17 @@ and cannot be removed at runtime.</p>
 <span class="w">                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">,</span>
 <span class="w">                  </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">outRole</span><span class="p">);</span>
 
+<span class="cm">/* Get a copy of a role by its NodeId.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param roleId The NodeId of the role</span>
+<span class="cm"> * @param outRole Output: deep copy of the role (caller must clear)</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success,</span>
+<span class="cm"> *         UA_STATUSCODE_BADNOTFOUND if the role does not exist */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getRoleById</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">outRole</span><span class="p">);</span>
+
 <span class="cm">/* Get the BrowseNames of all registered roles.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server instance</span>
@@ -2775,6 +2786,29 @@ and cannot be removed at runtime.</p>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_getRoles</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">rolesSize</span><span class="p">,</span>
 <span class="w">                   </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">**</span><span class="n">roleNames</span><span class="p">);</span>
+
+<span class="cm">/* Update a role in the server&#39;s role registry.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The existing role is matched by roleId, roleName (QualifiedName) or</span>
+<span class="cm"> * both. At least one must be set. If both are provided they must</span>
+<span class="cm"> * identify the same role. Replaces all mutable fields (identityMappingRules,</span>
+<span class="cm"> * applications, endpoints and their exclude flags) with deep copies</span>
+<span class="cm"> * from the provided role. The roleId and roleName of the stored role</span>
+<span class="cm"> * are not changed.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Anonymous and AuthenticatedUser are well-known roles defined by the</span>
+<span class="cm"> * OPC UA specification and cannot be modified.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param role The role with updated fields</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success,</span>
+<span class="cm"> *         UA_STATUSCODE_BADINVALIDARGUMENT if neither roleId nor</span>
+<span class="cm"> *         roleName is set,</span>
+<span class="cm"> *         UA_STATUSCODE_BADNOTFOUND if no matching role exists,</span>
+<span class="cm"> *         UA_STATUSCODE_BADUSERACCESSDENIED if the matched role is</span>
+<span class="cm"> *         Anonymous or AuthenticatedUser */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_updateRole</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Role</span><span class="w"> </span><span class="o">*</span><span class="n">role</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
 </pre></div>
