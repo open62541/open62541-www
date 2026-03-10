@@ -2280,6 +2280,9 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">sessionNotificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">serviceNotificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">subscriptionNotificationCallback</span><span class="p">;</span>
+<span class="cp">#ifdef UA_ENABLE_AUDITING</span>
+<span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">auditNotificationCallback</span><span class="p">;</span>
+<span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Networking</span>
 <span class="cm">     * ~~~~~~~~~~</span>
@@ -2382,11 +2385,9 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Limits for Requests */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxReferencesPerNode</span><span class="p">;</span>
 
-<span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
-<span class="w">    </span><span class="cm">/* Limits for TrustList */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxTrustListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in bytes, 0 =&gt; unlimited */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxRejectedListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
-<span class="cp">#endif</span>
+<span class="w">    </span><span class="cm">/* Reverse Connect</span>
+<span class="cm">     * ~~~~~~~~~~~~~~~ */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reverseReconnectInterval</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default is 15000 ms */</span>
 
 <span class="w">    </span><span class="cm">/* Async Operations</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~</span>
@@ -2398,6 +2399,12 @@ The usual usage is as follows:</p>
 <span class="cm">     * memory for setting the output value is then freed internally and should</span>
 <span class="cm">     * not be touched afterwards. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">asyncOperationCancelCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
+<span class="w">    </span><span class="cm">/* Limits for TrustList */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxTrustListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* in bytes, 0 =&gt; unlimited */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxRejectedListSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
+<span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Discovery</span>
 <span class="cm">     * ~~~~~~~~~ */</span>
@@ -2478,6 +2485,16 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_PubSubConfiguration</span><span class="w"> </span><span class="n">pubSubConfig</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
+<span class="w">    </span><span class="cm">/* Auditing</span>
+<span class="cm">     * ~~~~~~~~</span>
+<span class="cm">     * Drops audit events into the auditNotificationCallback and generates</span>
+<span class="cm">     * the corresponding Audit Events (if Events are enabled). */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditingEnabled</span><span class="p">;</span>
+<span class="cp">#ifdef UA_ENABLE_AUDITING</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditWriteUpdateEnabled</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Mind the runtime overhead */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditMethodUpdateEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Mind the runtime overhead */</span>
+<span class="cp">#endif</span>
+
 <span class="w">    </span><span class="cm">/* Historical Access</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~ */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">historizingEnabled</span><span class="p">;</span>
@@ -2504,10 +2521,6 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">deleteEventCapability</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">deleteAtTimeDataCapability</span><span class="p">;</span>
 <span class="cp">#endif</span>
-
-<span class="w">    </span><span class="cm">/* Reverse Connect</span>
-<span class="cm">     * ~~~~~~~~~~~~~~~ */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reverseReconnectInterval</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default is 15000 ms */</span>
 
 <span class="w">    </span><span class="cm">/* Certificate Password Callback</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */</span>
