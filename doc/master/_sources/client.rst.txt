@@ -648,9 +648,11 @@ client settings.
        /* Certificate Verification Plugin */
        UA_CertificateGroup certificateVerification;
    
-       /* Additional SecurityPolicies for authentication (e.g. to encrypt the
-        * password). The SecurityPolicies for SecureChannels (above) are also
-        * usable for authentication. */
+       /* SecurityPolicies for authentication with an x509 certificate. The
+        * UserIdentityToken contains only the certificate. The certificate gets
+        * matched against the SecurityPolicy instance from this array. Only the
+        * SecurityPolicy instance carries the private key. See
+        * UA_ClientConfig_setAuthenticationCert. */
        size_t authSecurityPoliciesSize;
        UA_SecurityPolicy *authSecurityPolicies;
    
@@ -783,6 +785,26 @@ client settings.
    UA_ClientConfig_setAuthenticationUsername(UA_ClientConfig *config,
                                              const char *username,
                                              const char *password);
+   
+   /* This method operates on the client config in two ways:
+    *
+    * - Sets the certificate as a X509IdentityToken for authentication.
+    * - Replaces the authSecurityPolicies array with new instances of the available
+    *   SecurityPolicies using the certificate and associated private-key.
+    *
+    * During session activation, the certificate from the X509IdentityToken gets
+    * matched to a SecurityPolicy for the UserTokenPolicy supported by the server.
+    * The SecurityPolicy (with the private key) is then used for a signature that
+    * proves ownership of the certificate.
+    *
+    * This method is implemented in the /plugins directory as it depends on the
+    * platform-specific crypto implementations. */
+   #if defined(UA_ENABLE_ENCRYPTION_OPENSSL) || defined(UA_ENABLE_ENCRYPTION_MBEDTLS)
+   UA_StatusCode
+   UA_ClientConfig_setAuthenticationCert(UA_ClientConfig *config,
+                                         UA_ByteString certificateAuth,
+                                         UA_ByteString privateKeyAuth);
+   #endif
 
 .. _client-subscriptions:
 
@@ -920,6 +942,11 @@ During the creation of a MonitoredItem, the server may return changed
 adjusted parameters. Check the returned ``UA_CreateMonitoredItemsResponse``
 to get the current parameters.
 
+Be aware that the client may process incoming notifications before receiving
+the CreateMonitoredItemsResponse. This is due to the behavior of some server
+SDKs. Without this "early processing" we would miss the initial value, which
+can be an issue if the value changes at a slow rate.
+
 .. code-block:: c
 
    
@@ -938,7 +965,8 @@ to get the current parameters.
    }
    
 The clientHandle parameter cannot be set by the user, any value will be
-replaced by the client before sending the request to the server.
+replaced by the client with a unique internal ClientHandle value before
+sending the request to the server.
 
 .. code-block:: c
 
@@ -1213,6 +1241,10 @@ the regular service to read several attributes at once.
    UA_Client_readUserExecutableAttribute(UA_Client *client,
                                          const UA_NodeId nodeId,
                                          UA_Boolean *out);
+   
+   UA_THREADSAFE UA_StatusCode
+   UA_Client_readDatatypeDefinitionAttribute(UA_Client* client, const UA_NodeId nodeId,
+                                             UA_StructureDefinition *out);
    
 Historical Access
 ~~~~~~~~~~~~~~~~~

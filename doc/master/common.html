@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Common Definitions &mdash; open62541 (master) 1.5.0 documentation</title>
+  <title>Common Definitions &mdash; open62541 (master) 1.5.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e0a75244"></script>
+      <script src="_static/documentation_options.js?v=73275c37"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -50,7 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="server.html#role-based-access-control-rbac">Role-Based Access Control (RBAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html#role-based-access-control-rbac-type-definitions">Role-Based Access Control (RBAC) - Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html#role-based-access-control-rbac-api">Role-Based Access Control (RBAC) - API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
@@ -63,6 +64,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#rule-handling">Rule Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#order">Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#application-notification">Application Notification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auditing">Auditing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#connection-state">Connection State</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistic-counters">Statistic Counters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lifecycle-states">Lifecycle States</a></li>
@@ -256,10 +258,10 @@ additional payload members are added to the end of the payload. So that the
 names, type and also index of the payload members is stable.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Lifetime notifications, no payload */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STARTED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_SHUTDOWN</span><span class="p">,</span><span class="w"> </span><span class="cm">/* preparing shutdown */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPING</span><span class="p">,</span><span class="w"> </span><span class="cm">/* shutdown begins now */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPED</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STARTED</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_SHUTDOWN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x01</span><span class="p">,</span><span class="w"> </span><span class="cm">/* prepare shutdown */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x02</span><span class="p">,</span><span class="w"> </span><span class="cm">/* shutdown now */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPED</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x03</span><span class="p">,</span>
 
 <span class="w">    </span><span class="cm">/* (Server only) Give background information after a SecureChannel is opened</span>
 <span class="cm">     * or closed.</span>
@@ -344,9 +346,9 @@ names, type and also index of the payload members is stable.</p>
 <span class="cm">     *    Identifier of the RequestId for the Request/Response pair.</span>
 <span class="cm">     * 0:service-type [NodeId]</span>
 <span class="cm">     *    DataType identifier for the Request (server) or Response (client). */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_BEGIN</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_ASYNC</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_END</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_BEGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x10</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_ASYNC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x11</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_END</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x12</span><span class="p">,</span>
 
 <span class="w">    </span><span class="cm">/* (Server only) Signals the creation or modification of a Subscription.</span>
 <span class="cm">     *</span>
@@ -411,8 +413,102 @@ names, type and also index of the payload members is stable.</p>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_CREATED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MODIFIED</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MONITORINGMODE</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_DELETE</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_DELETE</span><span class="p">,</span>
+
+<span class="w">    </span><span class="cm">/* Audit events are described in a separete section.</span>
+<span class="cm">     * The enum values are bitfields to filter in a hierarchy. */</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT</span><span class="w">                                   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1000</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY</span><span class="w">                          </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1100</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CHANNEL</span><span class="w">                  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1110</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CHANNEL_OPEN</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1111</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION</span><span class="w">                  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1120</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_CREATE</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1121</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_ACTIVATE</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1122</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_CANCEL</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1124</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1140</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_DATAMISMATCH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1141</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_EXPIRED</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1142</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_INVALID</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1143</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_UNTRUSTED</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1144</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_REVOKED</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1145</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_MISMATCH</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1146</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE</span><span class="w">                              </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1200</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_ADD</span><span class="w">                          </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1210</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_DELETE</span><span class="w">                       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1220</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_ADDREFERENCES</span><span class="w">                </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1240</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_DELETEREFERENCES</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1280</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE</span><span class="w">                            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1400</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_WRITE</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1410</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_HISTORY</span><span class="w">                    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1420</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_METHOD</span><span class="w">                     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1440</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_CLIENT</span><span class="w">                            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1800</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_CLIENT_UPDATEMETHOD</span><span class="w">               </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1810</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ApplicationNotificationType</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="auditing">
+<h2>Auditing<a class="headerlink" href="#auditing" title="Link to this heading"></a></h2>
+<p>The key-value map for audit application notifications follows the properties
+defined for the AuditEventType and its subtypes. The key-string is the
+human-readable encoding for the SimpleAttributeOperand of the event
+properties (value attribute only). The properties should be looked up from
+their string-key and not via their order-index in the key-value map.</p>
+<p>Examples properties are (datatype in brackets):</p>
+<ul>
+<li><p>/ActionTimeStamp [DateTime]</p></li>
+<li><dl class="option-list">
+<dt><kbd><span class="option">/Status</span></kbd></dt>
+<dd><p>[Boolean]</p>
+</dd>
+</dl>
+</li>
+<li><dl class="option-list">
+<dt><kbd><span class="option">/ServerId</span></kbd></dt>
+<dd><p>[String]</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>See the definition of the AuditEventType and its subtypes in part 5 of the
+OPC UA specification. Below follows the hierarchy of the event types.
+Properties from the super-type are inherited.</p>
+<ul>
+<li><p>AuditEventType
+- AuditSecurityEventType</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>AuditChannelEventType
+- AuditOpenSecureChannelEventType</p></li>
+<li><p>AuditSessionEventType
+- AuditCreateSessionEventType
+- AuditActivateSessionEventType
+- AuditCancelEventType</p></li>
+<li><p>AuditCertificateEventType
+- AuditCertificateDataMismatchEventType
+- AuditCertificateExpiredEventType
+- AuditCertificateInvalidEventType
+- AuditCertificateUntrustedEventType
+- AuditCertificateRevokedEventType
+- AuditCertificateMismatchEventType</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>AuditNodeManagementEventType
+- AuditAddNodesEventType
+- AuditDeleteNodesEventType
+- AuditAddReferencesEventType
+- AuditDeleteReferencesEventType</p></li>
+<li><p>AuditUpdateEventType
+- AuditWriteUpdateEventType
+- AuditHistoryUpdateEventType</p></li>
+<li><p>AuditUpdateMethodEventType</p></li>
+<li><p>AuditClientEventType
+- AuditClientUpdateMethodResultEventType</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </section>

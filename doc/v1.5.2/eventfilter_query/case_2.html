@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Case 2 &mdash; open62541 (1.5.2) 1.5.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=73275c37"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../toc.html" class="icon icon-home">
+            open62541 (1.5.2)
+              <img src="../_static/open62541_html.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../toc.html">open62541 (1.5.2)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../toc.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Case 2</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/eventfilter_query/case_2.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="case-2">
+<h1>Case 2<a class="headerlink" href="#case-2" title="Link to this heading"></a></h1>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Eventfilter */</span>
+<span class="n">UA_EventFilter</span><span class="w"> </span><span class="n">filter</span><span class="p">;</span>
+<span class="n">UA_EventFilter_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">filter</span><span class="p">);</span>
+
+<span class="cm">/* query string */</span>
+<span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">inp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;SELECT</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;PATH </span><span class="se">\&quot;</span><span class="s">/Message</span><span class="se">\&quot;</span><span class="s">, PATH </span><span class="se">\&quot;</span><span class="s">/Severity</span><span class="se">\&quot;</span><span class="s">, PATH </span><span class="se">\&quot;</span><span class="s">/EventType</span><span class="se">\&quot;\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;WHERE</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;OR(OR(OR(OFTYPE ns=1;i=5002, $4), OR($5, OFTYPE i=3035)), OR($1,$2))</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;FOR</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;$1:= OFTYPE $7</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;$2:= OFTYPE $8</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;$4:= OFTYPE ns=1;i=5003</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;$5:= OFTYPE ns=1;i=5004</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;$7:= NODEID ns=1;i=5000</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">            </span><span class="s">&quot;$8:= ns=1;i=5001&quot;</span><span class="p">;</span>
+
+<span class="cm">/* UA_EventFilter_parse takes a Bytestring as input*/</span>
+<span class="n">UA_ByteString</span><span class="w"> </span><span class="n">case_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_String_fromChars</span><span class="p">(</span><span class="n">inp</span><span class="p">);</span>
+<span class="cm">/* create the eventfilter from the string */</span>
+<span class="n">UA_EventFilter_parse</span><span class="p">(</span><span class="n">filter</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">case_2</span><span class="p">);</span>
+
+<span class="n">UA_ByteString_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">case_2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The generated Eventfilter looks likes this:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="err">Selec</span><span class="kc">t</span><span class="err">Clauses</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                    </span><span class="err">TypeDe</span><span class="kc">f</span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">Id</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=2041&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="err">BrowsePa</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="p">{</span>
+<span class="w">                                    </span><span class="err">Name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Message&quot;</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">],</span>
+<span class="w">                    </span><span class="err">A</span><span class="kc">ttr</span><span class="err">ibu</span><span class="kc">te</span><span class="err">Id</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span>
+<span class="w">                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dexRa</span><span class="kc">n</span><span class="err">ge</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                    </span><span class="err">TypeDe</span><span class="kc">f</span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">Id</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=2041&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="err">BrowsePa</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="p">{</span>
+<span class="w">                                    </span><span class="err">Name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Severity&quot;</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">],</span>
+<span class="w">                    </span><span class="err">A</span><span class="kc">ttr</span><span class="err">ibu</span><span class="kc">te</span><span class="err">Id</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span>
+<span class="w">                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dexRa</span><span class="kc">n</span><span class="err">ge</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">            </span><span class="p">},</span>
+<span class="w">            </span><span class="p">{</span>
+<span class="w">                    </span><span class="err">TypeDe</span><span class="kc">f</span><span class="err">i</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">Id</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=2041&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="err">BrowsePa</span><span class="kc">t</span><span class="err">h</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="p">{</span>
+<span class="w">                                    </span><span class="err">Name</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EventType&quot;</span>
+<span class="w">                            </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">],</span>
+<span class="w">                    </span><span class="err">A</span><span class="kc">ttr</span><span class="err">ibu</span><span class="kc">te</span><span class="err">Id</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span>
+<span class="w">                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dexRa</span><span class="kc">n</span><span class="err">ge</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="err">WhereClause</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="err">Eleme</span><span class="kc">nts</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">},</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">},</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">},</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">},</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">},</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=592&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">I</span><span class="kc">n</span><span class="err">dex</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=595&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">Value</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                            </span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">NodeId</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ns=1;i=5000&quot;</span>
+<span class="w">                                                    </span><span class="p">}</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=595&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">Value</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                            </span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">NodeId</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ns=1;i=5001&quot;</span>
+<span class="w">                                                    </span><span class="p">}</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=595&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">Value</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                            </span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">NodeId</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ns=1;i=5002&quot;</span>
+<span class="w">                                                    </span><span class="p">}</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=595&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">Value</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                            </span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">NodeId</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ns=1;i=5003&quot;</span>
+<span class="w">                                                    </span><span class="p">}</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=595&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">Value</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                            </span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">NodeId</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ns=1;i=5004&quot;</span>
+<span class="w">                                                    </span><span class="p">}</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">},</span>
+<span class="w">                    </span><span class="p">{</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">t</span><span class="err">or</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span>
+<span class="w">                            </span><span class="err">Fil</span><span class="kc">ter</span><span class="err">Opera</span><span class="kc">n</span><span class="err">ds</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                                    </span><span class="p">{</span>
+<span class="w">                                            </span><span class="err">TypeId</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=595&quot;</span><span class="p">,</span>
+<span class="w">                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                    </span><span class="err">Value</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                                            </span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">NodeId</span><span class="p">,</span>
+<span class="w">                                                            </span><span class="err">Body</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i=3035&quot;</span>
+<span class="w">                                                    </span><span class="p">}</span>
+<span class="w">                                            </span><span class="p">}</span>
+<span class="w">                                    </span><span class="p">}</span>
+<span class="w">                            </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

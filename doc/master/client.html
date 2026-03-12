@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 (master) 1.5.0 documentation</title>
+  <title>Client &mdash; open62541 (master) 1.5.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e0a75244"></script>
+      <script src="_static/documentation_options.js?v=73275c37"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -50,7 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="server.html#role-based-access-control-rbac">Role-Based Access Control (RBAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html#role-based-access-control-rbac-type-definitions">Role-Based Access Control (RBAC) - Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html#role-based-access-control-rbac-api">Role-Based Access Control (RBAC) - API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Client</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#client-lifecycle">Client Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#connect-to-a-server">Connect to a Server</a></li>
@@ -734,9 +735,11 @@ client settings.</p>
 <span class="w">    </span><span class="cm">/* Certificate Verification Plugin */</span>
 <span class="w">    </span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="n">certificateVerification</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Additional SecurityPolicies for authentication (e.g. to encrypt the</span>
-<span class="cm">     * password). The SecurityPolicies for SecureChannels (above) are also</span>
-<span class="cm">     * usable for authentication. */</span>
+<span class="w">    </span><span class="cm">/* SecurityPolicies for authentication with an x509 certificate. The</span>
+<span class="cm">     * UserIdentityToken contains only the certificate. The certificate gets</span>
+<span class="cm">     * matched against the SecurityPolicy instance from this array. Only the</span>
+<span class="cm">     * SecurityPolicy instance carries the private key. See</span>
+<span class="cm">     * UA_ClientConfig_setAuthenticationCert. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
 
@@ -869,6 +872,26 @@ client settings.</p>
 <span class="nf">UA_ClientConfig_setAuthenticationUsername</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
 <span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">username</span><span class="p">,</span>
 <span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">password</span><span class="p">);</span>
+
+<span class="cm">/* This method operates on the client config in two ways:</span>
+<span class="cm"> *</span>
+<span class="cm"> * - Sets the certificate as a X509IdentityToken for authentication.</span>
+<span class="cm"> * - Replaces the authSecurityPolicies array with new instances of the available</span>
+<span class="cm"> *   SecurityPolicies using the certificate and associated private-key.</span>
+<span class="cm"> *</span>
+<span class="cm"> * During session activation, the certificate from the X509IdentityToken gets</span>
+<span class="cm"> * matched to a SecurityPolicy for the UserTokenPolicy supported by the server.</span>
+<span class="cm"> * The SecurityPolicy (with the private key) is then used for a signature that</span>
+<span class="cm"> * proves ownership of the certificate.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This method is implemented in the /plugins directory as it depends on the</span>
+<span class="cm"> * platform-specific crypto implementations. */</span>
+<span class="cp">#if defined(UA_ENABLE_ENCRYPTION_OPENSSL) || defined(UA_ENABLE_ENCRYPTION_MBEDTLS)</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_ClientConfig_setAuthenticationCert</span><span class="p">(</span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificateAuth</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">privateKeyAuth</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -997,6 +1020,10 @@ forward Event notifications from that node.</p>
 <p>During the creation of a MonitoredItem, the server may return changed
 adjusted parameters. Check the returned <code class="docutils literal notranslate"><span class="pre">UA_CreateMonitoredItemsResponse</span></code>
 to get the current parameters.</p>
+<p>Be aware that the client may process incoming notifications before receiving
+the CreateMonitoredItemsResponse. This is due to the behavior of some server
+SDKs. Without this “early processing” we would miss the initial value, which
+can be an issue if the value changes at a slow rate.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Provides default values for a new monitored item. */</span>
 <span class="k">static</span><span class="w"> </span><span class="n">UA_INLINE</span><span class="w"> </span><span class="n">UA_MonitoredItemCreateRequest</span>
 <span class="n">UA_MonitoredItemCreateRequest_default</span><span class="p">(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -1013,7 +1040,8 @@ to get the current parameters.</p>
 </pre></div>
 </div>
 <p>The clientHandle parameter cannot be set by the user, any value will be
-replaced by the client before sending the request to the server.</p>
+replaced by the client with a unique internal ClientHandle value before
+sending the request to the server.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Callback for the deletion of a MonitoredItem */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_Client_DeleteMonitoredItemCallback</span><span class="p">)</span>
 <span class="w">    </span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">subId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">subContext</span><span class="p">,</span>
@@ -1274,6 +1302,10 @@ the regular service to read several attributes at once.</p>
 <span class="n">UA_Client_readUserExecutableAttribute</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                      </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Client_readDatatypeDefinitionAttribute</span><span class="p">(</span><span class="n">UA_Client</span><span class="o">*</span><span class="w"> </span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                          </span><span class="n">UA_StructureDefinition</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
