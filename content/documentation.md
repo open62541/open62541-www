@@ -11,7 +11,10 @@ Historical documentation for legacy releases of open62541.
 | Version | Status | Web Version | PDF Version |
 |---------|--------|-------------|-------------|
 | **Development Branch** | Development | [View HTML](/doc/master/) | [Download PDF](/doc/open62541-master.pdf) |
-| **1.5.0 Release** | Latest | [View HTML](/doc/v1.5.0/) | [Download PDF](/doc/open62541-v1.5.0.pdf) |
+| **1.5.3 Release** | Latest | [View HTML](/doc/v1.5.3/) | [Download PDF](/doc/open62541-v1.5.3.pdf) |
+| 1.5.2 Release | Latest | [View HTML](/doc/v1.5.2/) | [Download PDF](/doc/open62541-v1.5.2.pdf) |
+| 1.5.1 Release | Latest | [View HTML](/doc/v1.5.1/) | [Download PDF](/doc/open62541-v1.5.1.pdf) |
+| 1.5.0 Release | Latest | [View HTML](/doc/v1.5.0/) | [Download PDF](/doc/open62541-v1.5.0.pdf) |
 | 1.4.16 Release | Oldstable | [View HTML](/doc/v1.4.16/) | [Download PDF](/doc/open62541-v1.4.16.pdf) |
 | 1.4.15 Release | Oldstable | [View HTML](/doc/v1.4.15/) | [Download PDF](/doc/open62541-v1.4.15.pdf) |
 | 1.4.14 Release | Oldstable | [View HTML](/doc/v1.4.14/) | [Download PDF](/doc/open62541-v1.4.14.pdf) |
