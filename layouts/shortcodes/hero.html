@@ -24,7 +24,7 @@
     <div id="particles-js" class="absolute inset-0 z-10"></div>
     {{ end }}
     
-    <div class="container relative z-20 py-24 md:py-32">
+    <div id="hero-content" class="container relative z-20 py-24 md:py-32">
         <div class="max-w-3xl mx-auto text-center">
             <div class="space-y-8">
                 <div class="flex justify-center">
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             interactivity: {
-                detect_on: 'window',
+                detect_on: 'canvas',
                 events: {
                     onhover: {
                         enable: true,
@@ -158,6 +158,37 @@ document.addEventListener('DOMContentLoaded', function() {
         var particlesCanvas = document.querySelector('#particles-js canvas');
         if (particlesCanvas) {
             particlesCanvas.style.pointerEvents = 'auto';
+
+            var heroContent = document.getElementById('hero-content');
+            if (heroContent) {
+                heroContent.addEventListener('mousemove', function(event) {
+                    particlesCanvas.dispatchEvent(new MouseEvent('mousemove', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        clientX: event.clientX,
+                        clientY: event.clientY,
+                        screenX: event.screenX,
+                        screenY: event.screenY
+                    }));
+                });
+
+                heroContent.addEventListener('click', function(event) {
+                    if (event.target.closest('a, button, input, textarea, select, label')) {
+                        return;
+                    }
+
+                    particlesCanvas.dispatchEvent(new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window,
+                        clientX: event.clientX,
+                        clientY: event.clientY,
+                        screenX: event.screenX,
+                        screenY: event.screenY
+                    }));
+                });
+            }
         }
     }
 });
