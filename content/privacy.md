@@ -15,7 +15,23 @@ If you have questions about processing your data, you can contact us via [contac
 
 ### Website visitors
 
-When you visit our website, we use cookies for the website to function, which you can read more about in our cookie policy.
+When you visit our website, we collect anonymised statistical data about your visit in order to understand how our website is used and to improve it over time. Details are described in the "Website analytics" subsection below.
+
+### Website analytics
+
+We use [Plausible Analytics](https://plausible.io) to collect anonymised, aggregate statistics about visits to this website. Plausible Analytics is operated by us on our own infrastructure (self-hosted) within the EU/EEA.
+
+Plausible Analytics does **not** use cookies or any other mechanism to store information on your device, and it does not track you across websites or over time. The following data is collected on each page view:
+
+* Page URL and referrer URL
+* Browser type, operating system, and device category (derived from the User-Agent header)
+* Country of origin (derived from the IP address; the IP address itself is **never stored**)
+
+No personal profiles are created, and no data is shared with third parties.
+
+Our lawful basis for this processing is Article 6(1)(f) of the GDPR (legitimate interest). Our legitimate interest is understanding how visitors use our website so that we can improve it. Because Plausible Analytics is cookieless, does not track individuals, and stores no personal data, this interest is not overridden by your rights and freedoms.
+
+If you wish to opt out of this anonymised measurement entirely, you can do so by enabling the "Do Not Track" (DNT) setting in your browser. Plausible Analytics respects the DNT header.
 
 ### Communication with potential customers
 
@@ -84,6 +100,8 @@ External suppliers can, for example, provide software used to organise our work,
 It is our responsibility to ensure that your personal information is processed correctly. That is why we place high demands on our partners. Our partners must guarantee that your personal information is protected.
 
 We enter agreements data processors that handle personal information on our behalf to increase the security of your personal information.
+
+**Plausible Analytics (self-hosted):** Website analytics are handled by a self-hosted instance of Plausible Analytics running on our own servers within the EU/EEA. No data is transmitted to Plausible's own servers or any other third party. Because no personal data is stored, no data processing agreement with an external party is required for this service.
 
 ---
 
