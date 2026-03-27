@@ -7,6 +7,7 @@ file(REMOVE_RECURSE
   "../doc_src/plugin_log.rst"
   "../doc_src/plugin_nodestore.rst"
   "../doc_src/plugin_securitypolicy.rst"
+  "../doc_src/plugin_servercomponent.rst"
   "../doc_src/pubsub.rst"
   "../doc_src/server.rst"
   "../doc_src/statuscodes.rst"
