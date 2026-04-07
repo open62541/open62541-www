@@ -2571,7 +2571,7 @@ The usual usage is as follows:</p>
 
 <span class="w">    </span><span class="cm">/* If true, all permissions are granted regardless of roles.</span>
 <span class="cm">     * WARNING: Effectively disables authorization. Use for testing only. */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">allPermissionsForAnonymousRole</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">allPermissionsForAnonymous</span><span class="p">;</span>
 <span class="cp">#endif</span>
 <span class="p">};</span>
 
@@ -2674,13 +2674,16 @@ The usual usage is as follows:</p>
 <span class="cm"> * @param rolePermissions Array of role-permission mappings</span>
 <span class="cm"> * @param recursive If true, also set for all hierarchically referenced</span>
 <span class="cm"> *        child nodes</span>
+<span class="cm"> * @param options Reserved for future use (e.g. to restrict the reference</span>
+<span class="cm"> *        type for recursive traversal). Pass NULL for now.</span>
 <span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_setNodeRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                 </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolePermissionsSize</span><span class="p">,</span>
 <span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_RolePermission</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissions</span><span class="p">,</span>
-<span class="w">                                 </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
+<span class="w">                                 </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
 <span class="cm">/* Get the role permissions of a node.</span>
 <span class="cm"> *</span>
@@ -2856,7 +2859,7 @@ array of the roles assigned to the session.</p>
 <span class="cm"> * @param outRoleNames Output: deep-copy array of QualifiedNames</span>
 <span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_getSessionRoleNames</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="n">UA_Server_getSessionRoleNames</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                              </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">**</span><span class="n">outRoleNames</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -2872,14 +2875,16 @@ configuration.</p>
 <span class="cm"> * @param server The server instance</span>
 <span class="cm"> * @param nodeId The node to modify</span>
 <span class="cm"> * @param roleId The role to add permissions for</span>
-<span class="cm"> * @param permissionType Permission bitmask to set</span>
-<span class="cm"> * @param overwriteExisting If true, replace; if false, OR with existing</span>
+<span class="cm"> * @param permissions Permission bitmask to set</span>
+<span class="cm"> * @param overwriteExisting If true, replace the role&#39;s existing permission</span>
+<span class="cm"> *        bitmask entirely; if false, OR (merge) the new bits into the</span>
+<span class="cm"> *        existing bitmask</span>
 <span class="cm"> * @param recursive If true, apply recursively to child nodes</span>
 <span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_addRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_PermissionType</span><span class="w"> </span><span class="n">permissionType</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_PermissionType</span><span class="w"> </span><span class="n">permissions</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">overwriteExisting</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
 
@@ -2888,13 +2893,13 @@ configuration.</p>
 <span class="cm"> * @param server The server instance</span>
 <span class="cm"> * @param nodeId The node to modify</span>
 <span class="cm"> * @param roleId The role to remove permissions for</span>
-<span class="cm"> * @param permissionType Permission bitmask to clear</span>
+<span class="cm"> * @param permissions Permission bitmask to clear</span>
 <span class="cm"> * @param recursive If true, apply recursively to child nodes</span>
 <span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removeRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_PermissionType</span><span class="w"> </span><span class="n">permissionType</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">UA_PermissionType</span><span class="w"> </span><span class="n">permissions</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
