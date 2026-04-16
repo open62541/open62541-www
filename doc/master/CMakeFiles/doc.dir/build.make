@@ -80,6 +80,7 @@ doc/CMakeFiles/doc: doc_src/plugin_nodestore.rst
 doc/CMakeFiles/doc: doc_src/plugin_eventloop.rst
 doc/CMakeFiles/doc: doc_src/plugin_certificategroup.rst
 doc/CMakeFiles/doc: doc_src/plugin_securitypolicy.rst
+doc/CMakeFiles/doc: doc_src/plugin_servercomponent.rst
 doc/CMakeFiles/doc: doc_src/tutorial_datatypes.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_firststeps.rst
 doc/CMakeFiles/doc: doc_src/tutorial_server_variable.rst
@@ -153,99 +154,104 @@ doc_src/plugin_securitypolicy.rst: /home/runner/work/open62541/open62541/include
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Generating ../doc_src/plugin_securitypolicy.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/securitypolicy.h /home/runner/work/open62541/open62541/build/doc_src/plugin_securitypolicy.rst
 
+doc_src/plugin_servercomponent.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
+doc_src/plugin_servercomponent.rst: /home/runner/work/open62541/open62541/include/open62541/plugin/servercomponent.h
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating ../doc_src/plugin_servercomponent.rst"
+	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/plugin/servercomponent.h /home/runner/work/open62541/open62541/build/doc_src/plugin_servercomponent.rst
+
 doc_src/pubsub.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/pubsub.rst: /home/runner/work/open62541/open62541/include/open62541/server_pubsub.h
 doc_src/pubsub.rst: /home/runner/work/open62541/open62541/include/open62541/pubsub.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating ../doc_src/pubsub.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Generating ../doc_src/pubsub.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/server_pubsub.h /home/runner/work/open62541/open62541/include/open62541/pubsub.h /home/runner/work/open62541/open62541/build/doc_src/pubsub.rst
 
 doc_src/server.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/server.rst: /home/runner/work/open62541/open62541/include/open62541/server.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Generating ../doc_src/server.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Generating ../doc_src/server.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/server.h /home/runner/work/open62541/open62541/build/doc_src/server.rst
 
 doc_src/statuscodes.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/statuscodes.rst: src_generated/open62541/statuscodes.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Generating ../doc_src/statuscodes.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Generating ../doc_src/statuscodes.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/build/src_generated/open62541/statuscodes.h /home/runner/work/open62541/open62541/build/doc_src/statuscodes.rst
 
 doc_src/tutorial_client_firststeps.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_client_firststeps.rst: /home/runner/work/open62541/open62541/examples/tutorial_client_firststeps.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Generating ../doc_src/tutorial_client_firststeps.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Generating ../doc_src/tutorial_client_firststeps.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_client_firststeps.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_client_firststeps.rst
 
 doc_src/tutorial_datatypes.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_datatypes.rst: /home/runner/work/open62541/open62541/examples/tutorial_datatypes.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Generating ../doc_src/tutorial_datatypes.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Generating ../doc_src/tutorial_datatypes.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_datatypes.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_datatypes.rst
 
 doc_src/tutorial_pubsub_publish.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_pubsub_publish.rst: /home/runner/work/open62541/open62541/examples/pubsub/tutorial_pubsub_publish.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Generating ../doc_src/tutorial_pubsub_publish.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Generating ../doc_src/tutorial_pubsub_publish.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/pubsub/tutorial_pubsub_publish.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_pubsub_publish.rst
 
 doc_src/tutorial_pubsub_subscribe.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_pubsub_subscribe.rst: /home/runner/work/open62541/open62541/examples/pubsub/tutorial_pubsub_subscribe.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Generating ../doc_src/tutorial_pubsub_subscribe.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Generating ../doc_src/tutorial_pubsub_subscribe.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/pubsub/tutorial_pubsub_subscribe.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_pubsub_subscribe.rst
 
 doc_src/tutorial_server_alarms_conditions.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_alarms_conditions.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_alarms_conditions.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Generating ../doc_src/tutorial_server_alarms_conditions.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Generating ../doc_src/tutorial_server_alarms_conditions.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_alarms_conditions.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_alarms_conditions.rst
 
 doc_src/tutorial_server_datasource.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_datasource.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_datasource.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Generating ../doc_src/tutorial_server_datasource.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Generating ../doc_src/tutorial_server_datasource.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_datasource.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_datasource.rst
 
 doc_src/tutorial_server_events.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_events.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_events.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Generating ../doc_src/tutorial_server_events.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Generating ../doc_src/tutorial_server_events.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_events.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_events.rst
 
 doc_src/tutorial_server_firststeps.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_firststeps.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_firststeps.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Generating ../doc_src/tutorial_server_firststeps.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Generating ../doc_src/tutorial_server_firststeps.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_firststeps.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_firststeps.rst
 
 doc_src/tutorial_server_method.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_method.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_method.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Generating ../doc_src/tutorial_server_method.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating ../doc_src/tutorial_server_method.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_method.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_method.rst
 
 doc_src/tutorial_server_monitoreditems.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_monitoreditems.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_monitoreditems.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating ../doc_src/tutorial_server_monitoreditems.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating ../doc_src/tutorial_server_monitoreditems.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_monitoreditems.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_monitoreditems.rst
 
 doc_src/tutorial_server_object.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_object.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_object.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating ../doc_src/tutorial_server_object.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating ../doc_src/tutorial_server_object.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_object.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_object.rst
 
 doc_src/tutorial_server_variable.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_variable.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_variable.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating ../doc_src/tutorial_server_variable.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating ../doc_src/tutorial_server_variable.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_variable.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_variable.rst
 
 doc_src/tutorial_server_variabletype.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/tutorial_server_variabletype.rst: /home/runner/work/open62541/open62541/examples/tutorial_server_variabletype.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating ../doc_src/tutorial_server_variabletype.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating ../doc_src/tutorial_server_variabletype.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/examples/tutorial_server_variabletype.c /home/runner/work/open62541/open62541/build/doc_src/tutorial_server_variabletype.rst
 
 doc_src/types.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/types.rst: /home/runner/work/open62541/open62541/include/open62541/types.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating ../doc_src/types.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating ../doc_src/types.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/types.h /home/runner/work/open62541/open62541/build/doc_src/types.rst
 
 doc_src/types_generated.rst: src_generated/open62541/types_generated.rst
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating ../doc_src/types_generated.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating ../doc_src/types_generated.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /usr/local/bin/cmake -E copy /home/runner/work/open62541/open62541/build/src_generated/open62541/types_generated.rst /home/runner/work/open62541/open62541/build/doc_src
 
 doc_src/util.rst: /home/runner/work/open62541/open62541/tools/c2rst.py
 doc_src/util.rst: /home/runner/work/open62541/open62541/include/open62541/util.h
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating ../doc_src/util.rst"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Generating ../doc_src/util.rst"
 	cd /home/runner/work/open62541/open62541/build/doc && /opt/hostedtoolcache/Python/3.14.3/x64/bin/python3.14 /home/runner/work/open62541/open62541/tools/c2rst.py /home/runner/work/open62541/open62541/include/open62541/util.h /home/runner/work/open62541/open62541/build/doc_src/util.rst
 
 doc/CMakeFiles/doc.dir/codegen:
@@ -260,6 +266,7 @@ doc: doc_src/plugin_eventloop.rst
 doc: doc_src/plugin_log.rst
 doc: doc_src/plugin_nodestore.rst
 doc: doc_src/plugin_securitypolicy.rst
+doc: doc_src/plugin_servercomponent.rst
 doc: doc_src/pubsub.rst
 doc: doc_src/server.rst
 doc: doc_src/statuscodes.rst
