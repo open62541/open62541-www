@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 (master) 1.5.3 documentation</title>
+  <title>Server &mdash; open62541 (master) 1.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d75fd82e"></script>
+      <script src="_static/documentation_options.js?v=1cd648e3"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -96,6 +96,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#per-role-node-permission-management">Per-Role Node Permission Management</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#namespace-default-role-permissions">Namespace Default Role Permissions</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration-from-file">Configuration from File</a></li>
@@ -104,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -2861,6 +2863,9 @@ array of the roles assigned to the session.</p>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_getSessionRoleNames</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                              </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">**</span><span class="n">outRoleNames</span><span class="p">);</span>
+
+<span class="cm">/* Convenience bitmask: all permission bits set */</span>
+<span class="cp">#define UA_PERMISSIONTYPE_ALL ((UA_PermissionType)0xFFFFFFFF)</span>
 </pre></div>
 </div>
 </section>
@@ -2901,11 +2906,53 @@ configuration.</p>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">UA_PermissionType</span><span class="w"> </span><span class="n">permissions</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">recursive</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="namespace-default-role-permissions">
+<h3>Namespace Default Role Permissions<a class="headerlink" href="#namespace-default-role-permissions" title="Link to this heading"></a></h3>
+<p>Per OPC UA Part 5: if a node has no explicit RolePermissions,
+the DefaultRolePermissions from the NamespaceMetadata apply.</p>
+<dl class="simple">
+<dt>Permission resolution order:</dt><dd><ol class="arabic simple">
+<li><p>Explicit node RolePermissions (set via addRolePermissions)</p></li>
+<li><p>Namespace default RolePermissions (set via this API)</p></li>
+</ol>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Set default role permissions for a namespace.</span>
+<span class="cm"> * Overwrites any previously set defaults for the given namespace.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param namespaceIndex The namespace index</span>
+<span class="cm"> * @param entriesSize Number of role-permission entries</span>
+<span class="cm"> * @param entries Array of role-permission entries (deep-copied)</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_setNamespaceDefaultRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                             </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">namespaceIndex</span><span class="p">,</span>
+<span class="w">                                             </span><span class="kt">size_t</span><span class="w"> </span><span class="n">entriesSize</span><span class="p">,</span>
+<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_RolePermission</span><span class="w"> </span><span class="o">*</span><span class="n">entries</span><span class="p">);</span>
+
+<span class="cm">/* Get default role permissions for a namespace.</span>
+<span class="cm"> * Returns a deep copy. The caller must free each entry&#39;s roleId</span>
+<span class="cm"> * with UA_NodeId_clear and the array with UA_free.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server instance</span>
+<span class="cm"> * @param namespaceIndex The namespace index</span>
+<span class="cm"> * @param entriesSize Output: number of entries</span>
+<span class="cm"> * @param entries Output: deep-copied array (caller must free)</span>
+<span class="cm"> * @return UA_STATUSCODE_GOOD on success */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getNamespaceDefaultRolePermissions</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                             </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">namespaceIndex</span><span class="p">,</span>
+<span class="w">                                             </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">entriesSize</span><span class="p">,</span>
+<span class="w">                                             </span><span class="n">UA_RolePermission</span><span class="w"> </span><span class="o">**</span><span class="n">entries</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_RBAC */</span>
 </pre></div>
 </div>
-</section>
 </section>
 </section>
 <section id="configuration-from-file">

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 (master) 1.5.3 documentation</title>
+  <title>Client &mdash; open62541 (master) 1.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d75fd82e"></script>
+      <script src="_static/documentation_options.js?v=1cd648e3"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -99,6 +99,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -184,6 +185,26 @@ established. See more about <a class="reference internal" href="#client-async-se
 <span class="cm"> * operations. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_run_iterate</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
+
+<span class="cm">/* Runs the client until interrupted. On Unix/Windows this registers an</span>
+<span class="cm"> * interrupt for SIGINT (ctrl-c). The method only returns after having received</span>
+<span class="cm"> * the interrupt or upon an error condition. The logical sequence is as follows:</span>
+<span class="cm"> *</span>
+<span class="cm"> * - Register the interrupt</span>
+<span class="cm"> * - Loop until interrupt: UA_Client_run_iterate</span>
+<span class="cm"> * - Deregister the interrupt</span>
+<span class="cm"> *</span>
+<span class="cm"> * The inner loop is also aborted when the client is disconnected and fails the</span>
+<span class="cm"> * automatic reconnect.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Attention! This method does not call UA_Client_connect() / _disconnect()</span>
+<span class="cm"> * internally. This needs to be handled before and after.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Attention! This method is implemented individually for the different</span>
+<span class="cm"> * platforms (POSIX/Win32/etc.). The default implementation is in</span>
+<span class="cm"> * /plugins/ua_config_default.c under the CC0 license. Adjust as needed. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_Client_runUntilInterrupt</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

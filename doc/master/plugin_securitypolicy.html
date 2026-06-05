@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SecurityPolicy Plugin API &mdash; open62541 (master) 1.5.3 documentation</title>
+  <title>SecurityPolicy Plugin API &mdash; open62541 (master) 1.5.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d75fd82e"></script>
+      <script src="_static/documentation_options.js?v=1cd648e3"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -230,12 +231,24 @@
 <span class="cm">     *         is known. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getRemotePlainTextBlockSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Returns the IV (initialization vector) length for symmetric encryption.</span>
+<span class="cm">     * For AEAD ciphers (e.g. ChaCha20-Poly1305) the IV length differs from the</span>
+<span class="cm">     * block size. If NULL, the block size is used as the IV length (which is</span>
+<span class="cm">     * correct for traditional block ciphers like AES-CBC).</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to retrieve data from.</span>
+<span class="cm">     * @return The IV length in bytes. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getLocalIvLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">);</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_SecurityPolicyEncryptionAlgorithm</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_NONE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_RSA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_ECC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_ECC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_SECURITYPOLICYTYPE_ECC_AEAD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_SecurityPolicyType</span><span class="p">;</span>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_SecurityPolicy</span><span class="w"> </span><span class="p">{</span>
@@ -337,6 +350,22 @@
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setRemoteSymIv</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
 <span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">iv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Sets the message security parameters for AEAD nonce derivation.</span>
+<span class="cm">     * Called before each symmetric encrypt/decrypt for ECC_AEAD policies.</span>
+<span class="cm">     * NULL for non-AEAD policies.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
+<span class="cm">     * @param channelContext The context to work on.</span>
+<span class="cm">     * @param tokenId The SecurityToken ID for nonce masking.</span>
+<span class="cm">     * @param previousSequenceNumber The previous sequence number for nonce masking.</span>
+<span class="cm">     * @param additionalAuthData The header bytes used as AAD for AEAD. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setMessageSecurityParameters</span><span class="p">)(</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">channelContext</span><span class="p">,</span>
+<span class="w">        </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">tokenId</span><span class="p">,</span>
+<span class="w">        </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">previousSequenceNumber</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">additionalAuthData</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Compares the supplied certificate with the remote certificate stored in</span>
 <span class="cm">     * the channel context.</span>
