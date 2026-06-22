@@ -461,6 +461,44 @@
 <span class="w">    </span><span class="cm">/* Deletes the dynamic content of the policy */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">);</span>
 <span class="p">};</span>
+
+<span class="cm">/* True if the SecurityPolicy requires the OPC UA Part 6 v1.05.07</span>
+<span class="cm"> * SecureChannelEnhancements behavior (see the conformance unit &quot;Security</span>
+<span class="cm"> * SecureChannelEnhancements True&quot;). The changed behavior is implemented in the</span>
+<span class="cm"> * core library, not in the SecurityPolicy itself. Detected from the policy URI</span>
+<span class="cm"> * so it does not depend on a struct member - this keeps the SecurityPolicy</span>
+<span class="cm"> * layout stable across the 1.5 release family. */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_SecurityPolicy_isEnhancedSecurity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">);</span>
+
+<span class="cm">/* True if the SecurityPolicy uses the legacy SequenceNumber handling (the OPC</span>
+<span class="cm"> * UA reference stack&#39;s LegacySequenceNumbers = true): the channel SequenceNumber</span>
+<span class="cm"> * starts at 1 and rolls over with the &quot;&lt; 1024&quot; rule. This is the case for None</span>
+<span class="cm"> * and the RSA policies (Basic*, Aes*_RsaOaep/RsaPss). The ECC policies use the</span>
+<span class="cm"> * non-legacy scheme (start at 0, wrap UA_UINT32_MAX -&gt; 0). Detected from the</span>
+<span class="cm"> * policy URI so it does not depend on a struct member - this keeps the</span>
+<span class="cm"> * SecurityPolicy layout stable across the 1.5 release family. A NULL policy is</span>
+<span class="cm"> * treated as legacy. */</span>
+<span class="n">UA_Boolean</span>
+<span class="nf">UA_SecurityPolicy_useLegacySequenceNumbers</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">);</span>
+
+<span class="cm">/* OPC UA Part 6 v1.05.07 (SecureChannelEnhancements): hash a certificate (the</span>
+<span class="cm"> * leaf, DER) with the hash of the policy&#39;s elliptic curve - SHA-256 for the</span>
+<span class="cm"> * nistP256 curve, SHA-384 for nistP384. Used to build the channel-bound</span>
+<span class="cm"> * CreateSession / ActivateSession SignatureData.</span>
+<span class="cm"> *</span>
+<span class="cm"> * This is NOT the OPN-header Certificate thumbprint: that thumbprint uses the</span>
+<span class="cm"> * SecurityPolicy&#39;s CertificateThumbprintAlgorithm (SHA-1 by default) and is</span>
+<span class="cm"> * produced by makeCertThumbprint. The digest here is selected from the policy</span>
+<span class="cm"> * URI&#39;s curve; the implementation is provided by the crypto backend.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param policy The policy whose curve selects the hash algorithm.</span>
+<span class="cm"> * @param certificate The certificate to hash (DER; leaf is used).</span>
+<span class="cm"> * @param hash Output buffer; allocated by the callee. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_SecurityPolicy_hashCertificate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">hash</span><span class="p">);</span>
 </pre></div>
 </div>
 <section id="pubsub-securitypolicy">
