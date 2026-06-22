@@ -9,6 +9,7 @@ file(REMOVE_RECURSE
   "../doc_src/index.rst"
   "../doc_src/nodeset_compiler.rst"
   "../doc_src/nodeset_compiler_pump.png"
+  "../doc_src/opc-ua-overview.png"
   "../doc_src/open62541.png"
   "../doc_src/open62541_html.png"
   "../doc_src/open62541_logo.png"
