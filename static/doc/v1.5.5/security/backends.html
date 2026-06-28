@@ -1,0 +1,214 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Backends &mdash; open62541 (1.5.5) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Authentication" href="authentication.html" />
+    <link rel="prev" title="Supported Security Policies" href="policies.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../toc.html" class="icon icon-home">
+            open62541 (1.5.5)
+              <img src="../_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Security</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="policies.html">Supported Security Policies</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Crypto Backends</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#backend-selection">Backend selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hardware-backed-key-storage-tpm2">Hardware-backed key storage (TPM2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#library-version-requirements">Library version requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#registering-policies">Registering policies</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="certificates.html">Certificates and Trust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ecc.html">ECC Specifics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../toc.html">open62541 (1.5.5)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Security</a></li>
+      <li class="breadcrumb-item active">Crypto Backends</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/security/backends.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="crypto-backends">
+<span id="security-backends"></span><h1>Crypto Backends<a class="headerlink" href="#crypto-backends" title="Link to this heading"></a></h1>
+<p>open62541 does not implement cryptography itself.  It delegates to an
+external library through a thin plugin layer.  The build option
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION</span></code> selects which library is compiled in.  No security
+policy from <a class="reference internal" href="policies.html#security-policies"><span class="std std-ref">Supported Security Policies</span></a> is available when this option is
+<code class="docutils literal notranslate"><span class="pre">OFF</span></code>.</p>
+<section id="backend-selection">
+<h2>Backend selection<a class="headerlink" href="#backend-selection" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32.0%" />
+<col style="width: 68.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>CMake option</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION=OFF</span></code></p></td>
+<td><p>No encryption support.  Default.  Only the <code class="docutils literal notranslate"><span class="pre">None</span></code> policy is usable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION=MBEDTLS</span></code></p></td>
+<td><p>mbedTLS.  All RSA profiles + the four NIST/Brainpool ECC curves.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION=OPENSSL</span></code></p></td>
+<td><p>OpenSSL.  All RSA profiles + every ECC curve, including
+Curve25519 and Curve448 (EdDSA).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION=LIBRESSL</span></code></p></td>
+<td><p>LibreSSL.  Experimental.  Coverage is similar to OpenSSL.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The two boolean aliases <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION_OPENSSL</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION_MBEDTLS</span></code> are still accepted for backward
+compatibility.  Prefer the unified <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION</span></code> form in new
+projects.</p>
+</section>
+<section id="hardware-backed-key-storage-tpm2">
+<h2>Hardware-backed key storage (TPM2)<a class="headerlink" href="#hardware-backed-key-storage-tpm2" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION_TPM2=ON</span></code> adds TPM2-backed key storage on top of an
+already-selected <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION</span></code> backend.  It is <strong>not</strong> a
+standalone crypto library, so it must be combined with <code class="docutils literal notranslate"><span class="pre">MBEDTLS</span></code> or
+<code class="docutils literal notranslate"><span class="pre">OPENSSL</span></code>.  When enabled, the private key used by the server lives on a
+TPM2 device instead of in a DER file.  See the
+<code class="docutils literal notranslate"><span class="pre">server_encryption_tpm_keystore</span></code> and <code class="docutils literal notranslate"><span class="pre">client_encryption_tpm_keystore</span></code>
+examples, and the <code class="docutils literal notranslate"><span class="pre">README_client_server_tpm_keystore.txt</span></code> next to them
+for the required software stack.</p>
+</section>
+<section id="library-version-requirements">
+<h2>Library version requirements<a class="headerlink" href="#library-version-requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>mbedTLS ≥ 3.0</strong> is required for the four NIST/Brainpool ECC curves.
+mbedTLS does not support Curve25519 / Curve448.</p></li>
+<li><p><strong>OpenSSL ≥ 3.0</strong> is required for full ECC support including EdDSA
+curves.</p></li>
+<li><p>See <a class="reference internal" href="../building.html#building"><span class="std std-ref">Building open62541</span></a> for the exact flag set and the
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION_TPM2</span></code> option.</p></li>
+</ul>
+</section>
+<section id="registering-policies">
+<h2>Registering policies<a class="headerlink" href="#registering-policies" title="Link to this heading"></a></h2>
+<p>The backend is selected at build time, not at runtime.  Once built with
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION=OPENSSL</span></code> (or <code class="docutils literal notranslate"><span class="pre">MBEDTLS</span></code>), adding a policy to a
+server is one call per policy and the same call works with either backend:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ServerConfig_addSecurityPolicyNone</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cert</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
+<span class="n">UA_ServerConfig_addSecurityPolicyBasic256Sha256</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cert</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
+<span class="n">UA_ServerConfig_addSecurityPolicyEccNistP256</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cert</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
+<span class="cm">/* ... or, in one shot: */</span>
+<span class="n">UA_ServerConfig_addAllSecurityPolicies</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cert</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">key</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addAllSecurityPolicies()</span></code> auto-detects the key type
+(RSA vs EC) and registers all policies matching the key.  The
+ECC-specific helpers and the full set of <code class="docutils literal notranslate"><span class="pre">addSecurityPolicy*()</span></code> calls
+are listed in <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="policies.html" class="btn btn-neutral float-left" title="Supported Security Policies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="authentication.html" class="btn btn-neutral float-right" title="Authentication" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
