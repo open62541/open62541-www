@@ -1,0 +1,200 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authentication &mdash; open62541 (1.5) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Certificates and Trust" href="certificates.html" />
+    <link rel="prev" title="Crypto Backends" href="backends.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../toc.html" class="icon icon-home">
+            open62541 (1.5)
+              <img src="../_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Security</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="policies.html">Supported Security Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Crypto Backends</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Authentication</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#identity-token-types">Identity token types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-server-configuration">Default server configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="certificates.html">Certificates and Trust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ecc.html">ECC Specifics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../toc.html">open62541 (1.5)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Security</a></li>
+      <li class="breadcrumb-item active">Authentication</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/security/authentication.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="authentication">
+<span id="security-authentication"></span><h1>Authentication<a class="headerlink" href="#authentication" title="Link to this heading"></a></h1>
+<p>Authentication in OPC UA happens at the <em>Session</em> layer, on top of an
+already-open SecureChannel.  The client presents an <em>IdentityToken</em> during
+<code class="docutils literal notranslate"><span class="pre">ActivateSession</span></code>.  The server validates it through its <em>AccessControl</em>
+plugin and either accepts or rejects the session.</p>
+<section id="identity-token-types">
+<h2>Identity token types<a class="headerlink" href="#identity-token-types" title="Link to this heading"></a></h2>
+<p>The standard defines four token types.  All four are accepted by
+open62541’s default access-control plugin and may be enabled in any
+combination.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 28.0%" />
+<col style="width: 46.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Token</p></th>
+<th class="head"><p>Type constant</p></th>
+<th class="head"><p>Typical use</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Anonymous</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UA_AnonymousIdentityToken</span></code></p></td>
+<td><p>Public, read-only data, discovery.  Opt out for protected servers.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Username / Password</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UA_UserNameIdentityToken</span></code></p></td>
+<td><p>Simple human-user login.  Credentials checked against an
+in-server list or a custom callback.</p></td>
+</tr>
+<tr class="row-even"><td><p>X.509 Certificate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UA_X509IdentityToken</span></code></p></td>
+<td><p>Mutual-TLS-style login.  The client proves possession of the
+private key matching a certificate the server trusts.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Issued Token</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">UA_IssuedIdentityToken</span></code></p></td>
+<td><p>External STS / OAuth-style flows.  The server forwards the token
+to an authorization service.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="default-server-configuration">
+<h2>Default server configuration<a class="headerlink" href="#default-server-configuration" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">UA_AccessControl_default()</span></code> (in
+<code class="docutils literal notranslate"><span class="pre">plugins/ua_accesscontrol_default.c</span></code>) wires up the standard validator.
+It checks anonymous logins, looks up username/password pairs in a static
+list, and (when configured) verifies X.509 chains through a
+<code class="docutils literal notranslate"><span class="pre">UA_CertificateGroup</span></code>.  The actual session-validation routine is
+<code class="docutils literal notranslate"><span class="pre">activateSession_default()</span></code> in the same file.</p>
+<p>Useful entry points in the public plugin header
+<code class="docutils literal notranslate"><span class="pre">plugins/include/open62541/plugin/accesscontrol_default.h</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_AccessControl_default()</span></code> – construct a default access-control
+plugin with a username/password allow-list and an optional
+<code class="docutils literal notranslate"><span class="pre">UA_UsernamePasswordLoginCallback</span></code> for custom validation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verifyX509</span></code> – a <code class="docutils literal notranslate"><span class="pre">UA_CertificateGroup</span></code> used to validate X.509
+identity tokens.  See <a class="reference internal" href="certificates.html#security-certificates"><span class="std std-ref">Certificates and Trust</span></a>.</p></li>
+</ul>
+<p>For the protocol-level description of how authentication fits into
+<code class="docutils literal notranslate"><span class="pre">CreateSession</span></code> / <code class="docutils literal notranslate"><span class="pre">ActivateSession</span></code>, see <a class="reference internal" href="../core_concepts.html"><span class="doc">OPC UA Basics</span></a>
+(“Session” section).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="backends.html" class="btn btn-neutral float-left" title="Crypto Backends" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="certificates.html" class="btn btn-neutral float-right" title="Certificates and Trust" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

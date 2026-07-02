@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificates and Trust &mdash; open62541 (1.5.5) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ECC Specifics" href="ecc.html" />
+    <link rel="prev" title="Authentication" href="authentication.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../toc.html" class="icon icon-home">
+            open62541 (1.5.5)
+              <img src="../_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Security</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="policies.html">Supported Security Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Crypto Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html">Authentication</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Certificates and Trust</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#certificategroup-backends">CertificateGroup backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filestore-pki-layout">Filestore PKI layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-a-certificate">Generate a certificate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#certificate-utility-functions">Certificate utility functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#revocation">Revocation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ecc.html">ECC Specifics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin.html">Plugin API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../toc.html">open62541 (1.5.5)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Security</a></li>
+      <li class="breadcrumb-item active">Certificates and Trust</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/security/certificates.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="certificates-and-trust">
+<span id="security-certificates"></span><h1>Certificates and Trust<a class="headerlink" href="#certificates-and-trust" title="Link to this heading"></a></h1>
+<p>Every SecureChannel protected by anything other than the <code class="docutils literal notranslate"><span class="pre">None</span></code> policy
+requires an X.509 certificate and matching private key on both sides.
+Trust is managed by <em>CertificateGroup</em> plugins, which store the trusted
+issuer list, the rejected-certificate list, and the CRLs used during
+validation.</p>
+<section id="certificategroup-backends">
+<h2>CertificateGroup backends<a class="headerlink" href="#certificategroup-backends" title="Link to this heading"></a></h2>
+<p>open62541 ships three CertificateGroup backends.  Pick one when you
+configure your server.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 72.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Backend</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateGroup_AcceptAll</span></code></p></td>
+<td><p>Trust every certificate.  Useful for tests and demos, <strong>not for
+production</strong>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateGroup_Memorystore</span></code></p></td>
+<td><p>Trust list kept in RAM.  Configurable size limits
+(<code class="docutils literal notranslate"><span class="pre">0:max-trust-listsize</span></code> defaults to 64 KiB;
+<code class="docutils literal notranslate"><span class="pre">0:max-rejected-listsize</span></code> defaults to 100).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateGroup_Filestore</span></code></p></td>
+<td><p>Trust list on disk under a PKI directory.  Default location is
+the current working directory, override with
+<code class="docutils literal notranslate"><span class="pre">UA_CertificateGroup_Filestore</span></code>’s path argument.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="filestore-pki-layout">
+<h2>Filestore PKI layout<a class="headerlink" href="#filestore-pki-layout" title="Link to this heading"></a></h2>
+<p>The Filestore backend reads and writes a fixed directory layout rooted
+at the configured path:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>pki/
+├── ApplCerts/
+│   ├── issuer/{certs,crl}/
+│   ├── own/{certs,private}/
+│   ├── rejected/certs/
+│   └── trusted/{certs,crl}/
+└── UserTokenCerts/
+    └── (same layout as ApplCerts)
+</pre></div>
+</div>
+</section>
+<section id="generate-a-certificate">
+<h2>Generate a certificate<a class="headerlink" href="#generate-a-certificate" title="Link to this heading"></a></h2>
+<p>For development and self-signed certificates, <code class="docutils literal notranslate"><span class="pre">UA_CreateCertificate</span></code>
+(in <code class="docutils literal notranslate"><span class="pre">plugins/include/open62541/plugin/create_certificate.h</span></code>) generates
+a key pair and a self-signed certificate in one call.  RSA key sizes
+2048 / 4096 are supported (4096 default).  ECC usage is documented in
+<a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p>
+</section>
+<section id="certificate-utility-functions">
+<h2>Certificate utility functions<a class="headerlink" href="#certificate-utility-functions" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_*</span></code> helpers in
+<code class="docutils literal notranslate"><span class="pre">include/open62541/plugin/certificategroup.h</span></code> extract common
+information from a DER certificate without exposing the underlying
+crypto library:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_verifyApplicationUri()</span></code> – check that the
+cert’s SubjectAltName URI matches the application’s
+<code class="docutils literal notranslate"><span class="pre">ApplicationUri</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_getExpirationDate()</span></code> – X.509 <code class="docutils literal notranslate"><span class="pre">notAfter</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_getSubjectName()</span></code> – X.509 Subject DN.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_getThumbprint()</span></code> – SHA-1 thumbprint.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_getKeySize()</span></code> – asymmetric key length in bits.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_CertificateUtils_comparePublicKeys()</span></code> – compare public keys
+from a certificate and a CSR.</p></li>
+</ul>
+</section>
+<section id="revocation">
+<h2>Revocation<a class="headerlink" href="#revocation" title="Link to this heading"></a></h2>
+<p>When a certificate fails trust validation, the standard OPC UA status
+codes used by open62541 are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADCERTIFICATEREVOCATIONUNKNOWN</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADCERTIFICATEISSUERREVOCATIONUNKNOWN</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADCERTIFICATEISSUERREVOKED</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADCERTIFICATEISSUERUSENOTALLOWED</span></code></p></li>
+</ul>
+<p>The Filestore backend’s <code class="docutils literal notranslate"><span class="pre">getCertificateCrls()</span></code> operation returns the
+CRLs relevant to a certificate, used by the verification step.</p>
+<p>For the full plugin API, see <a class="reference internal" href="../plugin_certificategroup.html"><span class="doc">CertificateGroup Plugin API</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="authentication.html" class="btn btn-neutral float-left" title="Authentication" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ecc.html" class="btn btn-neutral float-right" title="ECC Specifics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
