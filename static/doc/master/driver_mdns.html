@@ -1,0 +1,194 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multicast DNS Discovery Driver &mdash; open62541 (master) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Alarms &amp; Conditions Driver (Experimental)" href="driver_alarms_conditions.html" />
+    <link rel="prev" title="Drivers" href="driver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (master)
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="driver.html">Drivers</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Multicast DNS Discovery Driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_alarms_conditions.html">Alarms &amp; Conditions Driver (Experimental)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_gds_receiver.html">GDS Receiver Driver</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (master)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="driver.html">Drivers</a></li>
+      <li class="breadcrumb-item active">Multicast DNS Discovery Driver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/driver_mdns.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="multicast-dns-discovery-driver">
+<h1>Multicast DNS Discovery Driver<a class="headerlink" href="#multicast-dns-discovery-driver" title="Link to this heading"></a></h1>
+<p>An OPC UA application can announce / retract a server via multicast DNS. Also
+it receives multicast-based information about other servers. This
+functionality is implemented as a driver that integrates with open62541
+servers.
+Internally, the drivers use the EventLoop of the server to create and manage
+UDP sockets. They further use the UA_APPLICATIONNOTIFICATIONTYPE_DISCOVERY
+category for server notifications to receive relevant updates from the server
+at runtime.</p>
+<p>The following configuration parameters are forwarded in a key-value map
+during driver instantiation and/or set in the key-value map inside the
+generic driver structure before starting the driver.</p>
+<dl class="simple">
+<dt>0:listen [bool]</dt><dd><p>Receive information about OPC UA servers on the network via mDNS. Calls
+UA_Server_registerServerOnNetwork and UA_Server_deregisterServerOnNetwork
+to store the server information locally.</p>
+</dd>
+<dt>0:announce [bool]</dt><dd><p>Announce registered servers over mDNS. This receives register/deregister
+notifications from UA_Server_registerServerOnNetwork and forwards the
+information.</p>
+</dd>
+<dt>0:announce-ttl [uint32]</dt><dd><p>Default TTL in seconds for announced mDNS records.</p>
+</dd>
+<dt>0:query-presence [bool]</dt><dd><p>Send an mDNS PTR query for _opcua-tcp._tcp.local. on startup. Defaults to
+false.</p>
+</dd>
+<dt>0:query-details [bool]</dt><dd><p>Send targeted SRV/TXT follow-up queries for partially received OPC UA
+service instances. Defaults to false.</p>
+</dd>
+<dt>0:query-interval [uint32]</dt><dd><p>Interval in seconds for repeated presence queries. A value of zero
+disables repeated queries. Defaults to zero.</p>
+</dd>
+<dt>0:interface [string]</dt><dd><p>Network interface for listening or sending. Can be either the IP address
+of the network interface or the interface name (e.g. ‘eth0’). Cf. the UDP
+ConnectionManager parameters.</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_MdnsDriver</span><span class="w"> </span><span class="n">UA_MdnsDriver</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_MdnsDriver</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Driver</span><span class="w"> </span><span class="n">drv</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Must be the first member */</span>
+
+<span class="w">    </span><span class="cm">/* Manually publish/remove address records. This is separate from the</span>
+<span class="cm">     * ServerOnNetwork announcement path as PTR/SRV/TXT records are always</span>
+<span class="cm">     * derived from the ServerOnNetwork data. The address strings are numeric</span>
+<span class="cm">     * IPv4/IPv6 literals. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addARecord</span><span class="p">)(</span><span class="n">UA_MdnsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">mdns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">UA_String</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">ttl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeARecord</span><span class="p">)(</span><span class="n">UA_MdnsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">mdns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_String</span><span class="w"> </span><span class="n">address</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addAAAARecord</span><span class="p">)(</span><span class="n">UA_MdnsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">mdns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_String</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">ttl</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeAAAARecord</span><span class="p">)(</span><span class="n">UA_MdnsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">mdns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">hostname</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_String</span><span class="w"> </span><span class="n">address</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="cm">/* Based on the libmdnsd dependency */</span>
+<span class="n">UA_MdnsDriver</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_MdnsDriver_Mdnsd</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">);</span>
+
+<span class="cm">/* Based on the libavahi dependency */</span>
+<span class="n">UA_MdnsDriver</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_MdnsDriver_Avahi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="driver.html" class="btn btn-neutral float-left" title="Drivers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="driver_alarms_conditions.html" class="btn btn-neutral float-right" title="Alarms &amp; Conditions Driver (Experimental)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

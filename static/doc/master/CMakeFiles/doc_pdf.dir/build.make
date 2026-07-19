@@ -66,10 +66,10 @@ include doc/CMakeFiles/doc_pdf.dir/compiler_depend.make
 # Include the progress variables for this target.
 include doc/CMakeFiles/doc_pdf.dir/progress.make
 
-doc/CMakeFiles/doc_pdf: /usr/bin/pdflatex
+doc/CMakeFiles/doc_pdf: /usr/bin/lualatex
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/runner/work/open62541/open62541/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating PDF documentation from LaTeX sources"
-	cd /home/runner/work/open62541/open62541/build/doc_latex && /usr/bin/pdflatex -interaction=batchmode open62541.tex
-	cd /home/runner/work/open62541/open62541/build/doc_latex && /usr/bin/pdflatex -interaction=batchmode open62541.tex
+	cd /home/runner/work/open62541/open62541/build/doc_latex && /usr/bin/lualatex -interaction=batchmode open62541.tex
+	cd /home/runner/work/open62541/open62541/build/doc_latex && /usr/bin/lualatex -interaction=batchmode open62541.tex
 
 doc/CMakeFiles/doc_pdf.dir/codegen:
 .PHONY : doc/CMakeFiles/doc_pdf.dir/codegen

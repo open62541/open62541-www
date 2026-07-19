@@ -10,8 +10,8 @@ open62541 uses CMake to build the library and binaries. CMake generates a
 Makefile or a Visual Studio project. This is then used to perform the actual
 build.
 
-Building with CMake on Ubuntu or Debian
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Building with CMake on Debian/Ubuntu
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -22,20 +22,23 @@ Building with CMake on Ubuntu or Debian
    sudo apt-get install libmbedtls-dev       # for encryption support
    sudo apt-get install check libsubunit-dev # for unit tests
    sudo apt-get install libpcap-dev          # for network-replay unit tests
-   sudo apt-get install python3-sphinx graphviz  # for documentation generation
+   sudo apt-get install python3-sphinx  # for documentation generation
    sudo apt-get install python3-sphinx-rtd-theme # documentation style
    sudo apt-get install libavahi-client-dev libavahi-common-dev # for LDS-ME (multicast discovery)
 
    git clone https://github.com/open62541/open62541.git
    cd open62541
-   git submodule update --init --recursive
    mkdir build
    cd build
    cmake ..
    make
 
+   # optional: fetch additional dependencies for advanced features
+   git submodule update --init --recursive
+
    # select additional features
    ccmake ..
+   cmake .. -DUA_ENABLE_DRIVER_MDNS_AVAHI=ON # use Avahi for multicast discovery
    make
 
    # build documentation
@@ -142,7 +145,6 @@ Building on OS X
    brew install cmake
    pip install sphinx # for documentation generation
    pip install sphinx_rtd_theme # documentation style
-   brew install graphviz # for graphics in the documentation
    brew install check # for unit tests
 
 Follow Ubuntu instructions without the ``apt-get`` commands as these are taken care of by the above packages.
@@ -272,9 +274,6 @@ Detailed SDK Features
 **UA_ENABLE_SUBSCRIPTIONS_EVENTS**
     Enable the use of events for subscriptions. This is a new feature and currently marked as EXPERIMENTAL.
 
-**UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS (EXPERIMENTAL)**
-    Enable the use of A&C for subscriptions. This is a new feature build upon events and currently marked as EXPERIMENTAL.
-
 **UA_ENABLE_METHODCALLS**
    Enable the Method service set
 
@@ -285,25 +284,11 @@ Detailed SDK Features
    Compile a single-file release into the files :file:`open62541.c` and :file:`open62541.h`.
    Invoke the CMake target to generate the amalgamation as ``make open62541-amalgamation``.
 
-**UA_ENABLE_IMMUTABLE_NODES**
-   Nodes in the information model are not edited but copied and replaced. The
-   replacement is done with atomic operations so that the information model is
-   always consistent and can be accessed from an interrupt or parallel thread
-   (depends on the node storage plugin implementation).
-
 **UA_ENABLE_COVERAGE**
    Measure the coverage of unit tests
 
 **UA_ENABLE_DISCOVERY**
    Enable Discovery Service (LDS)
-
-**UA_ENABLE_DISCOVERY_MULTICAST**
-   Enable Discovery Service with multicast support (LDS-ME) and specify the
-   multicast backend. The possible options are:
-
-   - ``OFF`` No multicast support. (default)
-   - ``MDNSD`` Multicast support using libmdnsd
-   - ``AVAHI`` Multicast support using Avahi
 
 **UA_ENABLE_DISCOVERY_SEMAPHORE**
    Enable Discovery Semaphore support
@@ -319,7 +304,7 @@ Detailed SDK Features
 
    ECC security policies (NIST P-256/P-384, Brainpool) are available with OpenSSL
    or mbedTLS ≥ 3.0.  Curve25519 and Curve448 require OpenSSL.  See
-   :ref:`ecc-security` for details.
+   :ref:`security-ecc` for details.
 
 **UA_ENABLE_ENCRYPTION_TPM2**
    Enable TPM hardware for encryption. The possible options are:
@@ -330,14 +315,12 @@ Detailed SDK Features
    Namespace zero contains the standard-defined nodes. The full namespace zero
    may not be required for all applications. The selectable options are as follows:
 
+   - ``NONE``: Do not generate namespace zero from the XML definitions.
    - ``MINIMAL``: A barebones namespace zero that is compatible with most
      clients. But this namespace 0 is so small that it does not pass the CTT
      (Conformance Testing Tools of the OPC Foundation).
    - ``REDUCED``: Small namespace zero that passes the CTT.
    - ``FULL``: Full namespace zero generated from the official XML definitions.
-
-   The advanced build option ``UA_FILE_NS0`` can be used to override the XML
-   file used for namespace zero generation.
 
 **UA_ENABLE_DIAGNOSTICS**
    Enable diagnostics information exposed by the server. Enabled by default.
@@ -354,10 +337,6 @@ be visible in the cmake GUIs.
 
 **UA_ENABLE_STATUSCODE_DESCRIPTIONS**
    Compile the human-readable name of the StatusCodes into the binary. Enabled by default.
-
-**UA_ENABLE_FULL_NS0**
-   Use the full NS0 instead of a minimal Namespace 0 nodeset
-   ``UA_FILE_NS0`` is used to specify the file for NS0 generation from namespace0 folder. Default value is ``Opc.Ua.NodeSet2.xml``
 
 PubSub Build Options
 ^^^^^^^^^^^^^^^^^^^^
@@ -425,18 +404,18 @@ The RAM requirements of a server are mostly due to the following settings:
 Prebuilt packages
 -----------------
 
-Debian
-^^^^^^
-Debian packages can be found in our official PPA:
+.. _debian:
 
- * Daily Builds (based on master branch): https://launchpad.net/~open62541-team/+archive/ubuntu/daily
- * Release Builds (starting with Version 0.4): https://launchpad.net/~open62541-team/+archive/ubuntu/ppa
+Debian/Ubuntu
+^^^^^^^^^^^^^
+Official distribution packages are available for
+`Debian <https://packages.debian.org/search?keywords=open62541>`__ and
+`Ubuntu <https://packages.ubuntu.com/search?keywords=open62541>`__.
 
-Install them with:
+Install the development package with:
 
 .. code-block:: bash
 
-    sudo add-apt-repository ppa:open62541-team/ppa
     sudo apt-get update
     sudo apt-get install libopen62541-1-dev
 
@@ -469,4 +448,3 @@ the shared library.
 
    cp /path-to/examples/tutorial_server_firststeps.c . # copy the example server
    gcc -std=c99 -o server tutorial_server_firststeps.c -lopen62541
-

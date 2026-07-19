@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 (master) 1.5.4 documentation</title>
+  <title>Server &mdash; open62541 (master) 1.5.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1cd648e3"></script>
+      <script src="_static/documentation_options.js?v=b8aeccfa"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
           
           <a href="toc.html" class="icon icon-home">
             open62541 (master)
-              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -46,13 +46,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#application-notification">Application Notification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#securechannel-handling">SecureChannel Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#session-handling">Session Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#attribute-service-set">Attribute Service Set</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#method-service-set">Method Service Set</a></li>
@@ -73,13 +74,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#async-operations">Async Operations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#events">Events</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#discovery">Discovery</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#registering-at-a-discovery-server">Registering at a Discovery Server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#operating-a-discovery-server">Operating a Discovery Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-and-semantic-changes">Model and Semantic Changes</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#alarms-conditions-experimental">Alarms &amp; Conditions (Experimental)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remote-discovery-server-registration">Remote Discovery Server Registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#local-discovery-server-records">Local Discovery Server Records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drivers">Drivers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reverse-connect">Reverse Connect</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
@@ -88,7 +89,6 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#server-configuration">Server Configuration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#update-the-server-certificate-at-runtime">Update the Server Certificate at Runtime</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rbac-api">RBAC API</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#node-role-permission-management">Node Role-Permission Management</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#role-management">Role Management</a></li>
@@ -105,12 +105,13 @@
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="driver.html">Drivers</a></li>
 </ul>
 
         </div>
@@ -299,6 +300,19 @@ documentation on the notifications and their defined payload.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerNotificationCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                              </span><span class="n">UA_ApplicationNotificationType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span>
 <span class="w">                                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">payload</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="securechannel-handling">
+<h2>SecureChannel Handling<a class="headerlink" href="#securechannel-handling" title="Link to this heading"></a></h2>
+<p>The server opens new SecureChannels internally when a server socket is
+active. Information about SecureChannels and their state is notified with
+UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL. SecureChannels can be manually
+closed. This leaves any attached session alive so that it can potentially
+reconnect.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_closeSecureChannel</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_ShutdownReason</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -730,19 +744,23 @@ information model.</p>
 <span class="w">                                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">browsePathSize</span><span class="p">,</span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="o">*</span><span class="n">browsePath</span><span class="p">);</span>
 
-<span class="cp">#ifndef HAVE_NODEITER_CALLBACK</span>
-<span class="cp">#define HAVE_NODEITER_CALLBACK</span>
+<span class="cm">/* Returns the target of a &quot;HasTypeDefinition&quot; reference (or inverse</span>
+<span class="cm"> * &quot;HasSubtype&quot; reference for type nodes) */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getNodeType</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outTypeId</span><span class="p">);</span>
+
 <span class="cm">/* Iterate over all nodes referenced by parentNodeId by calling the callback</span>
 <span class="cm"> * function for each child node (in ifdef because GCC/CLANG handle include order</span>
 <span class="cm"> * differently) */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_NodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">childId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isInverse</span><span class="p">,</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_ServerNodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">childId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isInverse</span><span class="p">,</span>
 <span class="w">                           </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
-<span class="cp">#endif</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_forEachChildNodeCall</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_NodeIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="w">                               </span><span class="n">UA_ServerNodeIteratorCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">                               </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1056,7 +1074,7 @@ used to override the value source.</p>
 <span class="cm"> * source. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_setVariableNode_externalValueSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">**</span><span class="n">value</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="o">**</span><span class="w"> </span><span class="n">value</span><span class="p">,</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="w"> </span><span class="o">*</span><span class="n">notifications</span><span class="p">);</span>
 
 <span class="cm">/* It is expected that the read callback is implemented. Whenever the value</span>
@@ -1687,19 +1705,76 @@ particularly important for events emitted at a high frequency.</p>
 <span class="w">                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outEventId</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_SUBSCRIPTIONS_EVENTS */</span>
-
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+</pre></div>
+</div>
+<section id="model-and-semantic-changes">
+<span id="model-semantic-changes"></span><h3>Model and Semantic Changes<a class="headerlink" href="#model-and-semantic-changes" title="Link to this heading"></a></h3>
+<p>With <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_SUBSCRIPTIONS_EVENTS</span></code>, the server automatically emits the
+standard <code class="docutils literal notranslate"><span class="pre">GeneralModelChangeEventType</span></code> and <code class="docutils literal notranslate"><span class="pre">SemanticChangeEventType</span></code> for
+changes made through OPC UA Services and the corresponding local
+<code class="docutils literal notranslate"><span class="pre">UA_Server_*</span></code> APIs. Changes made while the server’s namespace is initially
+populated are suppressed. Both EventTypes are emitted by the Server object.</p>
+<p>A structural change is reported only if the affected Node has a
+scalar <code class="docutils literal notranslate"><span class="pre">NodeVersion</span></code> Property with the String DataType. The server updates
+that Property with the decimal representation of a server-wide, increasing
+Int64. Nodes without a suitable <code class="docutils literal notranslate"><span class="pre">NodeVersion</span></code> Property are not
+included in a ModelChangeEvent. The following successful operations are
+reported:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Operation</p></th>
+<th class="head"><p>ModelChange verb</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Add a Node</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NodeAdded</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Delete a Node</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NodeDeleted</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Add a Reference</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ReferenceAdded</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Delete a Reference</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ReferenceDeleted</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Change the DataType Attribute</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DataTypeChanged</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Changes to ValueRank and ArrayDimensions are not structural ModelChanges.</p>
+<p>A SemanticChange is reported when a successful Value write changes a
+Variable whose AccessLevel contains <code class="docutils literal notranslate"><span class="pre">UA_ACCESSLEVELMASK_SEMANTICCHANGE</span></code>.
+The Variable must be a Property connected to its owner by <code class="docutils literal notranslate"><span class="pre">HasProperty</span></code> or
+a subtype. The owner is reported as the affected Node. Same-value writes are
+suppressed when the previous value is directly available. For callback-based
+value sources the previous value may not be available for comparison, so a
+successful write is treated as a SemanticChange.</p>
+<p>A SemanticChange also marks Value MonitoredItems on the affected Variable.
+Their next DataChange notification contains the <code class="docutils literal notranslate"><span class="pre">SemanticsChanged</span></code>
+StatusCode bit. MonitoredItems with a zero SamplingInterval are sampled
+immediately. For cyclic sampling the bit remains pending until the next
+notification.</p>
+<p>Changes are accumulated until the outermost local operation or decoded
+Service request completes. Entries for the same affected Node are coalesced
+by combining their ModelChange verbs. Model and Semantic changes collected
+together are emitted as separate standard Events. Failed operations are not
+reported.</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">examples/events/server_modelchange.c</span></code> for a complete local example.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
 </pre></div>
 </div>
 </section>
-<section id="discovery">
-<h2>Discovery<a class="headerlink" href="#discovery" title="Link to this heading"></a></h2>
-<section id="registering-at-a-discovery-server">
-<h3>Registering at a Discovery Server<a class="headerlink" href="#registering-at-a-discovery-server" title="Link to this heading"></a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Register the given server instance at the discovery server. This should be</span>
+</section>
+<section id="remote-discovery-server-registration">
+<h2>Remote Discovery Server Registration<a class="headerlink" href="#remote-discovery-server-registration" title="Link to this heading"></a></h2>
+<p>The current server can register itself at a discovery. For that it requires
+to open a client connection.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Register the given server instance at a discovery server. This should be</span>
 <span class="cm"> * called periodically, for example every 10 minutes, depending on the</span>
-<span class="cm"> * configuration of the discovery server. You should also call</span>
-<span class="cm"> * _unregisterDiscovery when the server shuts down.</span>
+<span class="cm"> * configuration of the discovery server.</span>
 <span class="cm"> *</span>
 <span class="cm"> * The supplied client configuration is used to create a new client to connect</span>
 <span class="cm"> * to the discovery server. The client configuration is moved over to the server</span>
@@ -1721,264 +1796,168 @@ particularly important for events emitted at a high frequency.</p>
 </pre></div>
 </div>
 </section>
-<section id="operating-a-discovery-server">
-<h3>Operating a Discovery Server<a class="headerlink" href="#operating-a-discovery-server" title="Link to this heading"></a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Callback for RegisterServer. Data is passed from the register call */</span>
-<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_Server_registerServerCallback</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_RegisteredServer</span><span class="w"> </span><span class="o">*</span><span class="n">registeredServer</span><span class="p">,</span>
-<span class="w">                                    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+<section id="local-discovery-server-records">
+<h2>Local Discovery Server Records<a class="headerlink" href="#local-discovery-server-records" title="Link to this heading"></a></h2>
+<p>The Discovery Service-Set allows the registering of local (for FindServers)
+and also remote servers (for FindServersOnNetwork).</p>
+<p>We uniquely identify records by their combination of ServerUri + one matching
+DiscoveryUrl.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_findServers</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">,</span>
+<span class="w">                      </span><span class="kt">size_t</span><span class="w"> </span><span class="n">localeIdsSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LocaleId</span><span class="w"> </span><span class="o">*</span><span class="n">localeIds</span><span class="p">,</span>
+<span class="w">                      </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">,</span>
+<span class="w">                      </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outServersSize</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">UA_ApplicationDescription</span><span class="w"> </span><span class="o">**</span><span class="n">outServers</span><span class="p">);</span>
 
-<span class="cm">/* Set the callback which is called if another server registeres or unregisters</span>
-<span class="cm"> * with this instance. This callback is called every time the server gets a</span>
-<span class="cm"> * register call. This especially means that for every periodic server register</span>
-<span class="cm"> * the callback will be called.</span>
+<span class="cm">/* Local API for the RegisterServer2 service. If configurationResults is</span>
+<span class="cm"> * non-Null, then it must point to an array of discoveryConfigurationSize</span>
+<span class="cm"> * length. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_registerServer</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_RegisteredServer</span><span class="w"> </span><span class="o">*</span><span class="n">registeredServer</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">discoveryConfigurationSize</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">discoveryConfiguration</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="o">*</span><span class="n">configurationResults</span><span class="p">);</span>
+
+<span class="cm">/* Remove the servers matching the ServerUri and at least one of the</span>
+<span class="cm"> * provided DiscoveryUrls */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_deregisterServer</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">serverUri</span><span class="p">,</span>
+<span class="w">                           </span><span class="kt">size_t</span><span class="w"> </span><span class="n">discoveryUrlsSize</span><span class="p">,</span>
+<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">discoveryUrls</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The server internally manages the ServersOnNetwork list. Multicast discovery
+is implemented on top in a driver outside of the core library.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_findServersOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">startingRecordId</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxRecordsToReturn</span><span class="p">,</span>
+<span class="w">                               </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverCapabilityFilterSize</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverCapabilityFilter</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">outLastCounterResetTime</span><span class="p">,</span>
+<span class="w">                               </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outServersSize</span><span class="p">,</span>
+<span class="w">                               </span><span class="n">UA_ServerOnNetwork</span><span class="w"> </span><span class="o">**</span><span class="n">outServers</span><span class="p">);</span>
+
+<span class="cm">/* Register a remote server. If the server name was previously known, the</span>
+<span class="cm"> * existing entry gets updated. The parameter kv-map can be extended with</span>
+<span class="cm"> * additional parameters in the future. Currently supported are:</span>
 <span class="cm"> *</span>
-<span class="cm"> * @param server</span>
-<span class="cm"> * @param cb the callback</span>
-<span class="cm"> * @param data data passed to the callback</span>
-<span class="cm"> * @return ``UA_STATUSCODE_SUCCESS`` on success */</span>
-<span class="kt">void</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="nf">UA_Server_setRegisterServerCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                    </span><span class="n">UA_Server_registerServerCallback</span><span class="w"> </span><span class="n">cb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+<span class="cm"> * 0:remote-address [String]</span>
+<span class="cm"> *    IP-address or other host identifier from which the information</span>
+<span class="cm"> *    was received.</span>
+<span class="cm"> * 0:ttl [UInt32]</span>
+<span class="cm"> *    Time-to-live of DNS information. Zero means infinite. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_registerServerOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ServerOnNetwork</span><span class="w"> </span><span class="o">*</span><span class="n">son</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">);</span>
 
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
-
-<span class="cm">/* Callback for server detected through mDNS. Data is passed from the register</span>
-<span class="cm"> * call</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param isServerAnnounce indicates if the server has just been detected. If</span>
-<span class="cm"> *        set to false, this means the server is shutting down.</span>
-<span class="cm"> * @param isTxtReceived indicates if we already received the corresponding TXT</span>
-<span class="cm"> *        record with the path and caps data */</span>
-<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_Server_serverOnNetworkCallback</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ServerOnNetwork</span><span class="w"> </span><span class="o">*</span><span class="n">serverOnNetwork</span><span class="p">,</span>
-<span class="w">                                     </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isServerAnnounce</span><span class="p">,</span>
-<span class="w">                                     </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTxtReceived</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
-
-<span class="cm">/* Set the callback which is called if another server is found through mDNS or</span>
-<span class="cm"> * deleted. It will be called for any mDNS message from the remote server, thus</span>
-<span class="cm"> * it may be called multiple times for the same instance. Also the SRV and TXT</span>
-<span class="cm"> * records may arrive later, therefore for the first call the server</span>
-<span class="cm"> * capabilities may not be set yet. If called multiple times, previous data will</span>
-<span class="cm"> * be overwritten.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server</span>
-<span class="cm"> * @param cb the callback</span>
-<span class="cm"> * @param data data passed to the callback</span>
-<span class="cm"> * @return ``UA_STATUSCODE_SUCCESS`` on success */</span>
-<span class="kt">void</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="nf">UA_Server_setServerOnNetworkCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                     </span><span class="n">UA_Server_serverOnNetworkCallback</span><span class="w"> </span><span class="n">cb</span><span class="p">,</span>
-<span class="w">                                     </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
-
-<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_DISCOVERY_MULTICAST */</span>
+<span class="cm">/* Remove the entry of the remote server with the matching ServerName */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_deregisterServerOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">serverName</span><span class="p">);</span>
 
 <span class="cp">#endif </span><span class="cm">/* UA_ENABLE_DISCOVERY */</span>
 </pre></div>
 </div>
 </section>
-</section>
-<section id="alarms-conditions-experimental">
-<h2>Alarms &amp; Conditions (Experimental)<a class="headerlink" href="#alarms-conditions-experimental" title="Link to this heading"></a></h2>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS</span>
-<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="n">UA_TwoStateVariableCallbackType</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">UA_ENTERING_ENABLEDSTATE</span><span class="p">,</span>
-<span class="w">  </span><span class="n">UA_ENTERING_ACKEDSTATE</span><span class="p">,</span>
-<span class="w">  </span><span class="n">UA_ENTERING_CONFIRMEDSTATE</span><span class="p">,</span>
-<span class="w">  </span><span class="n">UA_ENTERING_ACTIVESTATE</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_TwoStateVariableCallbackType</span><span class="p">;</span>
+<section id="drivers">
+<span id="id5"></span><h2>Drivers<a class="headerlink" href="#drivers" title="Link to this heading"></a></h2>
+<p>Drivers are different from other “plugins” in that they have an explicit
+stateful lifecycle and can be started/stopped at runtime. Their lifecycle is
+however dependent on the server into which the drivers are embedded. When the
+server shuts down, the drivers are also stopped.</p>
+<p>Drivers can use the server’s public API to the full extent. For example
+add/remove nodes, or register connections and timers in the server’s
+EventLoop.</p>
+<p>Some drivers define core functionality and are added internally in the server
+implementation.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_DRIVERTYPE_GENERIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_DRIVERTYPE_GDS_RECEIVER</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_DriverType</span><span class="p">;</span>
 
-<span class="cm">/* Callback prototype to set user specific callbacks */</span>
-<span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
-<span class="p">(</span><span class="o">*</span><span class="n">UA_TwoStateVariableChangeCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">condition</span><span class="p">);</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_Driver</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_Driver</span><span class="w"> </span><span class="n">UA_Driver</span><span class="p">;</span>
 
-<span class="cm">/* Create condition instance. The function checks first whether the passed</span>
-<span class="cm"> * conditionType is a subType of ConditionType. Then checks whether the</span>
-<span class="cm"> * condition source has HasEventSource reference to its parent. If not, a</span>
-<span class="cm"> * HasEventSource reference will be created between condition source and server</span>
-<span class="cm"> * object. To expose the condition in address space, a hierarchical</span>
-<span class="cm"> * ReferenceType should be passed to create the reference to condition source.</span>
-<span class="cm"> * Otherwise, UA_NODEID_NULL should be passed to make the condition not exposed.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param conditionId The NodeId of the requested Condition Object. When passing</span>
-<span class="cm"> *        UA_NODEID_NUMERIC(X,0) an unused nodeid in namespace X will be used.</span>
-<span class="cm"> *        E.g. passing UA_NODEID_NULL will result in a NodeId in namespace 0.</span>
-<span class="cm"> * @param conditionType The NodeId of the node representation of the ConditionType</span>
-<span class="cm"> * @param conditionName The name of the condition to be created</span>
-<span class="cm"> * @param conditionSource The NodeId of the Condition Source (Parent of the Condition)</span>
-<span class="cm"> * @param hierarchialReferenceType The NodeId of Hierarchical ReferenceType</span>
-<span class="cm"> *                                 between Condition and its source</span>
-<span class="cm"> * @param outConditionId The NodeId of the created Condition</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_createCondition method */</span>
+<span class="cm">/* Callback through which the server notifies the driver</span>
+<span class="cm"> * about runtime changes and internal events. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_DriverNotificationCallback</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">drv</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_ApplicationNotificationType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">payload</span><span class="p">);</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_Driver</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span><span class="w"> </span><span class="cm">/* linked-list */</span>
+
+<span class="w">    </span><span class="cm">/*</span>
+<span class="cm">     * Configuration</span>
+<span class="cm">     */</span>
+
+<span class="w">    </span><span class="n">UA_DriverType</span><span class="w"> </span><span class="n">driverType</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* See the driver-specific documentation for possible parameters.</span>
+<span class="cm">     * The params need to be cleaned up within the _free method. */</span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Backpointer to the server. Must be set before _start is called. If NULL</span>
+<span class="cm">     * this is set by the server during registering. Generally the server must</span>
+<span class="cm">     * not be switched out once the driver has been started. */</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* The server forwards its internal notifications to all drivers. In order</span>
+<span class="cm">     * to avoid overload, the filter must be set. The top 32bit are ANDed with</span>
+<span class="cm">     * the notification type to see if the driver is interested in the</span>
+<span class="cm">     * notification. See the common.h for details on the notification types and</span>
+<span class="cm">     * their payload. */</span>
+<span class="w">    </span><span class="n">UA_DriverNotificationCallback</span><span class="w"> </span><span class="n">notificationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ApplicationNotificationType</span><span class="w"> </span><span class="n">notificationFilter</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/*</span>
+<span class="cm">     * Lifecycle management</span>
+<span class="cm">     */</span>
+
+<span class="w">    </span><span class="n">UA_LifecycleState</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Start the Driver. It will typically register timers/connections in the</span>
+<span class="cm">     * EventLoop and may add nodes in the server&#39;s information model. Starting</span>
+<span class="cm">     * can fail if the server is not already started also.</span>
+<span class="cm">     *</span>
+<span class="cm">     * During startup, the server calls start on all registered drivers. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">sc</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Stopping is asynchronous and might need a few iterations of the eventloop</span>
+<span class="cm">     * to succeed. All Drivers are stopped during the shutdown of the server.</span>
+<span class="cm">     * Once fully stopped, the Driver must no longer rely on the server</span>
+<span class="cm">     * backpointer. So it can be detached and _free&#39;d at runtime of the</span>
+<span class="cm">     * server. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">stop</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">sc</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Clean up and delete the Driver. Can fail if it is not fully stopped. When</span>
+<span class="cm">     * successfully removed, the Driver must no longer be accessed from the</span>
+<span class="cm">     * server.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Drivers are all free&#39;d when the server is deleted. If a Driver is</span>
+<span class="cm">     * manually removed before, then it needs to be unlinked from the server&#39;s</span>
+<span class="cm">     * internal linked-list before. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">sc</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="cm">/* Adds the Driver to the server. Starts the driver if the server is already</span>
+<span class="cm"> * started. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_createCondition</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">conditionName</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">hierarchialReferenceType</span><span class="p">,</span>
-<span class="w">                          </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span>
+<span class="nf">UA_Server_addDriver</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">drv</span><span class="p">);</span>
 
-<span class="cm">/* The method pair UA_Server_addCondition_begin and _finish splits the</span>
-<span class="cm"> * UA_Server_createCondtion in two parts similiar to the</span>
-<span class="cm"> * UA_Server_addNode_begin / _finish pair. This is useful if the node shall be</span>
-<span class="cm"> * modified before finish the instantiation. For example to add children with</span>
-<span class="cm"> * specific NodeIds.</span>
-<span class="cm"> * For details refer to the UA_Server_addNode_begin / _finish methods.</span>
-<span class="cm"> *</span>
-<span class="cm"> * Additionally to UA_Server_addNode_begin UA_Server_addCondition_begin checks</span>
-<span class="cm"> * if the passed condition type is a subtype of the OPC UA ConditionType.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param conditionId The NodeId of the requested Condition Object. When passing</span>
-<span class="cm"> *        UA_NODEID_NUMERIC(X,0) an unused nodeid in namespace X will be used.</span>
-<span class="cm"> *        E.g. passing UA_NODEID_NULL will result in a NodeId in namespace 0.</span>
-<span class="cm"> * @param conditionType The NodeId of the node representation of the ConditionType</span>
-<span class="cm"> * @param conditionName The name of the condition to be added</span>
-<span class="cm"> * @param outConditionId The NodeId of the added Condition</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_addCondition_begin method */</span>
+<span class="cm">/* Remove the Driver from the server. This will fail if the driver is not fully</span>
+<span class="cm"> * stopped. */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addCondition_begin</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">conditionName</span><span class="p">,</span>
-<span class="w">                             </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span>
+<span class="nf">UA_Server_removeDriver</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">drv</span><span class="p">);</span>
 
-<span class="cm">/* Second call of the UA_Server_addCondition_begin and _finish pair.</span>
-<span class="cm"> * Additionally to UA_Server_addNode_finish UA_Server_addCondition_finish:</span>
-<span class="cm"> *  - checks whether the condition source has HasEventSource reference to its</span>
-<span class="cm"> *    parent. If not, a HasEventSource reference will be created between</span>
-<span class="cm"> *    condition source and server object</span>
-<span class="cm"> *  - exposes the condition in the address space if hierarchialReferenceType is</span>
-<span class="cm"> *    not UA_NODEID_NULL by adding a reference of this type from the condition</span>
-<span class="cm"> *    source to the condition instance</span>
-<span class="cm"> *  - initializes the standard condition fields and callbacks</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param conditionId The NodeId of the unfinished Condition Object</span>
-<span class="cm"> * @param conditionSource The NodeId of the Condition Source (Parent of the Condition)</span>
-<span class="cm"> * @param hierarchialReferenceType The NodeId of Hierarchical ReferenceType</span>
-<span class="cm"> *                                 between Condition and its source</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_addCondition_finish method */</span>
-
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addCondition_finish</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">hierarchialReferenceType</span><span class="p">);</span>
-
-<span class="cm">/* Set the value of condition field.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param value Variant Value to be written to the Field</span>
-<span class="cm"> * @param fieldName Name of the Field in which the value should be written</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_setConditionField method*/</span>
-<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="n">UA_Server_setConditionField</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">fieldName</span><span class="p">);</span>
-
-<span class="cm">/* Set the value of property of condition field.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param condition The NodeId of the node representation of the Condition</span>
-<span class="cm"> *        Instance</span>
-<span class="cm"> * @param value Variant Value to be written to the Field</span>
-<span class="cm"> * @param variableFieldName Name of the Field which has a property</span>
-<span class="cm"> * @param variablePropertyName Name of the Field Property in which the value</span>
-<span class="cm"> *        should be written</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_setConditionVariableFieldProperty*/</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setConditionVariableFieldProperty</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">variableFieldName</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">variablePropertyName</span><span class="p">);</span>
-
-<span class="cm">/* Triggers an event only for an enabled condition. The condition list is</span>
-<span class="cm"> * updated then with the last generated EventId.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param conditionSource The NodeId of the node representation of the Condition Source</span>
-<span class="cm"> * @param outEventId last generated EventId</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_triggerConditionEvent method */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_triggerConditionEvent</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
-<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
-<span class="w">                                </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outEventId</span><span class="p">);</span>
-
-<span class="cm">/* Add an optional condition field using its name. (TODO Adding optional methods</span>
-<span class="cm"> * is not implemented yet)</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param conditionType The NodeId of the node representation of the Condition Type</span>
-<span class="cm"> * from which the optional field comes</span>
-<span class="cm"> * @param fieldName Name of the optional field</span>
-<span class="cm"> * @param outOptionalVariable The NodeId of the created field (Variable Node)</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_addConditionOptionalField method */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addConditionOptionalField</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">fieldName</span><span class="p">,</span>
-<span class="w">                                    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outOptionalVariable</span><span class="p">);</span>
-
-<span class="cm">/* Function used to set a user specific callback to TwoStateVariable Fields of a</span>
-<span class="cm"> * condition. The callbacks will be called before triggering the events when</span>
-<span class="cm"> * transition to true State of EnabledState/Id, AckedState/Id, ConfirmedState/Id</span>
-<span class="cm"> * and ActiveState/Id occurs.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param conditionSource The NodeId of the node representation of the Condition Source</span>
-<span class="cm"> * @param removeBranch (Not Implemented yet)</span>
-<span class="cm"> * @param callback User specific callback function</span>
-<span class="cm"> * @param callbackType Callback function type, indicates where it should be called</span>
-<span class="cm"> * @return The StatusCode of the UA_Server_setConditionTwoStateVariableCallback method */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setConditionTwoStateVariableCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
-<span class="w">                                               </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">removeBranch</span><span class="p">,</span>
-<span class="w">                                               </span><span class="n">UA_TwoStateVariableChangeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
-<span class="w">                                               </span><span class="n">UA_TwoStateVariableCallbackType</span><span class="w"> </span><span class="n">callbackType</span><span class="p">);</span>
-
-<span class="cm">/* Delete a condition from the address space and the internal lists.</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param condition The NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param conditionSource The NodeId of the node representation of the Condition Source</span>
-<span class="cm"> * @return ``UA_STATUSCODE_GOOD`` on success */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_deleteCondition</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">);</span>
-
-<span class="cm">/* Set the LimitState of the LimitAlarmType</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param conditionId NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param limitValue The value from the trigger node */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setLimitState</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
-<span class="w">                        </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">limitValue</span><span class="p">);</span>
-
-<span class="cm">/* Parse the certifcate and set Expiration date</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param server The server object</span>
-<span class="cm"> * @param conditionId NodeId of the node representation of the Condition Instance</span>
-<span class="cm"> * @param cert The certificate for parsing */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_setExpirationDate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
-<span class="w">                            </span><span class="n">UA_ByteString</span><span class="w">  </span><span class="n">cert</span><span class="p">);</span>
-
-<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_SUBSCRIPTIONS_ALARMS_CONDITIONS */</span>
+<span class="cm">/* Get the first entry of the server&#39;s driver linked list. */</span>
+<span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_Server_getDrivers</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -2102,7 +2081,7 @@ objects.</p>
 </section>
 <section id="role-based-access-control-rbac">
 <h2>Role-Based Access Control (RBAC)<a class="headerlink" href="#role-based-access-control-rbac" title="Link to this heading"></a></h2>
-<p>Role-Based Access Control implementation per OPC UA Part 18.</p>
+<p>Role-Based Access Control implementation per OPC UA Part 18 v1.05.</p>
 <p><strong>WARNING</strong>: This feature is EXPERIMENTAL and NOT FOR PRODUCTION USE.
 The RBAC implementation is under active development and the API may change.
 Use only for testing and development purposes.</p>
@@ -2142,7 +2121,7 @@ defining permissions per role on individual nodes or entire namespaces.</p>
 
 <span class="cm">/* UA_Role</span>
 <span class="cm"> * Represents an OPC UA role with identity mapping rules and optional</span>
-<span class="cm"> * application/endpoint restrictions per OPC UA Part 18. */</span>
+<span class="cm"> * application/endpoint restrictions per OPC UA Part 18 v1.05 §4.4. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">roleId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">roleName</span><span class="p">;</span><span class="w">              </span><span class="cm">/* BrowseName of the role */</span>
@@ -2181,7 +2160,7 @@ defining permissions per role on individual nodes or entire namespaces.</p>
 </section>
 </section>
 <section id="server-configuration">
-<span id="id5"></span><h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Link to this heading"></a></h2>
+<span id="id6"></span><h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Link to this heading"></a></h2>
 <p>The configuration structure is passed to the server during initialization.
 The server expects that the configuration is not modified during runtime.
 Currently, only one server can use a configuration at a time. During
@@ -2281,6 +2260,7 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">sessionNotificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">serviceNotificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">subscriptionNotificationCallback</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">discoveryNotificationCallback</span><span class="p">;</span>
 <span class="cp">#ifdef UA_ENABLE_AUDITING</span>
 <span class="w">    </span><span class="n">UA_ServerNotificationCallback</span><span class="w"> </span><span class="n">auditNotificationCallback</span><span class="p">;</span>
 <span class="cp">#endif</span>
@@ -2410,25 +2390,29 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Discovery</span>
 <span class="cm">     * ~~~~~~~~~ */</span>
 <span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+<span class="w">    </span><span class="cm">/* Enable the internal management of RegisteredServers (besides the local</span>
+<span class="cm">     * server itself) via the RegisterServer and FindServer services. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">registeredServersEnabled</span><span class="p">;</span>
+
 <span class="w">    </span><span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
 <span class="cm">     * the list, if it doesn&#39;t re-register within the given time frame. A value</span>
 <span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
 <span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
 <span class="cm">     * every 10 seconds. The server will still be removed depending on the</span>
 <span class="cm">     * state of the semaphore file. */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">discoveryCleanupTimeout</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">registeredServerCleanupTimeout</span><span class="p">;</span>
 
-<span class="cp"># ifdef UA_ENABLE_DISCOVERY_MULTICAST</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">mdnsEnabled</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_MdnsDiscoveryConfiguration</span><span class="w"> </span><span class="n">mdnsConfig</span><span class="p">;</span>
-<span class="cp">#  ifdef UA_ENABLE_DISCOVERY_MULTICAST_MDNSD</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">mdnsInterfaceIP</span><span class="p">;</span>
-<span class="cp">#   if !defined(UA_HAS_GETIFADDR)</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">mdnsIpAddressListSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">mdnsIpAddressList</span><span class="p">;</span>
-<span class="cp">#   endif</span>
-<span class="cp">#  endif</span>
-<span class="cp"># endif</span>
+<span class="w">    </span><span class="cm">/* mDNS based Announcement and Discovery is implemented in a driver that</span>
+<span class="cm">     * attach to a server outside the main configuration. The</span>
+<span class="cm">     * FindServersOnNetwork Server is however implemented by the server itself.</span>
+<span class="cm">     * The drivers interact with the server via the Discovery API. For example</span>
+<span class="cm">     * to add/update/remove a ServerOnNetwork structure. */</span>
+
+<span class="w">    </span><span class="cm">/* Enable the internal management of ServerOnNetwork entries and the</span>
+<span class="cm">     * FindServersOnNetwork Service. This is used in conjunction with mDNS to</span>
+<span class="cm">     * implement a Discovery Server that detects other servers on the</span>
+<span class="cm">     * network. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">serversOnNetworkEnabled</span><span class="p">;</span>
 <span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Subscriptions</span>
@@ -2457,26 +2441,17 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Limits for PublishRequests */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxPublishReqPerSession</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Register MonitoredItem in Userland</span>
-<span class="cm">     *</span>
-<span class="cm">     * @param server Allows the access to the server object</span>
-<span class="cm">     * @param sessionId The session id, represented as an node id</span>
-<span class="cm">     * @param sessionContext An optional pointer to user-defined data for the</span>
-<span class="cm">     *        specific data source</span>
-<span class="cm">     * @param nodeid Id of the node in question</span>
-<span class="cm">     * @param nodeidContext An optional pointer to user-defined data, associated</span>
-<span class="cm">     *        with the node in the nodestore. Note that, if the node has already</span>
-<span class="cm">     *        been removed, this value contains a NULL pointer.</span>
-<span class="cm">     * @param attributeId Identifies which attribute (value, data type etc.) is</span>
-<span class="cm">     *        monitored</span>
-<span class="cm">     * @param removed Determines if the MonitoredItem was removed or created. */</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">monitoredItemRegisterCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
-<span class="w">                                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
-<span class="w">                                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
-<span class="w">                                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span>
-<span class="w">                                          </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">attibuteId</span><span class="p">,</span>
-<span class="w">                                          </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">removed</span><span class="p">);</span>
+<span class="w">    </span><span class="cm">/* Register MonitoredItem in Userland.</span>
+<span class="cm">     * Deprecated now. Use the ServerNotificationCallback mechanism with</span>
+<span class="cm">     * UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM for the same feature.</span>
+<span class="cm">    void (*monitoredItemRegisterCallback)(UA_Server *server,</span>
+<span class="cm">                                          const UA_NodeId *sessionId,</span>
+<span class="cm">                                          void *sessionContext,</span>
+<span class="cm">                                          const UA_NodeId *nodeId,</span>
+<span class="cm">                                          void *nodeContext,</span>
+<span class="cm">                                          UA_UInt32 attibuteId,</span>
+<span class="cm">                                          UA_Boolean removed);</span>
+<span class="cm">    */</span>
 <span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* PubSub</span>
@@ -2584,30 +2559,6 @@ The usual usage is as follows:</p>
 <span class="n">UA_ServerConfig_clean</span><span class="p">(</span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_ServerConfig_clear</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 <span class="p">}</span>
-</pre></div>
-</div>
-<section id="update-the-server-certificate-at-runtime">
-<h3>Update the Server Certificate at Runtime<a class="headerlink" href="#update-the-server-certificate-at-runtime" title="Link to this heading"></a></h3>
-<p>If certificateGroupId is null the DefaultApplicationGroup is used.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_updateCertificate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificate</span><span class="p">,</span>
-<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">privateKey</span><span class="p">);</span>
-
-<span class="cm">/* Creates a PKCS #10 DER encoded certificate request signed with the server&#39;s</span>
-<span class="cm"> * private key.</span>
-<span class="cm"> * If certificateGroupId is null the DefaultApplicationGroup is used.</span>
-<span class="cm"> */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_createSigningRequest</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">subjectName</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">regenerateKey</span><span class="p">,</span>
-<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">,</span>
-<span class="w">                               </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">csr</span><span class="p">);</span>
 
 <span class="cm">/* Adds certificates and Certificate Revocation Lists (CRLs) to a specific</span>
 <span class="cm"> * certificate group on the server.</span>
@@ -2626,7 +2577,7 @@ The usual usage is as follows:</p>
 <span class="cm"> *        to the list or replace the existing list</span>
 <span class="cm"> * @return ``UA_STATUSCODE_GOOD`` on success */</span>
 <span class="n">UA_StatusCode</span>
-<span class="nf">UA_Server_addCertificates</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="n">UA_Server_addCertificates</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
 <span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificates</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">size_t</span><span class="w"> </span><span class="n">certificatesSize</span><span class="p">,</span>
@@ -2654,7 +2605,6 @@ The usual usage is as follows:</p>
 <span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isTrusted</span><span class="p">);</span>
 </pre></div>
 </div>
-</section>
 <section id="rbac-api">
 <h3>RBAC API<a class="headerlink" href="#rbac-api" title="Link to this heading"></a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_RBAC</span>
@@ -2733,7 +2683,8 @@ and cannot be removed at runtime.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Add a role to the server&#39;s role registry.</span>
 <span class="cm"> *</span>
 <span class="cm"> * The role&#39;s BrowseName (roleName) is the primary unique identifier,</span>
-<span class="cm"> * per OPC UA Part 18 Section 4.2. A role with the same roleName or</span>
+<span class="cm"> * per OPC UA Part 18 v1.05 §4.2.2 (AddRole: &quot;The BrowseName shall be</span>
+<span class="cm"> * unique within the RoleSet Object&quot;). A role with the same roleName or</span>
 <span class="cm"> * roleId must not already exist.</span>
 <span class="cm"> *</span>
 <span class="cm"> * If role-&gt;roleId is null, the server auto-assigns a random numeric</span>

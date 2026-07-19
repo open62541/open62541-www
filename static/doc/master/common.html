@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Common Definitions &mdash; open62541 (master) 1.5.4 documentation</title>
+  <title>Common Definitions &mdash; open62541 (master) 1.5.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,14 +14,14 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1cd648e3"></script>
+      <script src="_static/documentation_options.js?v=b8aeccfa"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Utility Definitions" href="util.html" />
-    <link rel="prev" title="ECC Security Policies" href="ecc_security.html" /> 
+    <link rel="prev" title="ECC Specifics" href="security/ecc.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -34,7 +34,7 @@
           
           <a href="toc.html" class="icon icon-home">
             open62541 (master)
-              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -46,14 +46,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Common Definitions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#attribute-id">Attribute Id</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#access-level-masks">Access Level Masks</a></li>
@@ -63,7 +63,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#rule-handling">Rule Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#order">Order</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#application-notification">Application Notification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#auditing">Auditing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#connection-state">Connection State</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#statistic-counters">Statistic Counters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#lifecycle-states">Lifecycle States</a></li>
@@ -73,6 +72,7 @@
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="driver.html">Drivers</a></li>
 </ul>
 
         </div>
@@ -251,204 +251,221 @@ specification.</p>
 </section>
 <section id="application-notification">
 <span id="id4"></span><h2>Application Notification<a class="headerlink" href="#application-notification" title="Link to this heading"></a></h2>
-<p>The ApplicationNotification enum indicates the type of notification for the
-server/client in which the corresponding callback is configured.</p>
-<p>The notification comes with a key-value map for the payload. Future
+<p>The ApplicationNotification mechanism is for runtime notifications where the
+server/client wants to make the local application aware of state changes and
+internal events.</p>
+<p>The identifier for the different notifications is a UA_UInt64 integer. The
+high 32bits contain a bitfield for the notification type. The low 32bits are
+for detailed differentiation within each type. This allows for easy filtering
+with bitwise operations.</p>
+<p>The notifications comes with a key-value map for the payload. Future
 additional payload members are added to the end of the payload. So that the
 names, type and also index of the payload members is stable.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Lifetime notifications, no payload */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STARTED</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x0</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_SHUTDOWN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x01</span><span class="p">,</span><span class="w"> </span><span class="cm">/* prepare shutdown */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x02</span><span class="p">,</span><span class="w"> </span><span class="cm">/* shutdown now */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPED</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x03</span><span class="p">,</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">UA_ApplicationNotificationType</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* (Server only) Give background information after a SecureChannel is opened</span>
-<span class="cm">     * or closed.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:securechannel-id [UInt32]</span>
-<span class="cm">     *    Identifier of the SecureChannel to which the Session is connected.</span>
-<span class="cm">     * 0:connection-manager-name [String]</span>
-<span class="cm">     *    Name of the ConnectionManager (configured in the EventLoop) from which</span>
-<span class="cm">     *    the connction was opened.</span>
-<span class="cm">     * 0:connection-id [UInt64]</span>
-<span class="cm">     *    Identifier of the connection in the context of the EventLoop. This is</span>
-<span class="cm">     *    often the socket identifier, but that is not necessarily the case.</span>
-<span class="cm">     * 0:remote-addresss [String]</span>
-<span class="cm">     *   Address (hostname or IP that opened the SecureChannel.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:protocol-version [UInt32]</span>
-<span class="cm">     *   The version of the UACP protocol requested by the Client.</span>
-<span class="cm">     * 0:recv-buffer-size [UInt32]</span>
-<span class="cm">     *   The largest buffer (chunk size) we can receive over the channel.</span>
-<span class="cm">     * 0:recv-max-message-size [UInt32]</span>
-<span class="cm">     *   The maximum size of received messages.</span>
-<span class="cm">     * 0:recv-max-chunk-count [UInt32]</span>
-<span class="cm">     *   The maximum number of chunks for received messages.</span>
-<span class="cm">     * 0:send-buffer-size [UInt32]</span>
-<span class="cm">     *   The largest buffer (chunk size) we can send over the channel.</span>
-<span class="cm">     * 0:send-max-message-size [UInt32]</span>
-<span class="cm">     *   The maximum size of sent messages.</span>
-<span class="cm">     * 0:send-max-chunk-count [UInt32]</span>
-<span class="cm">     *   The maximum number of chunks for sent messages.</span>
-<span class="cm">     * 0:endpoint-url</span>
-<span class="cm">     *   The target EndpointUri (for the server) indicated by the client.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:security-mode [MessageSecurityMode]</span>
-<span class="cm">     *   The SecurityChannel can be unsigned, signed or signed+encrypted.</span>
-<span class="cm">     * 0:security-policy-uri [String]</span>
-<span class="cm">     *   Uri of the SecurityPolicy for this SecyrityChannel.</span>
-<span class="cm">     * 0:remote-certificate [ByteString]</span>
-<span class="cm">     *   Certificate used by the remote side during OpenSecureChannel. */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_CLOSED</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* (Server only) Give background information for Sessions. The _DEACTIVATE</span>
-<span class="cm">     * notification occurs when a Sesssion is unbound from its original</span>
-<span class="cm">     * SecureChannel. Either because the SecureChannel is closed or because the</span>
-<span class="cm">     * session is activated on another SecureChannel.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:session-id [NodeId]</span>
-<span class="cm">     *   Identifier of the Session.</span>
-<span class="cm">     * 0:securechannel-id [UInt32]</span>
-<span class="cm">     *   Identifier of the SecureChannel on which the Session is activated.</span>
-<span class="cm">     *   Zero if the Session is not bound to any SecureChannel.</span>
-<span class="cm">     * 0:session-name [String]</span>
-<span class="cm">     *   Name of the Session as defined by the client.</span>
-<span class="cm">     * 0:client-description [ApplicationDescription]</span>
-<span class="cm">     *   Name of the Session as defined by the client.</span>
-<span class="cm">     * 0:client-user-id [String]</span>
-<span class="cm">     *   User identifier used to activate the session. This is extracted from</span>
-<span class="cm">     *   the UserIdentityToken (e.g. username but not the password).</span>
-<span class="cm">     * 0:locale-ids [Array of String]</span>
-<span class="cm">     *   List of preferred languages.</span>
-<span class="cm">     *</span>
-<span class="cm">     * Any additional attributes set via UA_Server_setSessionAttribute are</span>
-<span class="cm">     * appended to the above list. */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_CREATED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_ACTIVATED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_DEACTIVATED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SESSION_CLOSED</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* Processing of a service request or response. The server-side processing</span>
-<span class="cm">     * of a request can be asynchronous. The existence of a yet-unfinished async</span>
-<span class="cm">     * operation from the request is signaled with the _SERVICE_ASYNC enum. The</span>
-<span class="cm">     * _SERVICE_END enum is signalled eventually, once all async operations from</span>
-<span class="cm">     * the service request are completed.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:securechannel-id [UInt32]</span>
-<span class="cm">     *    Identifier of the SecureChannel to which the Session is connected.</span>
-<span class="cm">     * 0:session-id [NodeId]</span>
-<span class="cm">     *    Identifier of the Session for/from which the Service is requested.</span>
-<span class="cm">     *    This is the ns=0;i=0 NodeId if no Session is bound to the receiving</span>
-<span class="cm">     *    SecureChannel.</span>
-<span class="cm">     * 0:request-id [UInt32]</span>
-<span class="cm">     *    Identifier of the RequestId for the Request/Response pair.</span>
-<span class="cm">     * 0:service-type [NodeId]</span>
-<span class="cm">     *    DataType identifier for the Request (server) or Response (client). */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_BEGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x10</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_ASYNC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x11</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_END</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x12</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* (Server only) Signals the creation or modification of a Subscription.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:session-id [NodeId]</span>
-<span class="cm">     *    Identifier of the Session for which the Subscription is created.</span>
-<span class="cm">     *    If the subscription is not bound to any Session, then the NodeId</span>
-<span class="cm">     *    ns=0;i=0 is returned.</span>
-<span class="cm">     * 0:subscription-id [UInt32]</span>
-<span class="cm">     *    Identifier of the Subscription (unique for the Session).</span>
-<span class="cm">     * 0:publishing-interval [Double]</span>
-<span class="cm">     *    Frequence at which accumulated notifications are sent out.</span>
-<span class="cm">     * 0:lifetime-count [UInt32]</span>
-<span class="cm">     *    Number of consecutive publishing interval with a missing</span>
-<span class="cm">     *    PublishRequest before the Subscription is starved (deleted).</span>
-<span class="cm">     * 0:max-keepalive-count [UInt32]</span>
-<span class="cm">     *    Number of consecutive publishing intervals without a PublishResponse</span>
-<span class="cm">     *    before a keepalive is sent.</span>
-<span class="cm">     * 0:max-notifications-per-publish [UInt32]</span>
-<span class="cm">     *    Number of notifications that can be in a PublishResponse.</span>
-<span class="cm">     * 0:priority [Byte]</span>
-<span class="cm">     *    Higher-priority subscriptions send out PublishResponses first.</span>
-<span class="cm">     * 0:publishing-enabled [Boolean]</span>
-<span class="cm">     *    What the name says. */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_CREATED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_MODIFIED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_PUBLISHINGMODE</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_TRANSFERRED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_DELETED</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* (Server only) Signals the creation or modification of a MonitoredItem.</span>
-<span class="cm">     *</span>
-<span class="cm">     * 0:session-id [NodeId]</span>
-<span class="cm">     *    Identifier of the Session for which the Subscription is created.</span>
-<span class="cm">     *    If the subscription is not bound to any Session, then the NodeId</span>
-<span class="cm">     *    ns=0;i=0 is returned.</span>
-<span class="cm">     * 0:subscription-id [UInt32]</span>
-<span class="cm">     *    Identifier of the Subscription (unique for the Session).</span>
-<span class="cm">     * 0:monitoreditem-id [UInt32]</span>
-<span class="cm">     *    Identifier of the MonitoredItem (unique for the Subscription).</span>
-<span class="cm">     * 0:target-node [NodeId]</span>
-<span class="cm">     *    Identifier of the Node that is monitored.</span>
-<span class="cm">     * 0:attribute-id [UInt32]</span>
-<span class="cm">     *    Node-attribute that is being monitored.</span>
-<span class="cm">     *    Conforms to the values from the UA_AttributeId enum.</span>
-<span class="cm">     * 0:index-range [String]</span>
-<span class="cm">     *    Defines if only part of an array value is monitored.</span>
-<span class="cm">     * 0:timestamps-to-return [TimestampsToReturn]</span>
-<span class="cm">     *    Enum with the options SOURCE | SERVER | BOTH | NEITHER.</span>
-<span class="cm">     * 0:monitorimg-mode [MonitoringMode]</span>
-<span class="cm">     *    Enum with the options DISABLED | SAMPLING | REPORTING.</span>
-<span class="cm">     * 0:client-handle [UInt32]</span>
-<span class="cm">     *   Client-supplied identifier of the MonitoredItem.</span>
-<span class="cm">     * 0:samping-interval [Double]</span>
-<span class="cm">     *    Interval to evaluate the MonitoredItem in milliseconds.</span>
-<span class="cm">     * 0:filter [Empty | DataChangeFilter | EventFilter | AggregateFilter]</span>
-<span class="cm">     *    The filter used to emit notifications.</span>
-<span class="cm">     * 0:queue-size [UInt32]</span>
-<span class="cm">     *    Maximum number of notifications waiting to be published.</span>
-<span class="cm">     * 0:discard-oldest [Boolean]</span>
-<span class="cm">     *    When the queue overflows, delete the newest or the oldest</span>
-<span class="cm">     *    notification. */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_CREATED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MODIFIED</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MONITORINGMODE</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_DELETE</span><span class="p">,</span>
-
-<span class="w">    </span><span class="cm">/* Audit events are described in a separete section.</span>
-<span class="cm">     * The enum values are bitfields to filter in a hierarchy. */</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT</span><span class="w">                                   </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1000</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY</span><span class="w">                          </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1100</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CHANNEL</span><span class="w">                  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1110</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CHANNEL_OPEN</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1111</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION</span><span class="w">                  </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1120</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_CREATE</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1121</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_ACTIVATE</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1122</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_CANCEL</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1124</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE</span><span class="w">              </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1140</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_DATAMISMATCH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1141</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_EXPIRED</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1142</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_INVALID</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1143</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_UNTRUSTED</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1144</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_REVOKED</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1145</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_MISMATCH</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1146</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE</span><span class="w">                              </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1200</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_ADD</span><span class="w">                          </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1210</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_DELETE</span><span class="w">                       </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1220</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_ADDREFERENCES</span><span class="w">                </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1240</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_DELETEREFERENCES</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1280</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE</span><span class="w">                            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1400</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_WRITE</span><span class="w">                      </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1410</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_HISTORY</span><span class="w">                    </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1420</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_METHOD</span><span class="w">                     </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1440</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_CLIENT</span><span class="w">                            </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1800</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_CLIENT_UPDATEMETHOD</span><span class="w">               </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1810</span>
-<span class="p">}</span><span class="w"> </span><span class="n">UA_ApplicationNotificationType</span><span class="p">;</span>
+<span class="cm">/* Lifecycle notifications, no payload */</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE          \</span>
+<span class="cp">    (0x01ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STARTED  \</span>
+<span class="cp">    ((0x01ULL &lt;&lt; 32) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_SHUTDOWN \</span>
+<span class="cp">    ((0x01ULL &lt;&lt; 32) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPING \</span>
+<span class="cp">    ((0x01ULL &lt;&lt; 32) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_LIFECYCLE_STOPPED  \</span>
+<span class="cp">    ((0x01ULL &lt;&lt; 32) | 0x04)</span>
 </pre></div>
 </div>
-</section>
-<section id="auditing">
-<h2>Auditing<a class="headerlink" href="#auditing" title="Link to this heading"></a></h2>
+<p>(Server only) Give background information after a SecureChannel is opened
+or closed.</p>
+<dl class="simple">
+<dt>0:securechannel-id [UInt32]</dt><dd><p>Identifier of the SecureChannel to which the Session is connected.</p>
+</dd>
+<dt>0:connection-manager-name [String]</dt><dd><p>Name of the ConnectionManager (configured in the EventLoop) from which
+the connction was opened.</p>
+</dd>
+<dt>0:connection-id [UInt64]</dt><dd><p>Identifier of the connection in the context of the EventLoop. This is
+often the socket identifier, but that is not necessarily the case.</p>
+</dd>
+<dt>0:remote-address [String]</dt><dd><p>Address (hostname or IP that opened the SecureChannel.</p>
+</dd>
+<dt>0:protocol-version [UInt32]</dt><dd><p>The version of the UACP protocol requested by the Client.</p>
+</dd>
+<dt>0:recv-buffer-size [UInt32]</dt><dd><p>The largest buffer (chunk size) we can receive over the channel.</p>
+</dd>
+<dt>0:recv-max-message-size [UInt32]</dt><dd><p>The maximum size of received messages.</p>
+</dd>
+<dt>0:recv-max-chunk-count [UInt32]</dt><dd><p>The maximum number of chunks for received messages.</p>
+</dd>
+<dt>0:send-buffer-size [UInt32]</dt><dd><p>The largest buffer (chunk size) we can send over the channel.</p>
+</dd>
+<dt>0:send-max-message-size [UInt32]</dt><dd><p>The maximum size of sent messages.</p>
+</dd>
+<dt>0:send-max-chunk-count [UInt32]</dt><dd><p>The maximum number of chunks for sent messages.</p>
+</dd>
+<dt>0:endpoint-url</dt><dd><p>The target EndpointUri (for the server) indicated by the client.</p>
+</dd>
+<dt>0:security-mode [MessageSecurityMode]</dt><dd><p>The SecurityChannel can be unsigned, signed or signed+encrypted.</p>
+</dd>
+<dt>0:security-policy-uri [String]</dt><dd><p>Uri of the SecurityPolicy for this SecyrityChannel.</p>
+</dd>
+<dt>0:certificate-type-id [NodeId]</dt><dd><p>Certificate type used by the SecurityPolicy for this SecureChannel.</p>
+</dd>
+<dt>0:remote-certificate [ByteString]</dt><dd><p>Certificate used by the remote side during OpenSecureChannel.</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL        \</span>
+<span class="cp">    (0x02ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED \</span>
+<span class="cp">    ((0x02ULL &lt;&lt; 32) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_CLOSED \</span>
+<span class="cp">    ((0x02ULL &lt;&lt; 32) | 0x02)</span>
+</pre></div>
+</div>
+<p>(Server only) Give background information for Sessions. The _DEACTIVATE
+notification occurs when a Sesssion is unbound from its original
+SecureChannel. Either because the SecureChannel is closed or because the
+session is activated on another SecureChannel.</p>
+<dl class="simple">
+<dt>0:session-id [NodeId]</dt><dd><p>Identifier of the Session.</p>
+</dd>
+<dt>0:securechannel-id [UInt32]</dt><dd><p>Identifier of the SecureChannel on which the Session is activated.
+Zero if the Session is not bound to any SecureChannel.</p>
+</dd>
+<dt>0:session-name [String]</dt><dd><p>Name of the Session as defined by the client.</p>
+</dd>
+<dt>0:client-description [ApplicationDescription]</dt><dd><p>Name of the Session as defined by the client.</p>
+</dd>
+<dt>0:client-user-id [String]</dt><dd><p>User identifier used to activate the session. This is extracted from
+the UserIdentityToken (e.g. username but not the password).</p>
+</dd>
+<dt>0:locale-ids [Array of String]</dt><dd><p>List of preferred languages.</p>
+</dd>
+</dl>
+<p>Any additional attributes set via UA_Server_setSessionAttribute are
+appended to the above list.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SESSION             \</span>
+<span class="cp">    (0x04ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SESSION_CREATED     \</span>
+<span class="cp">    ((0x04ULL &lt;&lt; 32) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SESSION_ACTIVATED   \</span>
+<span class="cp">    ((0x04ULL &lt;&lt; 32) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SESSION_DEACTIVATED \</span>
+<span class="cp">    ((0x04ULL &lt;&lt; 32) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SESSION_CLOSED      \</span>
+<span class="cp">    ((0x04ULL &lt;&lt; 32) | 0x04)</span>
+</pre></div>
+</div>
+<p>Processing of a service request or response. The server-side processing
+of a request can be asynchronous. The existence of a yet-unfinished async
+operation from the request is signaled with the _SERVICE_ASYNC enum. The
+_SERVICE_END enum is signalled eventually, once all async operations from
+the service request are completed.</p>
+<dl class="simple">
+<dt>0:securechannel-id [UInt32]</dt><dd><p>Identifier of the SecureChannel to which the Session is connected.</p>
+</dd>
+<dt>0:session-id [NodeId]</dt><dd><p>Identifier of the Session for/from which the Service is requested.
+This is the ns=0;i=0 NodeId if no Session is bound to the receiving
+SecureChannel.</p>
+</dd>
+<dt>0:request-id [UInt32]</dt><dd><p>Identifier of the RequestId for the Request/Response pair.</p>
+</dd>
+<dt>0:service-type [NodeId]</dt><dd><p>DataType identifier for the Request (server) or Response (client).</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SERVICE       \</span>
+<span class="cp">    (0x08ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_BEGIN \</span>
+<span class="cp">    ((0x08ULL &lt;&lt; 32) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_ASYNC \</span>
+<span class="cp">    ((0x08ULL &lt;&lt; 32) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SERVICE_END   \</span>
+<span class="cp">    ((0x08ULL &lt;&lt; 32) | 0x03)</span>
+</pre></div>
+</div>
+<p>(Server only) Signals the creation or modification of a Subscription.</p>
+<dl class="simple">
+<dt>0:session-id [NodeId]</dt><dd><p>Identifier of the Session for which the Subscription is created.
+If the subscription is not bound to any Session, then the NodeId
+ns=0;i=0 is returned.</p>
+</dd>
+<dt>0:subscription-id [UInt32]</dt><dd><p>Identifier of the Subscription (unique for the Session).</p>
+</dd>
+<dt>0:publishing-interval [Double]</dt><dd><p>Frequence at which accumulated notifications are sent out.</p>
+</dd>
+<dt>0:lifetime-count [UInt32]</dt><dd><p>Number of consecutive publishing interval with a missing
+PublishRequest before the Subscription is starved (deleted).</p>
+</dd>
+<dt>0:max-keepalive-count [UInt32]</dt><dd><p>Number of consecutive publishing intervals without a PublishResponse
+before a keepalive is sent.</p>
+</dd>
+<dt>0:max-notifications-per-publish [UInt32]</dt><dd><p>Number of notifications that can be in a PublishResponse.</p>
+</dd>
+<dt>0:priority [Byte]</dt><dd><p>Higher-priority subscriptions send out PublishResponses first.</p>
+</dd>
+<dt>0:publishing-enabled [Boolean]</dt><dd><p>What the name says.</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION                \</span>
+<span class="cp">    (0x10ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_CREATED        \</span>
+<span class="cp">    ((0x10ULL &lt;&lt; 32) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_MODIFIED       \</span>
+<span class="cp">    ((0x10ULL &lt;&lt; 32) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_PUBLISHINGMODE \</span>
+<span class="cp">    ((0x10ULL &lt;&lt; 32) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_TRANSFERRED    \</span>
+<span class="cp">    ((0x10ULL &lt;&lt; 32) | 0x04)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_SUBSCRIPTION_DELETED        \</span>
+<span class="cp">    ((0x10ULL &lt;&lt; 32) | 0x05)</span>
+</pre></div>
+</div>
+<p>(Server only) Signals the creation or modification of a MonitoredItem.</p>
+<dl class="simple">
+<dt>0:session-id [NodeId]</dt><dd><p>Identifier of the Session for which the Subscription is created.
+If the subscription is not bound to any Session, then the NodeId
+ns=0;i=0 is returned.</p>
+</dd>
+<dt>0:subscription-id [UInt32]</dt><dd><p>Identifier of the Subscription (unique for the Session).</p>
+</dd>
+<dt>0:monitoreditem-id [UInt32]</dt><dd><p>Identifier of the MonitoredItem (unique for the Subscription).</p>
+</dd>
+<dt>0:target-node [NodeId]</dt><dd><p>Identifier of the Node that is monitored.</p>
+</dd>
+<dt>0:attribute-id [UInt32]</dt><dd><p>Node-attribute that is being monitored.
+Conforms to the values from the UA_AttributeId enum.</p>
+</dd>
+<dt>0:index-range [String]</dt><dd><p>Defines if only part of an array value is monitored.</p>
+</dd>
+<dt>0:timestamps-to-return [TimestampsToReturn]</dt><dd><p>Enum with the options SOURCE | SERVER | BOTH | NEITHER.</p>
+</dd>
+<dt>0:monitorimg-mode [MonitoringMode]</dt><dd><p>Enum with the options DISABLED | SAMPLING | REPORTING.</p>
+</dd>
+<dt>0:client-handle [UInt32]</dt><dd><p>Client-supplied identifier of the MonitoredItem.</p>
+</dd>
+<dt>0:samping-interval [Double]</dt><dd><p>Interval to evaluate the MonitoredItem in milliseconds.</p>
+</dd>
+<dt>0:filter [Empty | DataChangeFilter | EventFilter | AggregateFilter]</dt><dd><p>The filter used to emit notifications.</p>
+</dd>
+<dt>0:queue-size [UInt32]</dt><dd><p>Maximum number of notifications waiting to be published.</p>
+</dd>
+<dt>0:discard-oldest [Boolean]</dt><dd><p>When the queue overflows, delete the newest or the oldest
+notification.</p>
+</dd>
+</dl>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM                \</span>
+<span class="cp">    (0x20ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_CREATED        \</span>
+<span class="cp">    ((0x20ULL &lt;&lt; 32) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MODIFIED       \</span>
+<span class="cp">    ((0x20ULL &lt;&lt; 32) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_MONITORINGMODE \</span>
+<span class="cp">    ((0x20ULL &lt;&lt; 32) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_MONITOREDITEM_DELETED        \</span>
+<span class="cp">    ((0x20ULL &lt;&lt; 32) | 0x04)</span>
+</pre></div>
+</div>
+<p>(Server only) Signals the creation of an audit event.</p>
 <p>The key-value map for audit application notifications follows the properties
 defined for the AuditEventType and its subtypes. The key-string is the
 human-readable encoding for the SimpleAttributeOperand of the event
@@ -473,42 +490,165 @@ their string-key and not via their order-index in the key-value map.</p>
 <p>See the definition of the AuditEventType and its subtypes in part 5 of the
 OPC UA specification. Below follows the hierarchy of the event types.
 Properties from the super-type are inherited.</p>
-<ul>
-<li><p>AuditEventType
-- AuditSecurityEventType</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>AuditChannelEventType
-- AuditOpenSecureChannelEventType</p></li>
-<li><p>AuditSessionEventType
-- AuditCreateSessionEventType
-- AuditActivateSessionEventType
-- AuditCancelEventType</p></li>
-<li><p>AuditCertificateEventType
-- AuditCertificateDataMismatchEventType
-- AuditCertificateExpiredEventType
-- AuditCertificateInvalidEventType
-- AuditCertificateUntrustedEventType
-- AuditCertificateRevokedEventType
-- AuditCertificateMismatchEventType</p></li>
-</ul>
-</div></blockquote>
 <ul class="simple">
-<li><p>AuditNodeManagementEventType
-- AuditAddNodesEventType
-- AuditDeleteNodesEventType
-- AuditAddReferencesEventType
-- AuditDeleteReferencesEventType</p></li>
-<li><p>AuditUpdateEventType
-- AuditWriteUpdateEventType
-- AuditHistoryUpdateEventType</p></li>
-<li><p>AuditUpdateMethodEventType</p></li>
-<li><p>AuditClientEventType
-- AuditClientUpdateMethodResultEventType</p></li>
+<li><p>AuditEventType</p>
+<ul>
+<li><p>AuditSecurityEventType</p>
+<ul>
+<li><p>AuditChannelEventType</p>
+<ul>
+<li><p>AuditOpenSecureChannelEventType</p></li>
+</ul>
+</li>
+<li><p>AuditSessionEventType</p>
+<ul>
+<li><p>AuditCreateSessionEventType</p></li>
+<li><p>AuditActivateSessionEventType</p></li>
+<li><p>AuditCancelEventType</p></li>
+</ul>
+</li>
+<li><p>AuditCertificateEventType</p>
+<ul>
+<li><p>AuditCertificateDataMismatchEventType</p></li>
+<li><p>AuditCertificateExpiredEventType</p></li>
+<li><p>AuditCertificateInvalidEventType</p></li>
+<li><p>AuditCertificateUntrustedEventType</p></li>
+<li><p>AuditCertificateRevokedEventType</p></li>
+<li><p>AuditCertificateMismatchEventType</p></li>
 </ul>
 </li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+</li>
+<li><p>AuditNodeManagementEventType</p>
+<ul>
+<li><p>AuditAddNodesEventType</p></li>
+<li><p>AuditDeleteNodesEventType</p></li>
+<li><p>AuditAddReferencesEventType</p></li>
+<li><p>AuditDeleteReferencesEventType</p></li>
+</ul>
+</li>
+<li><p>AuditUpdateEventType</p>
+<ul>
+<li><p>AuditWriteUpdateEventType</p></li>
+<li><p>AuditHistoryUpdateEventType</p></li>
+</ul>
+</li>
+<li><p>AuditUpdateMethodEventType</p></li>
+<li><p>AuditClientEventType</p>
+<ul>
+<li><p>AuditClientUpdateMethodResultEventType</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT                                   \</span>
+<span class="cp">    (0x40ULL &lt;&lt; 32)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY                          \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CHANNEL                  \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x01 &lt;&lt; 8))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CHANNEL_OPEN             \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x01 &lt;&lt; 8) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION                  \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x02 &lt;&lt; 8))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_CREATE           \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x02 &lt;&lt; 8) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_ACTIVATE         \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x02 &lt;&lt; 8) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_SESSION_CANCEL           \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x02 &lt;&lt; 8) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE              \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_DATAMISMATCH \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_EXPIRED      \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_INVALID      \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_UNTRUSTED    \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8) | 0x04)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_REVOKED      \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8) | 0x05)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_SECURITY_CERTIFICATE_MISMATCH     \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x01 &lt;&lt; 16) | (0x04 &lt;&lt; 8) | 0x06)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE                              \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x02 &lt;&lt; 16))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_ADD                          \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x02 &lt;&lt; 16) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_DELETE                       \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x02 &lt;&lt; 16) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_ADDREFERENCES                \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x02 &lt;&lt; 16) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_NODE_DELETEREFERENCES             \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x02 &lt;&lt; 16) | 0x04)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE                            \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x04 &lt;&lt; 16))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_WRITE                      \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x04 &lt;&lt; 16) | 0x01)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_HISTORY                    \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x04 &lt;&lt; 16) | 0x02)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_UPDATE_METHOD                     \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x04 &lt;&lt; 16) | 0x03)</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_CLIENT                            \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x08 &lt;&lt; 16))</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_AUDIT_CLIENT_UPDATEMETHOD               \</span>
+<span class="cp">    ((0x40ULL &lt;&lt; 32) | (0x08 &lt;&lt; 16) | 0x01)</span>
+</pre></div>
+</div>
+<p>(Server only) Signals for the Discovery service set.</p>
+<p>We uniquely identify servers by the combination of the following
+information. This is used to decide whether to update an existing
+record or whether to create a new one.</p>
+<ul class="simple">
+<li><p>For FindServers: ServerUri + one matching DiscoveryUrl</p></li>
+<li><p>For FindServerOnNetwork: ServerName + DiscoveryUrl</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_DISCOVERY (0x80ULL &lt;&lt; 32)</span>
+
+<span class="cm">/* A server was added via the RegisterServer service or the local API.</span>
+<span class="cm"> * Updates and removals are also notified.</span>
+<span class="cm"> *</span>
+<span class="cm"> * 0:registered-server [RegisteredServer]</span>
+<span class="cm"> *    Received server information.</span>
+<span class="cm"> * 0:discovery-configuration [Array of ExtensionObject]</span>
+<span class="cm"> *    Additional data, typically a UA_MdnsDiscoveryConfiguration.</span>
+<span class="cm"> * 0:server-added [Boolean]</span>
+<span class="cm"> *    They entry was newly added.</span>
+<span class="cm"> * 0:server-updated [Boolean]</span>
+<span class="cm"> *    An existing entry was updated.</span>
+<span class="cm"> * 0:server-removed [Boolean]</span>
+<span class="cm"> *    The entry was removed.</span>
+<span class="cm"> * 0:securechannel-id [UInt32]</span>
+<span class="cm"> *    Identifier of the SecureChannel from which the information was</span>
+<span class="cm"> *    recieved (0 for locally triggered operations).</span>
+<span class="cm"> * 0:session-id [NodeId]</span>
+<span class="cm"> *    Identifier of the Session that called the RegisterServer service.</span>
+<span class="cm"> *    The Null-NodeId if a SecureChannel without Session made the call. */</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_DISCOVERY_REGISTERSERVER \</span>
+<span class="cp">    ((0x80ULL &lt;&lt; 32) | 0x01)</span>
+
+<span class="cm">/* Information about a server over multicast DNS or the local API.</span>
+<span class="cm"> * Updates over time and removal is also notified (e.g after the DNS</span>
+<span class="cm"> * TTL (time-to-live) runs out).</span>
+<span class="cm"> *</span>
+<span class="cm"> * 0:server-on-network [ServerOnNetwork] Server information received.</span>
+<span class="cm"> *    (The RecordId datatype member is defined internally in the</span>
+<span class="cm"> *    server. It does not have semantic meaning here.)</span>
+<span class="cm"> * 0:remote-address [String]</span>
+<span class="cm"> *    IP-address or other host identifier from which the information</span>
+<span class="cm"> *    was received.</span>
+<span class="cm"> * 0:ttl [UInt32]</span>
+<span class="cm"> *    Time-to-live of DNS information. Zero means infinite</span>
+<span class="cm"> *    (if the server is not currently getting removed).</span>
+<span class="cm"> * 0:server-added [Boolean]</span>
+<span class="cm"> *    They entry was added.</span>
+<span class="cm"> * 0:server-updated [Boolean]</span>
+<span class="cm"> *    An existing entry was updated.</span>
+<span class="cm"> * 0:server-removed [Boolean]</span>
+<span class="cm"> *    The entry was removed. */</span>
+<span class="cp">#define UA_APPLICATIONNOTIFICATIONTYPE_DISCOVERY_SERVERONNETWORK \</span>
+<span class="cp">    ((0x80ULL &lt;&lt; 32) | 0x02)</span>
 </pre></div>
 </div>
 </section>
@@ -608,7 +748,7 @@ graceful shutdown.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="ecc_security.html" class="btn btn-neutral float-left" title="ECC Security Policies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="security/ecc.html" class="btn btn-neutral float-left" title="ECC Specifics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="util.html" class="btn btn-neutral float-right" title="Utility Definitions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

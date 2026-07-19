@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECC Specifics &mdash; open62541 (master) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Common Definitions" href="../common.html" />
+    <link rel="prev" title="Certificates and Trust" href="certificates.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../toc.html" class="icon icon-home">
+            open62541 (master)
+              <img src="../_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Security</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="policies.html">Supported Security Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html">Crypto Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentication.html">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="certificates.html">Certificates and Trust</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ECC Specifics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#supported-curves">Supported curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#certificate-requirements">Certificate requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generating-ecc-certificates">Generating ECC certificates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../driver.html">Drivers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../toc.html">open62541 (master)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Security</a></li>
+      <li class="breadcrumb-item active">ECC Specifics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/security/ecc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ecc-specifics">
+<span id="security-ecc"></span><h1>ECC Specifics<a class="headerlink" href="#ecc-specifics" title="Link to this heading"></a></h1>
+<p>ECC policies give equivalent or stronger security than the RSA-based
+profiles with much shorter key lengths, which makes them well suited for
+resource-constrained and modern deployments.  This page documents only
+the ECC-specific configuration.  For the general picture read
+<a class="reference internal" href="index.html#security-overview"><span class="std std-ref">Security</span></a> first.</p>
+<section id="supported-curves">
+<h2>Supported curves<a class="headerlink" href="#supported-curves" title="Link to this heading"></a></h2>
+<p>Each row corresponds to one SecurityPolicy.  The presence of a check
+mark means that backend can register the policy given a matching
+certificate and private key.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 36.0%" />
+<col style="width: 32.0%" />
+<col style="width: 16.0%" />
+<col style="width: 16.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>OPC UA Policy</p></th>
+<th class="head"><p>Curve</p></th>
+<th class="head"><p>OpenSSL</p></th>
+<th class="head"><p>mbedTLS ≥ 3.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EccNistP256</span></code></p></td>
+<td><p>NIST P-256 (prime256v1)</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EccNistP384</span></code></p></td>
+<td><p>NIST P-384 (secp384r1)</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EccBrainpoolP256r1</span></code></p></td>
+<td><p>Brainpool P-256r1</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EccBrainpoolP384r1</span></code></p></td>
+<td><p>Brainpool P-384r1</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EccCurve25519</span></code></p></td>
+<td><p>Curve25519 (Ed25519)</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EccCurve448</span></code></p></td>
+<td><p>Curve448 (Ed448)</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+</tbody>
+</table>
+<p>Curve25519 and Curve448 require OpenSSL ≥ 3.0.  The NIST and Brainpool
+curves require mbedTLS ≥ 3.0 or OpenSSL ≥ 3.0.  See
+<a class="reference internal" href="backends.html#security-backends"><span class="std std-ref">Crypto Backends</span></a> for the build flags.</p>
+</section>
+<section id="certificate-requirements">
+<h2>Certificate requirements<a class="headerlink" href="#certificate-requirements" title="Link to this heading"></a></h2>
+<p>Each ECC policy requires its own certificate and private key, and the
+key must match the curve.  A single certificate <strong>cannot</strong> be shared
+across different curves.  RSA and ECC policies can coexist on the same
+server.  Each carries its own key pair.</p>
+<p>X.509 extensions to set when creating an ECC certificate:</p>
+<ul>
+<li><p><strong>Key Usage</strong> – <code class="docutils literal notranslate"><span class="pre">keyAgreement</span></code> is required (for ECDH key exchange).
+The recommended set for ECDSA curves is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">digitalSignature</span><span class="p">,</span> <span class="n">nonRepudiation</span><span class="p">,</span> <span class="n">keyAgreement</span><span class="p">,</span> <span class="n">keyCertSign</span>
+</pre></div>
+</div>
+<p>RSA certificates use <code class="docutils literal notranslate"><span class="pre">keyEncipherment</span></code> instead.</p>
+</li>
+<li><p><strong>SubjectAltName</strong> – must include at least <code class="docutils literal notranslate"><span class="pre">URI:&lt;ApplicationUri&gt;</span></code>
+and <code class="docutils literal notranslate"><span class="pre">DNS:&lt;hostname&gt;</span></code> (or <code class="docutils literal notranslate"><span class="pre">IP:...</span></code>).</p></li>
+</ul>
+</section>
+<section id="generating-ecc-certificates">
+<h2>Generating ECC certificates<a class="headerlink" href="#generating-ecc-certificates" title="Link to this heading"></a></h2>
+<p>There are three ways to obtain an ECC certificate for use with
+open62541.</p>
+<p><strong>1. ``UA_CreateCertificate`` (built-in, recommended for development)</strong></p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">key-type</span> <span class="pre">=</span> <span class="pre">&quot;EC&quot;</span></code> and the desired <code class="docutils literal notranslate"><span class="pre">ecc-curve</span></code> value in the
+key-value map.  Supported curves: <code class="docutils literal notranslate"><span class="pre">prime256v1</span></code>, <code class="docutils literal notranslate"><span class="pre">secp384r1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">brainpoolP256r1</span></code>, <code class="docutils literal notranslate"><span class="pre">brainpoolP384r1</span></code>, <code class="docutils literal notranslate"><span class="pre">ed25519</span></code>, <code class="docutils literal notranslate"><span class="pre">ed448</span></code> (last
+two require OpenSSL).</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">kvm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_KeyValueMap_new</span><span class="p">();</span>
+<span class="n">UA_UInt16</span><span class="w"> </span><span class="n">expiresIn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">365</span><span class="p">;</span>
+<span class="n">UA_KeyValueMap_setScalar</span><span class="p">(</span><span class="n">kvm</span><span class="p">,</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;expires-in-days&quot;</span><span class="p">),</span>
+<span class="w">                         </span><span class="o">&amp;</span><span class="n">expiresIn</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_UINT16</span><span class="p">]);</span>
+<span class="n">UA_String</span><span class="w"> </span><span class="n">keyType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_STATIC</span><span class="p">(</span><span class="s">&quot;EC&quot;</span><span class="p">);</span>
+<span class="n">UA_KeyValueMap_setScalar</span><span class="p">(</span><span class="n">kvm</span><span class="p">,</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;key-type&quot;</span><span class="p">),</span>
+<span class="w">                         </span><span class="o">&amp;</span><span class="n">keyType</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">]);</span>
+<span class="n">UA_String</span><span class="w"> </span><span class="n">curve</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_STATIC</span><span class="p">(</span><span class="s">&quot;prime256v1&quot;</span><span class="p">);</span>
+<span class="n">UA_KeyValueMap_setScalar</span><span class="p">(</span><span class="n">kvm</span><span class="p">,</span><span class="w"> </span><span class="n">UA_QUALIFIEDNAME</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ecc-curve&quot;</span><span class="p">),</span>
+<span class="w">                         </span><span class="o">&amp;</span><span class="n">curve</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_STRING</span><span class="p">]);</span>
+
+<span class="n">UA_ByteString</span><span class="w"> </span><span class="n">privateKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_BYTESTRING_NULL</span><span class="p">;</span>
+<span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_BYTESTRING_NULL</span><span class="p">;</span>
+<span class="n">UA_CreateCertificate</span><span class="p">(</span><span class="n">UA_Log_Stdout</span><span class="p">,</span><span class="w"> </span><span class="n">subject</span><span class="p">,</span><span class="w"> </span><span class="n">lenSubject</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">subjectAltName</span><span class="p">,</span><span class="w"> </span><span class="n">lenSubjectAltName</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">UA_CERTIFICATEFORMAT_DER</span><span class="p">,</span><span class="w"> </span><span class="n">kvm</span><span class="p">,</span>
+<span class="w">                     </span><span class="o">&amp;</span><span class="n">privateKey</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">certificate</span><span class="p">);</span>
+<span class="n">UA_KeyValueMap_delete</span><span class="p">(</span><span class="n">kvm</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>2. OpenSSL CLI (production, full control)</strong></p>
+<p>ECDSA curves (P-256, P-384, Brainpool):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openssl<span class="w"> </span>ecparam<span class="w"> </span>-name<span class="w"> </span>prime256v1<span class="w"> </span>-genkey<span class="w"> </span>-noout<span class="w"> </span>-out<span class="w"> </span>server_nistP256.key.pem
+openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-x509<span class="w"> </span>-key<span class="w"> </span>server_nistP256.key.pem<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-out<span class="w"> </span>server_nistP256.cert.pem<span class="w"> </span>-days<span class="w"> </span><span class="m">3650</span><span class="w"> </span>-sha256<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-subj<span class="w"> </span><span class="s2">&quot;/C=DE/O=MyOrg/CN=OPC-UA-Server&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;subjectAltName=URI:urn:my.app:server,DNS:localhost,IP:127.0.0.1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;basicConstraints=critical,CA:FALSE&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;keyUsage=critical,digitalSignature,nonRepudiation,keyAgreement&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;extendedKeyUsage=serverAuth,clientAuth&quot;</span>
+openssl<span class="w"> </span>x509<span class="w">  </span>-in<span class="w">  </span>server_nistP256.cert.pem<span class="w"> </span>-outform<span class="w"> </span>DER<span class="w"> </span>-out<span class="w"> </span>server_nistP256.cert.der
+openssl<span class="w"> </span>pkey<span class="w">  </span>-in<span class="w">  </span>server_nistP256.key.pem<span class="w">  </span>-outform<span class="w"> </span>DER<span class="w"> </span>-out<span class="w"> </span>server_nistP256.key.der
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">-sha384</span></code> and <code class="docutils literal notranslate"><span class="pre">prime256v1</span></code> replaced with <code class="docutils literal notranslate"><span class="pre">secp384r1</span></code> or
+<code class="docutils literal notranslate"><span class="pre">brainpoolP256r1</span></code> / <code class="docutils literal notranslate"><span class="pre">brainpoolP384r1</span></code> accordingly.</p>
+<p>EdDSA curves (Curve25519, Curve448):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>openssl<span class="w"> </span>genpkey<span class="w"> </span>-algorithm<span class="w"> </span>ed25519<span class="w"> </span>-out<span class="w"> </span>server_curve25519.key.pem
+openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-x509<span class="w"> </span>-key<span class="w"> </span>server_curve25519.key.pem<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-out<span class="w"> </span>server_curve25519.cert.pem<span class="w"> </span>-days<span class="w"> </span><span class="m">3650</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-subj<span class="w"> </span><span class="s2">&quot;/C=DE/O=MyOrg/CN=OPC-UA-Server&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;subjectAltName=URI:urn:my.app:server,DNS:localhost,IP:127.0.0.1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;basicConstraints=critical,CA:FALSE&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;keyUsage=critical,digitalSignature,nonRepudiation,keyAgreement&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-addext<span class="w"> </span><span class="s2">&quot;extendedKeyUsage=serverAuth,clientAuth&quot;</span>
+openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w">  </span>server_curve25519.cert.pem<span class="w"> </span>-outform<span class="w"> </span>DER<span class="w"> </span>-out<span class="w"> </span>server_curve25519.cert.der
+openssl<span class="w"> </span>pkey<span class="w"> </span>-in<span class="w">  </span>server_curve25519.key.pem<span class="w">  </span>-outform<span class="w"> </span>DER<span class="w"> </span>-out<span class="w"> </span>server_curve25519.key.der
+</pre></div>
+</div>
+<p>Replace <code class="docutils literal notranslate"><span class="pre">ed25519</span></code> with <code class="docutils literal notranslate"><span class="pre">ed448</span></code> for Curve448.</p>
+<p><strong>3. ``tools/certs/create_self-signed.py`` (development helper)</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Single ECC certificate</span>
+python3<span class="w"> </span>tools/certs/create_self-signed.py<span class="w"> </span>/tmp/certs<span class="w"> </span>--ecc<span class="w"> </span>prime256v1
+
+<span class="c1"># All supported ECC curves at once</span>
+python3<span class="w"> </span>tools/certs/create_self-signed.py<span class="w"> </span>/tmp/certs<span class="w"> </span>--ecc-all
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--ecc-all</span></code> mode produces DER files named
+<code class="docutils literal notranslate"><span class="pre">server_c_&lt;curve&gt;.cert.der</span></code> / <code class="docutils literal notranslate"><span class="pre">server_c_&lt;curve&gt;.key.der</span></code> ready for
+<code class="docutils literal notranslate"><span class="pre">--ecc-cert-dir</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="certificates.html" class="btn btn-neutral float-left" title="Certificates and Trust" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../common.html" class="btn btn-neutral float-right" title="Common Definitions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

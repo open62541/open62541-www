@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GDS Receiver Driver &mdash; open62541 (master) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Alarms &amp; Conditions Driver (Experimental)" href="driver_alarms_conditions.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (master)
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="driver.html">Drivers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="driver_mdns.html">Multicast DNS Discovery Driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_alarms_conditions.html">Alarms &amp; Conditions Driver (Experimental)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GDS Receiver Driver</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (master)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="driver.html">Drivers</a></li>
+      <li class="breadcrumb-item active">GDS Receiver Driver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/driver_gds_receiver.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gds-receiver-driver">
+<h1>GDS Receiver Driver<a class="headerlink" href="#gds-receiver-driver" title="Link to this heading"></a></h1>
+<p>The GDS Receiver driver implements the server side of OPC UA
+PushManagement. It exposes the ServerConfiguration methods for updating the
+application certificate and the CertificateGroup trust lists. Changes are
+collected in a transaction and applied together with the ApplyChanges
+method. The driver also tracks active sessions and SecureChannels so that
+abandoned transactions can be discarded and affected channels can be
+revalidated or closed after an update.</p>
+<p>Build open62541 with <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_DRIVER_GDS_RECEIVER</span></code> enabled.
+PushManagement additionally requires encryption and the full Namespace
+Zero.</p>
+<p>Create the driver with UA_GDSReceiver_new() and attach its <code class="docutils literal notranslate"><span class="pre">drv</span></code> member to
+the server with UA_Server_addDriver() before calling
+UA_Server_run_startup(). A server can have at most one GDS Receiver driver.
+The server takes ownership of the receiver after it has been added
+successfully.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_DRIVER_GDS_RECEIVER</span>
+
+<span class="n">_UA_BEGIN_DECLS</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_GDSReceiver</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Driver</span><span class="w"> </span><span class="n">drv</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Must be the first member */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_GDSReceiver</span><span class="p">;</span>
+
+<span class="cm">/* Create a GDS Receiver driver. The returned driver is heap-allocated and</span>
+<span class="cm"> * must either be passed to UA_Server_addDriver() or released with its ``free``</span>
+<span class="cm"> * callback. Returns NULL if allocation fails. */</span>
+<span class="n">UA_GDSReceiver</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_GDSReceiver_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="cm">/* Update the application certificate used by the server endpoints. The GDS</span>
+<span class="cm"> * Receiver driver must be attached and started. If certificateGroupId is</span>
+<span class="cm"> * null, the DefaultApplicationGroup is used. Returns BadInvalidArgument for a</span>
+<span class="cm"> * null receiver or empty certificate and BadInvalidState if the receiver is</span>
+<span class="cm"> * not attached and started. This function is thread-safe. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_GDSReceiver_updateCertificate</span><span class="p">(</span><span class="n">UA_GDSReceiver</span><span class="w"> </span><span class="o">*</span><span class="n">receiver</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">privateKey</span><span class="p">);</span>
+
+<span class="cm">/* Create a PKCS #10 DER-encoded certificate signing request. The GDS Receiver</span>
+<span class="cm"> * driver must be attached and started. If certificateGroupId is null,</span>
+<span class="cm"> * the DefaultApplicationGroup is used. Returns BadInvalidArgument for a null</span>
+<span class="cm"> * receiver or output pointer and BadInvalidState if the receiver is not</span>
+<span class="cm"> * attached and started. This function is thread-safe. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_GDSReceiver_createSigningRequest</span><span class="p">(</span><span class="n">UA_GDSReceiver</span><span class="w"> </span><span class="o">*</span><span class="n">receiver</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateTypeId</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">subjectName</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="o">*</span><span class="n">regenerateKey</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">nonce</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">csr</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="driver_alarms_conditions.html" class="btn btn-neutral float-left" title="Alarms &amp; Conditions Driver (Experimental)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

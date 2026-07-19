@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventLoop Plugin API &mdash; open62541 (master) 1.5.4 documentation</title>
+  <title>EventLoop Plugin API &mdash; open62541 (master) 1.5.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1cd648e3"></script>
+      <script src="_static/documentation_options.js?v=b8aeccfa"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
           
           <a href="toc.html" class="icon icon-home">
             open62541 (master)
-              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -46,14 +46,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -88,6 +88,7 @@
 <li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html">SecurityPolicy Plugin API</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="driver.html">Drivers</a></li>
 </ul>
 
         </div>
@@ -159,7 +160,7 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">/* Delayed callbacks are executed not when they are registered, but in the</span>
 <span class="cm"> * following EventLoop cycle */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_atomic</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">next</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Callback</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
@@ -581,9 +582,12 @@ The server sockets get deactivated if the limit is reached.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -631,9 +635,12 @@ configuration parameters have to set before calling _start to take effect.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -695,9 +702,12 @@ calling _start to take effect.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -892,9 +902,12 @@ the first callback are different between server and client connections.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -942,9 +955,12 @@ configuration parameters have to set before calling _start to take effect.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>

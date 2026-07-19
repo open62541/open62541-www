@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alarms &amp; Conditions Driver (Experimental) &mdash; open62541 (master) 1.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=b8aeccfa"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GDS Receiver Driver" href="driver_gds_receiver.html" />
+    <link rel="prev" title="Multicast DNS Discovery Driver" href="driver_mdns.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (master)
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="driver.html">Drivers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="driver_mdns.html">Multicast DNS Discovery Driver</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Alarms &amp; Conditions Driver (Experimental)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_gds_receiver.html">GDS Receiver Driver</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (master)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="driver.html">Drivers</a></li>
+      <li class="breadcrumb-item active">Alarms &amp; Conditions Driver (Experimental)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/driver_alarms_conditions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="alarms-conditions-driver-experimental">
+<h1>Alarms &amp; Conditions Driver (Experimental)<a class="headerlink" href="#alarms-conditions-driver-experimental" title="Link to this heading"></a></h1>
+<p>OPC UA Alarms &amp; Conditions model process states that need operator
+attention: limit violations, abnormal device states, certificate expiry, and
+similar situations. Unlike plain events, conditions are stateful. They can
+remain active, be acknowledged or confirmed, carry comments, and be
+refreshed for clients that reconnect or subscribe later.</p>
+<p>The central concept is the Condition instance. A Condition is an Object of a
+ConditionType, such as OffNormalAlarmType or ExclusiveLimitAlarmType. It is
+associated with a Condition Source, the node whose state is represented by
+the Condition. The source is connected to the event hierarchy with
+HasEventSource so clients can discover and subscribe to relevant alarms.</p>
+<p>Conditions expose standardized fields such as EnabledState, ActiveState,
+AckedState, ConfirmedState, Severity, Message, Retain, and SourceNode. These
+fields describe the current alarm state and are also copied into emitted
+condition events. Retain marks conditions that are still relevant to a
+client. Acknowledgement and confirmation model operator interaction.</p>
+<p>This driver provides the server-side bookkeeping for Conditions, retained
+EventIds, refresh handling, state callbacks, and helper functions to create,
+update, trigger, and delete Conditions. Create the driver with
+UA_AlarmsConditionsDriver() and attach it to a server with
+UA_Server_addDriver(). Only one Alarms &amp; Conditions driver instance can be
+attached to a server.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ENABLE_SUBSCRIPTIONS_EVENTS) &amp;&amp; defined(UA_GENERATED_NAMESPACE_ZERO_FULL)</span>
+
+<span class="n">_UA_BEGIN_DECLS</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="n">UA_AlarmConditionsDriver</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="n">UA_TwoStateVariableCallbackType</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_ENTERING_ENABLEDSTATE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ENTERING_ACKEDSTATE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ENTERING_CONFIRMEDSTATE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_ENTERING_ACTIVESTATE</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_TwoStateVariableCallbackType</span><span class="p">;</span>
+
+<span class="cm">/* User-defined callback for changes of TwoStateVariable fields. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_TwoStateVariableChangeCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">condition</span><span class="p">);</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Driver</span><span class="w"> </span><span class="n">drv</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Must be the first member */</span>
+
+<span class="w">    </span><span class="cm">/* Create a condition instance.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The conditionType must be a subtype of ConditionType. If the condition</span>
+<span class="cm">     * source has no inverse HasEventSource reference, a HasEventSource</span>
+<span class="cm">     * reference from the Server object to the source is created. Pass a</span>
+<span class="cm">     * hierarchical reference type to expose the condition below its source in</span>
+<span class="cm">     * the address space. Pass UA_NODEID_NULL to keep the condition unexposed.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param conditionId The requested Condition Object NodeId. Passing</span>
+<span class="cm">     *        UA_NODEID_NUMERIC(X,0) selects an unused NodeId in namespace X.</span>
+<span class="cm">     *        Passing UA_NODEID_NULL selects an unused NodeId in namespace 0.</span>
+<span class="cm">     * @param conditionType The ConditionType node</span>
+<span class="cm">     * @param conditionName The condition name</span>
+<span class="cm">     * @param conditionSource The Condition Source node</span>
+<span class="cm">     * @param hierarchialReferenceType The hierarchical ReferenceType between</span>
+<span class="cm">     *        the condition source and the condition</span>
+<span class="cm">     * @param outConditionId The created Condition node</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">createCondition</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">conditionName</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">hierarchialReferenceType</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Begin creating a condition instance.</span>
+<span class="cm">     *</span>
+<span class="cm">     * This is the first half of createCondition(), mirroring the</span>
+<span class="cm">     * UA_Server_addNode_begin() / UA_Server_addNode_finish() pattern. Use it</span>
+<span class="cm">     * when the condition node shall be modified before instantiation is</span>
+<span class="cm">     * finished, for example to add children with specific NodeIds.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param conditionId The requested Condition Object NodeId. Passing</span>
+<span class="cm">     *        UA_NODEID_NUMERIC(X,0) selects an unused NodeId in namespace X.</span>
+<span class="cm">     *        Passing UA_NODEID_NULL selects an unused NodeId in namespace 0.</span>
+<span class="cm">     * @param conditionType The ConditionType node. It must be a subtype of the</span>
+<span class="cm">     *        OPC UA ConditionType.</span>
+<span class="cm">     * @param conditionName The condition name</span>
+<span class="cm">     * @param outConditionId The added Condition node</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addConditionBegin</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">conditionName</span><span class="p">,</span>
+<span class="w">                                       </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outConditionId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Finish creating a condition instance.</span>
+<span class="cm">     *</span>
+<span class="cm">     * This is the second half of the addConditionBegin() /</span>
+<span class="cm">     * addConditionFinish() pair. It finishes the node, creates missing</span>
+<span class="cm">     * HasEventSource references, optionally exposes the condition below its</span>
+<span class="cm">     * source, and initializes the standard condition fields and callbacks.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param conditionId The unfinished Condition Object node</span>
+<span class="cm">     * @param conditionSource The Condition Source node</span>
+<span class="cm">     * @param hierarchialReferenceType The hierarchical ReferenceType between</span>
+<span class="cm">     *        the condition source and the condition</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addConditionFinish</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">hierarchialReferenceType</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Set the value of a condition field.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param condition The Condition instance node</span>
+<span class="cm">     * @param value The value to write</span>
+<span class="cm">     * @param fieldName The target field name</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setConditionField</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">fieldName</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Set a property value of a condition field.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param condition The Condition instance node</span>
+<span class="cm">     * @param value The value to write</span>
+<span class="cm">     * @param variableFieldName The field containing the property</span>
+<span class="cm">     * @param variablePropertyName The target field property name</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setConditionVariableFieldProperty</span><span class="p">)(</span>
+<span class="w">        </span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">variableFieldName</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">variablePropertyName</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Trigger an event for an enabled condition.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The internal condition state is updated with the generated EventId.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param condition The Condition instance node</span>
+<span class="cm">     * @param conditionSource The Condition Source node</span>
+<span class="cm">     * @param outEventId The generated EventId</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">triggerConditionEvent</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span>
+<span class="w">                                           </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">outEventId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Add an optional condition field by name.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Optional methods are not implemented yet.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param condition The Condition instance node</span>
+<span class="cm">     * @param conditionType The ConditionType containing the optional field</span>
+<span class="cm">     * @param fieldName The optional field name</span>
+<span class="cm">     * @param outOptionalVariable The created field Variable node</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">addConditionOptionalField</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
+<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionType</span><span class="p">,</span>
+<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">fieldName</span><span class="p">,</span>
+<span class="w">                                               </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outOptionalVariable</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Set a callback for a condition TwoStateVariable field.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The callback is called before triggering events when EnabledState/Id,</span>
+<span class="cm">     * AckedState/Id, ConfirmedState/Id, or ActiveState/Id transitions to true.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param condition The Condition instance node</span>
+<span class="cm">     * @param conditionSource The Condition Source node</span>
+<span class="cm">     * @param removeBranch Not implemented yet</span>
+<span class="cm">     * @param callback The user callback</span>
+<span class="cm">     * @param callbackType The state transition for which the callback is used</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setConditionTwoStateVariableCallback</span><span class="p">)(</span>
+<span class="w">        </span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
+<span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">removeBranch</span><span class="p">,</span>
+<span class="w">        </span><span class="n">UA_TwoStateVariableChangeCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
+<span class="w">        </span><span class="n">UA_TwoStateVariableCallbackType</span><span class="w"> </span><span class="n">callbackType</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Delete a condition from the address space and internal state.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param condition The Condition instance node</span>
+<span class="cm">     * @param conditionSource The Condition Source node</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteCondition</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">condition</span><span class="p">,</span>
+<span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionSource</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Set the LimitState of a LimitAlarmType condition.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param conditionId The Condition instance node</span>
+<span class="cm">     * @param limitValue The value from the trigger node</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setLimitState</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">limitValue</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Parse a certificate and set the ExpirationDate.</span>
+<span class="cm">     *</span>
+<span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
+<span class="cm">     * @param conditionId The Condition instance node</span>
+<span class="cm">     * @param cert The certificate to parse</span>
+<span class="cm">     * @return The StatusCode of the operation */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setExpirationDate</span><span class="p">)(</span><span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">conditionId</span><span class="p">,</span>
+<span class="w">                                       </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">cert</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="n">UA_AlarmConditionsDriver</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_AlarmsConditionsDriver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="driver_mdns.html" class="btn btn-neutral float-left" title="Multicast DNS Discovery Driver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="driver_gds_receiver.html" class="btn btn-neutral float-right" title="GDS Receiver Driver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
