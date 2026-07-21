@@ -72,6 +72,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#tcp-connection-manager">TCP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#udp-connection-manager">UDP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ethernet-connection-manager">Ethernet Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#http-connection-manager">HTTP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mqtt-connection-manager">MQTT Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#signal-interrupt-manager">Signal Interrupt Manager</a></li>
 </ul>
@@ -765,6 +766,54 @@ txtime parameters uses Linux conventions.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_Ethernet</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 <span class="cp">#endif</span>
+</pre></div>
+</div>
+</section>
+<section id="http-connection-manager">
+<h3>HTTP Connection Manager<a class="headerlink" href="#http-connection-manager" title="Link to this heading"></a></h3>
+<p>The HTTP ConnectionManager uses the libwebsockets library to send HTTP requests.</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string]</dt><dd><p>Hostname or IPv4/IPv6 address of the target (required).</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Port of the target host (required).</p>
+</dd>
+<dt>0:timeout [uint16]</dt><dd><p>Connection timeout in seconds (default: 30).</p>
+</dd>
+<dt>0:useSSL [bool]</dt><dd><p>Encrypt the connection with TLS (default: false).</p>
+</dd>
+<dt>0:username [string]</dt><dd><p>Username for HTTP Basic authentication. The authorization header is added
+only if both <code class="docutils literal notranslate"><span class="pre">username</span></code> and <code class="docutils literal notranslate"><span class="pre">password</span></code> are set.</p>
+</dd>
+<dt>0:password [string]</dt><dd><p>Password for HTTP Basic authentication. The authorization header is added
+only if both <code class="docutils literal notranslate"><span class="pre">username</span></code> and <code class="docutils literal notranslate"><span class="pre">password</span></code> are set.</p>
+</dd>
+<dt>0:ca-cert [bytestring]</dt><dd><p>DER or PEM encoded CA certificate or certificate bundle used to verify
+the server. If unset, the operating system trust store is used.</p>
+</dd>
+<dt>0:client-cert [bytestring]</dt><dd><p>DER or PEM encoded client certificate for mutual TLS.</p>
+</dd>
+<dt>0:client-key [bytestring]</dt><dd><p>DER or PEM encoded private key for the client certificate.</p>
+</dd>
+<dt>0:client-key-password [string]</dt><dd><p>Password for an encrypted client private key.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<dl class="simple">
+<dt>0:path [string]</dt><dd><p>Request-target path (default: <code class="docutils literal notranslate"><span class="pre">/</span></code>).</p>
+</dd>
+<dt>0:method [string]</dt><dd><p>HTTP request method (default: <code class="docutils literal notranslate"><span class="pre">GET</span></code>).</p>
+</dd>
+<dt>0:header [string]</dt><dd><p>Additional request headers encoded as ampersand-separated key-value
+pairs, for example <code class="docutils literal notranslate"><span class="pre">Accept=application/json&amp;X-Trace=yes</span></code>. Header names
+and values therefore cannot contain unescaped <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> or <code class="docutils literal notranslate"><span class="pre">=</span></code> characters.</p>
+</dd>
+</dl>
+<p>The <code class="docutils literal notranslate"><span class="pre">buf</span></code> argument passed to <code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> is used as the request
+body. It may be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> for an empty body and, like all ConnectionManager
+send buffers, is released internally even if sending fails.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_HTTP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
