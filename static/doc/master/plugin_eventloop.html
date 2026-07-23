@@ -73,7 +73,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#udp-connection-manager">UDP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ethernet-connection-manager">Ethernet Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#http-connection-manager">HTTP Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libwebsockets-websocket-connection-manager">Libwebsockets WebSocket Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mqtt-connection-manager">MQTT Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libwebsockets-mqtt-connection-manager">Libwebsockets MQTT Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#signal-interrupt-manager">Signal Interrupt Manager</a></li>
 </ul>
 </li>
@@ -412,6 +414,13 @@ connections that are each bound to an MQTT topic.</p>
 <span class="w">    </span><span class="cm">/* Name of the protocol supported by the ConnectionManager. For example</span>
 <span class="cm">     * &quot;mqtt&quot;, &quot;udp&quot;, &quot;mqtt&quot;. */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">protocol</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Optional certificate validation for secure transports. Configure before</span>
+<span class="cm">     * the EventLoop is started. If certificateGroupOwned is set, the</span>
+<span class="cm">     * ConnectionManager calls certificateGroup-&gt;clear and frees the group when</span>
+<span class="cm">     * it is deleted. Otherwise the group must outlive the ConnectionManager. */</span>
+<span class="w">    </span><span class="n">UA_CertificateGroup</span><span class="w"> </span><span class="o">*</span><span class="n">certificateGroup</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">certificateGroupOwned</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Open a Connection</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~</span>
@@ -817,6 +826,44 @@ send buffers, is released internally even if sending fails.</p>
 </pre></div>
 </div>
 </section>
+<section id="libwebsockets-websocket-connection-manager">
+<h3>Libwebsockets WebSocket Connection Manager<a class="headerlink" href="#libwebsockets-websocket-connection-manager" title="Link to this heading"></a></h3>
+<p>Provides binary WebSocket client and server connections. Each buffer passed
+to <code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> is sent as one binary WebSocket message. Incoming
+fragments are reassembled before they are passed to the connection callback.</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string]</dt><dd><p>Remote hostname for clients or local interface for listeners. Listeners
+default to all interfaces.</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Remote or listening port (required; zero selects a dynamic server port).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Create a listening connection (default: false).</p>
+</dd>
+<dt>0:path [string]</dt><dd><p>WebSocket request path for clients (default: <code class="docutils literal notranslate"><span class="pre">/</span></code>).</p>
+</dd>
+<dt>0:useSSL [bool]</dt><dd><p>Encrypt the connection with TLS (default: false). TLS listeners require
+<code class="docutils literal notranslate"><span class="pre">certificate</span></code> and <code class="docutils literal notranslate"><span class="pre">private-key</span></code>.</p>
+</dd>
+<dt>0:certificate [bytestring]</dt><dd><p>DER or PEM encoded local certificate. For listeners this is the server
+certificate. For clients it enables mutual TLS.</p>
+</dd>
+<dt>0:private-key [bytestring]</dt><dd><p>DER or PEM encoded private key for <code class="docutils literal notranslate"><span class="pre">certificate</span></code>.</p>
+</dd>
+<dt>0:private-key-password [string]</dt><dd><p>Password for an encrypted private key.</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>Validate parameters without opening a connection.</p>
+</dd>
+</dl>
+<p>Listener callbacks provide <code class="docutils literal notranslate"><span class="pre">listen-address</span></code> and <code class="docutils literal notranslate"><span class="pre">listen-port</span></code>. Active
+and accepted connections provide <code class="docutils literal notranslate"><span class="pre">remote-address</span></code>. If the ConnectionManager
+has a <code class="docutils literal notranslate"><span class="pre">certificateGroup</span></code>, it validates the server certificate of secure
+client connections. Otherwise libwebsockets uses the system trust store.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_LWS_WebSocket</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
 <section id="mqtt-connection-manager">
 <h3>MQTT Connection Manager<a class="headerlink" href="#mqtt-connection-manager" title="Link to this heading"></a></h3>
 <p>The MQTT ConnectionManager reuses the TCP ConnectionManager that is
@@ -837,6 +884,18 @@ separate connections are created for each topic and for each direction
 </dd>
 <dt>0:password [string]</dt><dd><p>Password to use (default: none)</p>
 </dd>
+<dt>0:useSSL [bool]</dt><dd><p>Encrypt the broker connection with TLS (default: false).</p>
+</dd>
+<dt>0:certificate [bytestring]</dt><dd><p>DER or PEM encoded client certificate for mutual TLS.</p>
+</dd>
+<dt>0:private-key [bytestring]</dt><dd><p>DER or PEM encoded private key for <code class="docutils literal notranslate"><span class="pre">certificate</span></code>.</p>
+</dd>
+<dt>0:private-key-password [string]</dt><dd><p>Password for an encrypted private key.</p>
+</dd>
+</dl>
+<p>If the ConnectionManager has a <code class="docutils literal notranslate"><span class="pre">certificateGroup</span></code>, it validates the broker
+certificate. Otherwise libwebsockets uses the system trust store.</p>
+<dl class="simple">
 <dt>0:keep-alive [uint16]</dt><dd><p>Number of seconds for the keep-alive (ping) (default: 400).</p>
 </dd>
 <dt>0:validate [boolean]</dt><dd><p>If true, the connection setup will act as a dry-run without actually
@@ -860,6 +919,18 @@ publish on the topic. Subscribed topics can also be published to.</p>
 <p>No additional parameters for sending over an Ethernet connection defined.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_MQTT</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="libwebsockets-mqtt-connection-manager">
+<h3>Libwebsockets MQTT Connection Manager<a class="headerlink" href="#libwebsockets-mqtt-connection-manager" title="Link to this heading"></a></h3>
+<p>Implements the same MQTT ConnectionManager contract and parameters as
+<code class="docutils literal notranslate"><span class="pre">UA_ConnectionManager_new_MQTT</span></code>, using the MQTT client role provided by
+libwebsockets. Enable this implementation with <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS_MQTT</span></code>. The
+libwebsockets library must be built with
+<code class="docutils literal notranslate"><span class="pre">LWS_ROLE_MQTT=ON</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_LWS_MQTT</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

@@ -306,6 +306,13 @@ connections that are each bound to an MQTT topic.
         * "mqtt", "udp", "mqtt". */
        UA_String protocol;
    
+       /* Optional certificate validation for secure transports. Configure before
+        * the EventLoop is started. If certificateGroupOwned is set, the
+        * ConnectionManager calls certificateGroup->clear and frees the group when
+        * it is deleted. Otherwise the group must outlive the ConnectionManager. */
+       UA_CertificateGroup *certificateGroup;
+       UA_Boolean certificateGroupOwned;
+   
        /* Open a Connection
         * ~~~~~~~~~~~~~~~~~
         * Connecting is asynchronous. The connection-callback is called when the
@@ -767,6 +774,54 @@ send buffers, is released internally even if sending fails.
    UA_ConnectionManager *
    UA_ConnectionManager_new_HTTP(const UA_String eventSourceName);
    
+Libwebsockets WebSocket Connection Manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Provides binary WebSocket client and server connections. Each buffer passed
+to ``sendWithConnection`` is sent as one binary WebSocket message. Incoming
+fragments are reassembled before they are passed to the connection callback.
+
+**Open Connection Parameters:**
+
+0:address [string]
+   Remote hostname for clients or local interface for listeners. Listeners
+   default to all interfaces.
+
+0:port [uint16]
+   Remote or listening port (required; zero selects a dynamic server port).
+
+0:listen [boolean]
+   Create a listening connection (default: false).
+
+0:path [string]
+   WebSocket request path for clients (default: ``/``).
+
+0:useSSL [bool]
+   Encrypt the connection with TLS (default: false). TLS listeners require
+   ``certificate`` and ``private-key``.
+
+0:certificate [bytestring]
+   DER or PEM encoded local certificate. For listeners this is the server
+   certificate. For clients it enables mutual TLS.
+
+0:private-key [bytestring]
+   DER or PEM encoded private key for ``certificate``.
+
+0:private-key-password [string]
+   Password for an encrypted private key.
+
+0:validate [boolean]
+   Validate parameters without opening a connection.
+
+Listener callbacks provide ``listen-address`` and ``listen-port``. Active
+and accepted connections provide ``remote-address``. If the ConnectionManager
+has a ``certificateGroup``, it validates the server certificate of secure
+client connections. Otherwise libwebsockets uses the system trust store.
+
+.. code-block:: c
+
+   UA_ConnectionManager *
+   UA_ConnectionManager_new_LWS_WebSocket(const UA_String eventSourceName);
+   
 MQTT Connection Manager
 ~~~~~~~~~~~~~~~~~~~~~~~
 The MQTT ConnectionManager reuses the TCP ConnectionManager that is
@@ -791,6 +846,21 @@ separate connections are created for each topic and for each direction
 
 0:password [string]
    Password to use (default: none)
+
+0:useSSL [bool]
+   Encrypt the broker connection with TLS (default: false).
+
+0:certificate [bytestring]
+   DER or PEM encoded client certificate for mutual TLS.
+
+0:private-key [bytestring]
+   DER or PEM encoded private key for ``certificate``.
+
+0:private-key-password [string]
+   Password for an encrypted private key.
+
+If the ConnectionManager has a ``certificateGroup``, it validates the broker
+certificate. Otherwise libwebsockets uses the system trust store.
 
 0:keep-alive [uint16]
   Number of seconds for the keep-alive (ping) (default: 400).
@@ -823,6 +893,19 @@ No additional parameters for sending over an Ethernet connection defined.
 
    UA_ConnectionManager *
    UA_ConnectionManager_new_MQTT(const UA_String eventSourceName);
+   
+Libwebsockets MQTT Connection Manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Implements the same MQTT ConnectionManager contract and parameters as
+``UA_ConnectionManager_new_MQTT``, using the MQTT client role provided by
+libwebsockets. Enable this implementation with ``UA_ENABLE_LWS_MQTT``. The
+libwebsockets library must be built with
+``LWS_ROLE_MQTT=ON``.
+
+.. code-block:: c
+
+   UA_ConnectionManager *
+   UA_ConnectionManager_new_LWS_MQTT(const UA_String eventSourceName);
    
 Signal Interrupt Manager
 ~~~~~~~~~~~~~~~~~~~~~~~~
