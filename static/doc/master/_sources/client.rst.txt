@@ -1119,7 +1119,13 @@ sending the request to the server.
        UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId);
    
 The "ClientHandle" is part of the MonitoredItem configuration. The handle is
-set internally and not exposed to the user.
+set internally and not exposed to the user. A modification uses a new
+ClientHandle. Until the first notification with that handle arrives, queued
+notifications with the old handle are processed with the old settings.
+
+If the same MonitoredItem is modified again before a notification with the
+pending handle arrives, the newer modification supersedes the pending one.
+Notifications with the superseded handle are ignored.
 
 .. code-block:: c
 
@@ -1131,7 +1137,7 @@ set internally and not exposed to the user.
    typedef void
    (*UA_ClientAsyncModifyMonitoredItemsCallback)(
        UA_Client *client, void *userdata, UA_UInt32 requestId,
-       UA_DeleteMonitoredItemsResponse *response);
+       UA_ModifyMonitoredItemsResponse *response);
    
    UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_modify_async(UA_Client *client,

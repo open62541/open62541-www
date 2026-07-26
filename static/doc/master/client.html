@@ -1185,7 +1185,12 @@ sending the request to the server.</p>
 </pre></div>
 </div>
 <p>The “ClientHandle” is part of the MonitoredItem configuration. The handle is
-set internally and not exposed to the user.</p>
+set internally and not exposed to the user. A modification uses a new
+ClientHandle. Until the first notification with that handle arrives, queued
+notifications with the old handle are processed with the old settings.</p>
+<p>If the same MonitoredItem is modified again before a notification with the
+pending handle arrives, the newer modification supersedes the pending one.
+Notifications with the superseded handle are ignored.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ModifyMonitoredItemsResponse</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_MonitoredItems_modify</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ModifyMonitoredItemsRequest</span><span class="w"> </span><span class="n">request</span><span class="p">);</span>
@@ -1193,7 +1198,7 @@ set internally and not exposed to the user.</p>
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_ClientAsyncModifyMonitoredItemsCallback</span><span class="p">)(</span>
 <span class="w">    </span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">userdata</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">requestId</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_DeleteMonitoredItemsResponse</span><span class="w"> </span><span class="o">*</span><span class="n">response</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_ModifyMonitoredItemsResponse</span><span class="w"> </span><span class="o">*</span><span class="n">response</span><span class="p">);</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_MonitoredItems_modify_async</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
