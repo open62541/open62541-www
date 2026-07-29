@@ -863,6 +863,17 @@ client settings.</p>
 <span class="w">    </span><span class="cm">/* Advanced Settings</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~ */</span>
 
+<span class="w">    </span><span class="cm">/* Maximum number of application-level asynchronous service calls that may</span>
+<span class="cm">     * be outstanding. A value of 0 disables the limit. The default is 32.</span>
+<span class="cm">     * Internal requests for connection maintenance and Publish are not counted.</span>
+<span class="cm">     *</span>
+<span class="cm">     * When the limit is reached, UA_RULEHANDLING_ABORT (and DEFAULT) rejects a</span>
+<span class="cm">     * new call with BadTooManyOperations. UA_RULEHANDLING_WARN logs a warning</span>
+<span class="cm">     * and waits for capacity. UA_RULEHANDLING_ACCEPT waits silently. Waiting</span>
+<span class="cm">     * runs the EventLoop and can therefore execute user callbacks. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxAsyncServiceCalls</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">asyncServiceCallRule</span><span class="p">;</span>
+
 <span class="w">    </span><span class="cm">/* Number of PublishResponse queued up in the server */</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">outStandingPublishRequests</span><span class="p">;</span>
 
@@ -1695,6 +1706,11 @@ is shutting down is UA_STATUSCODE_BADSHUTDOWN. The StatusCode received when
 the client doesn’t receive response after the specified in config-&gt;timeout
 (can be overridden via the “timeoutHint” in the request header) is
 UA_STATUSCODE_BADTIMEOUT.</p>
+<p>The number of outstanding application-level async calls can be limited with
+<code class="docutils literal notranslate"><span class="pre">config-&gt;maxAsyncServiceCalls</span></code>. Depending on
+<code class="docutils literal notranslate"><span class="pre">config-&gt;asyncServiceCallRule</span></code>, a call at the limit either returns
+UA_STATUSCODE_BADTOOMANYOPERATIONS or waits for capacity. Waiting runs the
+EventLoop and can execute user callbacks before the async call returns.</p>
 <p>The userdata and requestId arguments can be NULL. The (optional) requestId
 output can be used to cancel the service while it is still pending. The
 requestId is unique for each service request. Alternatively the requestHandle
