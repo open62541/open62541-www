@@ -68,7 +68,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#event-source">Event Source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connection-manager">Connection Manager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#interrupt-manager">Interrupt Manager</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#posix-eventloop-implementation">POSIX EventLoop Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#posix-eventloop-implementation">POSIX EventLoop Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#glib-eventloop-implementation">GLib EventLoop Implementation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tcp-connection-manager">TCP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#udp-connection-manager">UDP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ethernet-connection-manager">Ethernet Connection Manager</a></li>
@@ -77,6 +78,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mqtt-connection-manager">MQTT Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#libwebsockets-mqtt-connection-manager">Libwebsockets MQTT Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#signal-interrupt-manager">Signal Interrupt Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#glib-signal-interrupt-manager">GLib Signal Interrupt Manager</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#event-loop-configuration">Event Loop Configuration</a></li>
@@ -569,6 +571,37 @@ CLOCK_MONOTONIC_RAW)</p>
 </dl>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_EventLoop_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_EVENTLOOP_GLIB</span>
+</pre></div>
+</div>
+</section>
+<section id="glib-eventloop-implementation">
+<h2>GLib EventLoop Implementation<a class="headerlink" href="#glib-eventloop-implementation" title="Link to this heading"></a></h2>
+<p>A drop-in alternative to <code class="docutils literal notranslate"><span class="pre">UA_EventLoop_new_POSIX</span></code> that is driven by a
+GLib <code class="docutils literal notranslate"><span class="pre">GMainContext</span></code> instead of directly calling select()/epoll_wait().
+All ConnectionManagers documented below (TCP, UDP, Ethernet, …) work
+unchanged with this EventLoop.</p>
+<p>Once started, the EventLoop attaches a <code class="docutils literal notranslate"><span class="pre">GSource</span></code> to the given
+<code class="docutils literal notranslate"><span class="pre">GMainContext</span></code>. From that point on, sockets and timers are serviced
+automatically whenever that context is iterated – for example by
+<code class="docutils literal notranslate"><span class="pre">g_main_loop_run()</span></code>, <code class="docutils literal notranslate"><span class="pre">gtk_main()</span></code>, <code class="docutils literal notranslate"><span class="pre">g_application_run()</span></code>, or any
+other GLib-based application main loop. It is therefore not necessary to
+call the EventLoop’s own <code class="docutils literal notranslate"><span class="pre">run</span></code> method at all; the open62541 stack can be
+fully driven by GLib. <code class="docutils literal notranslate"><span class="pre">run</span></code> is still provided (performing a single
+bounded iteration of the <code class="docutils literal notranslate"><span class="pre">GMainContext</span></code>) for backwards compatibility
+with code that pumps the EventLoop itself (e.g. <code class="docutils literal notranslate"><span class="pre">UA_Server_run</span></code>).</p>
+<p>&#64;param logger The logger for the EventLoop.
+&#64;param glibMainContext The <code class="docutils literal notranslate"><span class="pre">GMainContext*</span></code> to attach to. If <code class="docutils literal notranslate"><span class="pre">NULL</span></code>,</p>
+<blockquote>
+<div><p>the process-wide default context (<code class="docutils literal notranslate"><span class="pre">g_main_context_default()</span></code>) is
+used – the same context iterated by a plain
+<code class="docutils literal notranslate"><span class="pre">g_main_loop_new(NULL,</span> <span class="pre">...)</span></code> or by GTK/GNOME applications.</p>
+</div></blockquote>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_GLib</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">glibMainContext</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_EVENTLOOP_GLIB */</span>
 </pre></div>
 </div>
 <section id="tcp-connection-manager">
@@ -941,6 +974,44 @@ interrupt manager takes the numerical interrupt identifiers from &lt;signal.h&gt
 for the interruptHandle.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_InterruptManager_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#ifdef UA_ENABLE_EVENTLOOP_GLIB</span>
+</pre></div>
+</div>
+</section>
+<section id="glib-signal-interrupt-manager">
+<h3>GLib Signal Interrupt Manager<a class="headerlink" href="#glib-signal-interrupt-manager" title="Link to this heading"></a></h3>
+<p>Same contract as UA_InterruptManager_new_POSIX (interruptHandle is a
+&lt;signal.h&gt; signal number), but each interrupt is registered as a native
+GLib GSource (g_unix_signal_source_new) attached to the GMainContext of
+the owning EventLoop (see UA_EventLoop_new_GLib), instead of installing a
+sigaction handler writing to a self-pipe. GLib handles the OS-level signal
+reception itself.</p>
+<p>Two behavioral differences from UA_InterruptManager_new_POSIX, both
+inherent to GLib:</p>
+<ul class="simple">
+<li><p>Delivery is asynchronous: GLib forwards a received signal to the
+EventLoop via an internal worker thread. A signal may therefore not yet
+be visible to a single non-blocking EventLoop iteration performed
+immediately after it was raised; callers polling for a specific
+interrupt should use one or more blocking iterations (a nonzero <cite>run</cite>
+timeout), not assume synchronous delivery.</p></li>
+<li><p>If the same signal number is registered on two independent GLib-backed
+InterruptManagers (or GSources) in the same process, GLib delivers each
+occurrence to only one of them, not both – unlike
+UA_InterruptManager_new_POSIX, which fans a signal out to every one of
+its own registered listeners. Use different signal numbers if multiple
+independent GLib InterruptManagers need to run side by side.</p></li>
+</ul>
+<p>Do not register the same signal on both a UA_InterruptManager_new_POSIX
+and a UA_InterruptManager_new_GLib instance in the same process – they
+install the OS-level handler through different, mutually-unaware
+mechanisms and will race over it. Only available on Unix (Linux/Darwin),
+not Win32.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_InterruptManager_new_GLib</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_EVENTLOOP_GLIB */</span>
 
 <span class="cp">#elif defined(UA_ARCHITECTURE_ZEPHYR)</span>
 
