@@ -1083,8 +1083,8 @@ used to override the value source.</p>
 <span class="cp">                                                 outNewNodeId)</span>
 
 <span class="cm">/* Set an internal value source. Both the value argument and the notifications</span>
-<span class="cm"> * argument can be NULL. If value is NULL, the Read service is used to get the</span>
-<span class="cm"> * latest value before switching from a callback to an internal value source. If</span>
+<span class="cm"> * argument can be NULL. If value is NULL, an existing internal value is kept;</span>
+<span class="cm"> * switching from another value source creates an empty internal value. If</span>
 <span class="cm"> * notifications is NULL, then all onRead/onWrite notifications are disabled. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_setVariableNode_internalValueSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
@@ -1320,16 +1320,18 @@ solved by the user.</p>
 <p>When a node is destroyed, the node-type destructor is called before the
 global destructor. So the overall node lifecycle is as follows:</p>
 <ol class="arabic simple">
+<li><p>Global Early Constructor (set in the server config)</p></li>
+<li><p>Node-Type Early Constructor (for Variables or Objects)</p></li>
+<li><p>Recursive instantiation of the node’s children</p></li>
 <li><p>Global Constructor (set in the server config)</p></li>
-<li><p>Node-Type Constructor (for VariableType or ObjectTypes)</p></li>
+<li><p>Node-Type Constructor (for Variables or Objects)</p></li>
 <li><p>(Usage-period of the Node)</p></li>
 <li><p>Node-Type Destructor</p></li>
 <li><p>Global Destructor</p></li>
 </ol>
 <p>The constructor and destructor callbacks can be set to <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and are not
-used in that case. If the node-type constructor fails, the global destructor
-will be called before removing the node. The destructors are assumed to never
-fail.</p>
+used in that case. If a constructor fails, the global destructor will be
+called before removing the node. The destructors are assumed to never fail.</p>
 <p>Every node carries a user-context and a constructor-context pointer. The
 user-context is used to attach custom data to a node. But the (user-defined)
 constructors and destructors may replace the user-context pointer if they
@@ -1344,7 +1346,7 @@ pointer of the new node is also initially set to <code class="docutils literal n
 <span class="n">UA_Server_setNodeContext</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Global constructor and destructor callbacks used for every node type.
+<p>Global constructor and destructor callbacks used for every node.
 It gets set in the server config.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Can be NULL. May replace the nodeContext */</span>
@@ -1401,6 +1403,17 @@ It gets set in the server config.</p>
 <span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetParentNodeId</span><span class="p">,</span>
 <span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">referenceTypeId</span><span class="p">,</span>
 <span class="w">                                         </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">targetNodeId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Can be NULL. Called after the node has been inserted into the Nodestore</span>
+<span class="cm">     * and its parent and TypeDefinition references have been added, but before</span>
+<span class="cm">     * automatic child instantiation. This allows the callback to add children</span>
+<span class="cm">     * that shall take the place of children declared by the TypeDefinition.</span>
+<span class="cm">     * May replace the nodeContext. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">earlyConstructor</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_GlobalNodeLifecycle</span><span class="p">;</span>
 </pre></div>
 </div>
@@ -1418,6 +1431,16 @@ ObjectTypeNodes. It gets called for instances of this node-type.</p>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
 <span class="w">                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Can be NULL. Called after the global earlyConstructor and before</span>
+<span class="cm">     * automatic child instantiation. May replace the nodeContext. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">earlyConstructor</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeId</span><span class="p">,</span>
+<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">typeNodeContext</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                      </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">nodeContext</span><span class="p">);</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_NodeTypeLifecycle</span><span class="p">;</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
@@ -1439,7 +1462,8 @@ _finish part via their matching BrowseName.</p>
 <li><p>prepares the node and adds it to the nodestore</p></li>
 <li><p>copies some unassigned attributes from the TypeDefinition node internally</p></li>
 <li><p>adds the references to the parent (and the TypeDefinition if applicable)</p></li>
-<li><p>performs type-checking of variables.</p></li>
+<li><p>performs type-checking of variables</p></li>
+<li><p>calls the global and node-type earlyConstructors, if configured.</p></li>
 </ul>
 </dd>
 </dl>
@@ -2384,6 +2408,11 @@ The usual usage is as follows:</p>
 <span class="cm">     * is allowed that they have any ModellingRule independent of the</span>
 <span class="cm">     * ModellingRule of their InstanceDeclaration */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">modellingRulesOnInstances</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Copy Method instance declarations into each Object instance instead of</span>
+<span class="cm">     * adding a reference to the Method on the ObjectType. The default is false</span>
+<span class="cm">     * for backwards compatibility. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">copyMethodsOnInstances</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Limits</span>
 <span class="cm">     * ~~~~~~ */</span>
