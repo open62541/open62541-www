@@ -2221,7 +2221,14 @@ The usual usage is as follows:</p>
 <li><p>After shutdown of the server, clean up the configuration (free memory)</p></li>
 </ol>
 <p>The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide a good starting point for this.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ServerConfig</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Encryption mode requirement for OPC UA Binary over WebSockets */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_WEBSOCKET_ENCRYPTION_OPTIONAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="cm">/* Allow both opc.ws:// (unencrypted) and opc.wss:// (TLS) */</span>
+<span class="w">    </span><span class="n">UA_WEBSOCKET_ENCRYPTION_REQUIRED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="cm">/* Allow only opc.wss:// (TLS); reject opc.ws:// */</span>
+<span class="w">    </span><span class="n">UA_WEBSOCKET_ENCRYPTION_DISABLED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">  </span><span class="cm">/* Allow only opc.ws:// (unencrypted); reject opc.wss:// */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_WebSocketEncryptionMode</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_ServerConfig</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Used to attach custom data to a server config. This can</span>
 <span class="cm">                    * then be retrieved e.g. in a callback that forwards a</span>
 <span class="cm">                    * pointer to the server. */</span>
@@ -2334,13 +2341,13 @@ The usual usage is as follows:</p>
 <span class="cm">                              * (default: 0 -&gt; unbounded) */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpReuseAddr</span><span class="p">;</span>
 
-<span class="cp">#ifdef UA_ENABLE_LWS</span>
+
 <span class="w">    </span><span class="cm">/* The following settings are specific to OPC UA Binary over WebSockets.</span>
-<span class="cm">     * The transport is opt-in and requires an opc.wss ServerUrl together with</span>
-<span class="cm">     * a TLS certificate/private-key pair. The TLS credentials protect the</span>
-<span class="cm">     * WebSocket transport and are independent of OPC UA SecurityPolicies. */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">webSocketEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Enable the WebSocket listener</span>
-<span class="cm">                                   * (default: false) */</span>
+<span class="cm">     * The transport is opt-in and controlled via webSocketEnabled (default: false).</span>
+<span class="cm">     * TLS credentials protect opc.wss:// endpoints independently of OPC UA SecurityPolicies. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">webSocketEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Enable the WebSocket listener (default: false) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">webSocketAllowUnencrypted</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Allow non-standard unencrypted opc.ws:// endpoints (default: false) */</span>
+<span class="w">    </span><span class="n">UA_WebSocketEncryptionMode</span><span class="w"> </span><span class="n">webSocketEncryptionMode</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Encryption requirement (default: UA_WEBSOCKET_ENCRYPTION_OPTIONAL) */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">webSocketBufSize</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Max length of sent and received chunks</span>
 <span class="cm">                                    * (default: 64kB) */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">webSocketMaxMsgSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Max length of messages</span>
@@ -2352,7 +2359,6 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">webSocketCertificate</span><span class="p">;</span><span class="w"> </span><span class="cm">/* TLS certificate, DER or PEM */</span>
 <span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">webSocketPrivateKey</span><span class="p">;</span><span class="w">  </span><span class="cm">/* TLS private key, DER or PEM */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">webSocketPrivateKeyPassword</span><span class="p">;</span>
-<span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Security and Encryption</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~ */</span>
