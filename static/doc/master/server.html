@@ -2289,10 +2289,10 @@ The usual usage is as follows:</p>
 
 <span class="w">    </span><span class="cm">/* Networking</span>
 <span class="cm">     * ~~~~~~~~~~</span>
-<span class="cm">     * The `severUrls` array contains the server URLs like</span>
+<span class="cm">     * The `serverUrls` array contains the server URLs like</span>
 <span class="cm">     * `opc.tcp://my-server:4840` or `opc.wss://localhost:443`. The URLs are</span>
 <span class="cm">     * used both for discovery and to set up the server sockets based on the</span>
-<span class="cm">     * defined hostnames (and ports).</span>
+<span class="cm">     * defined hostnames, ports and WebSocket paths.</span>
 <span class="cm">     *</span>
 <span class="cm">     * - If the list is empty: Listen on all network interfaces with TCP port 4840.</span>
 <span class="cm">     * - If the hostname of a URL is empty: Use the define protocol and port and</span>
@@ -2301,7 +2301,7 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrlsSize</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* The following settings are specific to OPC UA with TCP transport. */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpEnabled</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpEnabled</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Enable the TCP listener (default: true) */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">tcpBufSize</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Max length of sent and received chunks (packets)</span>
 <span class="cm">                              * (default: 64kB) */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">tcpMaxMsgSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Max length of messages</span>
@@ -2309,6 +2309,26 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">tcpMaxChunks</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Max number of chunks per message</span>
 <span class="cm">                              * (default: 0 -&gt; unbounded) */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpReuseAddr</span><span class="p">;</span>
+
+<span class="cp">#ifdef UA_ENABLE_LWS</span>
+<span class="w">    </span><span class="cm">/* The following settings are specific to OPC UA Binary over WebSockets.</span>
+<span class="cm">     * The transport is opt-in and requires an opc.wss ServerUrl together with</span>
+<span class="cm">     * a TLS certificate/private-key pair. The TLS credentials protect the</span>
+<span class="cm">     * WebSocket transport and are independent of OPC UA SecurityPolicies. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">webSocketEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Enable the WebSocket listener</span>
+<span class="cm">                                   * (default: false) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">webSocketBufSize</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Max length of sent and received chunks</span>
+<span class="cm">                                    * (default: 64kB) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">webSocketMaxMsgSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Max length of messages</span>
+<span class="cm">                                    * (default: 0 -&gt; unbounded) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">webSocketMaxChunks</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Max number of chunks per message</span>
+<span class="cm">                                    * (default: 0 -&gt; unbounded) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">webSocketMaxQueueSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Max bytes queued for a slow WebSocket</span>
+<span class="cm">                                      * peer (default: 16 * webSocketBufSize) */</span>
+<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">webSocketCertificate</span><span class="p">;</span><span class="w"> </span><span class="cm">/* TLS certificate, DER or PEM */</span>
+<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">webSocketPrivateKey</span><span class="p">;</span><span class="w">  </span><span class="cm">/* TLS private key, DER or PEM */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">webSocketPrivateKeyPassword</span><span class="p">;</span>
+<span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Security and Encryption</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~ */</span>
@@ -2936,7 +2956,9 @@ the DefaultRolePermissions from the NamespaceMetadata apply.</p>
 <code class="docutils literal notranslate"><span class="pre">examples/server_json_config.c</span></code> document the intended workflow and the
 currently supported keys. They cover the common runtime limits as well as
 optional blocks for discovery, subscriptions, historizing, PubSub and
-security policy configuration.</p>
+security policy configuration. TCP is enabled by default. WebSockets are
+disabled by default and can be configured with <code class="docutils literal notranslate"><span class="pre">webSocketEnabled</span></code> and the
+<code class="docutils literal notranslate"><span class="pre">webSocket</span></code> block when <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS</span></code> is compiled in.</p>
 <p>The following functions require JSON encoding support
 (<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_JSON_ENCODING</span></code>).</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_JSON_ENCODING</span>
