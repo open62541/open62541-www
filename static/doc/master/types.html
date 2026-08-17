@@ -1277,9 +1277,11 @@ target NodeId is stored instead of the decoded value.</p>
 <span class="w">    </span><span class="n">UA_EXTENSIONOBJECT_ENCODED_BYTESTRING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_EXTENSIONOBJECT_ENCODED_XML</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_EXTENSIONOBJECT_DECODED</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-<span class="w">    </span><span class="n">UA_EXTENSIONOBJECT_DECODED_NODELETE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="cm">/* Don't delete the content</span>
-<span class="cm">                                                 together with the</span>
-<span class="cm">                                                 ExtensionObject */</span>
+<span class="w">    </span><span class="n">UA_EXTENSIONOBJECT_DECODED_NODELETE</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="cm">/* Don't delete the content</span>
+<span class="cm">                                                  together with the</span>
+<span class="cm">                                                  ExtensionObject */</span>
+<span class="w">    </span><span class="n">UA_EXTENSIONOBJECT_ENCODED_JSON</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="w">  </span><span class="cm">/* Internal JSON representation</span>
+<span class="cm">                                                 for an unknown datatype */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ExtensionObjectEncoding</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ExtensionObject</span><span class="w"> </span><span class="p">{</span>
@@ -1400,8 +1402,9 @@ is required.</p></li>
 <p>Specializations, such as <code class="docutils literal notranslate"><span class="pre">UA_Int32_new()</span></code> are derived from the generic
 type operations as static inline functions.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* UA_DataTypeMember describes the fields of structures/unions/etc. In addition</span>
-<span class="cm"> * it is used to describe the possible values of enums. For enums, the</span>
-<span class="cm"> * memberType value is cast to an integer to represent the enum value. */</span>
+<span class="cm"> * it can describe the possible values of enums. Enum members are optional; if</span>
+<span class="cm"> * present, the memberType value is cast to an integer to represent the enum</span>
+<span class="cm"> * value. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DataTypeMember</span><span class="w"> </span><span class="p">{</span>
 <span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">memberName</span><span class="p">;</span><span class="w">       </span><span class="cm">/* Human-readable member name */</span>
@@ -1703,17 +1706,18 @@ additional data types can be forwarded.</p>
 </section>
 <section id="json-en-decoding">
 <h2>JSON En/Decoding<a class="headerlink" href="#json-en-decoding" title="Link to this heading"></a></h2>
-<p>The JSON decoding can parse the official encoding from the OPC UA
-specification. It further allows the following extensions:</p>
+<p>The JSON encoding follows OPC UA 1.05 and represents NodeIds and
+ExpandedNodeIds with their standard string syntax (for example
+<code class="docutils literal notranslate"><span class="pre">&quot;ns=1;i=42&quot;</span></code>). The decoder accepts Compact and Verbose values without an
+a priori mode setting. The encoding is detected independently for nested
+values, so mixed input is supported. The decoder further allows the
+following extensions:</p>
 <ul class="simple">
 <li><p>The strict JSON format is relaxed to also allow the JSON5 extensions
 (<a class="reference external" href="https://json5.org/">https://json5.org/</a>). This allows for more human-readable encoding and adds
 convenience features such as trailing commas in arrays and comments within
 JSON documents.</p></li>
 <li><p>Int64/UInt64 don’t necessarily have to be wrapped into a string.</p></li>
-<li><p>NodeIds and ExpandedNodeIds can be given in the string encoding (e.g.
-“ns=1;i=42”, see <cite>UA_NodeId_parse</cite>). The standard encoding is to express
-NodeIds as JSON objects.</p></li>
 </ul>
 <p>These extensions are not intended to be used for the OPC UA protocol on the
 network. They were rather added to allow more convenient configuration file
@@ -1727,16 +1731,18 @@ formats that also include data in the OPC UA type system.</p>
 
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">serverUris</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">serverUrisSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">useReversible</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">prettyPrint</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Add newlines and spaces for legibility */</span>
 
-<span class="w">    </span><span class="cm">/* Enabling the following options leads to non-standard compatible JSON5</span>
+<span class="w">    </span><span class="cm">/* Enabling unquotedKeys leads to non-standard compatible JSON5</span>
 <span class="cm">     * encoding! Use it for pretty-printing, but not for sending messages over</span>
 <span class="cm">     * the network. (Our own decoding can still parse it.) */</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">unquotedKeys</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Don't print quotes around object element keys */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">stringNodeIds</span><span class="p">;</span><span class="w"> </span><span class="cm">/* String encoding for NodeIds, like "ns=1;i=42" */</span>
+
+<span class="w">    </span><span class="cm">/* Use the OPC UA CompactEncoding. The zero-initialized default is the</span>
+<span class="cm">     * VerboseEncoding. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">useCompactEncoding</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_EncodeJsonOptions</span><span class="p">;</span>
 
 <span class="cm">/* Returns the number of bytes the value src takes in JSON encoding. Returns</span>

@@ -441,14 +441,37 @@ clients. But this namespace 0 is so small that it does not pass the CTT
 </dl>
 <p>Some options are marked as advanced. The advanced options need to be toggled to
 be visible in the cmake GUIs.</p>
-<dl class="simple">
+<dl>
 <dt><strong>UA_ENABLE_TYPEDESCRIPTION</strong></dt><dd><p>Add the type and member names to the UA_DataType structure. Enabled by default.</p>
 </dd>
 <dt><strong>UA_ENABLE_STATUSCODE_DESCRIPTIONS</strong></dt><dd><p>Compile the human-readable name of the StatusCodes into the binary. Enabled by default.</p>
 </dd>
-<dt><strong>UA_ENABLE_LWS</strong></dt><dd><p>Includes the <code class="docutils literal notranslate"><span class="pre">libwebsockets</span></code> library to enable OPC UA over WebSockets transport protocols (<code class="docutils literal notranslate"><span class="pre">opc.ws://</span></code> for unencrypted WebSockets and <code class="docutils literal notranslate"><span class="pre">opc.wss://</span></code> for WebSockets over TLS/SSL).</p>
+<dt><strong>UA_ENABLE_LWS</strong></dt><dd><p>Enable the <code class="docutils literal notranslate"><span class="pre">libwebsockets</span></code> transport provider. It supplies the generic
+HTTP client/server ConnectionManager, OPC UA services over HTTPS
+(<code class="docutils literal notranslate"><span class="pre">opc.https://</span></code>), and OPC UA Binary over WebSockets (<code class="docutils literal notranslate"><span class="pre">opc.ws://</span></code> and
+<code class="docutils literal notranslate"><span class="pre">opc.wss://</span></code>). The server transports remain opt-in through
+<code class="docutils literal notranslate"><span class="pre">httpEnabled</span></code> and <code class="docutils literal notranslate"><span class="pre">webSocketEnabled</span></code>. <code class="docutils literal notranslate"><span class="pre">opc.https</span></code> requires a TLS
+certificate and private key. Binary and, when <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_JSON_ENCODING</span></code>
+is enabled, JSON service bodies can coexist on the same endpoint URL and
+are exposed as separate Binary and <code class="docutils literal notranslate"><span class="pre">/json</span></code> endpoint paths. Each logical
+channel remains pinned to one encoding. Internally, Session routing contexts
+isolate AuthenticationTokens and nonces between clients without creating a
+new wire-level SecureChannel for every HTTP request.
+HTTP content compression is optional in the OPC UA specification.</p>
+<p>Session-less HTTPS <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> and <code class="docutils literal notranslate"><span class="pre">Accept-Language</span></code> processing are
+not implemented by this transport. Applications that require those optional
+profile features must provide them above the generic HTTP ConnectionManager.</p>
 </dd>
-<dt><strong>UA_ENABLE_LWS_MQTT</strong></dt><dd><p>Enable the <code class="docutils literal notranslate"><span class="pre">libwebsockets</span></code> MQTT ConnectionManager implementation for PubSub MQTT transport protocols (<code class="docutils literal notranslate"><span class="pre">opc.mqtt://</span></code> and <code class="docutils literal notranslate"><span class="pre">opc.mqtts://</span></code>). Requires <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS</span></code> and <code class="docutils literal notranslate"><span class="pre">libwebsockets</span></code> compiled with MQTT support (<code class="docutils literal notranslate"><span class="pre">LWS_ROLE_MQTT=ON</span></code>).</p>
+<dt><strong>UA_ENABLE_HTTP_COMPRESSION</strong></dt><dd><p>Enable bounded <code class="docutils literal notranslate"><span class="pre">gzip</span></code> and <code class="docutils literal notranslate"><span class="pre">deflate</span></code> request/response content coding for
+HTTP clients and servers. This option requires <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS</span></code> and zlib. Compressed
+input is limited independently on the wire and after decompression. Unknown
+request codings are rejected with HTTP status 415 and unacceptable response
+coding negotiation with status 406.</p>
+</dd>
+<dt><strong>UA_ENABLE_LWS_MQTT</strong></dt><dd><p>Enable the MQTT part of the <code class="docutils literal notranslate"><span class="pre">libwebsockets</span></code> provider for PubSub MQTT
+transport protocols (<code class="docutils literal notranslate"><span class="pre">opc.mqtt://</span></code> and <code class="docutils literal notranslate"><span class="pre">opc.mqtts://</span></code>). Requires
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS</span></code> and libwebsockets compiled with MQTT support
+(<code class="docutils literal notranslate"><span class="pre">LWS_ROLE_MQTT=ON</span></code>).</p>
 </dd>
 </dl>
 </section>

@@ -2328,7 +2328,9 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Networking</span>
 <span class="cm">     * ~~~~~~~~~~</span>
 <span class="cm">     * The `serverUrls` array contains the server URLs like</span>
-<span class="cm">     * `opc.tcp://my-server:4840` or `opc.wss://localhost:443`. The URLs are</span>
+<span class="cm">     * `opc.tcp://my-server:4840`, `opc.wss://localhost:443` or</span>
+<span class="cm">     * `opc.https://localhost:443/ua`. The non-standard `opc.ws` and</span>
+<span class="cm">     * `opc.http` schemes can be enabled explicitly for testing. The URLs are</span>
 <span class="cm">     * used both for discovery and to set up the server sockets based on the</span>
 <span class="cm">     * defined hostnames, ports and WebSocket paths.</span>
 <span class="cm">     *</span>
@@ -2348,7 +2350,6 @@ The usual usage is as follows:</p>
 <span class="cm">                              * (default: 0 -&gt; unbounded) */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">tcpReuseAddr</span><span class="p">;</span>
 
-
 <span class="w">    </span><span class="cm">/* The following settings are specific to OPC UA Binary over WebSockets.</span>
 <span class="cm">     * The transport is opt-in and controlled via webSocketEnabled (default: false).</span>
 <span class="cm">     * TLS credentials protect opc.wss:// endpoints independently of OPC UA SecurityPolicies. */</span>
@@ -2366,6 +2367,28 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">webSocketCertificate</span><span class="p">;</span><span class="w"> </span><span class="cm">/* TLS certificate, DER or PEM */</span>
 <span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">webSocketPrivateKey</span><span class="p">;</span><span class="w">  </span><span class="cm">/* TLS private key, DER or PEM */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">webSocketPrivateKeyPassword</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">httpEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default: false */</span>
+<span class="w">    </span><span class="cm">/* Allow the non-standard, unencrypted opc.http scheme. This removes</span>
+<span class="cm">     * transport confidentiality and is intended for testing only. Passwords</span>
+<span class="cm">     * still require an encrypted UserTokenPolicy unless</span>
+<span class="cm">     * allowNonePolicyPassword is enabled separately. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">httpAllowUnencrypted</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default: false */</span>
+
+<span class="w">    </span><span class="cm">/* OPC UA services over HTTP(S) (Part 6, 7.4 defines HTTPS). Unlike</span>
+<span class="cm">     * opc.wss, service structures are encoded directly in the request and</span>
+<span class="cm">     * response body. The opc.http scheme is an open62541 extension. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">httpMaxMsgSize</span><span class="p">;</span><span class="w">       </span><span class="cm">/* Default: 0 -&gt; unbounded */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">httpMaxDecompressedMsgSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Expanded request-body limit.</span>
+<span class="cm">                                           * Default: 0 -&gt; 64 MiB */</span>
+<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">httpTimeout</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Request timeout in seconds (default: 60) */</span>
+<span class="w">    </span><span class="cm">/* Bind address for HTTP(S) listeners. A null String uses the hostname from</span>
+<span class="cm">     * the corresponding ServerUrl. An explicitly set empty String</span>
+<span class="cm">     * listens on all interfaces without changing the advertised hostname. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">httpListenAddress</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">httpCertificate</span><span class="p">;</span><span class="w">  </span><span class="cm">/* TLS certificate, DER or PEM */</span>
+<span class="w">    </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">httpPrivateKey</span><span class="p">;</span><span class="w">   </span><span class="cm">/* TLS private key, DER or PEM */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">httpPrivateKeyPassword</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Security and Encryption</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~ */</span>
@@ -2998,9 +3021,10 @@ the DefaultRolePermissions from the NamespaceMetadata apply.</p>
 <code class="docutils literal notranslate"><span class="pre">examples/server_json_config.c</span></code> document the intended workflow and the
 currently supported keys. They cover the common runtime limits as well as
 optional blocks for discovery, subscriptions, historizing, PubSub and
-security policy configuration. TCP is enabled by default. WebSockets are
-disabled by default and can be configured with <code class="docutils literal notranslate"><span class="pre">webSocketEnabled</span></code> and the
-<code class="docutils literal notranslate"><span class="pre">webSocket</span></code> block when <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS</span></code> is compiled in.</p>
+security policy configuration. TCP is enabled by default. WebSockets and
+OPC UA services over HTTPS are disabled by default. When <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS</span></code>
+is compiled in, configure them with <code class="docutils literal notranslate"><span class="pre">webSocketEnabled</span></code> / <code class="docutils literal notranslate"><span class="pre">webSocket</span></code> and
+<code class="docutils literal notranslate"><span class="pre">httpEnabled</span></code> / <code class="docutils literal notranslate"><span class="pre">http</span></code> respectively.</p>
 <p>The following functions require JSON encoding support
 (<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_JSON_ENCODING</span></code>).</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_JSON_ENCODING</span>

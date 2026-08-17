@@ -826,31 +826,53 @@ txtime parameters uses Linux conventions.</p>
 </section>
 <section id="http-connection-manager">
 <h3>HTTP Connection Manager<a class="headerlink" href="#http-connection-manager" title="Link to this heading"></a></h3>
-<p>The HTTP ConnectionManager uses the libwebsockets library to send HTTP requests.</p>
+<p>The HTTP ConnectionManager uses libwebsockets for HTTP client and server
+connections. A server listener announces each accepted peer connection
+with its own connection id and context. Request bodies are reassembled and
+delivered in a callback on that accepted connection. Send the response with
+<code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> and the accepted connection id. Sequential HTTP/1.1
+keep-alive requests reuse the same id and context.</p>
 <p><strong>Open Connection Parameters:</strong></p>
 <dl class="simple">
-<dt>0:address [string]</dt><dd><p>Hostname or IPv4/IPv6 address of the target (required).</p>
+<dt>0:address [string]</dt><dd><p>Remote hostname or IPv4/IPv6 address for clients (required), or local
+interface for listeners. Listeners default to all interfaces.</p>
 </dd>
-<dt>0:port [uint16]</dt><dd><p>Port of the target host (required).</p>
+<dt>0:port [uint16]</dt><dd><p>Remote or listening port (required; zero selects a dynamic server port).</p>
 </dd>
-<dt>0:timeout [uint16]</dt><dd><p>Connection timeout in seconds (default: 30).</p>
+<dt>0:content-coding-policy [string]</dt><dd><p>Server responses only. <code class="docutils literal notranslate"><span class="pre">identity</span></code> forces an uncompressed response;
+<code class="docutils literal notranslate"><span class="pre">gzip</span></code> restricts negotiation to gzip or identity. This lets an
+application protocol narrow the generic HTTP coding set.</p>
+</dd>
+<dt>0:timeout [uint16]</dt><dd><p>Connection or request timeout in seconds (default: 30).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Create a listening connection (default: false).</p>
 </dd>
 <dt>0:useSSL [bool]</dt><dd><p>Encrypt the connection with TLS (default: false).</p>
 </dd>
-<dt>0:username [string]</dt><dd><p>Username for HTTP Basic authentication. The authorization header is added
-only if both <code class="docutils literal notranslate"><span class="pre">username</span></code> and <code class="docutils literal notranslate"><span class="pre">password</span></code> are set.</p>
+<dt>0:certificate [bytestring]</dt><dd><p>DER or PEM encoded local certificate. For listeners this is the server
+certificate. For clients it enables mutual TLS.</p>
 </dd>
-<dt>0:password [string]</dt><dd><p>Password for HTTP Basic authentication. The authorization header is added
-only if both <code class="docutils literal notranslate"><span class="pre">username</span></code> and <code class="docutils literal notranslate"><span class="pre">password</span></code> are set.</p>
+<dt>0:private-key [bytestring]</dt><dd><p>DER or PEM encoded private key for <code class="docutils literal notranslate"><span class="pre">certificate</span></code>.</p>
 </dd>
-<dt>0:ca-cert [bytestring]</dt><dd><p>DER or PEM encoded CA certificate or certificate bundle used to verify
-the server. If unset, the operating system trust store is used.</p>
+<dt>0:private-key-password [string]</dt><dd><p>Password for an encrypted private key.</p>
 </dd>
-<dt>0:client-cert [bytestring]</dt><dd><p>DER or PEM encoded client certificate for mutual TLS.</p>
+<dt>0:ca-certificate [bytestring]</dt><dd><p>DER or PEM encoded CA certificate used to validate the TLS peer. For a
+listener, setting this requires clients to present a trusted certificate.
+A client uses the system trust store when this parameter is omitted.</p>
 </dd>
-<dt>0:client-key [bytestring]</dt><dd><p>DER or PEM encoded private key for the client certificate.</p>
+<dt>0:recv-max-message-size [uint32]</dt><dd><p>Maximum size of a reassembled response body for clients or request body
+on the wire for listeners. Zero or omission means unlimited.</p>
 </dd>
-<dt>0:client-key-password [string]</dt><dd><p>Password for an encrypted client private key.</p>
+<dt>0:recv-max-decompressed-message-size [uint32]</dt><dd><p>Maximum request body size after HTTP Content-Encoding decompression for
+listeners, or response body size after decompression for clients. It
+defaults to <code class="docutils literal notranslate"><span class="pre">recv-max-message-size</span></code> when that limit is set, otherwise
+to 64 MiB for listeners. A client only advertises supported compression
+when this limit is non-zero.</p>
+</dd>
+<dt>0:send-max-message-size [uint32]</dt><dd><p>Maximum request body size for clients or response body size for listeners.
+Zero or omission means unlimited.</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>Validate parameters without opening a connection.</p>
 </dd>
 </dl>
 <p><strong>Send Parameters:</strong></p>
@@ -859,14 +881,50 @@ the server. If unset, the operating system trust store is used.</p>
 </dd>
 <dt>0:method [string]</dt><dd><p>HTTP request method (default: <code class="docutils literal notranslate"><span class="pre">GET</span></code>).</p>
 </dd>
-<dt>0:header [string]</dt><dd><p>Additional request headers encoded as ampersand-separated key-value
-pairs, for example <code class="docutils literal notranslate"><span class="pre">Accept=application/json&amp;X-Trace=yes</span></code>. Header names
-and values therefore cannot contain unescaped <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> or <code class="docutils literal notranslate"><span class="pre">=</span></code> characters.</p>
+<dt>0:status-code [uint16]</dt><dd><p>HTTP response status for server requests (default: 200). Not valid for
+client requests.</p>
+</dd>
+<dt>0:headers [KeyValuePair array]</dt><dd><p>Additional request or response headers. Every pair uses the header name as
+its QualifiedName with namespace index zero and a scalar String value.
+Header names are case-insensitive. Content-Length, Transfer-Encoding and
+Connection are managed internally and cannot be supplied.</p>
+</dd>
+<dt>0:request-handle [Variant]</dt><dd><p>Opaque caller-defined metadata for an HTTP client request. Scalar, array
+and custom DataTypes are accepted. The value is copied when sending,
+returned unchanged in every response callback and never transmitted as
+an HTTP header. Concurrent client requests require handles; callers are
+responsible for choosing values that distinguish their requests. Without
+a handle only one request may be outstanding.</p>
+</dd>
+<dt>0:timeout [uint16]</dt><dd><p>Timeout in seconds for this request. Zero or omission uses the timeout
+configured when opening the client binding.</p>
 </dd>
 </dl>
 <p>The <code class="docutils literal notranslate"><span class="pre">buf</span></code> argument passed to <code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> is used as the request
 body. It may be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> for an empty body and, like all ConnectionManager
 send buffers, is released internally even if sending fails.</p>
+<p>Listener callbacks provide <code class="docutils literal notranslate"><span class="pre">listen-address</span></code> and <code class="docutils literal notranslate"><span class="pre">listen-port</span></code>. An
+accepted connection is first announced with <code class="docutils literal notranslate"><span class="pre">remote-address</span></code> and an empty
+body. Its subsequent request callbacks provide <code class="docutils literal notranslate"><span class="pre">method</span></code>, <code class="docutils literal notranslate"><span class="pre">path</span></code>,
+<code class="docutils literal notranslate"><span class="pre">headers</span></code>, <code class="docutils literal notranslate"><span class="pre">remote-address</span></code> and <code class="docutils literal notranslate"><span class="pre">request-random</span></code>. The latter is a
+32-byte ByteString filled by the libwebsockets platform random source. Client
+response callbacks provide <code class="docutils literal notranslate"><span class="pre">status-code</span></code> and <code class="docutils literal notranslate"><span class="pre">headers</span></code> when the response
+is established. Identity response-body fragments also provide
+<code class="docutils literal notranslate"><span class="pre">content-length</span></code>. Decompressed fragments omit it because the wire length
+no longer describes the delivered body. A final callback contains
+<code class="docutils literal notranslate"><span class="pre">response-complete</span></code> set to true and an
+empty body. It also contains <code class="docutils literal notranslate"><span class="pre">request-status</span></code> with the terminal transport
+StatusCode. All callbacks contain <code class="docutils literal notranslate"><span class="pre">request-handle</span></code> when it was supplied
+by the caller. A failed client request does not close sibling requests or
+the client binding.</p>
+<p>Every accepted peer connection has an independent connection context and
+produces exactly one final <code class="docutils literal notranslate"><span class="pre">UA_CONNECTIONSTATE_CLOSING</span></code> callback. Its
+connection id remains valid across sequential requests until it is
+explicitly closed, the peer disconnects or the configured inactivity
+timeout expires. Only one request is active at a time on an HTTP/1.1
+connection. Closing a listener also closes all of its accepted connections
+before the ConnectionManager reaches the stopped state. Incoming chunked
+request bodies are decoded and delivered as one reassembled message.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_HTTP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
 </pre></div>
