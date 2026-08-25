@@ -602,8 +602,9 @@ client settings.
         * under these restrictions, then the connection will abort with an error
         * message. */
    
-       UA_String endpointUrl; /* The URI for the client to connect to
-                               * ("opc.tcp://host:port") */
+       UA_String endpointUrl; /* The URI for the client to connect to, e.g.
+                               * "opc.tcp://host:port" or
+                               * "opc.wss://host:port/path" */
    
        /* Session config */
        UA_ExtensionObject userIdentityToken; /* UserIdentityToken containing e.g.
@@ -629,6 +630,21 @@ client settings.
        UA_UInt32 connectivityCheckInterval; /* Connectivity check interval in ms.
                                              * 0 -> background task disabled */
        UA_Boolean tcpReuseAddr; /* Specific to OPC UA with TCP transport. */
+   #ifdef UA_ENABLE_LWS
+       UA_ByteString webSocketCaCertificate; /* DER or PEM encoded CA certificate
+                                              * for WebSocket TLS. The system trust
+                                              * store is used when empty. */
+       UA_UInt32 webSocketMaxQueueSize; /* Max bytes queued for a slow WebSocket
+                                         * peer (default: 16 * sendBufferSize) */
+   #endif
+       UA_Boolean httpAllowUnencrypted; /* Allow the non-standard opc.http scheme */
+       UA_ByteString httpCaCertificate; /* DER or PEM CA; empty uses system trust */
+       UA_ByteString httpClientCertificate; /* DER or PEM TLS client certificate */
+       UA_ByteString httpClientPrivateKey;  /* DER or PEM TLS client private key */
+       UA_String httpClientPrivateKeyPassword; /* Password for encrypted TLS key */
+       UA_UInt16 httpTimeout;           /* HTTP binding/request timeout in seconds */
+       UA_UInt32 httpMaxMsgSize;        /* Maximum encoded HTTP message size */
+       UA_UInt32 httpMaxDecompressedMsgSize; /* Maximum expanded HTTP response */
    
        /* Endpoint Selection
         * ~~~~~~~~~~~~~~~~~~
@@ -667,6 +683,13 @@ client settings.
    
        /* Certificate Verification Plugin */
        UA_CertificateGroup certificateVerification;
+   
+       /* Verify that the server ApplicationInstanceCertificate permits serverAuth.
+        * For RSA SecurityPolicies the EKU extension is mandatory. For ECC
+        * SecurityPolicies it is optional, but must permit serverAuth when present.
+        * ABORT rejects invalid usage, DEFAULT and WARN log and continue, and ACCEPT
+        * continues silently. */
+       UA_RuleHandling certificateEkuRule;
    
        /* SecurityPolicies for authentication with an x509 certificate. The
         * UserIdentityToken contains only the certificate. The certificate gets
@@ -774,6 +797,17 @@ client settings.
    
        /* Advanced Settings
         * ~~~~~~~~~~~~~~~~~ */
+   
+       /* Maximum number of application-level asynchronous service calls that may
+        * be outstanding. A value of 0 disables the limit. The default is 32.
+        * Internal requests for connection maintenance and Publish are not counted.
+        *
+        * When the limit is reached, UA_RULEHANDLING_ABORT (and DEFAULT) rejects a
+        * new call with BadTooManyOperations. UA_RULEHANDLING_WARN logs a warning
+        * and waits for capacity. UA_RULEHANDLING_ACCEPT waits silently. Waiting
+        * runs the EventLoop and can therefore execute user callbacks. */
+       UA_UInt32 maxAsyncServiceCalls;
+       UA_RuleHandling asyncServiceCallRule;
    
        /* Number of PublishResponse queued up in the server */
        UA_UInt16 outStandingPublishRequests;
@@ -1119,7 +1153,13 @@ sending the request to the server.
        UA_UInt32 subscriptionId, UA_UInt32 monitoredItemId);
    
 The "ClientHandle" is part of the MonitoredItem configuration. The handle is
-set internally and not exposed to the user.
+set internally and not exposed to the user. A modification uses a new
+ClientHandle. Until the first notification with that handle arrives, queued
+notifications with the old handle are processed with the old settings.
+
+If the same MonitoredItem is modified again before a notification with the
+pending handle arrives, the newer modification supersedes the pending one.
+Notifications with the superseded handle are ignored.
 
 .. code-block:: c
 
@@ -1131,7 +1171,7 @@ set internally and not exposed to the user.
    typedef void
    (*UA_ClientAsyncModifyMonitoredItemsCallback)(
        UA_Client *client, void *userdata, UA_UInt32 requestId,
-       UA_DeleteMonitoredItemsResponse *response);
+       UA_ModifyMonitoredItemsResponse *response);
    
    UA_StatusCode UA_THREADSAFE
    UA_Client_MonitoredItems_modify_async(UA_Client *client,
@@ -1282,6 +1322,20 @@ the regular service to read several attributes at once.
    UA_THREADSAFE UA_StatusCode
    UA_Client_readUserAccessLevelAttribute(UA_Client *client, const UA_NodeId nodeId,
                                           UA_Byte *out);
+   
+   /* Returns a variant with a UA_RolePermissionType array */
+   UA_THREADSAFE UA_StatusCode
+   UA_Client_readRolePermissionsAttribute(UA_Client *client, const UA_NodeId nodeId,
+                                          UA_Variant *out);
+   
+   /* Returns a variant with a UA_RolePermissionType array */
+   UA_THREADSAFE UA_StatusCode
+   UA_Client_readUserRolePermissionsAttribute(UA_Client *client, const UA_NodeId nodeId,
+                                              UA_Variant *out);
+   
+   UA_THREADSAFE UA_StatusCode
+   UA_Client_readAccessRestrictionsAttribute(UA_Client *client, const UA_NodeId nodeId,
+                                             UA_AccessRestrictionType *out);
    
    UA_THREADSAFE UA_StatusCode
    UA_Client_readMinimumSamplingIntervalAttribute(UA_Client *client,
@@ -1460,6 +1514,15 @@ time. Use the regular write service to write several attributes at once.
                                            const UA_Byte *newUserAccessLevel);
    
    UA_THREADSAFE UA_StatusCode
+   UA_Client_writeRolePermissionsAttribute(UA_Client *client, const UA_NodeId nodeId,
+                                           const UA_Variant *newRolePermissions);
+   
+   UA_THREADSAFE UA_StatusCode
+   UA_Client_writeAccessRestrictionsAttribute(
+       UA_Client *client, const UA_NodeId nodeId,
+       const UA_AccessRestrictionType *newAccessRestrictions);
+   
+   UA_THREADSAFE UA_StatusCode
    UA_Client_writeMinimumSamplingIntervalAttribute(UA_Client *client,
                                                    const UA_NodeId nodeId,
                                                    const UA_Double *newMinInterval);
@@ -1617,19 +1680,16 @@ Misc Highlevel Functionality
    UA_Client_NamespaceGetIndex(UA_Client *client, UA_String *namespaceUri,
                                UA_UInt16 *namespaceIndex);
    
-   #ifndef HAVE_NODEITER_CALLBACK
-   #define HAVE_NODEITER_CALLBACK
    /* Iterate over all nodes referenced by parentNodeId by calling the callback
     * function for each child node */
    typedef UA_StatusCode
-   (*UA_NodeIteratorCallback)(UA_NodeId childId, UA_Boolean isInverse,
-                              UA_NodeId referenceTypeId, void *handle);
-   #endif
+   (*UA_ClientNodeIteratorCallback)(UA_NodeId childId, UA_Boolean isInverse,
+                                    UA_NodeId referenceTypeId, void *handle);
    
    UA_StatusCode
    UA_Client_forEachChildNodeCall(
        UA_Client *client, UA_NodeId parentNodeId,
-       UA_NodeIteratorCallback callback, void *handle);
+       UA_ClientNodeIteratorCallback callback, void *handle);
 
 .. _client-async-services:
 
@@ -1654,6 +1714,12 @@ is shutting down is UA_STATUSCODE_BADSHUTDOWN. The StatusCode received when
 the client doesn't receive response after the specified in config->timeout
 (can be overridden via the "timeoutHint" in the request header) is
 UA_STATUSCODE_BADTIMEOUT.
+
+The number of outstanding application-level async calls can be limited with
+``config->maxAsyncServiceCalls``. Depending on
+``config->asyncServiceCallRule``, a call at the limit either returns
+UA_STATUSCODE_BADTOOMANYOPERATIONS or waits for capacity. Waiting runs the
+EventLoop and can execute user callbacks before the async call returns.
 
 The userdata and requestId arguments can be NULL. The (optional) requestId
 output can be used to cancel the service while it is still pending. The
@@ -2017,6 +2083,44 @@ the status of the operation is not good.
        UA_ClientAsyncReadUserAccessLevelAttributeCallback callback,
        void *userdata, UA_UInt32 *requestId);
    
+   /* Read a single RolePermissions attribute. If the status is good, the variant
+    * carries a UA_RolePermissionType array. */
+   typedef void
+   (*UA_ClientAsyncReadRolePermissionsAttributeCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_StatusCode status, UA_Variant *rolePermissions);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_readRolePermissionsAttribute_async(
+       UA_Client *client, const UA_NodeId nodeId,
+       UA_ClientAsyncReadRolePermissionsAttributeCallback callback,
+       void *userdata, UA_UInt32 *requestId);
+   
+   /* Read a single UserRolePermissions attribute. If the status is good, the
+    * variant carries a UA_RolePermissionType array. */
+   typedef void
+   (*UA_ClientAsyncReadUserRolePermissionsAttributeCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_StatusCode status, UA_Variant *userRolePermissions);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_readUserRolePermissionsAttribute_async(
+       UA_Client *client, const UA_NodeId nodeId,
+       UA_ClientAsyncReadUserRolePermissionsAttributeCallback callback,
+       void *userdata, UA_UInt32 *requestId);
+   
+   /* Read a single AccessRestrictions attribute */
+   typedef void
+   (*UA_ClientAsyncReadAccessRestrictionsAttributeCallback)(
+       UA_Client *client, void *userdata, UA_UInt32 requestId,
+       UA_StatusCode status, UA_AccessRestrictionType *accessRestrictions);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Client_readAccessRestrictionsAttribute_async(
+       UA_Client *client, const UA_NodeId nodeId,
+       UA_ClientAsyncReadAccessRestrictionsAttributeCallback callback,
+       void *userdata, UA_UInt32 *requestId);
+   
    /* Read a single MinimumSamplingInterval attribute */
    typedef void
    (*UA_ClientAsyncReadMinimumSamplingIntervalAttributeCallback)(
@@ -2098,6 +2202,9 @@ generate the method signatures with a macro.
    UA_CLIENT_ASYNCWRITE(UA_Client_writeHistorizingAttribute_async, UA_Boolean)
    UA_CLIENT_ASYNCWRITE(UA_Client_writeExecutableAttribute_async, UA_Boolean)
    UA_CLIENT_ASYNCWRITE(UA_Client_writeAccessLevelExAttribute_async, UA_UInt32)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeRolePermissionsAttribute_async, UA_Variant)
+   UA_CLIENT_ASYNCWRITE(UA_Client_writeAccessRestrictionsAttribute_async,
+                        UA_AccessRestrictionType)
    
 Method Calling
 ^^^^^^^^^^^^^^

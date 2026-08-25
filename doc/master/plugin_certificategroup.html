@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CertificateGroup Plugin API &mdash; open62541 (master) 1.5.4 documentation</title>
+  <title>CertificateGroup Plugin API &mdash; open62541 (master) 1.5.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1cd648e3"></script>
+      <script src="_static/documentation_options.js?v=8f564690"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
           
           <a href="toc.html" class="icon icon-home">
             open62541 (master)
-              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -46,14 +46,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -67,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html">SecurityPolicy Plugin API</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="driver.html">Drivers</a></li>
 </ul>
 
         </div>
@@ -167,6 +168,22 @@ The lifecycle of the plugin is attached to a server or client config. The
 <span class="nf">UA_CertificateUtils_getKeySize</span><span class="p">(</span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>
 <span class="w">                               </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">keySize</span><span class="p">);</span>
 
+<span class="cm">/* Extended key usages are a set. A value of UA_CERTIFICATEEKU_NONE means that</span>
+<span class="cm"> * the certificate does not contain an Extended Key Usage extension. The</span>
+<span class="cm"> * UA_CERTIFICATEEKU_OTHER flag is set if the extension contains at least one</span>
+<span class="cm"> * purpose that is not represented by the other flags. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_CERTIFICATEEKU_NONE</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_CERTIFICATEEKU_SERVERAUTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_CERTIFICATEEKU_CLIENTAUTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_CERTIFICATEEKU_ANY</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="n">UA_CERTIFICATEEKU_OTHER</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">3</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_CertificateEku</span><span class="p">;</span>
+
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_CertificateUtils_getExtendedKeyUsage</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_CertificateEku</span><span class="w"> </span><span class="o">*</span><span class="n">extendedKeyUsage</span><span class="p">);</span>
+
 <span class="cm">/* Compares the public keys from two byte strings, which can represent either</span>
 <span class="cm"> * certificates or Certificate Signing Requests (CSR). This function extracts</span>
 <span class="cm"> * the public keys from the provided byte strings and compares them to determine</span>
@@ -214,7 +231,7 @@ The lifecycle of the plugin is attached to a server or client config. The
 <span class="cm"> *</span>
 <span class="cm"> * Other subject attributes may also be specified, so the Common Name must be</span>
 <span class="cm"> * extracted as a single subject attribute instead of parsing all characters</span>
-<span class="cm"> * after &quot;CN=&quot; from the subject string.</span>
+<span class="cm"> * after "CN=" from the subject string.</span>
 <span class="cm"> */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_CertificateUtils_getCertCommonName</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">certificate</span><span class="p">,</span>

@@ -201,7 +201,7 @@ A sequence of Unicode characters. Strings are just an array of UA_Byte.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_String {
        size_t length; /* The length of the string */
        UA_Byte *data; /* The content (not null-terminated) */
    } UA_String;
@@ -345,7 +345,7 @@ A 16 byte value that can be used as a globally unique identifier.
 
 .. code-block:: c
 
-   typedef struct {
+   typedef struct UA_Guid {
        UA_UInt32 data1;
        UA_UInt16 data2;
        UA_UInt16 data3;
@@ -433,7 +433,7 @@ An identifier for a node in the address space of an OPC UA Server.
        UA_NODEIDTYPE_BYTESTRING = 5
    };
    
-   typedef struct {
+   typedef struct UA_NodeId {
        UA_UInt16 namespaceIndex;
        enum UA_NodeIdType identifierType;
        union {
@@ -538,7 +538,7 @@ A NodeId that allows the namespace URI to be specified instead of an index.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_ExpandedNodeId {
        UA_NodeId nodeId;
        UA_String namespaceUri;
        UA_UInt32 serverIndex;
@@ -636,7 +636,7 @@ A name qualified by a namespace.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_QualifiedName {
        UA_UInt16 namespaceIndex;
        UA_String name;
    } UA_QualifiedName;
@@ -695,7 +695,7 @@ Human readable text with an optional locale identifier.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_LocalizedText {
        UA_String locale;
        UA_String text;
    } UA_LocalizedText;
@@ -719,12 +719,12 @@ with a single element (min==max).
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_NumericRangeDimension {
        UA_UInt32 min;
        UA_UInt32 max;
    } UA_NumericRangeDimension;
    
-   typedef struct  {
+   typedef struct UA_NumericRange {
        size_t dimensionsSize;
        UA_NumericRangeDimension *dimensions;
    } UA_NumericRange;
@@ -784,7 +784,7 @@ Variants can also be *empty*. Then, the pointer to the type description is
                                  * The array dimensions also borrowed. */
    } UA_VariantStorageType;
    
-   typedef struct {
+   typedef struct UA_Variant {
        const UA_DataType *type;      /* The data type description */
        UA_VariantStorageType storageType;
        size_t arrayLength;           /* The number of elements in the data array */
@@ -870,12 +870,14 @@ target NodeId is stored instead of the decoded value.
        UA_EXTENSIONOBJECT_ENCODED_BYTESTRING = 1,
        UA_EXTENSIONOBJECT_ENCODED_XML        = 2,
        UA_EXTENSIONOBJECT_DECODED            = 3,
-       UA_EXTENSIONOBJECT_DECODED_NODELETE   = 4 /* Don't delete the content
-                                                    together with the
-                                                    ExtensionObject */
+       UA_EXTENSIONOBJECT_DECODED_NODELETE   = 4, /* Don't delete the content
+                                                     together with the
+                                                     ExtensionObject */
+       UA_EXTENSIONOBJECT_ENCODED_JSON       = 5  /* Internal JSON representation
+                                                    for an unknown datatype */
    } UA_ExtensionObjectEncoding;
    
-   typedef struct {
+   typedef struct UA_ExtensionObject {
        UA_ExtensionObjectEncoding encoding;
        union {
            struct {
@@ -923,7 +925,7 @@ A data value with an associated status code and timestamps.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_DataValue {
        UA_Variant    value;
        UA_DateTime   sourceTimestamp;
        UA_DateTime   serverTimestamp;
@@ -1002,9 +1004,10 @@ type operations as static inline functions.
 
    
    /* UA_DataTypeMember describes the fields of structures/unions/etc. In addition
-    * it is used to describe the possible values of enums. For enums, the
-    * memberType value is cast to an integer to represent the enum value. */
-   typedef struct {
+    * it can describe the possible values of enums. Enum members are optional; if
+    * present, the memberType value is cast to an integer to represent the enum
+    * value. */
+   typedef struct UA_DataTypeMember {
    #ifdef UA_ENABLE_TYPEDESCRIPTION
        const char *memberName;       /* Human-readable member name */
    #endif
@@ -1267,7 +1270,7 @@ additional data types can be forwarded.
 .. code-block:: c
 
    
-   typedef struct {
+   typedef struct UA_EncodeBinaryOptions {
        /* Mapping of namespace indices in NodeIds and of NamespaceUris in
         * ExpandedNodeIds. */
        UA_NamespaceMapping *namespaceMapping;
@@ -1290,7 +1293,7 @@ additional data types can be forwarded.
    /* The structure with the decoding options may be extended in the future.
     * Zero-out the entire structure initially to ensure code-compatibility when
     * more fields are added in a later release. */
-   typedef struct {
+   typedef struct UA_DecodeBinaryOptions {
        /* Begin of a linked list with custom datatype definitions */
        const UA_DataTypeArray *customTypes;
    
@@ -1318,18 +1321,18 @@ additional data types can be forwarded.
 JSON En/Decoding
 ----------------
 
-The JSON decoding can parse the official encoding from the OPC UA
-specification. It further allows the following extensions:
+The JSON encoding follows OPC UA 1.05 and represents NodeIds and
+ExpandedNodeIds with their standard string syntax (for example
+``"ns=1;i=42"``). The decoder accepts Compact and Verbose values without an
+a priori mode setting. The encoding is detected independently for nested
+values, so mixed input is supported. The decoder further allows the
+following extensions:
 
 - The strict JSON format is relaxed to also allow the JSON5 extensions
   (https://json5.org/). This allows for more human-readable encoding and adds
   convenience features such as trailing commas in arrays and comments within
   JSON documents.
 - Int64/UInt64 don't necessarily have to be wrapped into a string.
-- NodeIds and ExpandedNodeIds can be given in the string encoding (e.g.
-  "ns=1;i=42", see `UA_NodeId_parse`). The standard encoding is to express
-  NodeIds as JSON objects.
-
 These extensions are not intended to be used for the OPC UA protocol on the
 network. They were rather added to allow more convenient configuration file
 formats that also include data in the OPC UA type system.
@@ -1339,23 +1342,25 @@ formats that also include data in the OPC UA type system.
    
    #ifdef UA_ENABLE_JSON_ENCODING
    
-   typedef struct {
+   typedef struct UA_EncodeJsonOptions {
        /* Mapping of namespace indices in NodeIds and of NamespaceUris in
         * ExpandedNodeIds. */
        UA_NamespaceMapping *namespaceMapping;
    
        const UA_String *serverUris;
        size_t serverUrisSize;
-       UA_Boolean useReversible;
    
        UA_Boolean prettyPrint;   /* Add newlines and spaces for legibility */
    
-       /* Enabling the following options leads to non-standard compatible JSON5
+       /* Enabling unquotedKeys leads to non-standard compatible JSON5
         * encoding! Use it for pretty-printing, but not for sending messages over
         * the network. (Our own decoding can still parse it.) */
    
        UA_Boolean unquotedKeys;  /* Don't print quotes around object element keys */
-       UA_Boolean stringNodeIds; /* String encoding for NodeIds, like "ns=1;i=42" */
+   
+       /* Use the OPC UA CompactEncoding. The zero-initialized default is the
+        * VerboseEncoding. */
+       UA_Boolean useCompactEncoding;
    } UA_EncodeJsonOptions;
    
    /* Returns the number of bytes the value src takes in JSON encoding. Returns
@@ -1375,7 +1380,7 @@ formats that also include data in the OPC UA type system.
    /* The structure with the decoding options may be extended in the future.
     * Zero-out the entire structure initially to ensure code-compatibility when
     * more fields are added in a later release. */
-   typedef struct {
+   typedef struct UA_DecodeJsonOptions {
        /* Mapping of namespace indices in NodeIds and of NamespaceUris in
         * ExpandedNodeIds. */
        UA_NamespaceMapping *namespaceMapping;
@@ -1419,7 +1424,7 @@ formats that also include data in the OPC UA type system.
    /* The structure with the encoding options may be extended in the future.
     * Zero-out the entire structure initially to ensure code-compatibility when
     * more fields are added in a later release. */
-   typedef struct {
+   typedef struct UA_EncodeXmlOptions {
        UA_NamespaceMapping *namespaceMapping;
        const UA_String *serverUris;
        size_t serverUrisSize;
@@ -1442,7 +1447,7 @@ formats that also include data in the OPC UA type system.
    /* The structure with the decoding options may be extended in the future.
     * Zero-out the entire structure initially to ensure code-compatibility when
     * more fields are added in a later release. */
-   typedef struct {
+   typedef struct UA_DecodeXmlOptions {
        UA_Boolean unwrapped; /* The value xxx is not wrapped in an XML element - as
                               * in <Type>xxx</Type> */
    

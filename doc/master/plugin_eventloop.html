@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventLoop Plugin API &mdash; open62541 (master) 1.5.4 documentation</title>
+  <title>EventLoop Plugin API &mdash; open62541 (master) 1.5.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1cd648e3"></script>
+      <script src="_static/documentation_options.js?v=8f564690"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
           
           <a href="toc.html" class="icon icon-home">
             open62541 (master)
-              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -46,14 +46,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
@@ -68,12 +68,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#event-source">Event Source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connection-manager">Connection Manager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#interrupt-manager">Interrupt Manager</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#posix-eventloop-implementation">POSIX EventLoop Implementation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#native-eventloop-implementations">Native EventLoop Implementations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#glib-eventloop-implementation">GLib EventLoop Implementation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tcp-connection-manager">TCP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#udp-connection-manager">UDP Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ethernet-connection-manager">Ethernet Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#http-connection-manager">HTTP Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libwebsockets-websocket-connection-manager">libwebsockets WebSocket Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mqtt-connection-manager">MQTT Connection Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libwebsockets-mqtt-connection-manager">Libwebsockets MQTT Connection Manager</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#signal-interrupt-manager">Signal Interrupt Manager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#glib-signal-interrupt-manager">GLib Signal Interrupt Manager</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#event-loop-configuration">Event Loop Configuration</a></li>
@@ -88,6 +93,7 @@
 <li class="toctree-l2"><a class="reference internal" href="plugin_securitypolicy.html">SecurityPolicy Plugin API</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="driver.html">Drivers</a></li>
 </ul>
 
         </div>
@@ -137,10 +143,10 @@ regular interval with respect to the original basetime.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_TIMERPOLICY_ONCE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">        </span><span class="cm">/* Execute the timer once and remove */</span>
 <span class="w">    </span><span class="n">UA_TIMERPOLICY_CURRENTTIME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="cm">/* Repeated timer. Upon cycle miss, execute</span>
-<span class="cm">                                     * &quot;now&quot; and wait exactly for the interval</span>
+<span class="cm">                                     * "now" and wait exactly for the interval</span>
 <span class="cm">                                     * until the next execution (new basetime). */</span>
 <span class="w">    </span><span class="n">UA_TIMERPOLICY_BASETIME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">    </span><span class="cm">/* Repeated timer. Upon cycle miss, execute</span>
-<span class="cm">                                     * &quot;now&quot; and fall back into the regular</span>
+<span class="cm">                                     * "now" and fall back into the regular</span>
 <span class="cm">                                     * cycle from the original basetime (the</span>
 <span class="cm">                                     * next execution might come after less</span>
 <span class="cm">                                     * delay than the interval defines). */</span>
@@ -159,7 +165,7 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">/* Delayed callbacks are executed not when they are registered, but in the</span>
 <span class="cm"> * following EventLoop cycle */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_atomic</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DelayedCallback</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">next</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Callback</span><span class="w"> </span><span class="n">callback</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">application</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
@@ -181,7 +187,7 @@ But the globally defined functions are the same everywhere.</p>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* See the implementation-specific documentation for possible parameters.</span>
-<span class="cm">     * The params map is cleaned up when the EventLoop is _free&#39;d. */</span>
+<span class="cm">     * The params map is cleaned up when the EventLoop is _free'd. */</span>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* EventLoop Lifecycle</span>
@@ -189,7 +195,7 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * The EventLoop state also controls the state of the configured</span>
 <span class="cm">     * EventSources. Stopping the EventLoop gracefully closes e.g. the open</span>
 <span class="cm">     * network connections. The only way to process incoming events is to call</span>
-<span class="cm">     * the &#39;run&#39; method. Events are then triggering their respective callbacks</span>
+<span class="cm">     * the 'run' method. Events are then triggering their respective callbacks</span>
 <span class="cm">     * from within that method.*/</span>
 
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">UA_EventLoopState</span><span class="w"> </span><span class="n">state</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Only read the state from outside */</span>
@@ -205,14 +211,14 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * EventLoop is not stopped. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Wait for events and processs them for at most &quot;timeout&quot; ms or until an</span>
+<span class="w">    </span><span class="cm">/* Wait for events and processs them for at most "timeout" ms or until an</span>
 <span class="cm">     * unrecoverable error occurs. If timeout==0, then only already received</span>
 <span class="cm">     * events are processed. Returns immediately after processing the first</span>
 <span class="cm">     * (batch of) event(s). */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">run</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* The &quot;run&quot; method is blocking and waits for events during a timeout</span>
-<span class="cm">     * period. This cancels the &quot;run&quot; method to return immediately. */</span>
+<span class="w">    </span><span class="cm">/* The "run" method is blocking and waits for events during a timeout</span>
+<span class="cm">     * period. This cancels the "run" method to return immediately. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">cancel</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* EventLoop Time Domain</span>
@@ -222,7 +228,7 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * Managing independent time domains is important when different parts of</span>
 <span class="cm">     * the same system are synchronized to different external master clocks.</span>
 <span class="cm">     *</span>
-<span class="cm">     * Each EventLoop uses a &quot;normal&quot; and a &quot;monotonic&quot; clock. The monotonic</span>
+<span class="cm">     * Each EventLoop uses a "normal" and a "monotonic" clock. The monotonic</span>
 <span class="cm">     * clock does not (necessarily) conform to the current wallclock date. But</span>
 <span class="cm">     * its time intervals are more precise. So it is used for all internally</span>
 <span class="cm">     * scheduled events of the EventLoop (e.g. timed callbacks and time-based</span>
@@ -315,8 +321,8 @@ But the globally defined functions are the same everywhere.</p>
 <span class="cm">     * For multi-threading the EventLoop is protected by a mutex. The mutex is</span>
 <span class="cm">     * expected to be recursive (can be taken more than once from the same</span>
 <span class="cm">     * thread). A common approach to avoid deadlocks is to establish an absolute</span>
-<span class="cm">     * ordering between the locks. Where the &quot;lower&quot; locks needs to be taken</span>
-<span class="cm">     * before the &quot;upper&quot; lock. The EventLoop-mutex is exposed here to allow it</span>
+<span class="cm">     * ordering between the locks. Where the "lower" locks needs to be taken</span>
+<span class="cm">     * before the "upper" lock. The EventLoop-mutex is exposed here to allow it</span>
 <span class="cm">     * to be taken from the outside. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">lock</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">unlock</span><span class="p">)(</span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">el</span><span class="p">);</span>
@@ -379,7 +385,7 @@ connections that are each bound to an MQTT topic.</p>
 <span class="cm"> * the application.</span>
 <span class="cm"> *</span>
 <span class="cm"> * - The connectionId is initially unknown to the target application and</span>
-<span class="cm"> *   &quot;announced&quot; to the application when first used first in this callback.</span>
+<span class="cm"> *   "announced" to the application when first used first in this callback.</span>
 <span class="cm"> *</span>
 <span class="cm"> * - The context is attached to the connection. Initially a default context</span>
 <span class="cm"> *   is set. The context can be replaced within the callback (via the</span>
@@ -408,7 +414,7 @@ connections that are each bound to an MQTT topic.</p>
 <span class="w">    </span><span class="n">UA_EventSource</span><span class="w"> </span><span class="n">eventSource</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Name of the protocol supported by the ConnectionManager. For example</span>
-<span class="cm">     * &quot;mqtt&quot;, &quot;udp&quot;, &quot;mqtt&quot;. */</span>
+<span class="cm">     * "mqtt", "udp", "mqtt". */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">protocol</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Open a Connection</span>
@@ -502,7 +508,7 @@ shall be designed such that:</p>
 network event: all methods and also memory allocation are available from
 within the interrupt callback.</p></li>
 </ul>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Interrupts can have additional key-value &#39;instanceInfos&#39; for each individual</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Interrupts can have additional key-value 'instanceInfos' for each individual</span>
 <span class="cm"> * triggering. See the architecture-specific documentation. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_InterruptCallback</span><span class="p">)(</span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span><span class="n">im</span><span class="p">,</span>
@@ -540,11 +546,10 @@ within the interrupt callback.</p></li>
 </pre></div>
 </div>
 </section>
-<section id="posix-eventloop-implementation">
-<h2>POSIX EventLoop Implementation<a class="headerlink" href="#posix-eventloop-implementation" title="Link to this heading"></a></h2>
-<p>The POSIX compatibility of Win32 is ‘close enough’. So a joint implementation
-is provided. The configuration paramaters must be set before starting the
-EventLoop.</p>
+<section id="native-eventloop-implementations">
+<h2>Native EventLoop Implementations<a class="headerlink" href="#native-eventloop-implementations" title="Link to this heading"></a></h2>
+<p>POSIX uses readiness polling. Win32 uses I/O completion ports. Configuration
+parameters must be set before starting the EventLoop.</p>
 <p><strong>Clock configuration (Linux and BSDs only)</strong></p>
 <dl class="simple">
 <dt>0:clock-source [int32]</dt><dd><p>Clock source (default: CLOCK_REALTIME).</p>
@@ -556,8 +561,46 @@ a clock source id for a character-device such as /dev/ptp0. (default:
 CLOCK_MONOTONIC_RAW)</p>
 </dd>
 </dl>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ARCHITECTURE_POSIX) &amp;&amp; !defined(UA_ARCHITECTURE_LWIP)</span>
+<span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_EventLoop_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ARCHITECTURE_WIN32</span>
+<span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_WIN32</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ENABLE_EVENTLOOP_GLIB</span>
+</pre></div>
+</div>
+</section>
+<section id="glib-eventloop-implementation">
+<h2>GLib EventLoop Implementation<a class="headerlink" href="#glib-eventloop-implementation" title="Link to this heading"></a></h2>
+<p>A drop-in alternative to <code class="docutils literal notranslate"><span class="pre">UA_EventLoop_new_POSIX</span></code> that is driven by a
+GLib <code class="docutils literal notranslate"><span class="pre">GMainContext</span></code> instead of directly calling select()/epoll_wait().
+All ConnectionManagers documented below (TCP, UDP, Ethernet, …) work
+unchanged with this EventLoop.</p>
+<p>Once started, the EventLoop attaches a <code class="docutils literal notranslate"><span class="pre">GSource</span></code> to the given
+<code class="docutils literal notranslate"><span class="pre">GMainContext</span></code>. From that point on, sockets and timers are serviced
+automatically whenever that context is iterated – for example by
+<code class="docutils literal notranslate"><span class="pre">g_main_loop_run()</span></code>, <code class="docutils literal notranslate"><span class="pre">gtk_main()</span></code>, <code class="docutils literal notranslate"><span class="pre">g_application_run()</span></code>, or any
+other GLib-based application main loop. It is therefore not necessary to
+call the EventLoop’s own <code class="docutils literal notranslate"><span class="pre">run</span></code> method at all; the open62541 stack can be
+fully driven by GLib. <code class="docutils literal notranslate"><span class="pre">run</span></code> is still provided (performing a single
+bounded iteration of the <code class="docutils literal notranslate"><span class="pre">GMainContext</span></code>) for backwards compatibility
+with code that pumps the EventLoop itself (e.g. <code class="docutils literal notranslate"><span class="pre">UA_Server_run</span></code>).</p>
+<p>&#64;param logger The logger for the EventLoop.
+&#64;param glibMainContext The <code class="docutils literal notranslate"><span class="pre">GMainContext*</span></code> to attach to. If <code class="docutils literal notranslate"><span class="pre">NULL</span></code>,</p>
+<blockquote>
+<div><p>the process-wide default context (<code class="docutils literal notranslate"><span class="pre">g_main_context_default()</span></code>) is
+used – the same context iterated by a plain
+<code class="docutils literal notranslate"><span class="pre">g_main_loop_new(NULL,</span> <span class="pre">...)</span></code> or by GTK/GNOME applications.</p>
+</div></blockquote>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_EventLoop_new_GLib</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">glibMainContext</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_EVENTLOOP_GLIB */</span>
 </pre></div>
 </div>
 <section id="tcp-connection-manager">
@@ -581,9 +624,12 @@ The server sockets get deactivated if the limit is reached.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -617,8 +663,15 @@ creating any connection but solely validating the provided parameters
 <p><strong>Send Parameters:</strong></p>
 <p>No additional parameters for sending over an established TCP socket
 defined.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ARCHITECTURE_POSIX) &amp;&amp; !defined(UA_ARCHITECTURE_LWIP)</span>
+<span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ARCHITECTURE_WIN32</span>
+<span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_WIN32_TCP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -631,9 +684,12 @@ configuration parameters have to set before calling _start to take effect.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -678,8 +734,15 @@ creating any connection but solely validating the provided parameters
 </dl>
 <p><strong>Send Parameters:</strong></p>
 <p>No additional parameters for sending over an UDP connection defined.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ARCHITECTURE_POSIX) &amp;&amp; !defined(UA_ARCHITECTURE_LWIP)</span>
+<span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_ConnectionManager_new_POSIX_UDP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ARCHITECTURE_WIN32</span>
+<span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_WIN32_UDP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
 
 <span class="cp">#if defined(__linux__) </span><span class="cm">/* Linux only so far */</span>
 </pre></div>
@@ -695,9 +758,12 @@ calling _start to take effect.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -758,6 +824,173 @@ txtime parameters uses Linux conventions.</p>
 </pre></div>
 </div>
 </section>
+<section id="http-connection-manager">
+<h3>HTTP Connection Manager<a class="headerlink" href="#http-connection-manager" title="Link to this heading"></a></h3>
+<p>The HTTP ConnectionManager uses libwebsockets for HTTP client and server
+connections. A server listener announces each accepted peer connection
+with its own connection id and context. Request bodies are reassembled and
+delivered in a callback on that accepted connection. Send the response with
+<code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> and the accepted connection id. Sequential HTTP/1.1
+keep-alive requests reuse the same id and context.</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string]</dt><dd><p>Remote hostname or IPv4/IPv6 address for clients (required), or local
+interface for listeners. Listeners default to all interfaces.</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Remote or listening port (required; zero selects a dynamic server port).</p>
+</dd>
+<dt>0:content-coding-policy [string]</dt><dd><p>Server responses only. <code class="docutils literal notranslate"><span class="pre">identity</span></code> forces an uncompressed response;
+<code class="docutils literal notranslate"><span class="pre">gzip</span></code> restricts negotiation to gzip or identity. This lets an
+application protocol narrow the generic HTTP coding set.</p>
+</dd>
+<dt>0:timeout [uint16]</dt><dd><p>Connection or request timeout in seconds (default: 30).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Create a listening connection (default: false).</p>
+</dd>
+<dt>0:useSSL [bool]</dt><dd><p>Encrypt the connection with TLS (default: false).</p>
+</dd>
+<dt>0:certificate [bytestring]</dt><dd><p>DER or PEM encoded local certificate. For listeners this is the server
+certificate. For clients it enables mutual TLS.</p>
+</dd>
+<dt>0:private-key [bytestring]</dt><dd><p>DER or PEM encoded private key for <code class="docutils literal notranslate"><span class="pre">certificate</span></code>.</p>
+</dd>
+<dt>0:private-key-password [string]</dt><dd><p>Password for an encrypted private key.</p>
+</dd>
+<dt>0:ca-certificate [bytestring]</dt><dd><p>DER or PEM encoded CA certificate used to validate the TLS peer. For a
+listener, setting this requires clients to present a trusted certificate.
+A client uses the system trust store when this parameter is omitted.</p>
+</dd>
+<dt>0:recv-max-message-size [uint32]</dt><dd><p>Maximum size of a reassembled response body for clients or request body
+on the wire for listeners. Zero or omission means unlimited.</p>
+</dd>
+<dt>0:recv-max-decompressed-message-size [uint32]</dt><dd><p>Maximum request body size after HTTP Content-Encoding decompression for
+listeners, or response body size after decompression for clients. It
+defaults to <code class="docutils literal notranslate"><span class="pre">recv-max-message-size</span></code> when that limit is set, otherwise
+to 64 MiB for listeners. A client only advertises supported compression
+when this limit is non-zero.</p>
+</dd>
+<dt>0:send-max-message-size [uint32]</dt><dd><p>Maximum request body size for clients or response body size for listeners.
+Zero or omission means unlimited.</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>Validate parameters without opening a connection.</p>
+</dd>
+</dl>
+<p><strong>Send Parameters:</strong></p>
+<dl class="simple">
+<dt>0:path [string]</dt><dd><p>Request-target path (default: <code class="docutils literal notranslate"><span class="pre">/</span></code>).</p>
+</dd>
+<dt>0:method [string]</dt><dd><p>HTTP request method (default: <code class="docutils literal notranslate"><span class="pre">GET</span></code>).</p>
+</dd>
+<dt>0:status-code [uint16]</dt><dd><p>HTTP response status for server requests (default: 200). Not valid for
+client requests.</p>
+</dd>
+<dt>0:headers [KeyValuePair array]</dt><dd><p>Additional request or response headers. Every pair uses the header name as
+its QualifiedName with namespace index zero and a scalar String value.
+Header names are case-insensitive. Content-Length, Transfer-Encoding and
+Connection are managed internally and cannot be supplied.</p>
+</dd>
+<dt>0:request-handle [Variant]</dt><dd><p>Opaque caller-defined metadata for an HTTP client request. Scalar, array
+and custom DataTypes are accepted. The value is copied when sending,
+returned unchanged in every response callback and never transmitted as
+an HTTP header. Concurrent client requests require handles; callers are
+responsible for choosing values that distinguish their requests. Without
+a handle only one request may be outstanding.</p>
+</dd>
+<dt>0:timeout [uint16]</dt><dd><p>Timeout in seconds for this request. Zero or omission uses the timeout
+configured when opening the client binding.</p>
+</dd>
+</dl>
+<p>The <code class="docutils literal notranslate"><span class="pre">buf</span></code> argument passed to <code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> is used as the request
+body. It may be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> for an empty body and, like all ConnectionManager
+send buffers, is released internally even if sending fails.</p>
+<p>Listener callbacks provide <code class="docutils literal notranslate"><span class="pre">listen-address</span></code> and <code class="docutils literal notranslate"><span class="pre">listen-port</span></code>. An
+accepted connection is first announced with <code class="docutils literal notranslate"><span class="pre">remote-address</span></code> and an empty
+body. Its subsequent request callbacks provide <code class="docutils literal notranslate"><span class="pre">method</span></code>, <code class="docutils literal notranslate"><span class="pre">path</span></code>,
+<code class="docutils literal notranslate"><span class="pre">headers</span></code>, <code class="docutils literal notranslate"><span class="pre">remote-address</span></code> and <code class="docutils literal notranslate"><span class="pre">request-random</span></code>. The latter is a
+32-byte ByteString filled by the libwebsockets platform random source. Client
+response callbacks provide <code class="docutils literal notranslate"><span class="pre">status-code</span></code> and <code class="docutils literal notranslate"><span class="pre">headers</span></code> when the response
+is established. Identity response-body fragments also provide
+<code class="docutils literal notranslate"><span class="pre">content-length</span></code>. Decompressed fragments omit it because the wire length
+no longer describes the delivered body. A final callback contains
+<code class="docutils literal notranslate"><span class="pre">response-complete</span></code> set to true and an
+empty body. It also contains <code class="docutils literal notranslate"><span class="pre">request-status</span></code> with the terminal transport
+StatusCode. All callbacks contain <code class="docutils literal notranslate"><span class="pre">request-handle</span></code> when it was supplied
+by the caller. A failed client request does not close sibling requests or
+the client binding.</p>
+<p>Every accepted peer connection has an independent connection context and
+produces exactly one final <code class="docutils literal notranslate"><span class="pre">UA_CONNECTIONSTATE_CLOSING</span></code> callback. Its
+connection id remains valid across sequential requests until it is
+explicitly closed, the peer disconnects or the configured inactivity
+timeout expires. Only one request is active at a time on an HTTP/1.1
+connection. Closing a listener also closes all of its accepted connections
+before the ConnectionManager reaches the stopped state. Incoming chunked
+request bodies are decoded and delivered as one reassembled message.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_HTTP</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="libwebsockets-websocket-connection-manager">
+<h3>libwebsockets WebSocket Connection Manager<a class="headerlink" href="#libwebsockets-websocket-connection-manager" title="Link to this heading"></a></h3>
+<p>Provides WebSocket client and server connections. Each buffer passed to
+<code class="docutils literal notranslate"><span class="pre">sendWithConnection</span></code> is sent as one binary WebSocket message. Incoming
+fragments belonging to one WebSocket message are reassembled and delivered
+together in one connection callback.</p>
+<p><strong>Open Connection Parameters:</strong></p>
+<dl class="simple">
+<dt>0:address [string]</dt><dd><p>Remote hostname for clients or local interface for listeners. Listeners
+default to all interfaces.</p>
+</dd>
+<dt>0:port [uint16]</dt><dd><p>Remote or listening port (required; zero selects a dynamic server port).</p>
+</dd>
+<dt>0:listen [boolean]</dt><dd><p>Create a listening connection (default: false).</p>
+</dd>
+<dt>0:path [string]</dt><dd><p>WebSocket request path (default: <code class="docutils literal notranslate"><span class="pre">/</span></code>). Clients request this path and
+listeners reject upgrade requests for any other path.</p>
+</dd>
+<dt>0:subprotocol [string]</dt><dd><p>WebSocket subprotocol to request or accept. By default no subprotocol is
+negotiated. When configured, listeners reject clients that do not
+offer this exact subprotocol. A client may offer additional protocols.</p>
+</dd>
+<dt>0:binary-only [boolean]</dt><dd><p>Reject incoming text messages and accept only binary WebSocket messages
+(default: true).</p>
+</dd>
+<dt>0:useSSL [bool]</dt><dd><p>Encrypt the connection with TLS (default: false). TLS listeners require
+<code class="docutils literal notranslate"><span class="pre">certificate</span></code> and <code class="docutils literal notranslate"><span class="pre">private-key</span></code>.</p>
+</dd>
+<dt>0:certificate [bytestring]</dt><dd><p>DER or PEM encoded local certificate. For listeners this is the server
+certificate. For clients it enables mutual TLS.</p>
+</dd>
+<dt>0:private-key [bytestring]</dt><dd><p>DER or PEM encoded private key for <code class="docutils literal notranslate"><span class="pre">certificate</span></code>.</p>
+</dd>
+<dt>0:private-key-password [string]</dt><dd><p>Password for an encrypted private key.</p>
+</dd>
+<dt>0:ca-certificate [bytestring]</dt><dd><p>DER or PEM encoded CA certificate used to validate the TLS peer for
+client connections. If omitted, the system trust store is used.</p>
+</dd>
+<dt>0:recv-max-message-size [uint32]</dt><dd><p>Maximum size of one reconstructed incoming WebSocket message. Zero or
+omission means unlimited. For <code class="docutils literal notranslate"><span class="pre">opcua+uacp</span></code> this is the negotiated
+receive buffer size because each WebSocket message carries one UACP
+MessageChunk.</p>
+</dd>
+<dt>0:send-max-message-size [uint32]</dt><dd><p>Maximum size of one outgoing WebSocket message. Zero or omission means
+unlimited. For <code class="docutils literal notranslate"><span class="pre">opcua+uacp</span></code> this is the negotiated send buffer size.</p>
+</dd>
+<dt>0:send-max-queue-size [uint32]</dt><dd><p>Maximum total payload size queued for sending on one connection. Zero or
+omission means unlimited.</p>
+</dd>
+<dt>0:validate [boolean]</dt><dd><p>Validate parameters without opening a connection.</p>
+</dd>
+</dl>
+<p>Listener callbacks provide <code class="docutils literal notranslate"><span class="pre">listen-address</span></code> and <code class="docutils literal notranslate"><span class="pre">listen-port</span></code>. Active
+and accepted connections provide <code class="docutils literal notranslate"><span class="pre">remote-address</span></code>. Secure client
+connections validate the server certificate and hostname using either
+<code class="docutils literal notranslate"><span class="pre">ca-certificate</span></code> or the system trust store.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_LWS_WebSocket</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
 <section id="mqtt-connection-manager">
 <h3>MQTT Connection Manager<a class="headerlink" href="#mqtt-connection-manager" title="Link to this heading"></a></h3>
 <p>The MQTT ConnectionManager reuses the TCP ConnectionManager that is
@@ -777,6 +1010,18 @@ separate connections are created for each topic and for each direction
 <dt>0:username [string]</dt><dd><p>Username to use (default: none)</p>
 </dd>
 <dt>0:password [string]</dt><dd><p>Password to use (default: none)</p>
+</dd>
+<dt>0:useSSL [bool]</dt><dd><p>Encrypt the broker connection with TLS (default: false).</p>
+</dd>
+<dt>0:certificate [bytestring]</dt><dd><p>DER or PEM encoded client certificate for mutual TLS.</p>
+</dd>
+<dt>0:private-key [bytestring]</dt><dd><p>DER or PEM encoded private key for <code class="docutils literal notranslate"><span class="pre">certificate</span></code>.</p>
+</dd>
+<dt>0:private-key-password [string]</dt><dd><p>Password for an encrypted private key.</p>
+</dd>
+<dt>0:ca-certificate [bytestring]</dt><dd><p>DER or PEM encoded CA certificate used to validate the broker
+certificate. If omitted, the system trust store is used. The broker
+certificate and hostname are always validated for TLS connections.</p>
 </dd>
 <dt>0:keep-alive [uint16]</dt><dd><p>Number of seconds for the keep-alive (ping) (default: 400).</p>
 </dd>
@@ -804,13 +1049,70 @@ publish on the topic. Subscribed topics can also be published to.</p>
 </pre></div>
 </div>
 </section>
+<section id="libwebsockets-mqtt-connection-manager">
+<h3>Libwebsockets MQTT Connection Manager<a class="headerlink" href="#libwebsockets-mqtt-connection-manager" title="Link to this heading"></a></h3>
+<p>Implements the same MQTT ConnectionManager contract and parameters as
+<code class="docutils literal notranslate"><span class="pre">UA_ConnectionManager_new_MQTT</span></code>, using the MQTT client role provided by
+libwebsockets. Enable this implementation with <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_LWS_MQTT</span></code>. The
+libwebsockets library must be built with
+<code class="docutils literal notranslate"><span class="pre">LWS_ROLE_MQTT=ON</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_ConnectionManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_ConnectionManager_new_LWS_MQTT</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
 <section id="signal-interrupt-manager">
 <h3>Signal Interrupt Manager<a class="headerlink" href="#signal-interrupt-manager" title="Link to this heading"></a></h3>
 <p>Create an instance of the interrupt manager that handles POSX signals. This
 interrupt manager takes the numerical interrupt identifiers from &lt;signal.h&gt;
 for the interruptHandle.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ARCHITECTURE_POSIX) &amp;&amp; !defined(UA_ARCHITECTURE_LWIP)</span>
+<span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_InterruptManager_new_POSIX</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ARCHITECTURE_WIN32</span>
+<span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_InterruptManager_new_WIN32</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef UA_ENABLE_EVENTLOOP_GLIB</span>
+</pre></div>
+</div>
+</section>
+<section id="glib-signal-interrupt-manager">
+<h3>GLib Signal Interrupt Manager<a class="headerlink" href="#glib-signal-interrupt-manager" title="Link to this heading"></a></h3>
+<p>Same contract as UA_InterruptManager_new_POSIX (interruptHandle is a
+&lt;signal.h&gt; signal number), but each interrupt is registered as a native
+GLib GSource (g_unix_signal_source_new) attached to the GMainContext of
+the owning EventLoop (see UA_EventLoop_new_GLib), instead of installing a
+sigaction handler writing to a self-pipe. GLib handles the OS-level signal
+reception itself.</p>
+<p>Two behavioral differences from UA_InterruptManager_new_POSIX, both
+inherent to GLib:</p>
+<ul class="simple">
+<li><p>Delivery is asynchronous: GLib forwards a received signal to the
+EventLoop via an internal worker thread. A signal may therefore not yet
+be visible to a single non-blocking EventLoop iteration performed
+immediately after it was raised; callers polling for a specific
+interrupt should use one or more blocking iterations (a nonzero <cite>run</cite>
+timeout), not assume synchronous delivery.</p></li>
+<li><p>If the same signal number is registered on two independent GLib-backed
+InterruptManagers (or GSources) in the same process, GLib delivers each
+occurrence to only one of them, not both – unlike
+UA_InterruptManager_new_POSIX, which fans a signal out to every one of
+its own registered listeners. Use different signal numbers if multiple
+independent GLib InterruptManagers need to run side by side.</p></li>
+</ul>
+<p>Do not register the same signal on both a UA_InterruptManager_new_POSIX
+and a UA_InterruptManager_new_GLib instance in the same process – they
+install the OS-level handler through different, mutually-unaware
+mechanisms and will race over it. Only available on Unix (Linux/Darwin),
+not Win32.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_InterruptManager</span><span class="w"> </span><span class="o">*</span>
+<span class="nf">UA_InterruptManager_new_GLib</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">eventSourceName</span><span class="p">);</span>
+
+<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_EVENTLOOP_GLIB */</span>
 
 <span class="cp">#elif defined(UA_ARCHITECTURE_ZEPHYR)</span>
 
@@ -892,9 +1194,12 @@ the first callback are different between server and client connections.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>
@@ -942,9 +1247,12 @@ configuration parameters have to set before calling _start to take effect.</p>
 <dt>0:recv-bufsize [uint32]</dt><dd><p>Size of the buffer that is statically allocated for receiving messages
 (default 64kB).</p>
 </dd>
-<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. This then
-becomes an upper bound for the message size. If undefined a fresh buffer
-is allocated for every <cite>allocNetworkBuffer</cite> (default: no buffer).</p>
+<dt>0:send-bufsize [uint32]</dt><dd><p>Size of the statically allocated buffer for sending messages. The buffer
+is reused for every <cite>allocNetworkBuffer</cite> to avoid a heap allocation per
+message; a message larger than the buffer falls back to a fresh
+allocation. A dedicated send buffer is used (never the recv buffer), so
+sending while received data is still being processed is safe. If
+undefined, the send buffer defaults to the recv-bufsize.</p>
 </dd>
 </dl>
 <p><strong>Open Connection Parameters:</strong></p>

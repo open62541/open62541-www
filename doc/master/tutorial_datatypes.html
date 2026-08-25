@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Working with Data Types &mdash; open62541 (master) 1.5.4 documentation</title>
+  <title>Working with Data Types &mdash; open62541 (master) 1.5.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1cd648e3"></script>
+      <script src="_static/documentation_options.js?v=8f564690"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -34,7 +34,7 @@
           
           <a href="toc.html" class="icon icon-home">
             open62541 (master)
-              <img src="_static/open62541_html.png" class="logo" alt="Logo"/>
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -46,7 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">Core Concepts of OPC UA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
@@ -73,12 +73,13 @@
 <li class="toctree-l2"><a class="reference internal" href="tutorial_pubsub_subscribe.html">Subscribing Fields</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ecc_security.html">ECC Security Policies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
 <li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="driver.html">Drivers</a></li>
 </ul>
 
         </div>
@@ -136,7 +137,7 @@ sure to compare with the type definitions in <code class="docutils literal notra
 <span class="w">    </span><span class="cm">/* String */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span><span class="w"> </span><span class="cm">/* _init zeroes out the entire memory of the datatype */</span>
-<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;test&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"test"</span><span class="p">;</span>
 <span class="w">    </span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strlen</span><span class="p">(</span><span class="n">test</span><span class="p">);</span>
 <span class="w">    </span><span class="n">s</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_Byte</span><span class="o">*</span><span class="p">)</span><span class="n">test</span><span class="p">;</span>
 
@@ -144,8 +145,8 @@ sure to compare with the type definitions in <code class="docutils literal notra
 <span class="w">    </span><span class="n">UA_String_copy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">s2</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s2</span><span class="p">);</span><span class="w"> </span><span class="cm">/* Copying heap-allocated the dynamic content */</span>
 
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">&quot;test2&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="s">&quot;test2&quot;</span><span class="p">);</span><span class="w"> </span><span class="cm">/* Copies the content to the heap */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING</span><span class="p">(</span><span class="s">"test2"</span><span class="p">);</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">s4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_ALLOC</span><span class="p">(</span><span class="s">"test2"</span><span class="p">);</span><span class="w"> </span><span class="cm">/* Copies the content to the heap */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">eq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_String_equal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s3</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">s4</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s4</span><span class="p">);</span>
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">eq</span><span class="p">)</span>
@@ -180,7 +181,7 @@ bytestring.</p>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_NUMERIC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1234</span><span class="p">);</span>
 <span class="w">    </span><span class="n">id1</span><span class="p">.</span><span class="n">namespaceIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;testid&quot;</span><span class="p">);</span><span class="w"> </span><span class="cm">/* the string is static */</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">"testid"</span><span class="p">);</span><span class="w"> </span><span class="cm">/* the string is static */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">eq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NodeId_equal</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">id2</span><span class="p">);</span>
 <span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">eq</span><span class="p">)</span>
 <span class="w">        </span><span class="k">return</span><span class="p">;</span>
@@ -189,7 +190,7 @@ bytestring.</p>
 <span class="w">    </span><span class="n">UA_NodeId_copy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id2</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">id3</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_NodeId_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id3</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;testid&quot;</span><span class="p">);</span><span class="w"> </span><span class="cm">/* the string is copied</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_NODEID_STRING_ALLOC</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">"testid"</span><span class="p">);</span><span class="w"> </span><span class="cm">/* the string is copied</span>
 <span class="cm">                                                            to the heap */</span>
 <span class="w">    </span><span class="n">UA_NodeId_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">id4</span><span class="p">);</span>
 <span class="p">}</span>
@@ -243,21 +244,21 @@ integer array.</p>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UA_STRING_NULL</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rr</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READREQUEST</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">"%.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_ReadResponse</span><span class="w"> </span><span class="n">resp</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ReadResponse_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">resp</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">resp</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_READRESPONSE</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">"%.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_ReferenceDescription</span><span class="w"> </span><span class="n">br</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ReferenceDescription_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">br</span><span class="p">);</span>
 <span class="w">    </span><span class="n">br</span><span class="p">.</span><span class="n">nodeClass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">UA_NodeClass</span><span class="p">)</span><span class="mi">5</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">br</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_REFERENCEDESCRIPTION</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
-<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">"%.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">UA_Float</span><span class="w"> </span><span class="n">matrix</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="mf">4.0</span><span class="p">};</span>
@@ -272,7 +273,7 @@ integer array.</p>
 <span class="w">    </span><span class="n">dv</span><span class="p">.</span><span class="n">hasServerTimestamp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">    </span><span class="n">dv</span><span class="p">.</span><span class="n">hasSourcePicoseconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dv</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">UA_TYPES</span><span class="p">[</span><span class="n">UA_TYPES_DATAVALUE</span><span class="p">],</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
-<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%.*s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">"%.*s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">out</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
 <span class="w">    </span><span class="n">UA_String_clear</span><span class="p">(</span><span class="o">&amp;</span><span class="n">out</span><span class="p">);</span>
 <span class="p">}</span>
 <span class="cp">#endif</span>
