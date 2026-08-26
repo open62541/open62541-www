@@ -4,7 +4,7 @@ layout: "company"
 description: "Learn about our mission, leadership team, and the investors backing our vision"
 ---
 
-{{< section-container class="bg-gradient-to-b from-blue-50 via-blue-50 to-white pt-20 pb-32" >}}
+{{< section-container class="bg-gradient-to-b from-primary-50 via-primary-50 to-white pt-20 pb-32" >}}
     <div class="text-center">
         <h1 class="text-4xl md:text-5xl font-bold mb-6">Building the Future of SaaS</h1>
         <p class="text-xl text-gray-600 mb-16">We're on a mission to revolutionize how businesses operate in the digital age</p>
