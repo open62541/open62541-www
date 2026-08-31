@@ -19,7 +19,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      HUGO_VERSION: 0.152.2
+      HUGO_VERSION: 0.165.0
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,11 +41,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Tailwind CSS
-        run: npx tailwindcss -i assets/css/main.css -o static/css/style.css --minify
-
+      # No standalone Tailwind step: layouts/_default/baseof.html compiles
+      # assets/css/main.css through Hugo's css.PostCSS, which runs Tailwind via
+      # postcss.config.js. npm ci above provides postcss-cli + tailwindcss.
       - name: Build Hugo site
-        run: hugo --minify --baseURL "https://www.open62541.org/"
+        run: hugo --minify --baseURL "https://open62541.org/"
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
