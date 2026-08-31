@@ -1,0 +1,67 @@
+{{- /*
+  Renders the documentation version table directly from what is present in
+  static/doc/, so newly uploaded releases show up without editing the page.
+
+  Directory naming in static/doc/:
+    master        -> development branch
+    1.5, 1.3, ... -> series alias, points at the newest release of that series
+    v1.5.7, ...   -> individual point releases
+    *-rc*         -> release candidates, deliberately not listed
+*/ -}}
+{{- $rows := slice -}}
+{{- range (os.ReadDir "static/doc") -}}
+  {{- if .IsDir -}}
+    {{- $dir := .Name -}}
+    {{- if and (ne $dir "master") (not (strings.Contains $dir "-rc")) -}}
+      {{- $num := strings.TrimPrefix "v" $dir -}}
+      {{- $parts := split $num "." -}}
+      {{- $isAlias := not (strings.HasPrefix $dir "v") -}}
+      {{- /* zero-padded sort key; aliases sort to the top of their series */ -}}
+      {{- $key := slice -}}
+      {{- range $i, $p := $parts -}}
+        {{- $key = $key | append (printf "%04d" (int $p)) -}}
+      {{- end -}}
+      {{- range seq (sub 4 (len $parts)) -}}
+        {{- $key = $key | append (cond $isAlias "9999" "0000") -}}
+      {{- end -}}
+      {{- $major := int (index $parts 0) -}}
+      {{- $minor := cond (gt (len $parts) 1) (int (index $parts 1)) 0 -}}
+      {{- $series := printf "%d.%d" $major $minor -}}
+      {{- $status := "Legacy" -}}
+      {{- if eq $series "1.5" -}}{{- $status = "Current" -}}
+      {{- else if eq $series "1.4" -}}{{- $status = "Oldstable" -}}{{- end -}}
+      {{- $label := cond $isAlias (printf "%s (series)" $num) $num -}}
+      {{- $pdf := printf "/doc/open62541-%s.pdf" $dir -}}
+      {{- $rows = $rows | append (dict
+            "sort"   (delimit $key ".")
+            "label"  $label
+            "status" $status
+            "html"   (printf "/doc/%s/" $dir)
+            "pdf"    (cond (fileExists (printf "static/doc/open62541-%s.pdf" $dir)) $pdf "")
+            "strong" $isAlias) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $rows = sort $rows "sort" "desc" -}}
+
+<table>
+  <thead>
+    <tr><th>Version</th><th>Status</th><th>Web Version</th><th>PDF Version</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Development Branch</strong></td>
+      <td>Development</td>
+      <td><a href="/doc/master/">View HTML</a></td>
+      <td><a href="/doc/open62541-master.pdf">Download PDF</a></td>
+    </tr>
+    {{- range $rows }}
+    <tr>
+      <td>{{ if .strong }}<strong>{{ .label }}</strong>{{ else }}{{ .label }}{{ end }}</td>
+      <td>{{ .status }}</td>
+      <td><a href="{{ .html }}">View HTML</a></td>
+      <td>{{ with .pdf }}<a href="{{ . }}">Download PDF</a>{{ else }}&mdash;{{ end }}</td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
