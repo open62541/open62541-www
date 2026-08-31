@@ -1,0 +1,66 @@
+---
+title: "Query Parser"
+description: "OPC UA EventFilter Query Language parser"
+layout: "raw"
+hide_title: true
+---
+
+<div class="max-w-5xl mx-auto">
+  <!-- Hero -->
+  <div class="text-center mb-12">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">OPC UA EventFilter Query Language</h1>
+    <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+      Convert a formal query language into the OPC UA Event Filter byte-code encoding &mdash; directly in your browser.
+    </p>
+  </div>
+
+  <!-- Background -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+    <p class="text-gray-600 leading-relaxed mb-3">
+      OPC UA Event Filters provide powerful constructs for the server-side selection of relevant events, but the feature
+      is underused in practice because of their complexity. Event Filters are expressed in a &ldquo;byte-code&rdquo;
+      encoding, and assembling that encoding by hand is difficult and error-prone.
+    </p>
+    <p class="text-gray-600 leading-relaxed">
+      This tool converts a formal query language into that byte-code encoding. The parser runs locally as WebAssembly
+      &mdash; nothing is sent to a server.
+    </p>
+    <a href="https://github.com/open62541/open62541/blob/7e8ec6206a89b93f9566ea47856120387809cae2/doc/eventfilter_query/ETFA2024%20-%20A%20Query%20Language%20for%20OPC%20UA%20Event%20Filters.pdf"
+       target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold mt-4">
+      Read the ETFA 2024 paper
+      <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+    </a>
+  </div>
+
+  <!-- Tool -->
+  <div class="mb-12">
+    <iframe id="query-parser-iframe" src="/query-http/index.html"
+            title="OPC UA EventFilter Query Parser"
+            class="w-full block border-0" style="height: 530px;"
+            scrolling="no"></iframe>
+  </div>
+
+  {{/* Same-origin iframe: size it to its content so the layout stays correct
+       when Pico's two-column grid stacks on narrow screens. */}}
+  <script>
+    (function () {
+      var frame = document.getElementById('query-parser-iframe');
+      if (!frame) return;
+      function fit() {
+        try {
+          var doc = frame.contentDocument;
+          if (doc && doc.body) frame.style.height = (doc.body.scrollHeight + 8) + 'px';
+        } catch (e) { /* leave the fallback height in place */ }
+      }
+      frame.addEventListener('load', function () {
+        fit();
+        try {
+          if (window.ResizeObserver) new ResizeObserver(fit).observe(frame.contentDocument.body);
+        } catch (e) {}
+      });
+      window.addEventListener('resize', fit);
+      setTimeout(fit, 400);
+    })();
+  </script>
+</div>
