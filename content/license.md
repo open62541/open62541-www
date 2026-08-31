@@ -1,6 +1,7 @@
 ---
 title: "License"
 layout: "simple"
+description: "open62541 is licensed under the Mozilla Public License v2.0 - free of charge, including for commercial use."
 ---
 
 ## MIT License

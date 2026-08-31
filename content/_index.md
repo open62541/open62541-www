@@ -34,6 +34,7 @@ client_logos:
   - name: "Fraunhofer IOSB"
     logo: "/images/iosb.png"
     url: "https://www.iosb.fraunhofer.de/"
+description: "open62541 is an open source C (C99) implementation of OPC UA, licensed under MPL v2.0 - free for commercial use, with professional support available."
 ---
 
 {{< hero 

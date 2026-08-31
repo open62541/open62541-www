@@ -3,8 +3,7 @@ module.exports = {
   content: [
     "./layouts/**/*.html",
     "./content/**/*.{html,md}",
-    "./themes/hugo-saasify-theme/layouts/**/*.html",
-    "./themes/hugo-saasify-theme/exampleSite/content/**/*.{html,md}"
+    "./themes/hugo-saasify-theme/layouts/**/*.html"
   ],
   theme: {
     extend: {

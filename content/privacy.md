@@ -1,6 +1,7 @@
 ---
 title: "Privacy Policy"
 layout: "simple"
+description: "How the open62541 website handles personal data and analytics."
 ---
 
 ## 1. Controller

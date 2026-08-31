@@ -1,0 +1,33 @@
+{{- /* JSON-LD structured data: Organization + WebSite site-wide, plus
+       SoftwareSourceCode describing the library itself on the homepage. */ -}}
+{{- $org := dict
+      "@type" "Organization"
+      "@id" (printf "%s#organization" .Site.BaseURL)
+      "name" .Site.Title
+      "url" .Site.BaseURL
+      "logo" (absURL "images/logo-open62541.svg")
+      "description" .Site.Params.description
+      "sameAs" (slice "https://github.com/open62541/open62541")
+-}}
+{{- $site := dict
+      "@type" "WebSite"
+      "@id" (printf "%s#website" .Site.BaseURL)
+      "url" .Site.BaseURL
+      "name" .Site.Title
+      "description" .Site.Params.description
+      "inLanguage" "en"
+      "publisher" (dict "@id" (printf "%s#organization" .Site.BaseURL))
+-}}
+{{- $graph := slice $org $site -}}
+{{- if .IsHome -}}
+  {{- $graph = $graph | append (dict
+        "@type" "SoftwareSourceCode"
+        "name" "open62541"
+        "description" .Site.Params.description
+        "url" .Site.BaseURL
+        "codeRepository" "https://github.com/open62541/open62541"
+        "programmingLanguage" (dict "@type" "ComputerLanguage" "name" "C")
+        "license" "https://www.mozilla.org/en-US/MPL/2.0/"
+        "author" (dict "@id" (printf "%s#organization" .Site.BaseURL))) -}}
+{{- end -}}
+<script type="application/ld+json">{{ (dict "@context" "https://schema.org" "@graph" $graph) | jsonify | safeJS }}</script>

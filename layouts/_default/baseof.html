@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ .Site.LanguageCode | default "en" }}" class="h-full">
+<html lang="{{ .Site.Language.Lang | default "en" }}" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
     {{ partial "google-analytics" . }}
     
     <!-- Title -->
-    <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+    <title>{{ if .IsHome }}{{ .Site.Title }}{{ with .Site.Params.tagline }} – {{ . }}{{ end }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
     
     <!-- Meta Tags -->
     <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Site.Params.description }}{{ . }}{{ end }}{{ end }}">
@@ -24,12 +24,12 @@
     <meta property="og:type" content="{{ if .IsHome }}website{{ else }}article{{ end }}">
     <meta property="og:url" content="{{ .Permalink }}">
     <meta property="og:site_name" content="{{ .Site.Title }}">
-    {{ with .Params.image }}
+    <meta property="og:locale" content="en_US">
+    {{ with (or .Params.image .Site.Params.image) }}
     <meta property="og:image" content="{{ . | absURL }}">
-    {{ else }}
-    {{ with .Site.Params.image }}
-    <meta property="og:image" content="{{ . | absURL }}">
-    {{ end }}
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $.Site.Params.description }}">
     {{ end }}
 
     <!-- Twitter Card -->
@@ -39,12 +39,8 @@
     {{ with .Site.Params.twitter }}
     <meta name="twitter:site" content="@{{ . }}">
     {{ end }}
-    {{ with .Params.image }}
+    {{ with (or .Params.image .Site.Params.image) }}
     <meta name="twitter:image" content="{{ . | absURL }}">
-    {{ else }}
-    {{ with .Site.Params.image }}
-    <meta property="twitter:image" content="{{ . | absURL }}">
-    {{ end }}
     {{ end }}
 
     <!-- Favicon -->
@@ -52,11 +48,16 @@
     
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ .Permalink }}">
+
+    <!-- Structured Data -->
+    {{ partial "schema.html" . }}
     
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    {{/* Fonts are self-hosted (see the @font-face block in assets/css/main.css).
+         Only the latin subsets are preloaded; latin-ext loads on demand via
+         unicode-range. crossorigin is required even for same-origin fonts. */}}
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
     
     <!-- Main CSS -->
     {{ $css := resources.Get "css/main.css" }}
