@@ -16,7 +16,18 @@
 <section class="relative overflow-hidden" style="{{ if $gradient_from }}background:linear-gradient({{ $gradient_angle }}deg,{{ $gradient_from }},{{ $gradient_to | default $gradient_from }}){{ else }}background: linear-gradient(180deg, #f9fafb, #ffffff){{ end }}">
     {{ if $background_image }}
     <div class="absolute inset-0 z-0">
-        <img src="{{ $background_image | relURL }}" alt="Background" class="w-full h-full object-cover">
+        {{- $bg := resources.Get (strings.TrimPrefix "/" $background_image) -}}
+        {{- if $bg -}}
+        {{- $bgSm := $bg.Process "resize 1280x webp q78" -}}
+        {{- $bgLg := $bg.Process "resize 1920x webp q78" -}}
+        <img src="{{ $bgLg.RelPermalink }}"
+             srcset="{{ $bgSm.RelPermalink }} 1280w, {{ $bgLg.RelPermalink }} 1920w"
+             sizes="100vw"
+             width="{{ $bgLg.Width }}" height="{{ $bgLg.Height }}"
+             alt="" class="w-full h-full object-cover">
+        {{- else -}}
+        <img src="{{ $background_image | relURL }}" alt="" class="w-full h-full object-cover">
+        {{- end -}}
     </div>
     {{ end }}
     
@@ -27,9 +38,9 @@
     <div id="hero-content" class="container relative z-20 py-24 md:py-32">
         <div class="max-w-3xl mx-auto text-center">
             <div class="space-y-8">
-                <div class="flex justify-center">
-                    <img src="/images/logo-open62541-white.svg" alt="open62541" class="h-16 md:h-20 lg:h-24 w-auto">
-                </div>
+                <h1 class="flex justify-center">
+                    <img src="/images/logo-open62541-white.svg" alt="{{ $headline | default "open62541" }}" class="h-16 md:h-20 lg:h-24 w-auto">
+                </h1>
                 <p class="text-2xl md:text-3xl text-white/90">
                     {{ $sub_headline | safeHTML }}
                 </p>
@@ -60,8 +71,10 @@
 </section>
 
 {{ if $particles }}
-<!-- Particles.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<!-- particles.js 2.0.0 (MIT), vendored to /js/ and deferred so it no longer
+     blocks parsing mid-page. The init below runs on DOMContentLoaded, which
+     fires after deferred scripts execute, so particlesJS is always defined. -->
+<script src="/js/particles.min.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof particlesJS !== 'undefined') {

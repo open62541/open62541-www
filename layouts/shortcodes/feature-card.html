@@ -29,7 +29,22 @@
     
     <!-- Image section -->
     <div class="relative h-48 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-        <img src="{{ $image | relURL }}" alt="{{ $title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+        {{- /* Card image sits in a fixed 192px-tall object-cover box, so a ~600px
+               wide render (1200px for 2x displays) is plenty. Processed from
+               assets/ into WebP at build time; falls back to the raw static
+               path for any image not present in assets/. */ -}}
+        {{- $res := resources.Get (strings.TrimPrefix "/" $image) -}}
+        {{- if $res -}}
+        {{- $sm := $res.Process "resize 600x webp q82" -}}
+        {{- $lg := $res.Process "resize 1200x webp q82" -}}
+        <img src="{{ $sm.RelPermalink }}"
+             srcset="{{ $sm.RelPermalink }} 600w, {{ $lg.RelPermalink }} 1200w"
+             sizes="(min-width: 768px) 50vw, 100vw"
+             width="{{ $sm.Width }}" height="{{ $sm.Height }}"
+             alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async">
+        {{- else -}}
+        <img src="{{ $image | relURL }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async">
+        {{- end -}}
         <div class="absolute top-4 left-4">
             <span class="card-badge inline-block px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm uppercase tracking-wide">{{ $badge }}</span>
         </div>
