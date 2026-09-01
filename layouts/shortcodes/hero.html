@@ -18,11 +18,13 @@
     <div class="absolute inset-0 z-0">
         {{- $bg := resources.Get (strings.TrimPrefix "/" $background_image) -}}
         {{- if $bg -}}
-        {{- $bgSm := $bg.Process "resize 1280x webp q78" -}}
-        {{- $bgLg := $bg.Process "resize 1920x webp q78" -}}
+        {{- $b1 := cond (lt $bg.Width 1280) $bg.Width 1280 -}}
+        {{- $b2 := cond (lt $bg.Width 1920) $bg.Width 1920 -}}
+        {{- $bgSm := $bg.Process (printf "resize %dx webp q92 lanczos" $b1) -}}
+        {{- $bgLg := $bg.Process (printf "resize %dx webp q92 lanczos" $b2) -}}
         <img src="{{ $bgLg.RelPermalink }}"
-             srcset="{{ $bgSm.RelPermalink }} 1280w, {{ $bgLg.RelPermalink }} 1920w"
-             sizes="100vw"
+             {{ if ne $b1 $b2 }}srcset="{{ $bgSm.RelPermalink }} {{ $b1 }}w, {{ $bgLg.RelPermalink }} {{ $b2 }}w"
+             sizes="100vw"{{ end }}
              width="{{ $bgLg.Width }}" height="{{ $bgLg.Height }}"
              alt="" class="w-full h-full object-cover">
         {{- else -}}

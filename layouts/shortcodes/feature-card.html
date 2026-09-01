@@ -29,17 +29,20 @@
     
     <!-- Image section -->
     <div class="relative h-48 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-        {{- /* Card image sits in a fixed 192px-tall object-cover box, so a ~600px
-               wide render (1200px for 2x displays) is plenty. Processed from
-               assets/ into WebP at build time; falls back to the raw static
-               path for any image not present in assets/. */ -}}
+        {{- /* Card image sits in a fixed 192px-tall object-cover box. Render a 1x
+               and a 2x candidate, but never wider than the source: upscaling a
+               1000px original to 1200px only softens it. q95 + Lanczos, because
+               the screenshots carry small high-contrast text that shows WebP
+               ringing at lower settings. */ -}}
         {{- $res := resources.Get (strings.TrimPrefix "/" $image) -}}
         {{- if $res -}}
-        {{- $sm := $res.Process "resize 600x webp q82" -}}
-        {{- $lg := $res.Process "resize 1200x webp q82" -}}
+        {{- $w1 := cond (lt $res.Width 600) $res.Width 600 -}}
+        {{- $w2 := cond (lt $res.Width 1200) $res.Width 1200 -}}
+        {{- $sm := $res.Process (printf "resize %dx webp q95 lanczos" $w1) -}}
+        {{- $lg := $res.Process (printf "resize %dx webp q95 lanczos" $w2) -}}
         <img src="{{ $sm.RelPermalink }}"
-             srcset="{{ $sm.RelPermalink }} 600w, {{ $lg.RelPermalink }} 1200w"
-             sizes="(min-width: 768px) 50vw, 100vw"
+             {{ if ne $w1 $w2 }}srcset="{{ $sm.RelPermalink }} {{ $w1 }}w, {{ $lg.RelPermalink }} {{ $w2 }}w"
+             sizes="(min-width: 768px) 50vw, 100vw"{{ end }}
              width="{{ $sm.Width }}" height="{{ $sm.Height }}"
              alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async">
         {{- else -}}
