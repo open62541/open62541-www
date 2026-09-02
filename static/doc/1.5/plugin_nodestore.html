@@ -600,8 +600,9 @@ Nodestore backends.</p>
 
 <span class="w">    </span><span class="cm">/* Returns an editable copy of the same logical node (needs to be deleted</span>
 <span class="cm">     * with the deleteNode function or inserted / replaced into the nodestore).</span>
-<span class="cm">     * After replacing the node, MonitoredItems registered for its NodeId must</span>
-<span class="cm">     * remain attached to the replacement. */</span>
+<span class="cm">     * Runtime state such as MonitoredItem associations is not copied. A</span>
+<span class="cm">     * successful replacement must move that state from the old node to the</span>
+<span class="cm">     * replacement with UA_Node_moveMonitoredItems. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
 
@@ -656,10 +657,11 @@ Nodestore backends.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Node_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
 
-<span class="cm">/* Copy a node for an editable replacement of the same logical node. In</span>
-<span class="cm"> * addition to the node content, attached MonitoredItems are preserved. */</span>
-<span class="n">UA_StatusCode</span>
-<span class="nf">UA_Node_copyForEdit</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+<span class="cm">/* Move the runtime MonitoredItem associations from a node to its replacement.</span>
+<span class="cm"> * The destination must not have MonitoredItems attached. This is a no-op if</span>
+<span class="cm"> * source and destination are the same node. */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_moveMonitoredItems</span><span class="p">(</span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
 
 <span class="cm">/* Allocate new node and copy the values from src */</span>
 <span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span>
