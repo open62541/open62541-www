@@ -656,6 +656,15 @@ contained in the WriterGroup.</p>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w"> </span><span class="cm">/* via the UA_WriterGroupDataType */</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Fields defined by PubSubGroupDataType and preserved by file-config</span>
+<span class="cm">     * save/load. securityPolicy remains the runtime policy implementation. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityKeyServicesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="o">*</span><span class="n">securityKeyServices</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNetworkMessageSize</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">localeIdsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">localeIds</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">headerLayoutUri</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_WriterGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -840,6 +849,9 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_COMMON</span>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* A zero-initialized config keeps the legacy wildcard behavior. Set this</span>
+<span class="cm">     * to true to filter explicitly for the legitimate Byte PublisherId 0. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">publisherIdFilterEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">writerGroupId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="n">dataSetMetaData</span><span class="p">;</span>
@@ -849,6 +861,10 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="cm">                                      * message. Gets reset after every received</span>
 <span class="cm">                                      * message. If &lt;= 0.0, then no timeout is</span>
 <span class="cm">                                      * configured. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">keyFrameCount</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Maximum key-frame period. A value &lt;= 1</span>
+<span class="cm">                              * accepts key frames only. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">headerLayoutUri</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">dataSetReaderProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SubscribedDataSetType</span><span class="w"> </span><span class="n">subscribedDataSetType</span><span class="p">;</span>
@@ -928,6 +944,7 @@ can be configured for a ReaderGroup.</p>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">groupProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Messages are decrypted if a SecurityPolicy is configured and the</span>
 <span class="cm">     * securityMode set accordingly. The symmetric key is a runtime information</span>
@@ -935,6 +952,9 @@ can be configured for a ReaderGroup.</p>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityKeyServicesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="o">*</span><span class="n">securityKeyServices</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNetworkMessageSize</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -1101,7 +1121,8 @@ and manage role permission on SecurityGroup object.</p>
 <span class="cm"> *        the securityGroupId is deleted. The input config is copied to an</span>
 <span class="cm"> *        internal config object and the content of input config object will be</span>
 <span class="cm"> *        reset to zero.</span>
-<span class="cm"> * @param endpointUrl holds the endpointUrl of the SKS server</span>
+<span class="cm"> * @param endpointUrl holds the endpointUrl of the SKS server. It is copied and</span>
+<span class="cm"> *        does not need to outlive this call.</span>
 <span class="cm"> * @param securityGroupId the SecurityGroupId of the securityGroup on SKS and</span>
 <span class="cm"> *        reader/writergroups</span>
 <span class="cm"> * @param callback the user defined callback to notify the user about the status</span>

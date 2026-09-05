@@ -507,7 +507,7 @@
 <h2>PubSub SecurityPolicy<a class="headerlink" href="#pubsub-securitypolicy" title="Link to this heading"></a></h2>
 <p>For PubSub encryption, the message nonce is part of the (unencrypted)
 SecurityHeader. The nonce is required for the de- and encryption and has to
-be set in the channel context before de/encrypting.</p>
+be set in the group context before de/encrypting.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_PubSubSecurityPolicy</span><span class="p">;</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="p">;</span>
 
@@ -527,37 +527,47 @@ be set in the channel context before de/encrypting.</p>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">keyNonce</span><span class="p">,</span>
 <span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">gContext</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Delete the WriterGroup SecurityPolicy context */</span>
+<span class="w">    </span><span class="cm">/* Delete the WriterGroup / ReaderGroup SecurityPolicy context. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">deleteGroupContext</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* See UA_SecurityPolicy for the following method signatures */</span>
-
+<span class="w">    </span><span class="cm">/* Verify a message signature using the keys in the group context. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">verify</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                            </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">message</span><span class="p">,</span>
 <span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signature</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Sign a message using the keys in the group context. The caller allocates</span>
+<span class="cm">     * the signature buffer with the size returned by getSignatureSize. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">sign</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">message</span><span class="p">,</span>
 <span class="w">                          </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signature</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Return the signature size in bytes. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getSignatureSize</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Return the signing-key length in bytes. The group context may be NULL</span>
+<span class="cm">     * when querying the policy for SKS key-material processing. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getSignatureKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Return the encryption-key length in bytes. The group context may be NULL</span>
+<span class="cm">     * when querying the policy for SKS key-material processing. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getEncryptionKeyLength</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Encrypt the supplied buffer in place using the group keys and the</span>
+<span class="cm">     * message nonce installed with setMessageNonce. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">encrypt</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Decrypt the supplied buffer in place using the group keys and the</span>
+<span class="cm">     * message nonce installed with setMessageNonce. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">decrypt</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                             </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Set the keys and nonce for the WriterGroup. This is returned from the</span>
-<span class="cm">     * GetSecurityKeys method of a Security Key Service (SKS). Otherwise, set</span>
-<span class="cm">     * manually via out-of-band transmission of the keys. */</span>
+<span class="w">    </span><span class="cm">/* Set the keys and key nonce for a WriterGroup / ReaderGroup. These are</span>
+<span class="cm">     * returned by GetSecurityKeys on a Security Key Service (SKS), or supplied</span>
+<span class="cm">     * manually via out-of-band transmission. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setSecurityKeys</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">signingKey</span><span class="p">,</span>
@@ -568,8 +578,8 @@ be set in the channel context before de/encrypting.</p>
 <span class="cm">     *</span>
 <span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
 <span class="cm">     * @param gContext The group context.</span>
-<span class="cm">     * @param secret Usually from the nonce. See part 6.</span>
-<span class="cm">     * @param seed Usually from the nonce. See part 6.</span>
+<span class="cm">     * @param secret Secret input for the policy-specific key derivation.</span>
+<span class="cm">     * @param seed Seed input for the policy-specific key derivation.</span>
 <span class="cm">     * @param out An output to write the data to. The length defines the maximum</span>
 <span class="cm">     *        number of output bytes that are produced. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateKey</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
@@ -581,14 +591,18 @@ be set in the channel context before de/encrypting.</p>
 <span class="w">    </span><span class="cm">/* Random generator for generating nonces.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param policy The SecurityPolicy to which the callback belongs.</span>
-<span class="cm">     * @param wgContext The context of the SecureChannel</span>
+<span class="cm">     * @param gContext The group context, or NULL for policy-level generation.</span>
 <span class="cm">     * @param out Pointer to a buffer to store the nonce in. Needs to be</span>
 <span class="cm">     *        allocated by the caller. The buffer is filled with random data. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">generateNonce</span><span class="p">)(</span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policy</span><span class="p">,</span>
 <span class="w">                                   </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">gContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* The length of the nonce used in the SecureChannel */</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">nonceLength</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* Total length in bytes of one SKS key-material item. For the CTR policies</span>
+<span class="cm">     * this is signing key + encryption key + key nonce. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">keyMaterialLength</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Length of the per-NetworkMessage nonce passed to setMessageNonce. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">messageNonceLength</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* The nonce is contained in the NetworkMessage SecurityHeader. Set before</span>
 <span class="cm">     * each en-/decryption step. */</span>
