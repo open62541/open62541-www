@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nodeset-import">NodeSet Import</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#detailed-node-construction">Detailed Node Construction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reference-management">Reference Management</a></li>
@@ -1305,6 +1306,20 @@ having their layout changed.</p>
 </pre></div>
 </div>
 </section>
+<section id="nodeset-import">
+<h3>NodeSet Import<a class="headerlink" href="#nodeset-import" title="Link to this heading"></a></h3>
+<p>Load a UANodeSet XML document into the server.</p>
+<p>Load dependencies first by calling this function once for each document.
+The XML input is borrowed for the duration of the call. Individual nodes
+that cannot be added are logged and skipped. The return status reports
+failures that prevent loading the document as a whole. The operation is not
+transactional; nodes and namespaces added before a failure remain in the
+server.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_loadNodeset</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_XmlElement</span><span class="w"> </span><span class="n">nodesetXml</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
 <section id="node-lifecycle-constructors-destructors-and-node-contexts">
 <span id="node-lifecycle"></span><h3>Node Lifecycle: Constructors, Destructors and Node Contexts<a class="headerlink" href="#node-lifecycle-constructors-destructors-and-node-contexts" title="Link to this heading"></a></h3>
 <p>To finalize the instantiation of a node, a (user-defined) constructor
@@ -2279,6 +2294,12 @@ The usual usage is as follows:</p>
 <span class="cm">     * empty variant value. The default behaviour is to auto-create a matching</span>
 <span class="cm">     * zeroed-out value for empty VariableNodes when they are added. */</span>
 <span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">allowEmptyVariables</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Methods shall be the target of at least one HasComponent reference from</span>
+<span class="cm">     * an Object or ObjectType. Some legacy NodeSets contain detached Methods.</span>
+<span class="cm">     * DEFAULT and WARN log and accept them, ABORT rejects them and ACCEPT</span>
+<span class="cm">     * accepts them silently. */</span>
+<span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">allowUnattachedMethods</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">allowAllCertificateUris</span><span class="p">;</span>
 
