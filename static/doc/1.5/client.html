@@ -666,7 +666,15 @@ documentation on the notifications and their defined payload.</p>
 <p>The configuration used for setting connection parameters and additional
 client settings. The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide examples for many of the
 client settings.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Previous policy arrays retained by the default configuration plugin. Open</span>
+<span class="cm"> * SecureChannels and Sessions may still reference them. Freed with the config. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig_PolicyHistory</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig_PolicyHistory</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policies</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">policiesSize</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_ClientConfig_PolicyHistory</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">clientContext</span><span class="p">;</span><span class="w"> </span><span class="cm">/* User-defined pointer attached to the client */</span>
 <span class="w">    </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logging</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Plugin for log output */</span>
 
@@ -761,6 +769,7 @@ client settings.</p>
 <span class="cm">     * UA_ClientConfig_setAuthenticationCert. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ClientConfig_PolicyHistory</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicyHistory</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Internal ownership */</span>
 
 <span class="w">    </span><span class="cm">/* Allow clients without encryption support to connect with username and</span>
 <span class="cm">     * password. This requires to transmit the password in plain text over the</span>
