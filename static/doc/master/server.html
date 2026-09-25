@@ -316,6 +316,79 @@ reconnect.</p>
 <span class="w">                             </span><span class="n">UA_ShutdownReason</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
 </pre></div>
 </div>
+<p>A SecureChannel carries application-defined attributes in a key-value map,
+mirroring the <a class="reference internal" href="#server-session-handling"><span class="std std-ref">session attributes</span></a> below.
+This lets the application attach its own per-channel state, for example
+from the secureChannelNotificationCallback once it has looked at the
+channel’s SecurityMode.</p>
+<p>Namespace 0 is reserved for the server itself and restricted to a
+predefined set of keys, for both read and write – any other <code class="docutils literal notranslate"><span class="pre">0:...</span></code>
+key is rejected with UA_STATUSCODE_BADNOTFOUND (get) or
+UA_STATUSCODE_BADNOTWRITABLE (set/delete). An application is free to use
+any key in a non-zero namespace as generic, arbitrary storage.</p>
+<p>Most of the predefined ns0 keys are read-only: their value is computed
+fresh from the live SecureChannel on every access (nothing is cached),
+mirroring the background information sent with the
+UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED/_CLOSED notification
+(see common.h): <code class="docutils literal notranslate"><span class="pre">0:securechannel-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:connection-manager-name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:connection-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:remote-address</span></code>, <code class="docutils literal notranslate"><span class="pre">0:protocol-version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:recv-buffer-size</span></code>, <code class="docutils literal notranslate"><span class="pre">0:recv-max-message-size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:recv-max-chunk-count</span></code>, <code class="docutils literal notranslate"><span class="pre">0:send-buffer-size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:send-max-message-size</span></code>, <code class="docutils literal notranslate"><span class="pre">0:send-max-chunk-count</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:endpoint-url</span></code>, <code class="docutils literal notranslate"><span class="pre">0:security-mode</span></code>, <code class="docutils literal notranslate"><span class="pre">0:security-policy-url</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:certificate-type-id</span></code> and <code class="docutils literal notranslate"><span class="pre">0:remote-certificate</span></code>.
+UA_Server_setSecureChannelAttribute and
+UA_Server_deleteSecureChannelAttribute reject writes to these with
+UA_STATUSCODE_BADNOTWRITABLE.</p>
+<p>One further ns0 key is interpreted by the server itself, and is the one
+ns0 attribute the application may write (stored in the generic map like
+any application-defined attribute):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0:maxMessageSize</span></code> (<code class="docutils literal notranslate"><span class="pre">UA_UInt32</span></code>): If set, tightens (but never
+loosens) UA_ServerConfig.tcpMaxMsgSize for this specific channel. Useful
+to cap messages on a channel the application does not yet consider
+trusted, e.g. because it is unsigned/unencrypted or has no Session with
+a completed ActivateSession. Delete the attribute (or never set it) to
+fall back to the server-wide tcpMaxMsgSize.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Returns a shallow copy of the attribute (don't _clear or _delete manually).</span>
+<span class="cm"> * While the method is thread-safe, the returned value is not protected. Only</span>
+<span class="cm"> * use it in a (callback) context where the server is locked for the current</span>
+<span class="cm"> * thread. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSecureChannelAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span>
+
+<span class="cm">/* Return a deep copy of the attribute */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSecureChannelAttributeCopy</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span>
+
+<span class="cm">/* Returns UA_STATUSCODE_BADNOTFOUND if the attribute is not defined, not a</span>
+<span class="cm"> * scalar or not of the right datatype. Otherwise a shallow copy of the</span>
+<span class="cm"> * scalar value is written to the target location of the void pointer (don't</span>
+<span class="cm"> * _clear or _delete manually). While the method is thread-safe, the</span>
+<span class="cm"> * returned value is not protected. Only use it in a (callback) context</span>
+<span class="cm"> * where the server is locked for the current thread. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSecureChannelAttribute_scalar</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                           </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
+<span class="w">                                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_setSecureChannelAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_deleteSecureChannelAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
+</pre></div>
+</div>
 </section>
 <section id="session-handling">
 <span id="server-session-handling"></span><h2>Session Handling<a class="headerlink" href="#session-handling" title="Link to this heading"></a></h2>
