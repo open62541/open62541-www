@@ -558,8 +558,10 @@ functions to add new fields.</p>
 <span class="w">                                      </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="o">*</span><span class="n">metaData</span><span class="p">);</span>
 
 <span class="cm">/* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes</span>
-<span class="cm"> * all contained and linked PDS Fields. Connected WriterGroups will be also</span>
-<span class="cm"> * removed. */</span>
+<span class="cm"> * all contained and linked PDS Fields and the connected DataSetWriters. Returns</span>
+<span class="cm"> * Bad_ConfigurationError while a connected DataSetWriter is enabled and</span>
+<span class="cm"> * Bad_InvalidState (without changes) while the WriterGroup of a connected</span>
+<span class="cm"> * DataSetWriter is enabled. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removePublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">pdsId</span><span class="p">);</span>
 </pre></div>
@@ -698,6 +700,9 @@ contained in the WriterGroup.</p>
 <span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">wgId</span><span class="p">,</span>
 <span class="w">                                             </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">timestamp</span><span class="p">);</span>
 
+<span class="cm">/* Remove the group and its DataSetWriters. A failed child removal is returned</span>
+<span class="cm"> * and leaves the group pending deletion; retry after resolving the failure.</span>
+<span class="cm"> * New writers cannot be added once group deletion has started. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removeWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">wgId</span><span class="p">);</span>
 
