@@ -223,16 +223,44 @@ callbacks are executed.</p>
 <span class="cm"> * @param server The server object.</span>
 <span class="cm"> * @param waitInternal Should we wait for messages in the networklayer?</span>
 <span class="cm"> *        Otherwise, the timeouts for the networklayers are set to zero.</span>
-<span class="cm"> *        The default max wait time is 200ms.</span>
+<span class="cm"> *        The default max wait time is 500ms.</span>
 <span class="cm"> * @return Returns how long we can wait until the next scheduled</span>
 <span class="cm"> *         callback (in ms) */</span>
 <span class="n">UA_UInt16</span>
 <span class="nf">UA_Server_run_iterate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">waitInternal</span><span class="p">);</span>
 
 <span class="cm">/* The epilogue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt) */</span>
+<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt).</span>
+<span class="cm"> *</span>
+<span class="cm"> * Runs the EventLoop until the server is fully stopped. An external EventLoop</span>
+<span class="cm"> * is left running for its other users; an owned EventLoop is stopped as well.</span>
+<span class="cm"> * Calling this on an already stopped server succeeds without further action.</span>
+<span class="cm"> * Use UA_Server_run_shutdown_async if shutdown requires application work</span>
+<span class="cm"> * between EventLoop iterations or is initiated from an EventLoop callback.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @return GOOD once the server is STOPPED, or an EventLoop error if shutdown</span>
+<span class="cm"> *         could not be completed. Returns BADINVALIDARGUMENT for NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="cm">/* Initiates asynchronous shutdown and advances it on subsequent calls, without</span>
+<span class="cm"> * running the EventLoop. While the server is STOPPING, the caller must drive</span>
+<span class="cm"> * the EventLoop (directly or via UA_Server_run_iterate) and call this function</span>
+<span class="cm"> * again to complete shutdown.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Use UA_Server_getLifecycleState to read the current state, or the configured</span>
+<span class="cm"> * lifecycle notification callbacks to observe state transitions.</span>
+<span class="cm"> *</span>
+<span class="cm"> * An external EventLoop is left running; an owned EventLoop is stopped once</span>
+<span class="cm"> * all drivers have stopped.</span>
+<span class="cm"> * Repeated calls do not repeat stop requests or lifecycle notifications.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object. NULL is treated as already stopped.</span>
+<span class="cm"> * @return The lifecycle state after this shutdown step: STOPPING while shutdown</span>
+<span class="cm"> *         is in progress, or STOPPED if the server is fully stopped. */</span>
+<span class="n">UA_LifecycleState</span>
+<span class="nf">UA_Server_run_shutdown_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
