@@ -228,8 +228,10 @@ their duration grows with the tree size.</p>
 <span class="w">    </span><span class="cm">/* File operations; first member to allow casting b back to this struct */</span>
 <span class="w">    </span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Enumerate entries at path. Unreadable metadata may be skipped. An</span>
-<span class="cm">     * enumeration error discards the listing. Never truncate overlong names;</span>
+<span class="w">    </span><span class="cm">/* Enumerate entries at path. Return an error if enumeration or reading</span>
+<span class="cm">     * entry metadata fails, including when an entry disappears during the</span>
+<span class="cm">     * listing. An error discards the entire listing; a successful incomplete</span>
+<span class="cm">     * listing could lose data during a move. Never truncate overlong names;</span>
 <span class="cm">     * return Bad_EncodingLimitsExceeded instead. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">listDirectory</span><span class="p">)(</span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
 <span class="w">                                   </span><span class="n">UA_FileTransferListCallback</span><span class="w"> </span><span class="n">cb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">listContext</span><span class="p">);</span>
@@ -262,7 +264,8 @@ their duration grows with the tree size.</p>
 <section id="construction-and-parameters">
 <h2>Construction and Parameters<a class="headerlink" href="#construction-and-parameters" title="Link to this heading"></a></h2>
 <p>Set <code class="docutils literal notranslate"><span class="pre">driver-&gt;params</span></code> before UA_Server_addDriver(). Parameters are read on
-each start; all keys use namespace 0.</p>
+each start; all keys use namespace 0. A known key with another type than
+listed fails the start with Bad_InvalidArgument.</p>
 <dl class="simple">
 <dt>0:read-only [Boolean]</dt><dd><p>Disable writes and directory mutations (default: false).</p>
 </dd>
@@ -326,10 +329,16 @@ results only at debug level.</p>
 <span class="cm"> * roots are bound on first start. Freeing removes driver-created nodes and</span>
 <span class="cm"> * restores reused Objects' contexts and Properties' values, sources and contexts.</span>
 <span class="cm"> * Reused Objects also survive disappearance of their storage entry.</span>
+<span class="cm"> * Delete and successful moves delete reused Objects at the source as well.</span>
+<span class="cm"> * Before deleting an Object, its context from construction or reuse is restored</span>
+<span class="cm"> * for the application lifecycle destructors.</span>
 <span class="cm"> * While started, drivers supply the standard Methods, including shared</span>
 <span class="cm"> * Namespace Zero Method nodes and copies inherited by subtypes. Other</span>
 <span class="cm"> * Methods of subtypes stay with the application, see</span>
-<span class="cm"> * UA_FileTransferDriver_getHandleInfo().</span>
+<span class="cm"> * UA_FileTransferDriver_getHandleInfo(). The drivers own these Method nodes:</span>
+<span class="cm"> * the first start replaces callbacks set by the application, the last stop</span>
+<span class="cm"> * removes them. FileType Objects of the application that are served without a</span>
+<span class="cm"> * driver need their own Method nodes.</span>
 <span class="cm"> *</span>
 <span class="cm"> * On success, the backend struct is copied and its context becomes owned by</span>
 <span class="cm"> * the driver. On failure, created nodes are removed, *outDriver is NULL and</span>
