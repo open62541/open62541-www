@@ -145,6 +145,8 @@ their duration grows with the tree size.</p>
 <span class="w">    </span><span class="cm">/* NUL-terminated UTF-8 basename; empty for a directory root */</span>
 <span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">name</span><span class="p">[</span><span class="n">UA_FILETRANSFER_FILENAME_MAX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
 <span class="w">    </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w">             </span><span class="cm">/* Size in bytes (files only) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">sizeUnknown</span><span class="p">;</span><span class="w">     </span><span class="cm">/* The Size Property then reports</span>
+<span class="cm">                                 * Bad_NotSupported (Part 20, 4.2.1) */</span>
 <span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">lastModified</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Last modification time */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isDirectory</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_FileAccessRights</span><span class="w"> </span><span class="n">accessRights</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Storage-level permissions. Backend</span>
@@ -154,6 +156,17 @@ their duration grows with the tree size.</p>
 <span class="cm">                                * leaves an existing one unchanged. */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_FileTransferFileInfo</span><span class="p">;</span>
 
+<span class="cm">/* The caller of an open. The driver passes the Session of the Method call for</span>
+<span class="cm"> * Open, CreateFile, the copies of MoveOrCopy and</span>
+<span class="cm"> * UA_FileTransferDriver_openHandle(). Direct calls of the application pass</span>
+<span class="cm"> * NULL. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">openContext</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Of UA_FileTransferDriver_openHandle(), else NULL */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_FileTransferOpenContext</span><span class="p">;</span>
+
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_FileTransferFileBackend</span><span class="w"> </span><span class="n">UA_FileTransferFileBackend</span><span class="p">;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_FileTransferFileBackend</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Backend-owned storage and handle state */</span>
@@ -161,9 +174,14 @@ their duration grows with the tree size.</p>
 
 <span class="w">    </span><span class="cm">/* Open a file. mode is a UA_Byte bit mask of UA_OPENFILEMODE_* flags,</span>
 <span class="cm">     * validated by the driver. Append starts at EOF; otherwise start at zero.</span>
-<span class="cm">     * EraseExisting truncates the file. Return an independent handle. */</span>
+<span class="cm">     * EraseExisting truncates the file. Return an independent handle.</span>
+<span class="cm">     * context is the caller or NULL. For a Method call, the driver has checked</span>
+<span class="cm">     * the mode, the locking (Part 20, 4.2.2), the access rights and the handle</span>
+<span class="cm">     * limits before, and the result is returned to the client, e.g.</span>
+<span class="cm">     * Bad_NotSupported for a mode the file does not offer. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">open</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
-<span class="w">                          </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">mode</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+<span class="w">                          </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">mode</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferOpenContext</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Close the handle and flush buffered writes. Report flush errors here;</span>
 <span class="cm">     * a destination close error also fails a driver-managed copy. */</span>
@@ -291,6 +309,12 @@ until closed.</p>
 <dt>0:max-open-handles-per-file [UInt16]</dt><dd><p>Open-handle limit per file (default: 16). Either handle limit makes
 Open return Bad_ResourceUnavailable when reached.</p>
 </dd>
+<dt>0:activity-timeout [Double]</dt><dd><p>Close handles without a Method call for longer than this many
+milliseconds like Close, e.g. for the ActivityTimeout of a TrustList
+(Part 12, 7.8.2.1). The FileType Methods, openHandle and getHandleInfo
+count as calls. Idle handles are closed within twice the timeout. 0
+disables it (default); otherwise at least 0.0001.</p>
+</dd>
 <dt>0:max-read-length [UInt32]</dt><dd><p>Maximum bytes per Read or Write (default, also when zero: 1048576).
 Published as MaxByteStringLength. Reads are capped at this length;
 larger writes fail with Bad_InvalidArgument.</p>
@@ -390,6 +414,23 @@ results only at debug level.</p>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">fileNodeId</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                                  </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">fileHandle</span><span class="p">);</span>
+
+<span class="cm">/* Subtype Methods that open the file with their own arguments, e.g.</span>
+<span class="cm"> * OpenWithMasks of a TrustList (Part 12), create the FileHandle with</span>
+<span class="cm"> * openHandle. openContext reaches the backend open, e.g. for the masks. The</span>
+<span class="cm"> * checks and results of the Open Method apply; a stopped driver returns</span>
+<span class="cm"> * Bad_InvalidState and a node that is not a file of the driver</span>
+<span class="cm"> * Bad_InvalidArgument. The handle belongs to the Session like one from Open:</span>
+<span class="cm"> * it counts in OpenCount and the handle limits and closes with the Session.</span>
+<span class="cm"> * Return fileHandle to the client, or close it with closeHandle if the Method</span>
+<span class="cm"> * fails afterwards. backendHandle is optional. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_openHandle</span><span class="p">(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">fileNodeId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">mode</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">openContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">fileHandle</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">backendHandle</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
