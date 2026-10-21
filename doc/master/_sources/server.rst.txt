@@ -14,7 +14,7 @@ MethodNodes.
 Server Lifecycle
 ----------------
 This section describes the API for creating, running and deleting a server.
-At runtime, the server continuously listens on the network, acceppts incoming
+At runtime, the server continuously listens on the network, accepts incoming
 connections and processes received messages. Furthermore, timed (cyclic)
 callbacks are executed.
 
@@ -27,7 +27,7 @@ callbacks are executed.
     *
     * The default configuration can be used as the starting point to adjust the
     * server configuration to individual needs. UA_Server_new is implemented in the
-    * /plugins folder under the CC0 license. Furthermore the server confiugration
+    * /plugins folder under the CC0 license. Furthermore the server configuration
     * only uses the public server API.
     *
     * Returns the configured server or NULL if an error occurs. */
@@ -43,7 +43,7 @@ callbacks are executed.
    UA_StatusCode
    UA_Server_delete(UA_Server *server);
    
-   /* Get the configuration. Always succeeds as this simplfy resolves a pointer.
+   /* Get the configuration. Always succeeds as this simply resolves a pointer.
     * Attention! Do not adjust the configuration while the server is running! */
    UA_ServerConfig *
    UA_Server_getConfig(UA_Server *server);
@@ -78,7 +78,11 @@ callbacks are executed.
    UA_Server_runUntilInterrupt(UA_Server *server);
    
    /* The prologue part of UA_Server_run (no need to use if you call
-    * UA_Server_run or UA_Server_runUntilInterrupt) */
+    * UA_Server_run or UA_Server_runUntilInterrupt). Fails if a transport (TCP,
+    * WebSocket, HTTP) cannot open its server socket and the server cannot be
+    * reached otherwise (no other transport listens, no reverse connect is
+    * registered). Then the startup is undone as in UA_Server_run_shutdown. The
+    * lifecycle notifications report STOPPING and STOPPED without STARTED. */
    UA_StatusCode
    UA_Server_run_startup(UA_Server *server);
    
@@ -87,16 +91,44 @@ callbacks are executed.
     * @param server The server object.
     * @param waitInternal Should we wait for messages in the networklayer?
     *        Otherwise, the timeouts for the networklayers are set to zero.
-    *        The default max wait time is 200ms.
+    *        The default max wait time is 500ms.
     * @return Returns how long we can wait until the next scheduled
     *         callback (in ms) */
    UA_UInt16
    UA_Server_run_iterate(UA_Server *server, UA_Boolean waitInternal);
    
    /* The epilogue part of UA_Server_run (no need to use if you call
-    * UA_Server_run or UA_Server_runUntilInterrupt) */
+    * UA_Server_run or UA_Server_runUntilInterrupt).
+    *
+    * Runs the EventLoop until the server is fully stopped. An external EventLoop
+    * is left running for its other users; an owned EventLoop is stopped as well.
+    * Calling this on an already stopped server succeeds without further action.
+    * Use UA_Server_run_shutdown_async if shutdown requires application work
+    * between EventLoop iterations or is initiated from an EventLoop callback.
+    *
+    * @param server The server object.
+    * @return GOOD once the server is STOPPED, or an EventLoop error if shutdown
+    *         could not be completed. Returns BADINVALIDARGUMENT for NULL. */
    UA_StatusCode
    UA_Server_run_shutdown(UA_Server *server);
+   
+   /* Initiates asynchronous shutdown and advances it on subsequent calls, without
+    * running the EventLoop. While the server is STOPPING, the caller must drive
+    * the EventLoop (directly or via UA_Server_run_iterate) and call this function
+    * again to complete shutdown.
+    *
+    * Use UA_Server_getLifecycleState to read the current state, or the configured
+    * lifecycle notification callbacks to observe state transitions.
+    *
+    * An external EventLoop is left running; an owned EventLoop is stopped once
+    * all drivers have stopped.
+    * Repeated calls do not repeat stop requests or lifecycle notifications.
+    *
+    * @param server The server object. NULL is treated as already stopped.
+    * @return The lifecycle state after this shutdown step: STOPPING while shutdown
+    *         is in progress, or STOPPED if the server is fully stopped. */
+   UA_LifecycleState
+   UA_Server_run_shutdown_async(UA_Server *server);
    
 Timed Callbacks
 ---------------
@@ -191,6 +223,84 @@ reconnect.
    UA_StatusCode UA_THREADSAFE
    UA_Server_closeSecureChannel(UA_Server *server, UA_UInt32 channelId,
                                 UA_ShutdownReason reason);
+   
+A SecureChannel carries application-defined attributes in a key-value map,
+mirroring the :ref:`session attributes <server-session-handling>` below.
+This lets the application attach its own per-channel state, for example
+from the secureChannelNotificationCallback once it has looked at the
+channel's SecurityMode.
+
+Namespace 0 is reserved for the server itself and restricted to a
+predefined set of keys, for both read and write -- any other ``0:...``
+key is rejected with UA_STATUSCODE_BADNOTFOUND (get) or
+UA_STATUSCODE_BADNOTWRITABLE (set/delete). An application is free to use
+any key in a non-zero namespace as generic, arbitrary storage.
+
+Most of the predefined ns0 keys are read-only: their value is computed
+fresh from the live SecureChannel on every access (nothing is cached),
+mirroring the background information sent with the
+UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED/_CLOSED notification
+(see common.h): ``0:securechannel-id``, ``0:connection-manager-name``,
+``0:connection-id``, ``0:remote-address``, ``0:protocol-version``,
+``0:recv-buffer-size``, ``0:recv-max-message-size``,
+``0:recv-max-chunk-count``, ``0:send-buffer-size``,
+``0:send-max-message-size``, ``0:send-max-chunk-count``,
+``0:endpoint-url``, ``0:security-mode``, ``0:security-policy-url``,
+``0:certificate-type-id`` and ``0:remote-certificate``.
+UA_Server_setSecureChannelAttribute and
+UA_Server_deleteSecureChannelAttribute reject writes to these with
+UA_STATUSCODE_BADNOTWRITABLE.
+
+One further ns0 key is interpreted by the server itself, and is the one
+ns0 attribute the application may write (stored in the generic map like
+any application-defined attribute):
+
+- ``0:maxMessageSize`` (``UA_UInt32``): If set, tightens (but never
+  loosens) UA_ServerConfig.tcpMaxMsgSize for this specific channel. Useful
+  to cap messages on a channel the application does not yet consider
+  trusted, e.g. because it is unsigned/unencrypted or has no Session with
+  a completed ActivateSession. Delete the attribute (or never set it) to
+  fall back to the server-wide tcpMaxMsgSize.
+
+.. code-block:: c
+
+   
+   /* Returns a shallow copy of the attribute (don't _clear or _delete manually).
+    * While the method is thread-safe, the returned value is not protected. Only
+    * use it in a (callback) context where the server is locked for the current
+    * thread. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_getSecureChannelAttribute(UA_Server *server, UA_UInt32 channelId,
+                                       const UA_QualifiedName key,
+                                       UA_Variant *outValue);
+   
+   /* Return a deep copy of the attribute */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_getSecureChannelAttributeCopy(UA_Server *server, UA_UInt32 channelId,
+                                           const UA_QualifiedName key,
+                                           UA_Variant *outValue);
+   
+   /* Returns UA_STATUSCODE_BADNOTFOUND if the attribute is not defined, not a
+    * scalar or not of the right datatype. Otherwise a shallow copy of the
+    * scalar value is written to the target location of the void pointer (don't
+    * _clear or _delete manually). While the method is thread-safe, the
+    * returned value is not protected. Only use it in a (callback) context
+    * where the server is locked for the current thread. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_getSecureChannelAttribute_scalar(UA_Server *server,
+                                              UA_UInt32 channelId,
+                                              const UA_QualifiedName key,
+                                              const UA_DataType *type,
+                                              void *outValue);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_setSecureChannelAttribute(UA_Server *server, UA_UInt32 channelId,
+                                       const UA_QualifiedName key,
+                                       const UA_Variant *value);
+   
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_deleteSecureChannelAttribute(UA_Server *server, UA_UInt32 channelId,
+                                          const UA_QualifiedName key);
    
 .. _server-session-handling:
 
@@ -572,10 +682,8 @@ i=20      i=13      The method is not owned by the object type "Insect"
 .. code-block:: c
 
    
-   #ifdef UA_ENABLE_METHODCALLS
    UA_CallMethodResult UA_THREADSAFE
    UA_Server_call(UA_Server *server, const UA_CallMethodRequest *request);
-   #endif
    
 View Service Set
 ----------------
@@ -733,7 +841,7 @@ the select-clause.
        (UA_Server *server, UA_UInt32 monitoredItemId, void *monitoredItemContext,
         const UA_KeyValueMap eventFields);
    
-   /* Create a local MonitoredItem for Events. The API is simplifed compared to a
+   /* Create a local MonitoredItem for Events. The API is simplified compared to a
     * UA_MonitoredItemCreateRequest. The unavailable options are not relevant for
     * local MonitoredItems (e.g. the queue size) or not relevant for Event
     * MonitoredItems (e.g. the sampling interval).
@@ -808,7 +916,7 @@ example ``UA_Server_addVariablenode`` with a value attribute (a
 
 VariableNode
 ~~~~~~~~~~~~
-Variables store values as well as contraints for possible values. There are
+Variables store values as well as constraints for possible values. There are
 three options for storing the value: Internal in the VariableNode data
 structure itself, external with a double-pointer (to switch to an updated
 value with an atomic pointer-replacing operation) or with a callback
@@ -1050,7 +1158,6 @@ callbacks to be registered.
                         size_t inputSize, const UA_Variant *input,
                         size_t outputSize, UA_Variant *output);
    
-   #ifdef UA_ENABLE_METHODCALLS
    
    UA_THREADSAFE UA_StatusCode
    UA_Server_addMethodNode(UA_Server *server, const UA_NodeId requestedNewNodeId,
@@ -1091,7 +1198,6 @@ callbacks to be registered.
                                    const UA_NodeId methodNodeId,
                                    UA_MethodCallback *outMethodCallback);
    
-   #endif
    
 ObjectNode
 ~~~~~~~~~~
@@ -1211,6 +1317,22 @@ ViewNode
                          const UA_QualifiedName browseName,
                          const UA_ViewAttributes attr,
                          void *nodeContext, UA_NodeId *outNewNodeId);
+   
+NodeSet Import
+~~~~~~~~~~~~~~
+Load a UANodeSet XML document into the server.
+
+Load dependencies first by calling this function once for each document.
+The XML input is borrowed for the duration of the call. Individual nodes
+that cannot be added are logged and skipped. The return status reports
+failures that prevent loading the document as a whole. The operation is not
+transactional; nodes and namespaces added before a failure remain in the
+server.
+
+.. code-block:: c
+
+   UA_StatusCode
+   UA_Server_loadNodeset(UA_Server *server, const UA_XmlElement nodesetXml);
    
 .. _node-lifecycle:
 
@@ -1396,7 +1518,7 @@ The _finish method:
  - may remove the node if it encounters an error.
 
 The special UA_Server_addMethodNode_finish method needs to be used for method
-nodes, since there you need to explicitly specifiy the input and output
+nodes, since there you need to explicitly specify the input and output
 arguments which are added in the finish step (if not yet already there)
 
 .. code-block:: c
@@ -1419,7 +1541,6 @@ arguments which are added in the finish step (if not yet already there)
    UA_StatusCode UA_THREADSAFE
    UA_Server_addNode_finish(UA_Server *server, const UA_NodeId nodeId);
    
-   #ifdef UA_ENABLE_METHODCALLS
    
    UA_StatusCode UA_THREADSAFE
    UA_Server_addMethodNode_finish(UA_Server *server, const UA_NodeId nodeId,
@@ -1427,7 +1548,6 @@ arguments which are added in the finish step (if not yet already there)
                             size_t inputArgumentsSize, const UA_Argument *inputArguments,
                             size_t outputArgumentsSize, const UA_Argument *outputArguments);
    
-   #endif
    
    /* Deletes a node and optionally all references leading to the node. */
    UA_StatusCode UA_THREADSAFE
@@ -1540,12 +1660,10 @@ infinite.
                          UA_ServerAsyncWriteResultCallback callback,
                          void *asyncOpContext, UA_UInt32 timeout);
    
-   #ifdef UA_ENABLE_METHODCALLS
    UA_StatusCode UA_THREADSAFE
    UA_Server_call_async(UA_Server *server, const UA_CallMethodRequest *operation,
                         UA_ServerAsyncMethodResultCallback callback,
                         void *asyncOpContext, UA_UInt32 timeout);
-   #endif
    
 Local async operations can be manually cancelled (besides an internal cancel
 due to a timeout or server shutdown). The local async operations to be
@@ -1757,7 +1875,6 @@ See ``examples/events/server_modelchange.c`` for a complete local example.
 .. code-block:: c
 
    
-   #ifdef UA_ENABLE_DISCOVERY
    
 Remote Discovery Server Registration
 ------------------------------------
@@ -1859,7 +1976,6 @@ is implemented on top in a driver outside of the core library.
    UA_Server_deregisterServerOnNetwork(UA_Server *server,
                                        UA_String serverName);
    
-   #endif /* UA_ENABLE_DISCOVERY */
    
 .. _drivers:
 
@@ -1880,6 +1996,8 @@ implementation.
 .. code-block:: c
 
    
+   /* GENERIC permits multiple instances. Other driver types
+    * can be added only once to a server. */
    typedef enum {
        UA_DRIVERTYPE_GENERIC = 0,
        UA_DRIVERTYPE_GDS_RECEIVER
@@ -1953,7 +2071,9 @@ implementation.
    };
    
    /* Adds the Driver to the server. Starts the driver if the server is already
-    * started. */
+    * started and returns the start result. A failed start rolls back registration
+    * and leaves ownership with the caller. The server backpointer is retained
+    * for cleanup; stop the driver if needed before freeing it. */
    UA_StatusCode
    UA_Server_addDriver(UA_Server *server, UA_Driver *drv);
    
@@ -2192,7 +2312,7 @@ Examples for configurations are provided in the ``/plugins`` folder.
 The usual usage is as follows:
 
 1. Create a server configuration with default settings as a starting point
-2. Modifiy the configuration, e.g. by adding a server certificate
+2. Modify the configuration, e.g. by adding a server certificate
 3. Instantiate a server with it
 4. After shutdown of the server, clean up the configuration (free memory)
 
@@ -2260,6 +2380,12 @@ The :ref:`tutorials` provide a good starting point for this.
         * zeroed-out value for empty VariableNodes when they are added. */
        UA_RuleHandling allowEmptyVariables;
    
+       /* Methods shall be the target of at least one HasComponent reference from
+        * an Object or ObjectType. Some legacy NodeSets contain detached Methods.
+        * DEFAULT and WARN log and accept them, ABORT rejects them and ACCEPT
+        * accepts them silently. */
+       UA_RuleHandling allowUnattachedMethods;
+   
        UA_RuleHandling allowAllCertificateUris;
    
        /* Verify that client ApplicationInstanceCertificates and X509IdentityTokens
@@ -2283,11 +2409,11 @@ The :ref:`tutorials` provide a good starting point for this.
    
        /* EventLoop
         * ~~~~~~~~~
-        * The sever can be plugged into an external EventLoop. Otherwise the
-        * EventLoop is considered to be attached to the server's lifecycle and will
-        * be destroyed when the config is cleaned up. */
+        * A shared EventLoop must be external to every client and server using it.
+        * Otherwise, one of them can stop or delete it while others still use it.
+        * The application owns the shared EventLoop's lifetime. */
        UA_EventLoop *eventLoop;
-       UA_Boolean externalEventLoop; /* The EventLoop is not deleted with the config */
+       UA_Boolean externalEventLoop; /* Do not stop or delete the EventLoop */
    
        /* Application Notification
         * ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2476,7 +2602,6 @@ The :ref:`tutorials` provide a good starting point for this.
    
        /* Discovery
         * ~~~~~~~~~ */
-   #ifdef UA_ENABLE_DISCOVERY
        /* Enable the internal management of RegisteredServers (besides the local
         * server itself) via the RegisterServer and FindServer services. */
        UA_Boolean registeredServersEnabled;
@@ -2500,7 +2625,6 @@ The :ref:`tutorials` provide a good starting point for this.
         * implement a Discovery Server that detects other servers on the
         * network. */
        UA_Boolean serversOnNetworkEnabled;
-   #endif
    
        /* Subscriptions
         * ~~~~~~~~~~~~~ */

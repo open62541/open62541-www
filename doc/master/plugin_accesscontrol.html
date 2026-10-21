@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AccessControl Plugin API &mdash; open62541 (master) 1.5.7 documentation</title>
+  <title>AccessControl Plugin API &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2b2ec289"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -102,6 +102,10 @@ rights accordingly.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">sessionId</span></code> and <code class="docutils literal notranslate"><span class="pre">sessionContext</span></code> can be both NULL. This is the case
 when, for example, a MonitoredItem (the underlying Subscription) is detached
 from its Session but continues to run.</p>
+<p>The callbacks <code class="docutils literal notranslate"><span class="pre">activateSession</span></code>, <code class="docutils literal notranslate"><span class="pre">getUserRightsMask</span></code>,
+<code class="docutils literal notranslate"><span class="pre">getUserAccessLevel</span></code>, <code class="docutils literal notranslate"><span class="pre">getUserExecutable</span></code>, <code class="docutils literal notranslate"><span class="pre">getUserExecutableOnObject</span></code>
+and <code class="docutils literal notranslate"><span class="pre">allowBrowseNode</span></code> are mandatory. The server does not start without
+them. The other callbacks can be NULL.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_AccessControl</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="n">UA_AccessControl</span><span class="w"> </span><span class="o">*</span><span class="n">ac</span><span class="p">);</span>
@@ -125,7 +129,7 @@ from its Session but continues to run.</p>
 <span class="cm">     * - Select matching Endpoint/UserTokenPolicy (compare token type,</span>
 <span class="cm">     *   SecureChannel and PolicyId from the UserIdentityToken)</span>
 <span class="cm">     * - Cryptographic checks:</span>
-<span class="cm">     *   - Check the encryption algortihm from the UserIdentityToken</span>
+<span class="cm">     *   - Check the encryption algorithm from the UserIdentityToken</span>
 <span class="cm">     *   - UsernamePassword/IssuedToken: Decrypt the secret</span>
 <span class="cm">     *   - Check the x509 auth certificate signature and validate the</span>
 <span class="cm">     *     certificate against the server's sessionPKI */</span>
@@ -194,7 +198,11 @@ from its Session but continues to run.</p>
 
 <span class="w">    </span><span class="cm">/* Allow transfer of a subscription to another session. The Server shall</span>
 <span class="cm">     * validate that the Client of that Session is operating on behalf of the</span>
-<span class="cm">     * same user */</span>
+<span class="cm">     * same user. The oldSessionId is NULL for a Subscription that is detached</span>
+<span class="cm">     * from its Session. The server only calls this after it has verified that</span>
+<span class="cm">     * the new Session has the identity (user, and for anonymous users the</span>
+<span class="cm">     * client ApplicationUri over a secure SecureChannel) of the Session the</span>
+<span class="cm">     * Subscription was detached from. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">allowTransferSubscription</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_AccessControl</span><span class="w"> </span><span class="o">*</span><span class="n">ac</span><span class="p">,</span>
 <span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">oldSessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">oldSessionContext</span><span class="p">,</span>
 <span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">newSessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">newSessionContext</span><span class="p">);</span>

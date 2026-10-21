@@ -471,7 +471,7 @@ functions to add new fields.
                                  const UA_PublishedDataSetConfig *pdsConfig,
                                  UA_NodeId *pdsId);
    
-   /* Returns a deep copy of the config */
+   /* Return an owned copy; release it with UA_PublishedDataSetConfig_clear. */
    UA_StatusCode UA_THREADSAFE
    UA_Server_getPublishedDataSetConfig(UA_Server *server, const UA_NodeId pdsId,
                                        UA_PublishedDataSetConfig *config);
@@ -482,8 +482,10 @@ functions to add new fields.
                                          UA_DataSetMetaDataType *metaData);
    
    /* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes
-    * all contained and linked PDS Fields. Connected WriterGroups will be also
-    * removed. */
+    * all contained and linked PDS Fields and the connected DataSetWriters. Returns
+    * Bad_ConfigurationError while a connected DataSetWriter is enabled and
+    * Bad_InvalidState (without changes) while the WriterGroup of a connected
+    * DataSetWriter is enabled. */
    UA_StatusCode UA_THREADSAFE
    UA_Server_removePublishedDataSet(UA_Server *server, const UA_NodeId pdsId);
    
@@ -584,6 +586,15 @@ contained in the WriterGroup.
        UA_MessageSecurityMode securityMode; /* via the UA_WriterGroupDataType */
        UA_PubSubSecurityPolicy *securityPolicy;
        UA_String securityGroupId;
+   
+       /* Fields defined by PubSubGroupDataType and preserved by file-config
+        * save/load. securityPolicy remains the runtime policy implementation. */
+       size_t securityKeyServicesSize;
+       UA_EndpointDescription *securityKeyServices;
+       UA_UInt32 maxNetworkMessageSize;
+       size_t localeIdsSize;
+       UA_String *localeIds;
+       UA_String headerLayoutUri;
    } UA_WriterGroupConfig;
    
    void
@@ -617,6 +628,9 @@ contained in the WriterGroup.
                                                 const UA_NodeId wgId,
                                                 UA_DateTime *timestamp);
    
+   /* Remove the group and its DataSetWriters. A failed child removal is returned
+    * and leaves the group pending deletion; retry after resolving the failure.
+    * New writers cannot be added once group deletion has started. */
    UA_StatusCode UA_THREADSAFE
    UA_Server_removeWriterGroup(UA_Server *server, const UA_NodeId wgId);
    
@@ -777,6 +791,9 @@ SubscribedDataSet and be contained within a ReaderGroup.
    typedef struct {
        UA_PUBSUBCOMPONENT_COMMON
        UA_PublisherId publisherId;
+       /* A zero-initialized config keeps the legacy wildcard behavior. Set this
+        * to true to filter explicitly for the legitimate Byte PublisherId 0. */
+       UA_Boolean publisherIdFilterEnabled;
        UA_UInt16 writerGroupId;
        UA_UInt16 dataSetWriterId;
        UA_DataSetMetaDataType dataSetMetaData;
@@ -786,6 +803,10 @@ SubscribedDataSet and be contained within a ReaderGroup.
                                          * message. Gets reset after every received
                                          * message. If <= 0.0, then no timeout is
                                          * configured. */
+       UA_UInt32 keyFrameCount; /* Maximum key-frame period. A value <= 1
+                                 * accepts key frames only. */
+       UA_String headerLayoutUri;
+       UA_KeyValueMap dataSetReaderProperties;
        UA_ExtensionObject messageSettings;
        UA_ExtensionObject transportSettings;
        UA_SubscribedDataSetType subscribedDataSetType;
@@ -868,6 +889,7 @@ can be configured for a ReaderGroup.
        UA_KeyValueMap groupProperties;
        UA_PubSubEncodingType encodingMimeType;
        UA_ExtensionObject transportSettings;
+       UA_ExtensionObject messageSettings;
    
        /* Messages are decrypted if a SecurityPolicy is configured and the
         * securityMode set accordingly. The symmetric key is a runtime information
@@ -875,6 +897,9 @@ can be configured for a ReaderGroup.
        UA_MessageSecurityMode securityMode;
        UA_PubSubSecurityPolicy *securityPolicy;
        UA_String securityGroupId;
+       size_t securityKeyServicesSize;
+       UA_EndpointDescription *securityKeyServices;
+       UA_UInt32 maxNetworkMessageSize;
    } UA_ReaderGroupConfig;
    
    void
@@ -917,6 +942,21 @@ can be configured for a ReaderGroup.
                                           const UA_ByteString signingKey,
                                           const UA_ByteString encryptingKey,
                                           const UA_ByteString keyNonce);
+   
+   /* Return an owned copy; release it with UA_SubscribedDataSetConfig_clear. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_getSubscribedDataSetConfig(UA_Server *server, const UA_NodeId id,
+                                       UA_SubscribedDataSetConfig *config);
+   
+   /* Update the settings of a disabled dataset in place. Name and NodeId are
+    * immutable. Disable attached writers/readers before updating and restore
+    * their states afterwards. Plain PublishedItems fields are retained. */
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updatePublishedDataSetConfig(UA_Server *server, const UA_NodeId id,
+                                         const UA_PublishedDataSetConfig *config);
+   UA_StatusCode UA_THREADSAFE
+   UA_Server_updateSubscribedDataSetConfig(UA_Server *server, const UA_NodeId id,
+                                          const UA_SubscribedDataSetConfig *config);
    
    #ifdef UA_ENABLE_PUBSUB_FILE_CONFIG
    
@@ -1040,13 +1080,14 @@ SecurityGroupId. It is unique within the SKS.
     *        the securityGroupId is deleted. The input config is copied to an
     *        internal config object and the content of input config object will be
     *        reset to zero.
-    * @param endpointUrl holds the endpointUrl of the SKS server
+    * @param endpointUrl holds the endpointUrl of the SKS server. It is copied and
+    *        does not need to outlive this call.
     * @param securityGroupId the SecurityGroupId of the securityGroup on SKS and
     *        reader/writergroups
     * @param callback the user defined callback to notify the user about the status
     *        of SKS Pull request.
     * @param context passed to the callback function
-    * @return UA_StatusCode the retuned status */
+    * @return UA_StatusCode the returned status */
    UA_StatusCode
    UA_Server_setSksClient(UA_Server *server, UA_String securityGroupId,
                           UA_ClientConfig *clientConfig, const char *endpointUrl,
@@ -1185,10 +1226,12 @@ DataSet Message
        UA_FieldEncoding fieldEncoding;
    
        UA_Boolean dataSetMessageSequenceNrEnabled;
-       UA_UInt16 dataSetMessageSequenceNr;
+       /* UADP encodes this as UInt16; JSON uses UInt32. */
+       UA_UInt32 dataSetMessageSequenceNr;
    
        UA_Boolean statusEnabled;
-       UA_UInt16 status;
+       /* UADP encodes the high 16 bits; JSON uses the full StatusCode. */
+       UA_StatusCode status;
    
        UA_Boolean configVersionMajorVersionEnabled;
        UA_UInt32 configVersionMajorVersion;
@@ -1304,6 +1347,7 @@ Network Message
        /* For Json NetworkMessage */
        UA_Boolean messageIdEnabled;
        UA_String messageId;
+       UA_Boolean jsonSingleDataSetMessage; /* Messages contains an object instead of an array */
    
        /* The PayloadHeader contains the number of DataSetMessages and the
         * DataSetWriterId for each of them. If the PayloadHeader is disabled, then

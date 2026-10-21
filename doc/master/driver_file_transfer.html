@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Transfer Driver &mdash; open62541 (master) 1.5.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="GDS Receiver Driver" href="driver_gds_receiver.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="toc.html" class="icon icon-home">
+            open62541 (master)
+              <img src="_static/open62541_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_concepts.html">OPC UA Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pubsub.html">PubSub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security/index.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Utility Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nodeset_compiler.html">XML Nodeset Compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="statuscodes.html">StatusCodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin.html">Plugin API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="driver.html">Drivers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="driver_mdns.html">Multicast DNS Discovery Driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_alarms_conditions.html">Alarms &amp; Conditions Driver (Experimental)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="driver_gds_receiver.html">GDS Receiver Driver</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File Transfer Driver</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#storage-backend">Storage Backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#construction-and-parameters">Construction and Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#local-backends">Local Backends</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="toc.html">open62541 (master)</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="toc.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="driver.html">Drivers</a></li>
+      <li class="breadcrumb-item active">File Transfer Driver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/driver_file_transfer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="file-transfer-driver">
+<h1>File Transfer Driver<a class="headerlink" href="#file-transfer-driver" title="Link to this heading"></a></h1>
+<p>Expose a file or directory tree through the OPC UA Part 20 FileType and
+FileDirectoryType Methods. Each driver owns one storage backend; built-in
+backends serve local files and directories.</p>
+<p>Linking the driver requires <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_DRIVER_FILE_TRANSFER</span></code>.
+The reduced and full Namespace Zero include the required types; with MINIMAL
+or NONE, load them before constructing a driver. See
+<a class="reference internal" href="tutorial_server_filetransfer.html"><span class="doc">Serving Files and Directories</span></a> for setup.</p>
+<section id="storage-backend">
+<h2>Storage Backend<a class="headerlink" href="#storage-backend" title="Link to this heading"></a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">UA_FileTransferFileBackend</span></code> for one file or <code class="docutils literal notranslate"><span class="pre">UA_FileTransferBackend</span></code>
+for a directory tree. Each driver needs an independently owned context.
+Callbacks return OPC UA StatusCodes. Paths are UTF-8, relative to the backend
+root, with ‘/’ separators; the empty path denotes the root.</p>
+<p>open, close, read, getPosition, setPosition and getInfo are required.
+Directory backends also require listDirectory. Unless <code class="docutils literal notranslate"><span class="pre">read-only</span></code> is set,
+write is required, plus create, remove and rename for directories. Missing
+callbacks cause Bad_InvalidArgument during construction or start.</p>
+<p>Backend handles must be unique within the instance and have independent
+positions. Client handles belong to their Session and close with it.</p>
+<p>Callbacks run synchronously with the server lock held and must not block
+for extended periods. Scans and recursive copy/delete run in a single call;
+their duration grows with the tree size.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Permission bit mask for one Object. For files, read/write access content.</span>
+<span class="cm"> * For directories, read lists entries, write changes entries, and traverse</span>
+<span class="cm"> * accesses children. Managed ancestors require traverse; directory mutations</span>
+<span class="cm"> * require write/traverse, recursive copy requires read/traverse on directories</span>
+<span class="cm"> * and read on files. Traverse has no meaning for files.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Storage rights, read-only configuration and the optional access callbacks</span>
+<span class="cm"> * are intersected. They govern file operations and Writable/UserWritable;</span>
+<span class="cm"> * OPC UA Browse remains controlled by accessControl.allowBrowseNode.</span>
+<span class="cm"> * Owner/group/other selection and ACL evaluation belong to the backend. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">UA_FileAccessRights</span><span class="p">;</span>
+
+<span class="cp">#define UA_FILEACCESS_TRAVERSE ((UA_FileAccessRights)0x01)</span>
+<span class="cp">#define UA_FILEACCESS_WRITE    ((UA_FileAccessRights)0x02)</span>
+<span class="cp">#define UA_FILEACCESS_READ     ((UA_FileAccessRights)0x04)</span>
+
+<span class="cm">/* Maximum UTF-8 byte length of one filename, excluding the terminator.</span>
+<span class="cm"> * This is an API limit, not a filesystem limit. Never truncate a name. */</span>
+<span class="cp">#define UA_FILETRANSFER_FILENAME_MAX 1023</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* NUL-terminated UTF-8 basename; empty for a directory root */</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">name</span><span class="p">[</span><span class="n">UA_FILETRANSFER_FILENAME_MAX</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+<span class="w">    </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w">             </span><span class="cm">/* Size in bytes (files only) */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">sizeUnknown</span><span class="p">;</span><span class="w">     </span><span class="cm">/* The Size Property then reports</span>
+<span class="cm">                                 * Bad_NotSupported (Part 20, 4.2.1) */</span>
+<span class="w">    </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="n">lastModified</span><span class="p">;</span><span class="w">   </span><span class="cm">/* Last modification time */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isDirectory</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_FileAccessRights</span><span class="w"> </span><span class="n">accessRights</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Storage-level permissions. Backend</span>
+<span class="cm">                                      * callbacks can further restrict them. */</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">mimeType</span><span class="p">[</span><span class="mi">255</span><span class="p">];</span><span class="w">         </span><span class="cm">/* Media type, zero-padded; all bytes may be used.</span>
+<span class="cm">                                * Empty omits a new MimeType Property and</span>
+<span class="cm">                                * leaves an existing one unchanged. */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_FileTransferFileInfo</span><span class="p">;</span>
+
+<span class="cm">/* The caller of an open. The driver passes the Session of the Method call for</span>
+<span class="cm"> * Open, CreateFile, the copies of MoveOrCopy and</span>
+<span class="cm"> * UA_FileTransferDriver_openHandle(). Direct calls of the application pass</span>
+<span class="cm"> * NULL. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">openContext</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Of UA_FileTransferDriver_openHandle(), else NULL */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_FileTransferOpenContext</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_FileTransferFileBackend</span><span class="w"> </span><span class="n">UA_FileTransferFileBackend</span><span class="p">;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_FileTransferFileBackend</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Backend-owned storage and handle state */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Open a file. mode is a UA_Byte bit mask of UA_OPENFILEMODE_* flags,</span>
+<span class="cm">     * validated by the driver. Append starts at EOF; otherwise start at zero.</span>
+<span class="cm">     * EraseExisting truncates the file. Return an independent handle.</span>
+<span class="cm">     * context is the caller or NULL. For a Method call, the driver has checked</span>
+<span class="cm">     * the mode, the locking (Part 20, 4.2.2), the access rights and the handle</span>
+<span class="cm">     * limits before, and the result is returned to the client, e.g.</span>
+<span class="cm">     * Bad_NotSupported for a mode the file does not offer. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">open</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">mode</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferOpenContext</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Close the handle and flush buffered writes. Report flush errors here;</span>
+<span class="cm">     * a destination close error also fails a driver-managed copy. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">close</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">handle</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Read up to length bytes and advance the position. Allocate out for the</span>
+<span class="cm">     * caller to free with UA_ByteString_clear(). Empty out means EOF. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_Int32</span><span class="w"> </span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Write all data and advance the position. The caller retains the buffer. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span>
+<span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Get the current position of the handle */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getPosition</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="o">*</span><span class="n">outPosition</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Set the current position of the handle. Positions beyond the end of the</span>
+<span class="cm">     * file are clamped to the file size (Part 20, 4.2.7). */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">setPosition</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">handle</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">position</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Get metadata, including the basename (empty for a directory root).</span>
+<span class="cm">     * outInfo is zero-initialized. Set accessRights explicitly: zero denies</span>
+<span class="cm">     * access. An overlong name returns Bad_EncodingLimitsExceeded. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getInfo</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_FileTransferFileInfo</span><span class="w"> </span><span class="o">*</span><span class="n">outInfo</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Optional restrictions independent of client identity. outRights starts</span>
+<span class="cm">     * at zero; errors deny access and propagate to the caller. NULL adds no</span>
+<span class="cm">     * restriction. Policy state is available in b-&gt;context. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getAccessRights</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">UA_FileAccessRights</span><span class="w"> </span><span class="o">*</span><span class="n">outRights</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Optional Session-specific restrictions, with the Session identity and</span>
+<span class="cm">     * context from the Method or Property callback. Same output/error rules</span>
+<span class="cm">     * as getAccessRights. Open and every Read/Write recheck permissions;</span>
+<span class="cm">     * Close remains possible after revocation. With either access callback,</span>
+<span class="cm">     * recursive operations reject unmirrored entries needing an Object check. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getUserAccessRights</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span>
+<span class="w">                                         </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                         </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                         </span><span class="n">UA_FileAccessRights</span><span class="w"> </span><span class="o">*</span><span class="n">outRights</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Release context when the driver is freed. Optional; called once if set. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">clear</span><span class="p">)(</span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="cm">/* Report one entry with fully initialized metadata and a non-empty,</span>
+<span class="cm"> * NUL-terminated basename. info is borrowed for the duration of the callback;</span>
+<span class="cm"> * copy the struct to retain it. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
+<span class="p">(</span><span class="o">*</span><span class="n">UA_FileTransferListCallback</span><span class="p">)(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">listContext</span><span class="p">,</span>
+<span class="w">                               </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferFileInfo</span><span class="w"> </span><span class="o">*</span><span class="n">info</span><span class="p">);</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_FileTransferBackend</span><span class="w"> </span><span class="n">UA_FileTransferBackend</span><span class="p">;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_FileTransferBackend</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* File operations; first member to allow casting b back to this struct */</span>
+<span class="w">    </span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="n">file</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Enumerate entries at path. Return an error if enumeration or reading</span>
+<span class="cm">     * entry metadata fails, including when an entry disappears during the</span>
+<span class="cm">     * listing. An error discards the entire listing; a successful incomplete</span>
+<span class="cm">     * listing could lose data during a move. Never truncate overlong names;</span>
+<span class="cm">     * return Bad_EncodingLimitsExceeded instead. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">listDirectory</span><span class="p">)(</span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_FileTransferListCallback</span><span class="w"> </span><span class="n">cb</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">listContext</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Create an empty entry at path; fail if it exists. info is borrowed;</span>
+<span class="cm">     * name matches the path basename, isDirectory selects the type. Other</span>
+<span class="cm">     * fields are zeroed and ignored; use backend defaults for metadata. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">create</span><span class="p">)(</span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferFileInfo</span><span class="w"> </span><span class="o">*</span><span class="n">info</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Remove a file or empty directory. The driver removes trees bottom-up. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">remove</span><span class="p">)(</span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Move within this backend. Never overwrite or merge an existing target,</span>
+<span class="cm">     * even if it is not mirrored: return Bad_BrowseNameDuplicated. The driver</span>
+<span class="cm">     * rejects moves of entries with open handles. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">rename</span><span class="p">)(</span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">fromPath</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">toPath</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Optional file copy within this backend; otherwise the driver uses</span>
+<span class="cm">     * open/read/write/close. Trees are copied entry by entry. As for rename,</span>
+<span class="cm">     * do not overwrite targets or copy entries with open handles. Remove any</span>
+<span class="cm">     * partial destination on failure. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">copy</span><span class="p">)(</span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">fromPath</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">toPath</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+<section id="construction-and-parameters">
+<h2>Construction and Parameters<a class="headerlink" href="#construction-and-parameters" title="Link to this heading"></a></h2>
+<p>Set <code class="docutils literal notranslate"><span class="pre">driver-&gt;params</span></code> before UA_Server_addDriver(). Parameters are read on
+each start; all keys use namespace 0. A known key with another type than
+listed fails the start with Bad_InvalidArgument.</p>
+<dl class="simple">
+<dt>0:read-only [Boolean]</dt><dd><p>Disable writes and directory mutations (default: false).</p>
+</dd>
+<dt>0:max-scan-depth [UInt32]</dt><dd><p>Maximum depth of mirrored entries; the root’s entries have depth 1 and
+directories at the limit appear empty. 0 means unlimited (default).
+CreateFile, CreateDirectory and MoveOrCopy return Bad_ResourceUnavailable
+for targets beyond the limit. Lowering the limit keeps deeper Objects,
+but they are no longer refreshed.</p>
+</dd>
+<dt>0:max-nodes [UInt32]</dt><dd><p>Maximum mirrored Objects, including the root; 0 means unlimited
+(default). Lowering the limit does not remove existing Objects.</p>
+</dd>
+<dt>0:namespace-index [UInt16]</dt><dd><p>Namespace for new entry BrowseNames and NodeIds (default: 0).
+Standard Properties and Methods remain in namespace 0.</p>
+</dd>
+<dt>0:refresh-interval [Double]</dt><dd><p>Directory refresh interval in milliseconds (default: 1000), at least
+0.0001. 0 disables the periodic refresh, see
+UA_FileTransferDriver_refresh(). Vanished files with open handles remain
+until closed.</p>
+</dd>
+<dt>0:max-open-handles-per-session [UInt16]</dt><dd><p>Open-handle limit per Session in this driver (default: 64).</p>
+</dd>
+<dt>0:max-open-handles-per-file [UInt16]</dt><dd><p>Open-handle limit per file (default: 16). Either handle limit makes
+Open return Bad_ResourceUnavailable when reached.</p>
+</dd>
+<dt>0:activity-timeout [Double]</dt><dd><p>Close handles without a Method call for longer than this many
+milliseconds like Close, e.g. for the ActivityTimeout of a TrustList
+(Part 12, 7.8.2.1). The FileType Methods, openHandle and getHandleInfo
+count as calls. Idle handles are closed within twice the timeout. 0
+disables it (default); otherwise at least 0.0001.</p>
+</dd>
+<dt>0:max-read-length [UInt32]</dt><dd><p>Maximum bytes per Read or Write (default, also when zero: 1048576).
+Published as MaxByteStringLength. Reads are capped at this length;
+larger writes fail with Bad_InvalidArgument.</p>
+</dd>
+</dl>
+<p>Each refresh lists every mirrored directory with the server lock held, with
+max-nodes twice (removals first). For large or deep trees, set
+max-scan-depth and max-nodes and consider a longer refresh-interval, or 0
+with UA_FileTransferDriver_refresh(). Skipped entries and trees cut off by
+these limits are logged at start and when their numbers change; unchanged
+results only at debug level.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Description of the root Object. Zero-initialized fields select defaults.</span>
+<span class="cm"> * The description and its contents are borrowed only during construction. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Existing Object to reuse, or ID to create.</span>
+<span class="cm">                               * Null generates a NodeId in namespace 1. */</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Default: Objects folder */</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default: HasComponent */</span>
+<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default: path basename (file), or 0:FileSystem */</span>
+<span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">typeDefinition</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Default: FileType or FileDirectoryType */</span>
+<span class="w">    </span><span class="n">UA_ObjectAttributes</span><span class="w"> </span><span class="n">attributes</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Default Object attributes; an empty</span>
+<span class="cm">                                    * DisplayName uses the BrowseName */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_FileTransferNodeDescription</span><span class="p">;</span>
+
+<span class="cm">/* Construct a stopped driver for an existing backend file or directory.</span>
+<span class="cm"> * newDirectory serves the empty path. description may be NULL for defaults.</span>
+<span class="cm"> * A default file BrowseName uses namespace 1 and the path basename; for an</span>
+<span class="cm"> * empty path, use getInfo's name or "File" if unnamed.</span>
+<span class="cm"> *</span>
+<span class="cm"> * An existing description-&gt;nodeId reuses a FileType/FileDirectoryType Object</span>
+<span class="cm"> * (or subtype); other description fields are ignored. Children are matched</span>
+<span class="cm"> * by BrowseName text regardless of namespace. Ambiguous or incompatible</span>
+<span class="cm"> * entries are rejected; unrelated existing nodes are untouched.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Bound Object contexts point to the driver, including while stopped. Reused</span>
+<span class="cm"> * roots are bound on first start. Freeing removes driver-created nodes and</span>
+<span class="cm"> * restores reused Objects' contexts and Properties' values, sources and contexts.</span>
+<span class="cm"> * Reused Objects also survive disappearance of their storage entry.</span>
+<span class="cm"> * Delete and successful moves delete reused Objects at the source as well.</span>
+<span class="cm"> * Before deleting an Object, its context from construction or reuse is restored</span>
+<span class="cm"> * for the application lifecycle destructors.</span>
+<span class="cm"> * While started, drivers supply the standard Methods, including shared</span>
+<span class="cm"> * Namespace Zero Method nodes and copies inherited by subtypes. Other</span>
+<span class="cm"> * Methods of subtypes stay with the application, see</span>
+<span class="cm"> * UA_FileTransferDriver_getHandleInfo(). The drivers own these Method nodes:</span>
+<span class="cm"> * the first start replaces callbacks set by the application, the last stop</span>
+<span class="cm"> * removes them. FileType Objects of the application that are served without a</span>
+<span class="cm"> * driver need their own Method nodes.</span>
+<span class="cm"> *</span>
+<span class="cm"> * On success, the backend struct is copied and its context becomes owned by</span>
+<span class="cm"> * the driver. On failure, created nodes are removed, *outDriver is NULL and</span>
+<span class="cm"> * the caller retains the backend. outDriver is required; outNodeId is optional</span>
+<span class="cm"> * and receives an owned NodeId only on success.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Registration is separate. Before successful UA_Server_addDriver(), the</span>
+<span class="cm"> * caller must free the driver before deleting the server; afterwards the</span>
+<span class="cm"> * server owns it. To free explicitly, stop and remove the driver first.</span>
+<span class="cm"> * Start mirrors directory entries and the periodic refresh (unless</span>
+<span class="cm"> * refresh-interval is 0) keeps them in sync.</span>
+<span class="cm"> * Stop closes handles but preserves nodes and backend for restart. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_newFile</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">backend</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">path</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferNodeDescription</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">**</span><span class="n">outDriver</span><span class="p">);</span>
+
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_newDirectory</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">backend</span><span class="p">,</span>
+<span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_FileTransferNodeDescription</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">,</span>
+<span class="w">                                   </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">**</span><span class="n">outDriver</span><span class="p">);</span>
+
+<span class="cm">/* Reconcile the directory tree of a started directory driver with its backend</span>
+<span class="cm"> * now, e.g. with the periodic refresh disabled. Returns Bad_InvalidState for a</span>
+<span class="cm"> * stopped driver and Bad_NotSupported for a file driver. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_refresh</span><span class="p">(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">);</span>
+
+<span class="cm">/* FileType subtypes can define Methods on an open file, e.g. CloseAndUpdate of</span>
+<span class="cm"> * the PubSubConfiguration (Part 14). These Methods stay with the application,</span>
+<span class="cm"> * which also implements the backend of the file. Their callbacks resolve the</span>
+<span class="cm"> * client's FileHandle to the open mode and the backend handle, and may then</span>
+<span class="cm"> * close it like the Close Method. Handles are bound to the Session and the file</span>
+<span class="cm"> * Object that opened them; others return Bad_InvalidArgument. closeHandle</span>
+<span class="cm"> * returns the result of the backend close. Both can be called from Method</span>
+<span class="cm"> * callbacks. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_getHandleInfo</span><span class="p">(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">fileNodeId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">fileHandle</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="o">*</span><span class="n">mode</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">backendHandle</span><span class="p">);</span>
+
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_closeHandle</span><span class="p">(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">fileNodeId</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">fileHandle</span><span class="p">);</span>
+
+<span class="cm">/* Subtype Methods that open the file with their own arguments, e.g.</span>
+<span class="cm"> * OpenWithMasks of a TrustList (Part 12), create the FileHandle with</span>
+<span class="cm"> * openHandle. openContext reaches the backend open, e.g. for the masks. The</span>
+<span class="cm"> * checks and results of the Open Method apply; a stopped driver returns</span>
+<span class="cm"> * Bad_InvalidState and a node that is not a file of the driver</span>
+<span class="cm"> * Bad_InvalidArgument. The handle belongs to the Session like one from Open:</span>
+<span class="cm"> * it counts in OpenCount and the handle limits and closes with the Session.</span>
+<span class="cm"> * Return fileHandle to the client, or close it with closeHandle if the Method</span>
+<span class="cm"> * fails afterwards. backendHandle is optional. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_FileTransferDriver_openHandle</span><span class="p">(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">driver</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">fileNodeId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">mode</span><span class="p">,</span>
+<span class="w">                                 </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">openContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">fileHandle</span><span class="p">,</span>
+<span class="w">                                 </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="o">*</span><span class="n">backendHandle</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="local-backends">
+<h2>Local Backends<a class="headerlink" href="#local-backends" title="Link to this heading"></a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Serve an existing local directory (UTF-8 path, copied on success).</span>
+<span class="cm"> * out is written only on success. Reported rights follow the server process's</span>
+<span class="cm"> * filesystem permissions, further restricted by the optional access callbacks.</span>
+<span class="cm"> * Windows traversal checks are left to the filesystem operations.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Paths with ".." segments are rejected, but links to regular files are followed</span>
+<span class="cm"> * even outside rootPath: this is not a filesystem sandbox, including in</span>
+<span class="cm"> * read-only mode. Directory symlinks and special files are skipped; directories</span>
+<span class="cm"> * containing them cannot be deleted through the driver (Bad_InvalidState).</span>
+<span class="cm"> * Windows rejects unrepresentable names. 32-bit POSIX positions are limited</span>
+<span class="cm"> * to 2 GiB. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_FileTransferBackend_localDirectory</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">rootPath</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">UA_FileTransferBackend</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+
+<span class="cm">/* Serve one existing regular file using the same local I/O and permissions.</span>
+<span class="cm"> * filePath is UTF-8 and copied; out is written only on success. Links to regular</span>
+<span class="cm"> * files are followed. Only the empty backend path is accepted; getInfo reports</span>
+<span class="cm"> * the basename and media type. Pass UA_STRING_NULL to newFile(). */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_FileTransferFileBackend_localFile</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">filePath</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">UA_FileTransferFileBackend</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="driver_gds_receiver.html" class="btn btn-neutral float-left" title="GDS Receiver Driver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, The open62541 authors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

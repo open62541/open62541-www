@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PubSub &mdash; open62541 (master) 1.5.7 documentation</title>
+  <title>PubSub &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2b2ec289"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -547,7 +547,7 @@ functions to add new fields.</p>
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">UA_PublishedDataSetConfig</span><span class="w"> </span><span class="o">*</span><span class="n">pdsConfig</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">pdsId</span><span class="p">);</span>
 
-<span class="cm">/* Returns a deep copy of the config */</span>
+<span class="cm">/* Return an owned copy; release it with UA_PublishedDataSetConfig_clear. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_getPublishedDataSetConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">pdsId</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_PublishedDataSetConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
@@ -558,8 +558,10 @@ functions to add new fields.</p>
 <span class="w">                                      </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="o">*</span><span class="n">metaData</span><span class="p">);</span>
 
 <span class="cm">/* Remove PublishedDataSet, identified by the NodeId. Deletion of PDS removes</span>
-<span class="cm"> * all contained and linked PDS Fields. Connected WriterGroups will be also</span>
-<span class="cm"> * removed. */</span>
+<span class="cm"> * all contained and linked PDS Fields and the connected DataSetWriters. Returns</span>
+<span class="cm"> * Bad_ConfigurationError while a connected DataSetWriter is enabled and</span>
+<span class="cm"> * Bad_InvalidState (without changes) while the WriterGroup of a connected</span>
+<span class="cm"> * DataSetWriter is enabled. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removePublishedDataSet</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">pdsId</span><span class="p">);</span>
 </pre></div>
@@ -656,6 +658,15 @@ contained in the WriterGroup.</p>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span><span class="w"> </span><span class="cm">/* via the UA_WriterGroupDataType */</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Fields defined by PubSubGroupDataType and preserved by file-config</span>
+<span class="cm">     * save/load. securityPolicy remains the runtime policy implementation. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityKeyServicesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="o">*</span><span class="n">securityKeyServices</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNetworkMessageSize</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">localeIdsSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">localeIds</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">headerLayoutUri</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_WriterGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -689,6 +700,9 @@ contained in the WriterGroup.</p>
 <span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">wgId</span><span class="p">,</span>
 <span class="w">                                             </span><span class="n">UA_DateTime</span><span class="w"> </span><span class="o">*</span><span class="n">timestamp</span><span class="p">);</span>
 
+<span class="cm">/* Remove the group and its DataSetWriters. A failed child removal is returned</span>
+<span class="cm"> * and leaves the group pending deletion; retry after resolving the failure.</span>
+<span class="cm"> * New writers cannot be added once group deletion has started. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_removeWriterGroup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">wgId</span><span class="p">);</span>
 
@@ -840,6 +854,9 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_PUBSUBCOMPONENT_COMMON</span>
 <span class="w">    </span><span class="n">UA_PublisherId</span><span class="w"> </span><span class="n">publisherId</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* A zero-initialized config keeps the legacy wildcard behavior. Set this</span>
+<span class="cm">     * to true to filter explicitly for the legitimate Byte PublisherId 0. */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">publisherIdFilterEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">writerGroupId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetWriterId</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_DataSetMetaDataType</span><span class="w"> </span><span class="n">dataSetMetaData</span><span class="p">;</span>
@@ -849,6 +866,10 @@ SubscribedDataSet and be contained within a ReaderGroup.</p>
 <span class="cm">                                      * message. Gets reset after every received</span>
 <span class="cm">                                      * message. If &lt;= 0.0, then no timeout is</span>
 <span class="cm">                                      * configured. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">keyFrameCount</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Maximum key-frame period. A value &lt;= 1</span>
+<span class="cm">                              * accepts key frames only. */</span>
+<span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">headerLayoutUri</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">dataSetReaderProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SubscribedDataSetType</span><span class="w"> </span><span class="n">subscribedDataSetType</span><span class="p">;</span>
@@ -928,6 +949,7 @@ can be configured for a ReaderGroup.</p>
 <span class="w">    </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">groupProperties</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubEncodingType</span><span class="w"> </span><span class="n">encodingMimeType</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">transportSettings</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="n">messageSettings</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Messages are decrypted if a SecurityPolicy is configured and the</span>
 <span class="cm">     * securityMode set accordingly. The symmetric key is a runtime information</span>
@@ -935,6 +957,9 @@ can be configured for a ReaderGroup.</p>
 <span class="w">    </span><span class="n">UA_MessageSecurityMode</span><span class="w"> </span><span class="n">securityMode</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_PubSubSecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicy</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">securityKeyServicesSize</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_EndpointDescription</span><span class="w"> </span><span class="o">*</span><span class="n">securityKeyServices</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">maxNetworkMessageSize</span><span class="p">;</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ReaderGroupConfig</span><span class="p">;</span>
 
 <span class="kt">void</span>
@@ -977,6 +1002,21 @@ can be configured for a ReaderGroup.</p>
 <span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">signingKey</span><span class="p">,</span>
 <span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">encryptingKey</span><span class="p">,</span>
 <span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="n">keyNonce</span><span class="p">);</span>
+
+<span class="cm">/* Return an owned copy; release it with UA_SubscribedDataSetConfig_clear. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSubscribedDataSetConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_SubscribedDataSetConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
+
+<span class="cm">/* Update the settings of a disabled dataset in place. Name and NodeId are</span>
+<span class="cm"> * immutable. Disable attached writers/readers before updating and restore</span>
+<span class="cm"> * their states afterwards. Plain PublishedItems fields are retained. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_updatePublishedDataSetConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">                                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_PublishedDataSetConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_updateSubscribedDataSetConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_SubscribedDataSetConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
 <span class="cp">#ifdef UA_ENABLE_PUBSUB_FILE_CONFIG</span>
 
@@ -1101,13 +1141,14 @@ and manage role permission on SecurityGroup object.</p>
 <span class="cm"> *        the securityGroupId is deleted. The input config is copied to an</span>
 <span class="cm"> *        internal config object and the content of input config object will be</span>
 <span class="cm"> *        reset to zero.</span>
-<span class="cm"> * @param endpointUrl holds the endpointUrl of the SKS server</span>
+<span class="cm"> * @param endpointUrl holds the endpointUrl of the SKS server. It is copied and</span>
+<span class="cm"> *        does not need to outlive this call.</span>
 <span class="cm"> * @param securityGroupId the SecurityGroupId of the securityGroup on SKS and</span>
 <span class="cm"> *        reader/writergroups</span>
 <span class="cm"> * @param callback the user defined callback to notify the user about the status</span>
 <span class="cm"> *        of SKS Pull request.</span>
 <span class="cm"> * @param context passed to the callback function</span>
-<span class="cm"> * @return UA_StatusCode the retuned status */</span>
+<span class="cm"> * @return UA_StatusCode the returned status */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_setSksClient</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityGroupId</span><span class="p">,</span>
 <span class="w">                       </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">clientConfig</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">,</span>
@@ -1233,10 +1274,12 @@ is not required when <a class="reference internal" href="#pubsub"><span class="s
 <span class="w">    </span><span class="n">UA_FieldEncoding</span><span class="w"> </span><span class="n">fieldEncoding</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">dataSetMessageSequenceNrEnabled</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">dataSetMessageSequenceNr</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* UADP encodes this as UInt16; JSON uses UInt32. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">dataSetMessageSequenceNr</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">statusEnabled</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* UADP encodes the high 16 bits; JSON uses the full StatusCode. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">configVersionMajorVersionEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">configVersionMajorVersion</span><span class="p">;</span>
@@ -1350,6 +1393,7 @@ is not required when <a class="reference internal" href="#pubsub"><span class="s
 <span class="w">    </span><span class="cm">/* For Json NetworkMessage */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">messageIdEnabled</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">messageId</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">jsonSingleDataSetMessage</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Messages contains an object instead of an array */</span>
 
 <span class="w">    </span><span class="cm">/* The PayloadHeader contains the number of DataSetMessages and the</span>
 <span class="cm">     * DataSetWriterId for each of them. If the PayloadHeader is disabled, then</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Types &mdash; open62541 (master) 1.5.7 documentation</title>
+  <title>Data Types &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2b2ec289"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -733,7 +733,8 @@ seconds.</p>
 <span class="cm">/* The current time in UTC time */</span>
 <span class="n">UA_DateTime</span><span class="w"> </span><span class="nf">UA_DateTime_now</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
-<span class="cm">/* Offset between local time and UTC time */</span>
+<span class="cm">/* Offset between local time and UTC time. On POSIX, building with</span>
+<span class="cm"> * UA_ARCH_LOCAL_TIME_IS_UTC enabled returns zero without timezone conversion. */</span>
 <span class="n">UA_Int64</span><span class="w"> </span><span class="nf">UA_DateTime_localTimeUtcOffset</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
 <span class="cm">/* CPU clock invariant to system time changes. Use only to measure durations,</span>
@@ -1235,7 +1236,9 @@ used. <code class="docutils literal notranslate"><span class="pre">UA_Variant_is
 <span class="nf">UA_Variant_setScalarCopy</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Set the variant to an existing array value. The array is cleared together</span>
-<span class="cm"> * with the variant. */</span>
+<span class="cm"> * with the variant. With arraySize zero, the variant is an empty array (with</span>
+<span class="cm"> * UA_EMPTY_ARRAY_SENTINEL as data) and the array is not taken over. A NULL</span>
+<span class="cm"> * array with arraySize zero is a null array. */</span>
 <span class="kt">void</span>
 <span class="nf">UA_Variant_setArray</span><span class="p">(</span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">array</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arraySize</span><span class="p">,</span>
 <span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
@@ -1459,6 +1462,8 @@ type operations as static inline functions.</p>
 <span class="w">    </span><span class="n">UA_DATATYPEKIND_BITFIELDCLUSTER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="cm">/* bitfields + padding */</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DataTypeKind</span><span class="p">;</span>
 
+<span class="cp">#define UA_DATATYPE_MEMBERS_MAX 511</span>
+
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_DataType</span><span class="w"> </span><span class="p">{</span>
 <span class="cp">#ifdef UA_ENABLE_TYPEDESCRIPTION</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">typeName</span><span class="p">;</span>
@@ -1467,13 +1472,13 @@ type operations as static inline functions.</p>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">binaryEncodingId</span><span class="p">;</span><span class="w"> </span><span class="cm">/* NodeId of datatype when encoded as binary */</span>
 <span class="w">    </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">xmlEncodingId</span><span class="p">;</span><span class="w">    </span><span class="cm">/* NodeId of datatype when encoded as XML */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">memSize</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Size of the struct in memory */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">typeKind</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Dispatch index for the handling routines */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">typeKind</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Dispatch index for the handling routines */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">pointerFree</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="cm">/* The type (and its members) contains no</span>
 <span class="cm">                                 * pointers that need to be freed */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">overlayable</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="cm">/* The type has the identical memory layout</span>
 <span class="cm">                                 * in memory and on the binary stream. */</span>
-<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">membersSize</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w">  </span><span class="cm">/* How many members does the type have? */</span>
-<span class="w">    </span><span class="n">UA_DataTypeMember</span><span class="w"> </span><span class="o">*</span><span class="n">members</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">membersSize</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span><span class="w">  </span><span class="cm">/* How many members does the type have? */</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataTypeMember</span><span class="w"> </span><span class="o">*</span><span class="n">members</span><span class="p">;</span>
 <span class="p">};</span>
 
 <span class="cm">/* Clean up type definition with heap-allocated data */</span>
@@ -1488,7 +1493,7 @@ type operations as static inline functions.</p>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DataTypeArray</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_DataTypeArray</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">typesSize</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">types</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">types</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">cleanup</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Free the array structure and its content when the</span>
 <span class="cm">                         * client or server configuration containing it is</span>
 <span class="cm">                         * cleaned up */</span>

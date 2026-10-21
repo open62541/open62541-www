@@ -8,7 +8,7 @@ representation -- which is not directly accessible.
 
 ReferenceType Bitfield Representation
 -------------------------------------
-ReferenceTypes have an alternative represention as an index into a bitfield
+ReferenceTypes have an alternative representation as an index into a bitfield
 for fast comparison. The index is generated when the corresponding
 ReferenceTypeNode is added. By bounding the number of ReferenceTypes that can
 exist in the server, the bitfield can represent a set of an combination of
@@ -42,8 +42,8 @@ creates these ReferenceTypes in-order.
    #define UA_REFERENCETYPEINDEX_HASORDEREDCOMPONENT 16
    #define UA_REFERENCETYPEINDEX_HASINTERFACE 17
    
-   /* The maximum number of ReferrenceTypes. Must be a multiple of 32. */
-   #define UA_REFERENCETYPESET_MAX 128
+   /* The maximum number of ReferenceTypes. Must be a multiple of 32. */
+   #define UA_REFERENCETYPESET_MAX 256
    typedef struct {
        UA_UInt32 bits[UA_REFERENCETYPESET_MAX / 32];
    } UA_ReferenceTypeSet;
@@ -492,7 +492,7 @@ Nodestore backends.
        /* _getNode returns a pointer to an immutable node. Call _releaseNode to
         * indicate when the pointer is no longer accessed.
         *
-        * It can be indicated if only a subset of the attributes and referencs need
+        * It can be indicated if only a subset of the attributes and references need
         * to be accessed. That is relevant when the nodestore accesses a slow
         * storage backend for the attributes. The attribute mask is a bitfield with
         * ORed entries from UA_NodeAttributesMask. If the attributes mask is empty,
@@ -532,7 +532,7 @@ Nodestore backends.
         * calling _releaseNode.
         *
         * The attribute-mask and reference-description indicate if only a subset of
-        * the attributes and referencs are to be modified. Other attributes and
+        * the attributes and references are to be modified. Other attributes and
         * references shall not be changed. */
        UA_Node * (*getEditNode)(UA_Nodestore *ns, const UA_NodeId *nodeId,
                                 UA_UInt32 attributeMask,
@@ -550,8 +550,11 @@ Nodestore backends.
         * ``getNodeFromPtr``. */
        void (*releaseNode)(UA_Nodestore *ns, const UA_Node *node);
    
-       /* Returns an editable copy of a node (needs to be deleted with the
-        * deleteNode function or inserted / replaced into the nodestore). */
+       /* Returns an editable copy of the same logical node (needs to be deleted
+        * with the deleteNode function or inserted / replaced into the nodestore).
+        * Runtime state such as MonitoredItem associations is not copied. A
+        * successful replacement must transfer that state from the old node to
+        * the replacement. */
        UA_StatusCode (*getNodeCopy)(UA_Nodestore *ns, const UA_NodeId *nodeId,
                                     UA_Node **outNode);
    
@@ -601,7 +604,8 @@ Nodestore backends.
    UA_Node_insertOrUpdateDescription(UA_Node *node,
                                      const UA_LocalizedText *description);
    
-   /* Reset the destination node and copy the content of the source */
+   /* Reset the destination node and copy the content of the source. Runtime
+    * MonitoredItem associations are not copied. */
    UA_StatusCode
    UA_Node_copy(const UA_Node *src, UA_Node *dst);
    

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Server &mdash; open62541 (master) 1.5.7 documentation</title>
+  <title>Server &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2b2ec289"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -68,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#referencetypenode">ReferenceTypeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#datatypenode">DataTypeNode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#viewnode">ViewNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nodeset-import">NodeSet Import</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#node-lifecycle-constructors-destructors-and-node-contexts">Node Lifecycle: Constructors, Destructors and Node Contexts</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#detailed-node-construction">Detailed Node Construction</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reference-management">Reference Management</a></li>
@@ -149,7 +150,7 @@ MethodNodes.</p>
 <section id="server-lifecycle">
 <span id="id2"></span><h2>Server Lifecycle<a class="headerlink" href="#server-lifecycle" title="Link to this heading"></a></h2>
 <p>This section describes the API for creating, running and deleting a server.
-At runtime, the server continuously listens on the network, acceppts incoming
+At runtime, the server continuously listens on the network, accepts incoming
 connections and processes received messages. Furthermore, timed (cyclic)
 callbacks are executed.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Create a new server with a default configuration that adds plugins for</span>
@@ -158,7 +159,7 @@ callbacks are executed.</p>
 <span class="cm"> *</span>
 <span class="cm"> * The default configuration can be used as the starting point to adjust the</span>
 <span class="cm"> * server configuration to individual needs. UA_Server_new is implemented in the</span>
-<span class="cm"> * /plugins folder under the CC0 license. Furthermore the server confiugration</span>
+<span class="cm"> * /plugins folder under the CC0 license. Furthermore the server configuration</span>
 <span class="cm"> * only uses the public server API.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Returns the configured server or NULL if an error occurs. */</span>
@@ -174,7 +175,7 @@ callbacks are executed.</p>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
-<span class="cm">/* Get the configuration. Always succeeds as this simplfy resolves a pointer.</span>
+<span class="cm">/* Get the configuration. Always succeeds as this simply resolves a pointer.</span>
 <span class="cm"> * Attention! Do not adjust the configuration while the server is running! */</span>
 <span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Server_getConfig</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
@@ -209,7 +210,11 @@ callbacks are executed.</p>
 <span class="nf">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
 <span class="cm">/* The prologue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt) */</span>
+<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt). Fails if a transport (TCP,</span>
+<span class="cm"> * WebSocket, HTTP) cannot open its server socket and the server cannot be</span>
+<span class="cm"> * reached otherwise (no other transport listens, no reverse connect is</span>
+<span class="cm"> * registered). Then the startup is undone as in UA_Server_run_shutdown. The</span>
+<span class="cm"> * lifecycle notifications report STOPPING and STOPPED without STARTED. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run_startup</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
@@ -218,16 +223,44 @@ callbacks are executed.</p>
 <span class="cm"> * @param server The server object.</span>
 <span class="cm"> * @param waitInternal Should we wait for messages in the networklayer?</span>
 <span class="cm"> *        Otherwise, the timeouts for the networklayers are set to zero.</span>
-<span class="cm"> *        The default max wait time is 200ms.</span>
+<span class="cm"> *        The default max wait time is 500ms.</span>
 <span class="cm"> * @return Returns how long we can wait until the next scheduled</span>
 <span class="cm"> *         callback (in ms) */</span>
 <span class="n">UA_UInt16</span>
 <span class="nf">UA_Server_run_iterate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">waitInternal</span><span class="p">);</span>
 
 <span class="cm">/* The epilogue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt) */</span>
+<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt).</span>
+<span class="cm"> *</span>
+<span class="cm"> * Runs the EventLoop until the server is fully stopped. An external EventLoop</span>
+<span class="cm"> * is left running for its other users; an owned EventLoop is stopped as well.</span>
+<span class="cm"> * Calling this on an already stopped server succeeds without further action.</span>
+<span class="cm"> * Use UA_Server_run_shutdown_async if shutdown requires application work</span>
+<span class="cm"> * between EventLoop iterations or is initiated from an EventLoop callback.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object.</span>
+<span class="cm"> * @return GOOD once the server is STOPPED, or an EventLoop error if shutdown</span>
+<span class="cm"> *         could not be completed. Returns BADINVALIDARGUMENT for NULL. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
+
+<span class="cm">/* Initiates asynchronous shutdown and advances it on subsequent calls, without</span>
+<span class="cm"> * running the EventLoop. While the server is STOPPING, the caller must drive</span>
+<span class="cm"> * the EventLoop (directly or via UA_Server_run_iterate) and call this function</span>
+<span class="cm"> * again to complete shutdown.</span>
+<span class="cm"> *</span>
+<span class="cm"> * Use UA_Server_getLifecycleState to read the current state, or the configured</span>
+<span class="cm"> * lifecycle notification callbacks to observe state transitions.</span>
+<span class="cm"> *</span>
+<span class="cm"> * An external EventLoop is left running; an owned EventLoop is stopped once</span>
+<span class="cm"> * all drivers have stopped.</span>
+<span class="cm"> * Repeated calls do not repeat stop requests or lifecycle notifications.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param server The server object. NULL is treated as already stopped.</span>
+<span class="cm"> * @return The lifecycle state after this shutdown step: STOPPING while shutdown</span>
+<span class="cm"> *         is in progress, or STOPPED if the server is fully stopped. */</span>
+<span class="n">UA_LifecycleState</span>
+<span class="nf">UA_Server_run_shutdown_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -313,6 +346,79 @@ reconnect.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_closeSecureChannel</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
 <span class="w">                             </span><span class="n">UA_ShutdownReason</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>A SecureChannel carries application-defined attributes in a key-value map,
+mirroring the <a class="reference internal" href="#server-session-handling"><span class="std std-ref">session attributes</span></a> below.
+This lets the application attach its own per-channel state, for example
+from the secureChannelNotificationCallback once it has looked at the
+channel’s SecurityMode.</p>
+<p>Namespace 0 is reserved for the server itself and restricted to a
+predefined set of keys, for both read and write – any other <code class="docutils literal notranslate"><span class="pre">0:...</span></code>
+key is rejected with UA_STATUSCODE_BADNOTFOUND (get) or
+UA_STATUSCODE_BADNOTWRITABLE (set/delete). An application is free to use
+any key in a non-zero namespace as generic, arbitrary storage.</p>
+<p>Most of the predefined ns0 keys are read-only: their value is computed
+fresh from the live SecureChannel on every access (nothing is cached),
+mirroring the background information sent with the
+UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED/_CLOSED notification
+(see common.h): <code class="docutils literal notranslate"><span class="pre">0:securechannel-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:connection-manager-name</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:connection-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:remote-address</span></code>, <code class="docutils literal notranslate"><span class="pre">0:protocol-version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:recv-buffer-size</span></code>, <code class="docutils literal notranslate"><span class="pre">0:recv-max-message-size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:recv-max-chunk-count</span></code>, <code class="docutils literal notranslate"><span class="pre">0:send-buffer-size</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:send-max-message-size</span></code>, <code class="docutils literal notranslate"><span class="pre">0:send-max-chunk-count</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:endpoint-url</span></code>, <code class="docutils literal notranslate"><span class="pre">0:security-mode</span></code>, <code class="docutils literal notranslate"><span class="pre">0:security-policy-url</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0:certificate-type-id</span></code> and <code class="docutils literal notranslate"><span class="pre">0:remote-certificate</span></code>.
+UA_Server_setSecureChannelAttribute and
+UA_Server_deleteSecureChannelAttribute reject writes to these with
+UA_STATUSCODE_BADNOTWRITABLE.</p>
+<p>One further ns0 key is interpreted by the server itself, and is the one
+ns0 attribute the application may write (stored in the generic map like
+any application-defined attribute):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0:maxMessageSize</span></code> (<code class="docutils literal notranslate"><span class="pre">UA_UInt32</span></code>): If set, tightens (but never
+loosens) UA_ServerConfig.tcpMaxMsgSize for this specific channel. Useful
+to cap messages on a channel the application does not yet consider
+trusted, e.g. because it is unsigned/unencrypted or has no Session with
+a completed ActivateSession. Delete the attribute (or never set it) to
+fall back to the server-wide tcpMaxMsgSize.</p></li>
+</ul>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Returns a shallow copy of the attribute (don't _clear or _delete manually).</span>
+<span class="cm"> * While the method is thread-safe, the returned value is not protected. Only</span>
+<span class="cm"> * use it in a (callback) context where the server is locked for the current</span>
+<span class="cm"> * thread. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSecureChannelAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span>
+
+<span class="cm">/* Return a deep copy of the attribute */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSecureChannelAttributeCopy</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                        </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span>
+
+<span class="cm">/* Returns UA_STATUSCODE_BADNOTFOUND if the attribute is not defined, not a</span>
+<span class="cm"> * scalar or not of the right datatype. Otherwise a shallow copy of the</span>
+<span class="cm"> * scalar value is written to the target location of the void pointer (don't</span>
+<span class="cm"> * _clear or _delete manually). While the method is thread-safe, the</span>
+<span class="cm"> * returned value is not protected. Only use it in a (callback) context</span>
+<span class="cm"> * where the server is locked for the current thread. */</span>
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_getSecureChannelAttribute_scalar</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
+<span class="w">                                           </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">,</span>
+<span class="w">                                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">outValue</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_setSecureChannelAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
+
+<span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_deleteSecureChannelAttribute</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">channelId</span><span class="p">,</span>
+<span class="w">                                       </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -710,10 +816,8 @@ instance.</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
-<span class="n">UA_CallMethodResult</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_CallMethodResult</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_call</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallMethodRequest</span><span class="w"> </span><span class="o">*</span><span class="n">request</span><span class="p">);</span>
-<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -856,7 +960,7 @@ the select-clause.</p>
 <span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">monitoredItemContext</span><span class="p">,</span>
 <span class="w">     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">eventFields</span><span class="p">);</span>
 
-<span class="cm">/* Create a local MonitoredItem for Events. The API is simplifed compared to a</span>
+<span class="cm">/* Create a local MonitoredItem for Events. The API is simplified compared to a</span>
 <span class="cm"> * UA_MonitoredItemCreateRequest. The unavailable options are not relevant for</span>
 <span class="cm"> * local MonitoredItems (e.g. the queue size) or not relevant for Event</span>
 <span class="cm"> * MonitoredItems (e.g. the sampling interval).</span>
@@ -925,7 +1029,7 @@ example <code class="docutils literal notranslate"><span class="pre">UA_Server_a
 <a class="reference internal" href="types.html#variant"><span class="std std-ref">Variant</span></a>) pointing to a memory location on the stack.</p>
 <section id="variablenode">
 <span id="variable-node"></span><h3>VariableNode<a class="headerlink" href="#variablenode" title="Link to this heading"></a></h3>
-<p>Variables store values as well as contraints for possible values. There are
+<p>Variables store values as well as constraints for possible values. There are
 three options for storing the value: Internal in the VariableNode data
 structure itself, external with a double-pointer (to switch to an updated
 value with an atomic pointer-replacing operation) or with a callback
@@ -1156,7 +1260,6 @@ callbacks to be registered.</p>
 <span class="w">                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">input</span><span class="p">,</span>
 <span class="w">                     </span><span class="kt">size_t</span><span class="w"> </span><span class="n">outputSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">);</span>
 
-<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
 
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_addMethodNode</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">requestedNewNodeId</span><span class="p">,</span>
@@ -1196,8 +1299,6 @@ callbacks to be registered.</p>
 <span class="n">UA_Server_getMethodNodeCallback</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">methodNodeId</span><span class="p">,</span>
 <span class="w">                                </span><span class="n">UA_MethodCallback</span><span class="w"> </span><span class="o">*</span><span class="n">outMethodCallback</span><span class="p">);</span>
-
-<span class="cp">#endif</span>
 </pre></div>
 </div>
 </section>
@@ -1302,6 +1403,20 @@ having their layout changed.</p>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ViewAttributes</span><span class="w"> </span><span class="n">attr</span><span class="p">,</span>
 <span class="w">                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="nodeset-import">
+<h3>NodeSet Import<a class="headerlink" href="#nodeset-import" title="Link to this heading"></a></h3>
+<p>Load a UANodeSet XML document into the server.</p>
+<p>Load dependencies first by calling this function once for each document.
+The XML input is borrowed for the duration of the call. Individual nodes
+that cannot be added are logged and skipped. The return status reports
+failures that prevent loading the document as a whole. The operation is not
+transactional; nodes and namespaces added before a failure remain in the
+server.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span>
+<span class="nf">UA_Server_loadNodeset</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_XmlElement</span><span class="w"> </span><span class="n">nodesetXml</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1480,7 +1595,7 @@ Not that this is only allowed for object nodes.</p>
 </dd>
 </dl>
 <p>The special UA_Server_addMethodNode_finish method needs to be used for method
-nodes, since there you need to explicitly specifiy the input and output
+nodes, since there you need to explicitly specify the input and output
 arguments which are added in the finish step (if not yet already there)</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* The ``attr`` argument must have a type according to the NodeClass.</span>
 <span class="cm"> * ``VariableAttributes`` for variables, ``ObjectAttributes`` for objects, and</span>
@@ -1499,7 +1614,6 @@ arguments which are added in the finish step (if not yet already there)</p>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_addNode_finish</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">);</span>
 
-<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
 
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_addMethodNode_finish</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
@@ -1507,7 +1621,6 @@ arguments which are added in the finish step (if not yet already there)</p>
 <span class="w">                         </span><span class="kt">size_t</span><span class="w"> </span><span class="n">inputArgumentsSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Argument</span><span class="w"> </span><span class="o">*</span><span class="n">inputArguments</span><span class="p">,</span>
 <span class="w">                         </span><span class="kt">size_t</span><span class="w"> </span><span class="n">outputArgumentsSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Argument</span><span class="w"> </span><span class="o">*</span><span class="n">outputArguments</span><span class="p">);</span>
 
-<span class="cp">#endif</span>
 
 <span class="cm">/* Deletes a node and optionally all references leading to the node. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
@@ -1607,12 +1720,10 @@ infinite.</p>
 <span class="w">                      </span><span class="n">UA_ServerAsyncWriteResultCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
 <span class="w">                      </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
 
-<span class="cp">#ifdef UA_ENABLE_METHODCALLS</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_call_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_CallMethodRequest</span><span class="w"> </span><span class="o">*</span><span class="n">operation</span><span class="p">,</span>
 <span class="w">                     </span><span class="n">UA_ServerAsyncMethodResultCallback</span><span class="w"> </span><span class="n">callback</span><span class="p">,</span>
 <span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
-<span class="cp">#endif</span>
 </pre></div>
 </div>
 <p>Local async operations can be manually cancelled (besides an internal cancel
@@ -1809,7 +1920,7 @@ by combining their ModelChange verbs. Model and Semantic changes collected
 together are emitted as separate standard Events. Failed operations are not
 reported.</p>
 <p>See <code class="docutils literal notranslate"><span class="pre">examples/events/server_modelchange.c</span></code> for a complete local example.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </section>
@@ -1903,8 +2014,6 @@ is implemented on top in a driver outside of the core library.</p>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_deregisterServerOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">serverName</span><span class="p">);</span>
-
-<span class="cp">#endif </span><span class="cm">/* UA_ENABLE_DISCOVERY */</span>
 </pre></div>
 </div>
 </section>
@@ -1919,7 +2028,9 @@ add/remove nodes, or register connections and timers in the server’s
 EventLoop.</p>
 <p>Some drivers define core functionality and are added internally in the server
 implementation.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* GENERIC permits multiple instances. Other driver types</span>
+<span class="cm"> * can be added only once to a server. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">UA_DRIVERTYPE_GENERIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
 <span class="w">    </span><span class="n">UA_DRIVERTYPE_GDS_RECEIVER</span>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_DriverType</span><span class="p">;</span>
@@ -1992,7 +2103,9 @@ implementation.</p>
 <span class="p">};</span>
 
 <span class="cm">/* Adds the Driver to the server. Starts the driver if the server is already</span>
-<span class="cm"> * started. */</span>
+<span class="cm"> * started and returns the start result. A failed start rolls back registration</span>
+<span class="cm"> * and leaves ownership with the caller. The server backpointer is retained</span>
+<span class="cm"> * for cleanup; stop the driver if needed before freeing it. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_addDriver</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">drv</span><span class="p">);</span>
 
@@ -2216,7 +2329,7 @@ modified at runtime through the provided API.</p>
 The usual usage is as follows:</p>
 <ol class="arabic simple">
 <li><p>Create a server configuration with default settings as a starting point</p></li>
-<li><p>Modifiy the configuration, e.g. by adding a server certificate</p></li>
+<li><p>Modify the configuration, e.g. by adding a server certificate</p></li>
 <li><p>Instantiate a server with it</p></li>
 <li><p>After shutdown of the server, clean up the configuration (free memory)</p></li>
 </ol>
@@ -2280,6 +2393,12 @@ The usual usage is as follows:</p>
 <span class="cm">     * zeroed-out value for empty VariableNodes when they are added. */</span>
 <span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">allowEmptyVariables</span><span class="p">;</span>
 
+<span class="w">    </span><span class="cm">/* Methods shall be the target of at least one HasComponent reference from</span>
+<span class="cm">     * an Object or ObjectType. Some legacy NodeSets contain detached Methods.</span>
+<span class="cm">     * DEFAULT and WARN log and accept them, ABORT rejects them and ACCEPT</span>
+<span class="cm">     * accepts them silently. */</span>
+<span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">allowUnattachedMethods</span><span class="p">;</span>
+
 <span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">allowAllCertificateUris</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Verify that client ApplicationInstanceCertificates and X509IdentityTokens</span>
@@ -2303,11 +2422,11 @@ The usual usage is as follows:</p>
 
 <span class="w">    </span><span class="cm">/* EventLoop</span>
 <span class="cm">     * ~~~~~~~~~</span>
-<span class="cm">     * The sever can be plugged into an external EventLoop. Otherwise the</span>
-<span class="cm">     * EventLoop is considered to be attached to the server's lifecycle and will</span>
-<span class="cm">     * be destroyed when the config is cleaned up. */</span>
+<span class="cm">     * A shared EventLoop must be external to every client and server using it.</span>
+<span class="cm">     * Otherwise, one of them can stop or delete it while others still use it.</span>
+<span class="cm">     * The application owns the shared EventLoop's lifetime. */</span>
 <span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* The EventLoop is not deleted with the config */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Do not stop or delete the EventLoop */</span>
 
 <span class="w">    </span><span class="cm">/* Application Notification</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~</span>
@@ -2496,7 +2615,6 @@ The usual usage is as follows:</p>
 
 <span class="w">    </span><span class="cm">/* Discovery</span>
 <span class="cm">     * ~~~~~~~~~ */</span>
-<span class="cp">#ifdef UA_ENABLE_DISCOVERY</span>
 <span class="w">    </span><span class="cm">/* Enable the internal management of RegisteredServers (besides the local</span>
 <span class="cm">     * server itself) via the RegisterServer and FindServer services. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">registeredServersEnabled</span><span class="p">;</span>
@@ -2520,7 +2638,6 @@ The usual usage is as follows:</p>
 <span class="cm">     * implement a Discovery Server that detects other servers on the</span>
 <span class="cm">     * network. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">serversOnNetworkEnabled</span><span class="p">;</span>
-<span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Subscriptions</span>
 <span class="cm">     * ~~~~~~~~~~~~~ */</span>

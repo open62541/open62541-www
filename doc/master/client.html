@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Client &mdash; open62541 (master) 1.5.7 documentation</title>
+  <title>Client &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2b2ec289"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -150,7 +150,7 @@ established. See more about <a class="reference internal" href="#client-async-se
 <span class="cm"> *</span>
 <span class="cm"> * The default configuration can be used as the starting point to adjust the</span>
 <span class="cm"> * client configuration to individual needs. UA_Client_new is implemented in the</span>
-<span class="cm"> * /plugins folder under the CC0 license. Furthermore the client confiugration</span>
+<span class="cm"> * /plugins folder under the CC0 license. Furthermore the client configuration</span>
 <span class="cm"> * only uses the public server API.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @return Returns the configured client or NULL if an error occurs. */</span>
@@ -299,7 +299,7 @@ triggers the scheduled house-keeping tasks.</p>
 <span class="w">                                        </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">authenticationToken</span><span class="p">,</span>
 <span class="w">                                        </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">serverNonce</span><span class="p">);</span>
 
-<span class="cm">/* Re-activate the current session. A change of prefered locales can be done by</span>
+<span class="cm">/* Re-activate the current session. A change of preferred locales can be done by</span>
 <span class="cm"> * updating the client configuration. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_activateCurrentSession</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">);</span>
@@ -668,7 +668,15 @@ documentation on the notifications and their defined payload.</p>
 <p>The configuration used for setting connection parameters and additional
 client settings. The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide examples for many of the
 client settings.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Previous policy arrays retained by the default configuration plugin. Open</span>
+<span class="cm"> * SecureChannels and Sessions may still reference them. Freed with the config. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig_PolicyHistory</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig_PolicyHistory</span><span class="w"> </span><span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">policies</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">policiesSize</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_ClientConfig_PolicyHistory</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">UA_ClientConfig</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">clientContext</span><span class="p">;</span><span class="w"> </span><span class="cm">/* User-defined pointer attached to the client */</span>
 <span class="w">    </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logging</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Plugin for log output */</span>
 
@@ -707,7 +715,7 @@ client settings.</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noReconnect</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Don't reconnect SecureChannel when the connection</span>
 <span class="cm">                              * is lost without explicitly closing. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noNewSession</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don't automatically create a new Session when</span>
-<span class="cm">                              * the intial one is lost. Instead abort the</span>
+<span class="cm">                              * the initial one is lost. Instead abort the</span>
 <span class="cm">                              * connection when the Session is lost. */</span>
 
 <span class="w">    </span><span class="cm">/* Advanced Connection Settings */</span>
@@ -756,7 +764,7 @@ client settings.</p>
 <span class="cm">                                          * endpoint. */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">securityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* SecurityPolicy for the SecureChannel. An</span>
 <span class="cm">                                  * empty string indicates the client to select</span>
-<span class="cm">                                  * any avaialble SecurityPolicy. */</span>
+<span class="cm">                                  * any available SecurityPolicy. */</span>
 <span class="w">    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">authSecurityPolicyUri</span><span class="p">;</span><span class="w"> </span><span class="cm">/* For authentication (UserIdentityToken).</span>
 <span class="cm">                                      * The empty string lets the client select</span>
 <span class="cm">                                      * any matching policy. */</span>
@@ -779,6 +787,16 @@ client settings.</p>
 <span class="cm">     * continues silently. */</span>
 <span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">certificateEkuRule</span><span class="p">;</span>
 
+<span class="w">    </span><span class="cm">/* Compare the selected EndpointDescription from discovery with the</span>
+<span class="cm">     * authenticated EndpointDescriptions returned by CreateSession. Only</span>
+<span class="cm">     * server.applicationUri, endpointUrl, securityMode, securityPolicyUri,</span>
+<span class="cm">     * userIdentityTokens, transportProfileUri and securityLevel are compared,</span>
+<span class="cm">     * as required by Part 4. ABORT and DEFAULT reject a mismatch, WARN logs and</span>
+<span class="cm">     * continues, and ACCEPT continues silently. Certificate verification is</span>
+<span class="cm">     * separate and unaffected by this rule. The comparison is skipped when</span>
+<span class="cm">     * an EndpointDescription was configured directly. */</span>
+<span class="w">    </span><span class="n">UA_RuleHandling</span><span class="w"> </span><span class="n">endpointDescriptionRule</span><span class="p">;</span>
+
 <span class="w">    </span><span class="cm">/* SecurityPolicies for authentication with an x509 certificate. The</span>
 <span class="cm">     * UserIdentityToken contains only the certificate. The certificate gets</span>
 <span class="cm">     * matched against the SecurityPolicy instance from this array. Only the</span>
@@ -786,6 +804,7 @@ client settings.</p>
 <span class="cm">     * UA_ClientConfig_setAuthenticationCert. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">authSecurityPoliciesSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_SecurityPolicy</span><span class="w"> </span><span class="o">*</span><span class="n">authSecurityPolicies</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_ClientConfig_PolicyHistory</span><span class="w"> </span><span class="o">*</span><span class="n">securityPolicyHistory</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Internal ownership */</span>
 
 <span class="w">    </span><span class="cm">/* Allow clients without encryption support to connect with username and</span>
 <span class="cm">     * password. This requires to transmit the password in plain text over the</span>
@@ -900,9 +919,13 @@ client settings.</p>
 <span class="w">    </span><span class="cm">/* Number of PublishResponse queued up in the server */</span>
 <span class="w">    </span><span class="n">UA_UInt16</span><span class="w"> </span><span class="n">outStandingPublishRequests</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* EventLoop */</span>
+<span class="w">    </span><span class="cm">/* EventLoop</span>
+<span class="cm">     * ~~~~~~~~~</span>
+<span class="cm">     * A shared EventLoop must be external to every client and server using it.</span>
+<span class="cm">     * Otherwise, one of them can stop or delete it while others still use it.</span>
+<span class="cm">     * The application owns the shared EventLoop's lifetime. */</span>
 <span class="w">    </span><span class="n">UA_EventLoop</span><span class="w"> </span><span class="o">*</span><span class="n">eventLoop</span><span class="p">;</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don't delete the EventLoop with the config */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">externalEventLoop</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Do not stop or delete the EventLoop */</span>
 <span class="p">};</span>
 
 <span class="cm">/* Makes a deep copy of the config. Only The copies of the plugins (logger,</span>
@@ -994,7 +1017,7 @@ notifications. Every MonitoredItem is attached to exactly one Subscription.
 And a Subscription can contain many MonitoredItems.</p>
 <p>The client automatically processes PublishResponses (with a callback) in the
 background and keeps enough PublishRequests in transit. The PublishResponses
-may be recieved during a synchronous service call or in
+may be received during a synchronous service call or in
 <code class="docutils literal notranslate"><span class="pre">UA_Client_run_iterate</span></code>. See more about
 <a class="reference internal" href="#client-async-services"><span class="std std-ref">asynchronicity</span></a>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Callbacks defined for Subscriptions */</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nodestore Plugin API &mdash; open62541 (1.5) 1.5.7 documentation</title>
+  <title>Nodestore Plugin API &mdash; open62541 (1.5) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2b2ec289"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -598,8 +598,11 @@ Nodestore backends.</p>
 <span class="cm">     * ``getNodeFromPtr``. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">releaseNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">);</span>
 
-<span class="w">    </span><span class="cm">/* Returns an editable copy of a node (needs to be deleted with the</span>
-<span class="cm">     * deleteNode function or inserted / replaced into the nodestore). */</span>
+<span class="w">    </span><span class="cm">/* Returns an editable copy of the same logical node (needs to be deleted</span>
+<span class="cm">     * with the deleteNode function or inserted / replaced into the nodestore).</span>
+<span class="cm">     * Runtime state such as MonitoredItem associations is not copied. A</span>
+<span class="cm">     * successful replacement must move that state from the old node to the</span>
+<span class="cm">     * replacement with UA_Node_moveMonitoredItems. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">getNodeCopy</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">**</span><span class="n">outNode</span><span class="p">);</span>
 
@@ -649,9 +652,16 @@ Nodestore backends.</p>
 <span class="nf">UA_Node_insertOrUpdateDescription</span><span class="p">(</span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">node</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_LocalizedText</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">);</span>
 
-<span class="cm">/* Reset the destination node and copy the content of the source */</span>
+<span class="cm">/* Reset the destination node and copy the content of the source. Runtime</span>
+<span class="cm"> * MonitoredItem associations are not copied. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Node_copy</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
+
+<span class="cm">/* Move the runtime MonitoredItem associations from a node to its replacement.</span>
+<span class="cm"> * The destination must not have MonitoredItems attached. This is a no-op if</span>
+<span class="cm"> * source and destination are the same node. */</span>
+<span class="kt">void</span>
+<span class="nf">UA_Node_moveMonitoredItems</span><span class="p">(</span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span><span class="n">dst</span><span class="p">);</span>
 
 <span class="cm">/* Allocate new node and copy the values from src */</span>
 <span class="n">UA_Node</span><span class="w"> </span><span class="o">*</span>
