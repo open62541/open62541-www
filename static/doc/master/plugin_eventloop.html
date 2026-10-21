@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventLoop Plugin API &mdash; open62541 (master) 1.5.8 documentation</title>
+  <title>EventLoop Plugin API &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c334614b"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -126,7 +126,12 @@
 <p>An OPC UA-enabled application can have several clients and servers. And
 server can serve different transport-level protocols for OPC UA. The
 EventLoop is a central module that provides a unified control-flow for all of
-these. Hence, several applications can share an EventLoop.</p>
+these. Hence, several clients and servers can share an EventLoop. When they
+do, every client and server using that EventLoop must set
+<code class="docutils literal notranslate"><span class="pre">externalEventLoop</span></code> in its configuration. Otherwise, one of them may stop
+and delete the EventLoop during its own shutdown or configuration cleanup,
+while the others still use it. The application must keep the shared
+EventLoop alive until all its users have finished, then stop and delete it.</p>
 <p>The EventLoop and the ConnectionManager implementation is
 architecture-specific. The goal is to have a single call to “poll” (epoll,
 kqueue, …) in the EventLoop that covers all ConnectionManagers. Hence the
@@ -653,7 +658,12 @@ creating any connection but solely validating the provided parameters
 <dt>0:remote-address [string]</dt><dd><p>Address of the remote side (hostname or IP address).</p>
 </dd>
 </dl>
-<p><strong>Listen Connection Connection Callback Parameters (first callback only):</strong></p>
+<p><strong>Listen Connection Connection Callback Parameters (at establishment):</strong></p>
+<p>Listener setup can be asynchronous: <code class="docutils literal notranslate"><span class="pre">openConnection</span></code> may return before
+binding and listening have completed. In this case, the initial
+<code class="docutils literal notranslate"><span class="pre">UA_CONNECTIONSTATE_OPENING</span></code> callback may omit the bound address and port.
+These are provided in the <code class="docutils literal notranslate"><span class="pre">UA_CONNECTIONSTATE_ESTABLISHED</span></code> callback once
+the listener is ready to accept connections.</p>
 <dl class="simple">
 <dt>0:listen-address [string]</dt><dd><p>Local address (IP or hostname) for the new listen-connection.</p>
 </dd>
@@ -1134,9 +1144,19 @@ not Win32.</p>
 <h2>Event Loop Configuration<a class="headerlink" href="#event-loop-configuration" title="Link to this heading"></a></h2>
 <p>Defines the configuration parameters and optional callback functions for managing
 the network interface within the EventLoop.</p>
-<p>The functions for initializing, polling, and shutting down the network interface
-are optional. If they are not provided, the initialization and management of the
-network interface must be handled externally.</p>
+<p>The interface callbacks are optional. On POSIX, omitted callbacks use the
+default TAP interface. It and the lwIP stack are shared by all default
+EventLoops and remain alive until process exit, independently of EventLoop,
+server, and client lifetimes. The first EventLoop start initializes them.
+Subsequent loops reuse that configuration; explicitly conflicting IP settings
+return BadConfigurationError. Omitted IP settings reuse the existing values.</p>
+<p>On other platforms the application must provide callbacks or manage the
+network interface externally. Custom callbacks retain application-defined
+ownership: netifInit is called during start and retried until it succeeds.
+The interface then remains initialized through loop stop/start. netifShutdown
+is called during deletion, after all loop activity has ended, only if
+netifInit succeeded. Shared custom interfaces
+must outlive every EventLoop using them.</p>
 <p>** Configuration Parameters for the EventLoop**</p>
 <dl class="simple">
 <dt>0:ipaddr [string]</dt><dd><p>IPv4 address of the network interface (optional).</p>
@@ -1223,7 +1243,12 @@ creating any connection but solely validating the provided parameters
 <dt>0:remote-address [string]</dt><dd><p>Address of the remote side (hostname or IP address).</p>
 </dd>
 </dl>
-<p><strong>Listen Connection Connection Callback Parameters (first callback only):</strong></p>
+<p><strong>Listen Connection Connection Callback Parameters (at establishment):</strong></p>
+<p>Listener setup can be asynchronous: <code class="docutils literal notranslate"><span class="pre">openConnection</span></code> may return before
+binding and listening have completed. In this case, the initial
+<code class="docutils literal notranslate"><span class="pre">UA_CONNECTIONSTATE_OPENING</span></code> callback may omit the bound address and port.
+These are provided in the <code class="docutils literal notranslate"><span class="pre">UA_CONNECTIONSTATE_ESTABLISHED</span></code> callback once
+the listener is ready to accept connections.</p>
 <dl class="simple">
 <dt>0:listen-address [string]</dt><dd><p>Local address (IP or hostname) for the new listen-connection.</p>
 </dd>

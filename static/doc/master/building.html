@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Building open62541 &mdash; open62541 (master) 1.5.8 documentation</title>
+  <title>Building open62541 &mdash; open62541 (master) 1.5.9 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c334614b"></script>
+      <script src="_static/documentation_options.js?v=674ce552"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -145,7 +145,7 @@ git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w
 
 <span class="c1"># select additional features</span>
 ccmake<span class="w"> </span>..
-cmake<span class="w"> </span>..<span class="w"> </span>-DUA_ENABLE_DRIVER_MDNS_AVAHI<span class="o">=</span>ON<span class="w"> </span><span class="c1"># use Avahi for multicast discovery</span>
+cmake<span class="w"> </span>..<span class="w"> </span>-DUA_ENABLE_DRIVER_MDNS_AVAHI<span class="o">=</span>ON<span class="w"> </span>-DUA_ENABLE_DRIVER_MDNS_MDNSD<span class="o">=</span>OFF<span class="w"> </span><span class="c1"># use Avahi for multicast discovery</span>
 make
 
 <span class="c1"># build documentation</span>
@@ -384,12 +384,20 @@ The list of available tests can be displayed with <code class="docutils literal 
 </section>
 <section id="detailed-sdk-features">
 <h3>Detailed SDK Features<a class="headerlink" href="#detailed-sdk-features" title="Link to this heading"></a></h3>
-<dl>
+<dl class="simple">
 <dt><strong>UA_ENABLE_SUBSCRIPTIONS</strong></dt><dd><p>Enable subscriptions</p>
 </dd>
 <dt><strong>UA_ENABLE_SUBSCRIPTIONS_EVENTS</strong></dt><dd><p>Enable the use of events for subscriptions. This is a new feature and currently marked as EXPERIMENTAL.</p>
 </dd>
-<dt><strong>UA_ENABLE_METHODCALLS</strong></dt><dd><p>Enable the Method service set</p>
+</dl>
+<p>The Method service set is always compiled.</p>
+<dl class="simple">
+<dt><strong>UA_ENABLE_DRIVER_FILE_TRANSFER</strong></dt><dd><p>Enable the file transfer driver (default ON on all architectures). The local
+filesystem backend is available on POSIX and Win32; other architectures can
+supply a custom backend.
+The reduced Namespace Zero includes file transfer types when this driver is
+enabled; the full Namespace Zero always includes them. With <code class="docutils literal notranslate"><span class="pre">MINIMAL</span></code> or
+<code class="docutils literal notranslate"><span class="pre">NONE</span></code>, load the required types before constructing a file transfer driver.</p>
 </dd>
 <dt><strong>UA_ENABLE_NODEMANAGEMENT</strong></dt><dd><p>Enable dynamic addition and removal of nodes at runtime</p>
 </dd>
@@ -398,8 +406,12 @@ Invoke the CMake target to generate the amalgamation as <code class="docutils li
 </dd>
 <dt><strong>UA_ENABLE_COVERAGE</strong></dt><dd><p>Measure the coverage of unit tests</p>
 </dd>
-<dt><strong>UA_ENABLE_DISCOVERY</strong></dt><dd><p>Enable Discovery Service (LDS)</p>
-</dd>
+</dl>
+<p>Discovery services are always compiled. Enable registration management with
+<code class="docutils literal notranslate"><span class="pre">UA_ServerConfig.registeredServersEnabled</span></code> and network discovery management
+with <code class="docutils literal notranslate"><span class="pre">UA_ServerConfig.serversOnNetworkEnabled</span></code>. mDNS announcement and browsing
+require an attached mDNS driver.</p>
+<dl>
 <dt><strong>UA_ENABLE_DISCOVERY_SEMAPHORE</strong></dt><dd><p>Enable Discovery Semaphore support</p>
 </dd>
 <dt><strong>UA_ENABLE_ENCRYPTION</strong></dt><dd><p>Enable encryption support and specify the used encryption backend. The possible
