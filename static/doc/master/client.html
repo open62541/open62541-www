@@ -710,10 +710,35 @@ client settings.</p>
 <span class="w">    </span><span class="n">UA_LocaleId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionLocaleIds</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Preferred locales of the client */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">sessionLocaleIdsSize</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Basic connection behavior */</span>
+<span class="w">    </span><span class="cm">/* Basic connection behavior</span>
+<span class="cm">     *</span>
+<span class="cm">     * While the connectStatus is Good, the client re-dials a lost connection on</span>
+<span class="cm">     * its own. Any other status is final: the connection is closed and nothing</span>
+<span class="cm">     * is retried until UA_Client_connect* or a synchronous service call</span>
+<span class="cm">     * connects again. The status becomes final when the handshake, discovery</span>
+<span class="cm">     * or Session setup fails, the transport connection is refused on connect,</span>
+<span class="cm">     * a synchronous connect times out (BadTimeout), or the connection is lost</span>
+<span class="cm">     * with noReconnect set.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The first re-dial starts right away. If it fails, the next one waits</span>
+<span class="cm">     * reconnectInterval, then twice as long, up to reconnectIntervalMax. If the</span>
+<span class="cm">     * re-dial after the longest wait fails too, the client gives up with</span>
+<span class="cm">     * BadConnectionRejected or BadConnectionClosed. With the defaults, this</span>
+<span class="cm">     * takes about 26 seconds. Synchronous calls don't wait for a pending</span>
+<span class="cm">     * re-dial, they connect right away.</span>
+<span class="cm">     *</span>
+<span class="cm">     * UA_Client_connect* re-activates the previous Session if the server still</span>
+<span class="cm">     * has it. Call UA_Client_disconnect first to get a new Session. Until the</span>
+<span class="cm">     * Session is activated, asynchronous requests that need a Session fail</span>
+<span class="cm">     * with BadSessionNotActivated. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noSession</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Only open a SecureChannel, but no Session */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noReconnect</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Don't reconnect SecureChannel when the connection</span>
 <span class="cm">                              * is lost without explicitly closing. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reconnectInterval</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Wait in ms after the first failed</span>
+<span class="cm">                                     * re-dial, doubled for every further one</span>
+<span class="cm">                                     * (default: 250) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reconnectIntervalMax</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Longest wait between re-dials in ms</span>
+<span class="cm">                                     * (default: 10000) */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noNewSession</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don't automatically create a new Session when</span>
 <span class="cm">                              * the initial one is lost. Instead abort the</span>
 <span class="cm">                              * connection when the Session is lost. */</span>
