@@ -1998,21 +1998,30 @@ is implemented on top in a driver outside of the core library.</p>
 <span class="w">                               </span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">outServersSize</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_ServerOnNetwork</span><span class="w"> </span><span class="o">**</span><span class="n">outServers</span><span class="p">);</span>
 
-<span class="cm">/* Register a remote server. If the server name was previously known, the</span>
-<span class="cm"> * existing entry gets updated. The parameter kv-map can be extended with</span>
-<span class="cm"> * additional parameters in the future. Currently supported are:</span>
+<span class="cm">/* Register a received or local server. If the server name was previously</span>
+<span class="cm"> * known, the existing entry gets updated. The parameter kv-map can be extended</span>
+<span class="cm"> * with additional parameters in the future. Currently supported are:</span>
 <span class="cm"> *</span>
 <span class="cm"> * 0:remote-address [String]</span>
 <span class="cm"> *    IP-address or other host identifier from which the information</span>
 <span class="cm"> *    was received.</span>
 <span class="cm"> * 0:ttl [UInt32]</span>
-<span class="cm"> *    Time-to-live of DNS information. Zero means infinite. */</span>
+<span class="cm"> *    Time-to-live of DNS information. Zero means infinite.</span>
+<span class="cm"> * 0:announce [Boolean]</span>
+<span class="cm"> *    Announce the entry on the network, for example by an attached mDNS</span>
+<span class="cm"> *    driver. Default is false.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The entry of a registered server (see RegisterServer) is changed only by the</span>
+<span class="cm"> * registration. For such an entry, UA_STATUSCODE_BADNOTWRITABLE is returned. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_registerServerOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ServerOnNetwork</span><span class="w"> </span><span class="o">*</span><span class="n">son</span><span class="p">,</span>
 <span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="n">params</span><span class="p">);</span>
 
-<span class="cm">/* Remove the entry of the remote server with the matching ServerName */</span>
+<span class="cm">/* Remove the entry of the remote server with the matching ServerName. The entry</span>
+<span class="cm"> * of a registered server (see RegisterServer) is removed only with the</span>
+<span class="cm"> * registration. For such an entry, UA_STATUSCODE_BADNODELETERIGHTS is</span>
+<span class="cm"> * returned. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_deregisterServerOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                    </span><span class="n">UA_String</span><span class="w"> </span><span class="n">serverName</span><span class="p">);</span>
@@ -2643,8 +2652,18 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Enable the internal management of ServerOnNetwork entries and the</span>
 <span class="cm">     * FindServersOnNetwork Service. This is used in conjunction with mDNS to</span>
 <span class="cm">     * implement a Discovery Server that detects other servers on the</span>
-<span class="cm">     * network. */</span>
+<span class="cm">     * network. If registeredServersEnabled is also set, every registered</span>
+<span class="cm">     * server gets a ServerOnNetwork entry under its mDNS name (the</span>
+<span class="cm">     * mdnsServerName from RegisterServer2 or else the first ServerName). See</span>
+<span class="cm">     * announceRegisteredServers for the announcement of these entries. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">serversOnNetworkEnabled</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Announce the ServerOnNetwork entries of locally registered servers on the</span>
+<span class="cm">     * network. The entries are created and returned by FindServersOnNetwork</span>
+<span class="cm">     * also without this. An attached mDNS driver with the 0:announce parameter</span>
+<span class="cm">     * announces them. Default is true, as an LDS-ME announces all applications</span>
+<span class="cm">     * that it knows about (OPC 10000-12, 5.1). */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">announceRegisteredServers</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Subscriptions</span>
 <span class="cm">     * ~~~~~~~~~~~~~ */</span>
