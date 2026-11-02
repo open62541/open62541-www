@@ -1378,6 +1378,38 @@ having their layout changed.</p>
 <span class="n">UA_Server_addDataTypeFromDescription</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">);</span>
 
+<span class="cm">/* Zero-initialize the options. Additional fields may be added in the future.</span>
+<span class="cm"> * All pointers are borrowed for the duration of the call. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Map source namespace indexes to server indexes using local2Remote.</span>
+<span class="cm">     * Applies to the description AND both encoding-ID overrides below.</span>
+<span class="cm">     * NULL: all supplied indexes already refer to server namespaces. */</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NamespaceMapping</span><span class="w"> </span><span class="o">*</span><span class="n">namespaceMapping</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/* Optional overrides, expressed in the SAME source namespace context as</span>
+<span class="cm">     * the description. Both binaryEncodingId and xmlEncodingId are mapped</span>
+<span class="cm">     * through namespaceMapping when it is present.</span>
+<span class="cm">     * NULL: retain the description's encoding ID, if available.</span>
+<span class="cm">     * A pointer to a null NodeId explicitly clears the encoding ID. */</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">binaryEncodingId</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">xmlEncodingId</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_AddDataTypeFromDescriptionOptions</span><span class="p">;</span>
+
+<span class="cm">/* Extended description loading. The description must contain a decoded</span>
+<span class="cm"> * SimpleTypeDescription, EnumDescription or StructureDescription. All its</span>
+<span class="cm"> * namespace indexes, including member references and the QualifiedName, use</span>
+<span class="cm"> * the source context specified by the options. Mapping precedes server-side</span>
+<span class="cm"> * member resolution and native layout construction.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The options can be NULL. Inputs remain unchanged. The server owns the</span>
+<span class="cm"> * resulting datatype, including copies of both encoding IDs. Registration</span>
+<span class="cm"> * happens only after all conversion and encoding-ID allocation succeeds.</span>
+<span class="cm"> * An already registered datatype returns BADNODEIDEXISTS. */</span>
+<span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
+<span class="n">UA_Server_addDataTypeFromDescriptionEx</span><span class="p">(</span>
+<span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AddDataTypeFromDescriptionOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
+
 <span class="cm">/* The same as UA_Server_addDataTypeFromDescription, but with the description</span>
 <span class="cm"> * already converted into a UA_DataType. Makes a copy of the UA_DataType</span>
 <span class="cm"> * internally. */</span>
