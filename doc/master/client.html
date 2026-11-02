@@ -547,8 +547,9 @@ the AddressSpace or through a View which is a subset of the AddressSpace.</p>
 <span class="cm"> *   to the UA_DataTypeArray array.</span>
 <span class="cm"> * - If the dataTypesNodeSize is zero, then the type hierarchy in the server is</span>
 <span class="cm"> *   browsed to find any unknown DataTypes.</span>
-<span class="cm"> * - The "cleanup"-flag in the UA_DataTypeArray is set to true, so it is cleaned</span>
-<span class="cm"> *   up together with the client configuration -- if it is added there. */</span>
+<span class="cm"> * - The UA_DataTypeArray has cleanup = true and borrowed = false, so the</span>
+<span class="cm"> *   entry and its datatypes are cleaned up with the client configuration</span>
+<span class="cm"> *   if the entry is added there. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_getRemoteDataTypes</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span>
 <span class="w">                             </span><span class="kt">size_t</span><span class="w"> </span><span class="n">dataTypesNodesSize</span><span class="p">,</span>
@@ -710,10 +711,35 @@ client settings.</p>
 <span class="w">    </span><span class="n">UA_LocaleId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionLocaleIds</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Preferred locales of the client */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">sessionLocaleIdsSize</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Basic connection behavior */</span>
+<span class="w">    </span><span class="cm">/* Basic connection behavior</span>
+<span class="cm">     *</span>
+<span class="cm">     * While the connectStatus is Good, the client re-dials a lost connection on</span>
+<span class="cm">     * its own. Any other status is final: the connection is closed and nothing</span>
+<span class="cm">     * is retried until UA_Client_connect* or a synchronous service call</span>
+<span class="cm">     * connects again. The status becomes final when the handshake, discovery</span>
+<span class="cm">     * or Session setup fails, the transport connection is refused on connect,</span>
+<span class="cm">     * a synchronous connect times out (BadTimeout), or the connection is lost</span>
+<span class="cm">     * with noReconnect set.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The first re-dial starts right away. If it fails, the next one waits</span>
+<span class="cm">     * reconnectInterval, then twice as long, up to reconnectIntervalMax. If the</span>
+<span class="cm">     * re-dial after the longest wait fails too, the client gives up with</span>
+<span class="cm">     * BadConnectionRejected or BadConnectionClosed. With the defaults, this</span>
+<span class="cm">     * takes about 26 seconds. Synchronous calls don't wait for a pending</span>
+<span class="cm">     * re-dial, they connect right away.</span>
+<span class="cm">     *</span>
+<span class="cm">     * UA_Client_connect* re-activates the previous Session if the server still</span>
+<span class="cm">     * has it. Call UA_Client_disconnect first to get a new Session. Until the</span>
+<span class="cm">     * Session is activated, asynchronous requests that need a Session fail</span>
+<span class="cm">     * with BadSessionNotActivated. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noSession</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Only open a SecureChannel, but no Session */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noReconnect</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Don't reconnect SecureChannel when the connection</span>
 <span class="cm">                              * is lost without explicitly closing. */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reconnectInterval</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Wait in ms after the first failed</span>
+<span class="cm">                                     * re-dial, doubled for every further one</span>
+<span class="cm">                                     * (default: 250) */</span>
+<span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">reconnectIntervalMax</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Longest wait between re-dials in ms</span>
+<span class="cm">                                     * (default: 10000) */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">noNewSession</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Don't automatically create a new Session when</span>
 <span class="cm">                              * the initial one is lost. Instead abort the</span>
 <span class="cm">                              * connection when the Session is lost. */</span>
