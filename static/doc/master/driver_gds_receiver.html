@@ -103,8 +103,28 @@ method. The driver also tracks active sessions and SecureChannels so that
 abandoned transactions can be discarded and affected channels can be
 revalidated or closed after an update.</p>
 <p>Build open62541 with <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_DRIVER_GDS_RECEIVER</span></code> enabled.
-PushManagement additionally requires encryption and the full Namespace
-Zero.</p>
+PushManagement additionally requires encryption, the Method service set
+and the full Namespace Zero.</p>
+<p>Two file transfer drivers, registered while the receiver is started, serve
+the TrustList Objects of the DefaultApplicationGroup and the
+DefaultUserTokenGroup with the FileType Methods and Properties. Like every
+file transfer driver, they also serve the FileType Methods of Namespace
+Zero. A file transfer driver of the application on a TrustList Object makes
+the start fail with Bad_NodeIdExists. A TrustList opened for reading returns
+the encoded TrustListDataType at the time of the Open. A TrustList opened
+for writing is applied with CloseAndUpdate and discarded with Close
+(Part 12, 7.8.2). A MaxTrustListSize above 1 MiB raises the
+MaxByteStringLength of the TrustLists, so that a TrustList fits into one
+Write.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">drv.params</span></code> before the start; all keys use namespace 0.</p>
+<dl class="simple">
+<dt>0:activity-timeout [Double]</dt><dd><p>Close a TrustList without a Method call for longer than this many
+milliseconds and discard its changes (default: 60000, Part 12, 7.8.2.1).
+Published as the ActivityTimeout Property of the TrustLists. 0 disables
+it and removes the Property the receiver added; otherwise at least
+0.0001. Another type fails the start with Bad_InvalidArgument.</p>
+</dd>
+</dl>
 <p>Create the driver with UA_GDSReceiver_new() and attach its <code class="docutils literal notranslate"><span class="pre">drv</span></code> member to
 the server with UA_Server_addDriver() before calling
 UA_Server_run_startup(). A server can have at most one GDS Receiver driver.
