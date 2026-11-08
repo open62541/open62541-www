@@ -747,13 +747,16 @@ OPCFoundation/UANodeset Repository
 (<a class="reference external" href="https://github.com/OPCFoundation/UA-Nodeset">https://github.com/OPCFoundation/UA-Nodeset</a>). Specify the required information
 models using CMake.</p>
 <p>Which nodesets are to be loaded is determined by the Cmake flag
-<code class="docutils literal notranslate"><span class="pre">DUA_INFORMATION_MODEL_AUTOLOAD</span></code>. All nodesets that are to be loaded
+<code class="docutils literal notranslate"><span class="pre">UA_INFORMATION_MODEL_AUTOLOAD</span></code>. All nodesets that are to be loaded
 automatically are listed here. The naming is based on the folder name of the
-Companion Specification in the ua-nodeset folder.</p>
+Companion Specification in the ua-nodeset folder. Shortnames are case-sensitive;
+nested models use the names listed below. Where a folder contains several
+revisions of the same model, the shortname selects the revision configured in
+<code class="docutils literal notranslate"><span class="pre">tools/nodeset_injector/CMakeLists.txt</span></code>.</p>
 <p>A CMake call could look like this.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
 -DUA_BUILD_EXAMPLES<span class="o">=</span>ON
--DUA_INFORMATION_MODEL_AUTOLOAD<span class="o">=</span>DI<span class="p">;</span>POWERLINK<span class="p">;</span>PROFINET<span class="p">;</span>MachineVision
+-DUA_INFORMATION_MODEL_AUTOLOAD<span class="o">=</span><span class="s2">"DI;POWERLINK;PROFINET;MachineVision"</span>
 -DUA_NAMESPACE_ZERO<span class="o">=</span>FULL
 </pre></div>
 </div>
@@ -761,32 +764,40 @@ Companion Specification in the ua-nodeset folder.</p>
 be placed after them in the list. The following nodesets are currently
 supported, grouped by dependency depth:</p>
 <p><strong>Level 0 — Standalone (no companion-spec dependency, only ns0):</strong></p>
-<p>AMB, BACnet, CNC, DEXPI, DI, GDS, I4AAS, IOLinkIODD, IREDES,
+<p>AML-BaseTypes, AMB, BACnet, CNC, DemoModel, DEXPI, DI, DI-PackageMetadata,
+GDS, I4AAS, IOLinkIODD, IREDES, ISA-95,
 ISA95-JOBCONTROL, MachineVision, Machinery-Result,
-MDIS, MTConnect, OpenSCS, PackML, PROFINET,
-Safety, Scheduler, UAFX-Data, WireHarness-VEC, WoT</p>
+MDIS, MTConnect, OpenSCS, PackML, PROFINET, RSL,
+Safety, Scheduler, TestModel, UAFX-Data, WireHarness-VEC, WoT, XML</p>
 <p><strong>Level 1 — Depends on Level-0 specs (typically DI):</strong></p>
-<p>ADI (DI), AutoID (DI), CommercialKitchenEquipment (DI),
-CSPPlusForMachine (DI), FDI5 (DI), FDI7 (DI), FDT (DI), IA (DI),
+<p>ADI (DI), AML-Libraries (AML-BaseTypes), AutoID (DI), CommercialKitchenEquipment (DI),
+CSPPlusForMachine (DI), FDI5 (DI), FDI7 (DI), FDT (DI), GPOS (RSL), IA (DI),
 IOLink (DI), Machinery-Jobs (ISA95-JOBCONTROL),
 Onboarding (GDS), PADIM (DI),
 PlasticsRubber-GeneralTypes (DI), PLCopen (DI),
 PNEM (DI), PNENC (DI), PNGSDGM (DI), PNRIO (DI), POWERLINK (DI),
 Robotics (DI), Sercos (DI),
-UAFX-AC (DI, UAFX-Data), UAFX-CM (DI, UAFX-Data)</p>
+UAFX-AC (DI, UAFX-Data), UAFX-CM (DI, UAFX-Data), UnattendedRetail (DI)</p>
 <p><strong>Level 2 — Depends on Level-1 specs (two or more dependency hops):</strong></p>
 <p>Each entry lists its required dependencies in parentheses.</p>
 <p>CAS (DI, Machinery, IA),
+CranesHoists (DI, IA, Machinery, Robotics),
 ECM (DI, IA),
 Eumabois (DI, Machinery, Woodworking),
 Glass (DI, Machinery),
+Glass-v2 (DI, IA, Machinery, ISA95-JOBCONTROL, Machinery-Jobs),
+IA-Examples (DI, IA),
 LADS (DI, AMB, Machinery),
 Machinery (DI, IA),
+MachineVision-AMCM (DI, IA, Machinery),
 Machinery-Energy (DI, IA, ECM),
 Machinery-ProcessValues (DI, PADIM),
 MachineTool (DI, Machinery, IA, ISA95-JOBCONTROL, Machinery-Jobs),
 Mining-General (DI, IA, Machinery),
 PNDRV (DI, PNENC),
+PlasticsRubber-Dosing (DI, IA, Machinery, PlasticsRubber-GeneralTypes),
+PlasticsRubber-FoamCutting (DI, IA, Machinery, PlasticsRubber-GeneralTypes),
+PlasticsRubber-GDD (DI, IA, Machinery, PlasticsRubber-GeneralTypes),
 PlasticsRubber-TCD (DI, PlasticsRubber-GeneralTypes),
 PlasticsRubber-IMM2MES (DI, PlasticsRubber-GeneralTypes),
 PlasticsRubber-LDS (DI, PlasticsRubber-GeneralTypes),
@@ -807,6 +818,8 @@ CuttingTool (DI, IA, Machinery, ISA95-JOBCONTROL, Machinery-Jobs, Machinery-Resu
 GMS (DI, IA, Machinery, ISA95-JOBCONTROL, Machinery-Jobs, Machinery-Result, MachineTool),
 IJT (DI, AMB, IA, Machinery, Machinery-Result — loads both IJT/Base and IJT/Tightening),
 LaserSystems (DI, IA, Machinery, ISA95-JOBCONTROL, Machinery-Jobs, MachineTool),
+LaserSystems-Example (DI, IA, Machinery, ISA95-JOBCONTROL, Machinery-Jobs, MachineTool, LaserSystems),
+Machinery-Examples (DI, IA, Machinery, PADIM, Machinery-ProcessValues, ISA95-JOBCONTROL, Machinery-Jobs, Machinery-Result),
 MetalForming (DI, IA, Machinery, PADIM, Machinery-ProcessValues, ISA95-JOBCONTROL, Machinery-Jobs, MachineTool),
 Mining-Extraction-General (DI, IA, Machinery, Mining-General),
 Mining-Extraction-ShearerLoader (DI, IA, Machinery, Mining-General, Mining-Extraction-General),
@@ -815,6 +828,7 @@ Mining-Loading-HydraulicExcavator (DI, IA, Machinery, Mining-General, Mining-Loa
 Mining-DevelopmentSupport-General (DI, IA, Machinery, Mining-General),
 Mining-DevelopmentSupport-RoofSupportSystem (DI, IA, Machinery, Mining-General, Mining-DevelopmentSupport-General),
 Mining-DevelopmentSupport-Dozer (DI, IA, Machinery, Mining-General, Mining-DevelopmentSupport-General),
+Mining-TransportDumping-Conveying (DI, IA, Machinery, Mining-General),
 Mining-TransportDumping-General (DI, IA, Machinery, Mining-General),
 Mining-TransportDumping-RearDumpTruck (DI, IA, Machinery, Mining-General, Mining-TransportDumping-General),
 Mining-TransportDumping-ArmouredFaceConveyor (DI, IA, Machinery, Mining-General, Mining-TransportDumping-General),
@@ -825,6 +839,8 @@ Mining-PELOServices-FaceAlignmentSystem (DI, IA, Machinery, Mining-General, Mini
 Mining-MonitoringSupervisionServices-General (DI, IA, Machinery, Mining-General),
 PAEFS (DI, Machinery, PADIM, Machinery-ProcessValues),
 Powertrain (DI, Machinery, UAFX-Data, UAFX-AC),
+SurfaceTechnology-CleaningPretreatment (DI, IA, Machinery, PADIM, Machinery-ProcessValues, ISA95-JOBCONTROL, Machinery-Jobs, STGeneralTypes),
+SurfaceTechnology-OCT-MSS (DI, IA, Machinery, PADIM, Machinery-ProcessValues, ISA95-JOBCONTROL, Machinery-Jobs, STGeneralTypes),
 WMTP (DI, Machinery, PADIM, Machinery-ProcessValues),
 PlasticsRubber-Extrusion-GeneralTypes (DI, IA, Machinery, PlasticsRubber-GeneralTypes),
 PlasticsRubber-Extrusion-{ExtrusionLine,Extruder,Die,Filter,MeltPump,HaulOff,
@@ -838,27 +854,19 @@ TTD (DI, IA, Machinery, ISA95-JOBCONTROL, Machinery-Jobs, Machinery-Result, Mach
 WireHarness (DI, Machinery, ISA95-JOBCONTROL, Machinery-Jobs, Machinery-Result, WireHarness-VEC)</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><strong>PADIM</strong> and <strong>Machinery-ProcessValues</strong> are generated as internal
-helper nodesets (including the IRDI dictionary) when a model that
-requires them is selected.</p>
+<p><strong>PADIM</strong> also loads the IRDI dictionary. List <strong>PADIM</strong> and
+<strong>Machinery-ProcessValues</strong> explicitly before models that require them.
+<strong>SurfaceTechnology</strong> selects the Plasma model; <strong>STGeneralTypes</strong> selects
+its shared general types. <strong>Glass</strong> and <strong>Glass-v2</strong> select the original
+and v2 Flat Glass models, respectively.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Some companion specifications are not yet supported:</p>
-<ul class="simple">
-<li><p><strong>GPOS</strong> and <strong>RSL</strong> depend on OPC UA Part 8 spatial types
-(<code class="docutils literal notranslate"><span class="pre">3DFrame</span></code>, <code class="docutils literal notranslate"><span class="pre">3DCartesianCoordinates</span></code>) and use abstract
-VariableTypes as TypeDefinitions, which are not yet fully
-supported by the open62541 type system.</p></li>
-<li><p><strong>Glass</strong> has no embedded <code class="docutils literal notranslate"><span class="pre">.bsd</span></code> blob, so the compile-time
-nodeset compiler cannot generate <code class="docutils literal notranslate"><span class="pre">UA_DataType</span></code> definitions for
-its custom structs. Loading Glass via the <strong>NodesetLoader</strong> at
-runtime works (the loader registers types from <code class="docutils literal notranslate"><span class="pre">&lt;Definition&gt;</span></code>
-elements dynamically).</p></li>
-</ul>
 <p>Some companion specifications define types with the same C name in
 different OPC UA namespaces. These cannot be loaded simultaneously:</p>
 <ul class="simple">
+<li><p><strong>DemoModel</strong> and <strong>TestModel</strong> share test datatype names, including
+<code class="docutils literal notranslate"><span class="pre">UA_EnumUnderscoreTest</span></code>.</p></li>
 <li><p><strong>Pumps</strong> and <strong>PAEFS</strong> both define <code class="docutils literal notranslate"><span class="pre">UA_ControlModeEnum</span></code>.</p></li>
 <li><p><strong>TMC</strong> and <strong>PlasticsRubber-GeneralTypes</strong> both define
 <code class="docutils literal notranslate"><span class="pre">UA_ControlModeEnumeration</span></code> / <code class="docutils literal notranslate"><span class="pre">UA_ProductionStatusEnumeration</span></code>.</p></li>
