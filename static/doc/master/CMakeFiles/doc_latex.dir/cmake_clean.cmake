@@ -42,6 +42,7 @@ file(REMOVE_RECURSE
   "../doc_src/tutorial_server_filetransfer.rst"
   "../doc_src/tutorial_server_firststeps.rst"
   "../doc_src/tutorial_server_method.rst"
+  "../doc_src/tutorial_server_method_async.rst"
   "../doc_src/tutorial_server_monitoreditems.rst"
   "../doc_src/tutorial_server_object.rst"
   "../doc_src/tutorial_server_variable.rst"

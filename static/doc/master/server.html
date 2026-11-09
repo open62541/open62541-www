@@ -50,7 +50,10 @@
 <li class="toctree-l1"><a class="reference internal" href="building.html">Building open62541</a></li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Data Types</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#server-lifecycle">Server Lifecycle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stopping-the-server">Stopping the server</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-callbacks">Timed Callbacks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#application-notification">Application Notification</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#securechannel-handling">SecureChannel Handling</a></li>
@@ -74,7 +77,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#reference-management">Reference Management</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#async-operations">Async Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#async-operations">Async Operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#implementing-deferred-callbacks">Implementing deferred callbacks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#completion">Completion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cancellation">Cancellation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#threading">Threading</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#result-setters">Result setters</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submitting-local-async-requests">Submitting local async requests</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#model-and-semantic-changes">Model and Semantic Changes</a></li>
 </ul>
@@ -158,20 +171,19 @@ callbacks are executed.</p>
 <span class="cm"> * for more detailed options.</span>
 <span class="cm"> *</span>
 <span class="cm"> * The default configuration can be used as the starting point to adjust the</span>
-<span class="cm"> * server configuration to individual needs. UA_Server_new is implemented in the</span>
-<span class="cm"> * /plugins folder under the CC0 license. Furthermore the server configuration</span>
-<span class="cm"> * only uses the public server API.</span>
+<span class="cm"> * server configuration to individual needs.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Returns the configured server or NULL if an error occurs. */</span>
 <span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Server_new</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 
-<span class="cm">/* Creates a new server. Moves the config into the server with a shallow copy.</span>
-<span class="cm"> * The config content is cleared together with the server. */</span>
+<span class="cm">/* Create a server, taking ownership of the configuration contents and clearing</span>
+<span class="cm"> * config. The configuration contents are freed when the server is deleted. */</span>
 <span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span>
 <span class="nf">UA_Server_newWithConfig</span><span class="p">(</span><span class="n">UA_ServerConfig</span><span class="w"> </span><span class="o">*</span><span class="n">config</span><span class="p">);</span>
 
-<span class="cm">/* Delete the server and its configuration */</span>
+<span class="cm">/* Delete the server and its configuration. Requires a fully stopped server;</span>
+<span class="cm"> * otherwise, return an error without deleting it. See the shutdown APIs below. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_delete</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
@@ -184,7 +196,7 @@ callbacks are executed.</p>
 <span class="n">UA_LifecycleState</span>
 <span class="nf">UA_Server_getLifecycleState</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
-<span class="cm">/* Runs the server until until "running" is set to false. The logical sequence</span>
+<span class="cm">/* Runs the server until "running" is set to false. The logical sequence</span>
 <span class="cm"> * is as follows:</span>
 <span class="cm"> *</span>
 <span class="cm"> * - UA_Server_run_startup</span>
@@ -201,16 +213,12 @@ callbacks are executed.</p>
 <span class="cm"> * - UA_Server_run_startup</span>
 <span class="cm"> * - Loop until interrupt: UA_Server_run_iterate</span>
 <span class="cm"> * - UA_Server_run_shutdown</span>
-<span class="cm"> * - Deregister the interrupt</span>
-<span class="cm"> *</span>
-<span class="cm"> * Attention! This method is implemented individually for the different</span>
-<span class="cm"> * platforms (POSIX/Win32/etc.). The default implementation is in</span>
-<span class="cm"> * /plugins/ua_config_default.c under the CC0 license. Adjust as needed. */</span>
+<span class="cm"> * - Deregister the interrupt */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_runUntilInterrupt</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
-<span class="cm">/* The prologue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt). Fails if a transport (TCP,</span>
+<span class="cm">/* Start the server. Called automatically by UA_Server_run and</span>
+<span class="cm"> * UA_Server_runUntilInterrupt. Fails if a transport (TCP,</span>
 <span class="cm"> * WebSocket, HTTP) cannot open its server socket and the server cannot be</span>
 <span class="cm"> * reached otherwise (no other transport listens, no reverse connect is</span>
 <span class="cm"> * registered). Then the startup is undone as in UA_Server_run_shutdown. The</span>
@@ -228,41 +236,49 @@ callbacks are executed.</p>
 <span class="cm"> *         callback (in ms) */</span>
 <span class="n">UA_UInt16</span>
 <span class="nf">UA_Server_run_iterate</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">waitInternal</span><span class="p">);</span>
-
-<span class="cm">/* The epilogue part of UA_Server_run (no need to use if you call</span>
-<span class="cm"> * UA_Server_run or UA_Server_runUntilInterrupt).</span>
-<span class="cm"> *</span>
-<span class="cm"> * Runs the EventLoop until the server is fully stopped. An external EventLoop</span>
-<span class="cm"> * is left running for its other users; an owned EventLoop is stopped as well.</span>
-<span class="cm"> * Calling this on an already stopped server succeeds without further action.</span>
-<span class="cm"> * Use UA_Server_run_shutdown_async if shutdown requires application work</span>
-<span class="cm"> * between EventLoop iterations or is initiated from an EventLoop callback.</span>
+</pre></div>
+</div>
+<section id="stopping-the-server">
+<span id="server-shutdown"></span><h3>Stopping the server<a class="headerlink" href="#stopping-the-server" title="Link to this heading"></a></h3>
+<p>Choose how to drive shutdown:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_Server_run_shutdown</span></code> runs the EventLoop until fully stopped. It is
+called automatically by <code class="docutils literal notranslate"><span class="pre">UA_Server_run</span></code> and <code class="docutils literal notranslate"><span class="pre">UA_Server_runUntilInterrupt</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UA_Server_run_shutdown_async</span></code> does not run the EventLoop. While it returns
+STOPPING, drive the EventLoop directly or with <code class="docutils literal notranslate"><span class="pre">UA_Server_run_iterate</span></code>,
+then call it again to check for completion.</p></li>
+</ul>
+<p>Shutdown cancels pending async operations with BADSHUTDOWN and waits for their
+result setters. Keep completing deferred operations; see <a class="reference internal" href="#async-operations"><span class="std std-ref">Async Operations</span></a>.</p>
+<p>The server stops an owned EventLoop and leaves an external one running.
+Lifecycle notifications report STOPPING and STOPPED. Repeated shutdown calls
+are safe and do not repeat notifications. A fully stopped server needs no
+further work.</p>
+<p>Use nonblocking shutdown from EventLoop callbacks or when application work
+is needed between iterations. The blocking API’s callback restrictions are
+listed below.</p>
+<p>Shutdown also waits for deferred operations started by local synchronous calls
+before startup or after a previous shutdown, even if the lifecycle state is
+STOPPED. Blocking shutdown starts their EventLoop if needed; for nonblocking
+shutdown, the caller must start it before driving it.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Shut down the server and run the EventLoop until shutdown completes.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object.</span>
-<span class="cm"> * @return GOOD once the server is STOPPED, or an EventLoop error if shutdown</span>
-<span class="cm"> *         could not be completed. Returns BADINVALIDARGUMENT for NULL. */</span>
+<span class="cm"> * @return GOOD once fully stopped, or an EventLoop error if shutdown could not</span>
+<span class="cm"> *         complete. Returns BADINVALIDARGUMENT for NULL and BADINVALIDSTATE</span>
+<span class="cm"> *         from an initiating callback, cancellation notification or result callback. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_Server_run_shutdown</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 
-<span class="cm">/* Initiates asynchronous shutdown and advances it on subsequent calls, without</span>
-<span class="cm"> * running the EventLoop. While the server is STOPPING, the caller must drive</span>
-<span class="cm"> * the EventLoop (directly or via UA_Server_run_iterate) and call this function</span>
-<span class="cm"> * again to complete shutdown.</span>
-<span class="cm"> *</span>
-<span class="cm"> * Use UA_Server_getLifecycleState to read the current state, or the configured</span>
-<span class="cm"> * lifecycle notification callbacks to observe state transitions.</span>
-<span class="cm"> *</span>
-<span class="cm"> * An external EventLoop is left running; an owned EventLoop is stopped once</span>
-<span class="cm"> * all drivers have stopped.</span>
-<span class="cm"> * Repeated calls do not repeat stop requests or lifecycle notifications.</span>
+<span class="cm">/* Initiate or advance shutdown without running the EventLoop.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server object. NULL is treated as already stopped.</span>
-<span class="cm"> * @return The lifecycle state after this shutdown step: STOPPING while shutdown</span>
-<span class="cm"> *         is in progress, or STOPPED if the server is fully stopped. */</span>
+<span class="cm"> * @return STOPPING while shutdown is in progress, or STOPPED once fully stopped. */</span>
 <span class="n">UA_LifecycleState</span>
 <span class="nf">UA_Server_run_shutdown_async</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">);</span>
 </pre></div>
 </div>
+</section>
 </section>
 <section id="timed-callbacks">
 <h2>Timed Callbacks<a class="headerlink" href="#timed-callbacks" title="Link to this heading"></a></h2>
@@ -338,8 +354,7 @@ documentation on the notifications and their defined payload.</p>
 </section>
 <section id="securechannel-handling">
 <h2>SecureChannel Handling<a class="headerlink" href="#securechannel-handling" title="Link to this heading"></a></h2>
-<p>The server opens new SecureChannels internally when a server socket is
-active. Information about SecureChannels and their state is notified with
+<p>SecureChannel state changes are reported with
 UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL. SecureChannels can be manually
 closed. This leaves any attached session alive so that it can potentially
 reconnect.</p>
@@ -358,11 +373,8 @@ predefined set of keys, for both read and write – any other <code class="docut
 key is rejected with UA_STATUSCODE_BADNOTFOUND (get) or
 UA_STATUSCODE_BADNOTWRITABLE (set/delete). An application is free to use
 any key in a non-zero namespace as generic, arbitrary storage.</p>
-<p>Most of the predefined ns0 keys are read-only: their value is computed
-fresh from the live SecureChannel on every access (nothing is cached),
-mirroring the background information sent with the
-UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED/_CLOSED notification
-(see common.h): <code class="docutils literal notranslate"><span class="pre">0:securechannel-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:connection-manager-name</span></code>,
+<p>The following predefined ns0 keys are read-only and report the current
+SecureChannel state: <code class="docutils literal notranslate"><span class="pre">0:securechannel-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:connection-manager-name</span></code>,
 <code class="docutils literal notranslate"><span class="pre">0:connection-id</span></code>, <code class="docutils literal notranslate"><span class="pre">0:remote-address</span></code>, <code class="docutils literal notranslate"><span class="pre">0:protocol-version</span></code>,
 <code class="docutils literal notranslate"><span class="pre">0:recv-buffer-size</span></code>, <code class="docutils literal notranslate"><span class="pre">0:recv-max-message-size</span></code>,
 <code class="docutils literal notranslate"><span class="pre">0:recv-max-chunk-count</span></code>, <code class="docutils literal notranslate"><span class="pre">0:send-buffer-size</span></code>,
@@ -372,9 +384,7 @@ UA_APPLICATIONNOTIFICATIONTYPE_SECURECHANNEL_OPENED/_CLOSED notification
 UA_Server_setSecureChannelAttribute and
 UA_Server_deleteSecureChannelAttribute reject writes to these with
 UA_STATUSCODE_BADNOTWRITABLE.</p>
-<p>One further ns0 key is interpreted by the server itself, and is the one
-ns0 attribute the application may write (stored in the generic map like
-any application-defined attribute):</p>
+<p>The application may write one ns0 attribute:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">0:maxMessageSize</span></code> (<code class="docutils literal notranslate"><span class="pre">UA_UInt32</span></code>): If set, tightens (but never
 loosens) UA_ServerConfig.tcpMaxMsgSize for this specific channel. Useful
@@ -425,8 +435,7 @@ fall back to the server-wide tcpMaxMsgSize.</p></li>
 <section id="session-handling">
 <span id="server-session-handling"></span><h2>Session Handling<a class="headerlink" href="#session-handling" title="Link to this heading"></a></h2>
 <p>Sessions are managed via the OPC UA Session Service Set (CreateSession,
-ActivateSession, CloseSession). The identifier of sessions is generated
-internally in the server and is always a Guid-NodeId.</p>
+ActivateSession, CloseSession). Session identifiers are Guid-NodeIds.</p>
 <p>The creation of sessions is passed to the <a class="reference internal" href="plugin_accesscontrol.html#access-control"><span class="std std-ref">AccessControl Plugin API</span></a>. There, the
 authentication information is evaluated and a context-pointer is attached to
 the new session. The context pointer (and the session identifier) are then
@@ -441,7 +450,9 @@ to be manually set (NULL by default).</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
 <span class="nf">UA_Server_setAdminSessionContext</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">context</span><span class="p">);</span>
 
-<span class="cm">/* Manually close a session */</span>
+<span class="cm">/* Close a session and reject new requests immediately. While the server is</span>
+<span class="cm"> * running, final notifications and session-context cleanup occur asynchronously,</span>
+<span class="cm"> * after outstanding service responses. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_closeSession</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">);</span>
 </pre></div>
@@ -495,8 +506,7 @@ attributes are:</p>
 </section>
 <section id="attribute-service-set">
 <h2>Attribute Service Set<a class="headerlink" href="#attribute-service-set" title="Link to this heading"></a></h2>
-<p>The functions for reading and writing node attributes call the regular read
-and write service in the background that are also used over the network.</p>
+<p>Read and write node attributes locally.</p>
 <p>The following attributes cannot be read, since the local “admin” user always
 has full rights.</p>
 <ul class="simple">
@@ -717,12 +727,9 @@ size-requirements of the arguments can be retrieved from the
 <p>For calling a method, both <code class="docutils literal notranslate"><span class="pre">methodId</span></code> and <code class="docutils literal notranslate"><span class="pre">objectId</span></code> need to be defined
 by their NodeId. This is required because the same MethodNode can be
 referenced from multiple objects.</p>
-<p>In this server implementation, when an object is instantiated from a an
-ObjectType, all (mandatory) methods are automatically added to the new object
-instance. This is done by adding an additional reference to the original
-MethodNode. It is however possible to add a custom MethodNode directly to the
-object instance. It is also possible to remove a (optional) MethodNode that
-exists in the ObjectType from an instance.</p>
+<p>By default, Object instances reference the mandatory MethodNodes of their
+ObjectType. Custom MethodNodes can also be added directly to an instance, and
+optional methods inherited from the ObjectType can be removed from an instance.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">methodId</span></code> can point to a MethodNode that exists in the ObjectType but
 not in the object instance. It is resolved to the actual MethodNode of the
 object instance by taking the <em>BrowseName</em> attribute of the
@@ -837,8 +844,7 @@ information model.</p>
 
 <span class="cm">/* Non-standard version of the Browse service that recurses into child nodes.</span>
 <span class="cm"> *</span>
-<span class="cm"> * Possible loops (that can occur for non-hierarchical references) are handled</span>
-<span class="cm"> * internally. Every node is added at most once to the results array.</span>
+<span class="cm"> * Each node appears at most once in the results, even if references form cycles.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Nodes are only added if they match the NodeClassMask in the</span>
 <span class="cm"> * BrowseDescription. However, child nodes are still recursed into if the</span>
@@ -877,8 +883,7 @@ information model.</p>
 <span class="w">                      </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outTypeId</span><span class="p">);</span>
 
 <span class="cm">/* Iterate over all nodes referenced by parentNodeId by calling the callback</span>
-<span class="cm"> * function for each child node (in ifdef because GCC/CLANG handle include order</span>
-<span class="cm"> * differently) */</span>
+<span class="cm"> * function for each child node. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_ServerNodeIteratorCallback</span><span class="p">)(</span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">childId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isInverse</span><span class="p">,</span>
 <span class="w">                           </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">referenceTypeId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">);</span>
@@ -896,13 +901,11 @@ information model.</p>
 transported notifications for data changes and events. MonitoredItems can
 also be registered locally. Notifications are then forwarded to a
 user-defined callback instead of a remote client.</p>
-<p>Local MonitoredItems are delivered asynchronously. That is, the notification
-is inserted as a <em>Delayed Callback</em> for the EventLoop. The callback is then
-triggered when the control flow next returns to the EventLoop.</p>
+<p>Local notifications are delivered asynchronously when control next returns
+to the EventLoop.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef UA_ENABLE_SUBSCRIPTIONS</span>
 
-<span class="cm">/* Delete a local MonitoredItem. Used for both DataChange- and</span>
-<span class="cm"> * Event-MonitoredItems. */</span>
+<span class="cm">/* Delete a local DataChange- or Event-MonitoredItem. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_deleteMonitoredItem</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">monitoredItemId</span><span class="p">);</span>
 
@@ -917,6 +920,9 @@ notify the userland about value changes. Note that the sampling interval can
 also be zero to be notified about changes “right away”. For this we hook the
 MonitoredItem into the observed Node and check the filter after every call of
 the Write-Service.</p>
+<p>Sampling occurs only while the server is STARTED. Items created before
+startup wait for their next sampling trigger, not startup itself. This is
+the next write for zero-interval items sampled on writes.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Create a local MonitoredItem to detect data changes.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server executing the MonitoredItem</span>
@@ -1043,9 +1049,7 @@ registered by the application.</p>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="cm">/* Notify the application before the value attribute is read. Ignored if</span>
 <span class="cm">     * NULL. It is possible to write into the value attribute during onRead</span>
-<span class="cm">     * (using the write service). The node is re-retrieved from the Nodestore</span>
-<span class="cm">     * afterwards so that changes are considered in the following read</span>
-<span class="cm">     * operation.</span>
+<span class="cm">     * (using the write service). Such changes are reflected in the read result.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param handle Points to user-provided data for the callback.</span>
 <span class="cm">     * @param nodeid The identifier of the node.</span>
@@ -1058,8 +1062,7 @@ registered by the application.</p>
 <span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Notify the application after writing the value attribute. Ignored if</span>
-<span class="cm">     * NULL. The node is re-retrieved after writing, so that the new value is</span>
-<span class="cm">     * visible in the callback.</span>
+<span class="cm">     * NULL. The callback receives the updated value.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param server The server executing the callback</span>
 <span class="cm">     * @sessionId The identifier of the session</span>
@@ -1079,24 +1082,15 @@ registered by the application.</p>
 <span class="p">}</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="p">;</span>
 
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="cm">/* Copies the data from the source into the provided value.</span>
+<span class="w">    </span><span class="cm">/* Read from a data source into value. Set hasValue when supplying a value.</span>
 <span class="cm">     *</span>
-<span class="cm">     * !! ZERO-COPY OPERATIONS POSSIBLE !!</span>
-<span class="cm">     * It is not required to return a copy of the actual content data. You can</span>
-<span class="cm">     * return a pointer to memory owned by the user. Memory can be reused</span>
-<span class="cm">     * between read callbacks of a DataSource, as the result is already encoded</span>
-<span class="cm">     * on the network buffer between each read operation.</span>
+<span class="cm">     * On synchronous completion with GOOD and hasValue, Variant data marked</span>
+<span class="cm">     * UA_VARIANT_DATA_NODELETE is copied after the callback returns. It must</span>
+<span class="cm">     * remain valid and unchanged until that copy completes; it must not point</span>
+<span class="cm">     * into the callback's stack.</span>
 <span class="cm">     *</span>
-<span class="cm">     * To use zero-copy reads, set the value of the `value-&gt;value` Variant</span>
-<span class="cm">     * without copying, e.g. with `UA_Variant_setScalar`. Then, also set</span>
-<span class="cm">     * `value-&gt;value.storageType` to `UA_VARIANT_DATA_NODELETE` to prevent the</span>
-<span class="cm">     * memory being cleaned up. Don't forget to also set `value-&gt;hasValue` to</span>
-<span class="cm">     * true to indicate the presence of a value.</span>
-<span class="cm">     *</span>
-<span class="cm">     * To make an async read, return UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY.</span>
-<span class="cm">     * The result can then be set at a later time using</span>
-<span class="cm">     * UA_Server_setAsyncReadResult. Note that the server might cancel the async</span>
-<span class="cm">     * read by calling serverConfig-&gt;asyncOperationCancelCallback.</span>
+<span class="cm">     * For deferred completion, see Async Operations and</span>
+<span class="cm">     * UA_Server_setAsyncReadResult.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param server The server executing the callback</span>
 <span class="cm">     * @param sessionId The identifier of the session</span>
@@ -1113,9 +1107,9 @@ registered by the application.</p>
 <span class="cm">     * @param value The (non-null) DataValue that is returned to the client. The</span>
 <span class="cm">     *        data source sets the read data, the result status and optionally a</span>
 <span class="cm">     *        sourcetimestamp.</span>
-<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
-<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done. */</span>
+<span class="cm">     * @return GOOD on synchronous completion, GOODCOMPLETESASYNCHRONOUSLY to</span>
+<span class="cm">     *         defer completion, or an error reported to the caller. A status</span>
+<span class="cm">     *         set in value is also returned to the caller (set hasStatus). */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">includeSourceTimeStamp</span><span class="p">,</span>
@@ -1124,10 +1118,8 @@ registered by the application.</p>
 <span class="w">    </span><span class="cm">/* Write into a data source. This method pointer can be NULL if the</span>
 <span class="cm">     * operation is unsupported.</span>
 <span class="cm">     *</span>
-<span class="cm">     * To make an async write, return UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY.</span>
-<span class="cm">     * The result can then be set at a later time using</span>
-<span class="cm">     * UA_Server_setAsyncWriteResult. Note that the server might cancel the</span>
-<span class="cm">     * async read by calling serverConfig-&gt;asyncOperationCancelCallback.</span>
+<span class="cm">     * For deferred completion, see Async Operations and</span>
+<span class="cm">     * UA_Server_setAsyncWriteResult.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param server The server executing the callback</span>
 <span class="cm">     * @param sessionId The identifier of the session</span>
@@ -1135,16 +1127,12 @@ registered by the application.</p>
 <span class="cm">     *        access control layer</span>
 <span class="cm">     * @param nodeId The identifier of the node being written to</span>
 <span class="cm">     * @param nodeContext Additional data attached to the node by the user</span>
-<span class="cm">     * @param range If not NULL, then the datasource shall return only a</span>
-<span class="cm">     *        selection of the (nonscalar) data. Set</span>
-<span class="cm">     *        UA_STATUSCODE_BADINDEXRANGEINVALID in the value if this does not</span>
-<span class="cm">     *        apply</span>
+<span class="cm">     * @param range If not NULL, write only the selected range of the array.</span>
+<span class="cm">     *        Return BADINDEXRANGEINVALID if the range is invalid.</span>
 <span class="cm">     * @param value The (non-NULL) DataValue that has been written by the client.</span>
-<span class="cm">     *        The data source contains the written data, the result status and</span>
-<span class="cm">     *        optionally a sourcetimestamp</span>
-<span class="cm">     * @return Returns a status code for logging. Error codes intended for the</span>
-<span class="cm">     *         original caller are set in the value. If an error is returned,</span>
-<span class="cm">     *         then no releasing of the value is done. */</span>
+<span class="cm">     *        Its contents are borrowed for the duration of this callback.</span>
+<span class="cm">     * @return The write status, or GOODCOMPLETESASYNCHRONOUSLY to defer</span>
+<span class="cm">     *         completion and supply the write status via the result setter. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span>
 <span class="w">                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
 <span class="w">                           </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NumericRange</span><span class="w"> </span><span class="o">*</span><span class="n">range</span><span class="p">,</span>
@@ -1195,9 +1183,9 @@ used to override the value source.</p>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ValueSourceNotifications</span><span class="w"> </span><span class="o">*</span><span class="n">notifications</span><span class="p">);</span>
 
-<span class="cm">/* For the external value, no initial copy is made. The node "just" points to</span>
-<span class="cm"> * the provided double-pointer. Otherwise identical to the internal data</span>
-<span class="cm"> * source. */</span>
+<span class="cm">/* Set an external value source. The value is referenced through the provided</span>
+<span class="cm"> * double-pointer without copying it. Notifications work as for an internal</span>
+<span class="cm"> * value source. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_setVariableNode_externalValueSource</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="o">**</span><span class="w"> </span><span class="n">value</span><span class="p">,</span>
@@ -1252,6 +1240,10 @@ used to override the value source.</p>
 <p>Please refer to the <a class="reference internal" href="#server-method-call"><span class="std std-ref">Method Service Set</span></a> to get
 information about which MethodNodes may get executed and would thus require
 callbacks to be registered.</p>
+<p>The method callback fills the server-provided output array and returns the
+operation status. To defer completion, return
+<code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY</span></code>; see <a class="reference internal" href="#async-operations"><span class="std std-ref">Async Operations</span></a>
+and <code class="docutils literal notranslate"><span class="pre">UA_Server_setAsyncCallMethodResult</span></code>.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_MethodCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">sessionId</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">sessionContext</span><span class="p">,</span>
@@ -1352,28 +1344,23 @@ callbacks to be registered.</p>
 <span class="w">                          </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">nodeContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">outNewNodeId</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Due to the history of development, the DataTypeAttributes structure used in
-the AddNodes Service does not describe the layout of the DataType. But the
-(newer) structures for describing DataTypes do:</p>
+<p>DataTypeAttributes does not describe a DataType’s layout. To register that
+layout, use one of these descriptions:</p>
 <ul class="simple">
 <li><p>SimpleTypeDescription</p></li>
 <li><p>EnumDescription</p></li>
 <li><p>StructureDescription</p></li>
 </ul>
-<p>The <code class="docutils literal notranslate"><span class="pre">UA_Server_addDataTypeFromDescription</span></code> function translates the
-DataTypeDescription into a UA_DataType structure and adds it to an internal
-array of the server. Then the DataType is automatically decoded in messages
-received by the server. Also the <code class="docutils literal notranslate"><span class="pre">DataTypeDefinition</span></code> attribute of the
-corresponding DataTypeNode can then be read via the Read service.
+<p><code class="docutils literal notranslate"><span class="pre">UA_Server_addDataTypeFromDescription</span></code> registers the type for decoding
+incoming messages and makes the corresponding DataTypeNode’s
+<code class="docutils literal notranslate"><span class="pre">DataTypeDefinition</span></code> attribute available through the Read service.
 Simple aliases used as structure members are resolved to their storage
 representation without modifying the supplied description.</p>
-<p>The memory layout of the internally generated <code class="docutils literal notranslate"><span class="pre">UA_DataType</span></code> corresponds to
-the matching C-structure including padding.</p>
-<p>Note that a DataTypeDescription can be added only once during the lifetime of
-the server. This protects against existing instances of the DataType to
-having their layout changed.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Use the DataType description to create an internal UA_DataType entry in the</span>
-<span class="cm"> * server */</span>
+<p>The generated <code class="docutils literal notranslate"><span class="pre">UA_DataType</span></code> uses the layout of the matching C-structure,
+including padding.</p>
+<p>A DataTypeDescription can be added only once during the server’s lifetime;
+the layout of a registered type cannot be changed.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Register a DataType from its description. */</span>
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_addDataTypeFromDescription</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span>
 <span class="w">                                     </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">);</span>
@@ -1398,28 +1385,25 @@ having their layout changed.</p>
 <span class="cm">/* Extended description loading. The description must contain a decoded</span>
 <span class="cm"> * SimpleTypeDescription, EnumDescription or StructureDescription. All its</span>
 <span class="cm"> * namespace indexes, including member references and the QualifiedName, use</span>
-<span class="cm"> * the source context specified by the options. Mapping precedes server-side</span>
-<span class="cm"> * member resolution and native layout construction.</span>
+<span class="cm"> * the source namespace context specified by the options.</span>
 <span class="cm"> *</span>
 <span class="cm"> * The options can be NULL. Inputs remain unchanged. The server owns the</span>
-<span class="cm"> * resulting datatype, including copies of both encoding IDs. Registration</span>
-<span class="cm"> * happens only after all conversion and encoding-ID allocation succeeds.</span>
-<span class="cm"> * An already registered datatype returns BADNODEIDEXISTS. */</span>
+<span class="cm"> * resulting datatype, including copies of both encoding IDs. An already</span>
+<span class="cm"> * registered datatype returns BADNODEIDEXISTS. */</span>
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_addDataTypeFromDescriptionEx</span><span class="p">(</span>
 <span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExtensionObject</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">,</span>
 <span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_AddDataTypeFromDescriptionOptions</span><span class="w"> </span><span class="o">*</span><span class="n">options</span><span class="p">);</span>
 
 <span class="cm">/* The same as UA_Server_addDataTypeFromDescription, but with the description</span>
-<span class="cm"> * already converted into a UA_DataType. Makes a copy of the UA_DataType</span>
-<span class="cm"> * internally. */</span>
+<span class="cm"> * already converted into a UA_DataType. The server makes its own copy. */</span>
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_addDataType</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">parentNodeId</span><span class="p">,</span>
 <span class="w">                      </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">);</span>
 
 <span class="cm">/* Get the entry to the linked list of custom datatypes. This includes both the</span>
-<span class="cm"> * datatypes from serverConfig-&gt;customDataTypes and the internal custom data</span>
-<span class="cm"> * types from UA_Server_addDataType.</span>
+<span class="cm"> * datatypes from serverConfig-&gt;customDataTypes and those registered through</span>
+<span class="cm"> * UA_Server_addDataType.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Attention! The output pointer is only valid until the next call to</span>
 <span class="cm"> * UA_Server_addDataType. */</span>
@@ -1608,8 +1592,8 @@ pseudo-random unique NodeIds. Existing children are detected during the
 _finish part via their matching BrowseName.</p>
 <dl class="simple">
 <dt>The _begin method:</dt><dd><ul class="simple">
-<li><p>prepares the node and adds it to the nodestore</p></li>
-<li><p>copies some unassigned attributes from the TypeDefinition node internally</p></li>
+<li><p>creates the node</p></li>
+<li><p>inherits missing attributes from the TypeDefinition node</p></li>
 <li><p>adds the references to the parent (and the TypeDefinition if applicable)</p></li>
 <li><p>performs type-checking of variables</p></li>
 <li><p>calls the global and node-type earlyConstructors, if configured.</p></li>
@@ -1681,61 +1665,98 @@ arguments which are added in the finish step (if not yet already there)</p>
 </section>
 <section id="async-operations">
 <span id="id3"></span><h2>Async Operations<a class="headerlink" href="#async-operations" title="Link to this heading"></a></h2>
-<p>Some operations can take time, such as reading a sensor that needs to warm up
-first. In order not to block the server, a long-running operation can be
-handled asynchronously and the result returned at a later time. The core idea
-is that a userland callback can return
-UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY as the statuscode to signal that it
-wishes to complete the operation later.</p>
-<p>Currently, async operations are supported for the services</p>
+<p>An <em>initiating callback</em> implements a Read, Write or Call. It uses a <em>result
+setter</em> to complete deferred work. A local requester receives the outcome in
+a <em>result callback</em>; a remote client receives a service response.
+See <a class="reference internal" href="tutorial_server_method_async.html"><span class="doc">Adding Async Methods to Objects</span></a> for an event-loop example.</p>
+<section id="implementing-deferred-callbacks">
+<h3>Implementing deferred callbacks<a class="headerlink" href="#implementing-deferred-callbacks" title="Link to this heading"></a></h3>
+<p>Read/Write use a <code class="docutils literal notranslate"><span class="pre">UA_CallbackValueSource</span></code>; Call uses a <code class="docutils literal notranslate"><span class="pre">UA_MethodCallback</span></code>.
+Values stored directly in a VariableNode are handled synchronously.</p>
+<p>To finish later, schedule the work and return
+<code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY</span></code> from the initiating callback.
+For synchronous completion, return the operation status normally without
+calling a result setter.</p>
+<section id="completion">
+<h4>Completion<a class="headerlink" href="#completion" title="Link to this heading"></a></h4>
+<p>After the initiating callback returns, finish the work and call the matching
+result setter exactly once with the original pointer:</p>
 <ul class="simple">
-<li><p>Read</p></li>
-<li><p>Write</p></li>
-<li><p>Call</p></li>
+<li><p>Read: fill the <code class="docutils literal notranslate"><span class="pre">UA_DataValue</span></code> with the value, status and optional timestamps.</p></li>
+<li><p>Write: use the <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">UA_DataValue</span> <span class="pre">*</span></code> only as an identifier; do not dereference
+it after the initiating callback returns.</p></li>
+<li><p>Call: fill the <code class="docutils literal notranslate"><span class="pre">UA_Variant</span></code> output array.</p></li>
 </ul>
-<p>with the caveat that read/write need a CallbackValueSource registered for the
-variable. Values that are stored directly in a VariableNode are written and
-read immediately.</p>
-<p>Note that an async operation can be cancelled (e.g. after a timeout period or
-if the caller cannot wait for the result). This is signaled in the configured
-<code class="docutils literal notranslate"><span class="pre">asyncOperationCancelCallback</span></code>. The provided memory locations to store the
-operation output are then no longer valid.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* When the UA_MethodCallback returns UA_STATUSCODE_GOODCOMPLETESASYNCHRONOUSLY,</span>
-<span class="cm"> * then an async operation is created in the server for later completion. The</span>
-<span class="cm"> * output pointer from the method callback is used to identify the async</span>
-<span class="cm"> * operation. Do not access the output pointer after the operation has been</span>
-<span class="cm"> * cancelled or after setting the result. */</span>
+<p>Read/Call output remains valid until the result setter takes ownership,
+including after cancellation. Do not access it after handoff. Populate it with
+owned data, for example using <code class="docutils literal notranslate"><span class="pre">UA_Variant_setScalarCopy</span></code>; the server clears
+that data after use. Do not use temporary memory.</p>
+<p>Input data is borrowed for the initiating callback’s duration. Copy anything
+needed later, including Write values, Call arguments, NodeIds and ranges.</p>
+</section>
+<section id="cancellation">
+<h4>Cancellation<a class="headerlink" href="#cancellation" title="Link to this heading"></a></h4>
+<p>Cancellation ends the requester’s wait without stopping deferred work. Call
+the result setter even if processing is abandoned. Canceled results are
+discarded; side effects are not undone.</p>
+<p>The optional <code class="docutils literal notranslate"><span class="pre">asyncOperationCancelCallback</span></code> receives the original pointer
+for each canceled operation still awaiting its result setter. Notification
+runs after response handling or local result delivery; it does not complete
+the operation. Cancellation can occur before the initiating API returns.</p>
+<p>Synchronous local Read/Write/Call APIs cancel deferred completion and return
+BadWaitingForResponse. The cancellation rules above still apply. For
+cancellation during shutdown, see <a class="reference internal" href="#server-shutdown"><span class="std std-ref">Stopping the server</span></a>.</p>
+</section>
+<section id="threading">
+<h4>Threading<a class="headerlink" href="#threading" title="Link to this heading"></a></h4>
+<p>Deferred work can run on the EventLoop without multithreading support.
+Worker threads require <code class="docutils literal notranslate"><span class="pre">UA_MULTITHREADING</span> <span class="pre">&gt;=</span> <span class="pre">100</span></code>. Result setters acquire
+the server mutex. Output accessed by only one thread needs no external mutex;
+synchronize shared output, work queues and cancellation flags.</p>
+<p>Initiating callbacks, cancellation notifications and result callbacks run
+under the server mutex. Do not wait in them for a thread that needs to call
+a server API.</p>
+</section>
+<section id="result-setters">
+<h4>Result setters<a class="headerlink" href="#result-setters" title="Link to this heading"></a></h4>
+<p>For all three result setters, GOOD confirms the ownership handoff, not delivery
+to the requester. BADNOTFOUND means no pending operation matches the pointer
+and operation type.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Complete a Call using the original output array and the operation status. */</span>
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_setAsyncCallMethodResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
 <span class="w">                                   </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
 
-<span class="cm">/* See the UA_CallbackValueSource documentation */</span>
+<span class="cm">/* Complete a Read using the original DataValue, including its result status. */</span>
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_setAsyncReadResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
 
-<span class="cm">/* See the UA_CallbackValueSource documentation. The value needs to be the</span>
-<span class="cm"> * pointer used in the write callback. The statuscode is the result signal to be</span>
-<span class="cm"> * returned asynchronously. */</span>
+<span class="cm">/* Complete a Write using the original value pointer as the identifier and</span>
+<span class="cm"> * result as the write status. */</span>
 <span class="n">UA_THREADSAFE</span><span class="w"> </span><span class="n">UA_StatusCode</span>
 <span class="n">UA_Server_setAsyncWriteResult</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
 <span class="w">                              </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>The server supports asynchronous “local” read/write/call operations. The user
-supplies a result-callback that gets called either synchronously (if the
-operation terminates right away) or asynchronously at a later time. The
-result-callback is called exactly one time for each operation, also if the
-operation is cancelled. In this case a StatusCode like
-<code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADTIMEOUT</span></code> or <code class="docutils literal notranslate"><span class="pre">UA_STATUSCODE_BADSHUTDOWN</span></code> is set.</p>
-<p>If an operation returns asynchronously, then the result-callback is executed
-only in the next iteration of the Eventloop. An exception to this is
-UA_Server_cancelAsync, which can optionally call the result-callback right
-away (e.g. as part of a cleanup where the context of the result-callback gets
-removed).</p>
-<p>Async operations incur a small overhead since memory is allocated to persist
-the operation over time.</p>
-<p>The operation timeout is defined in milliseconds. A timeout of zero means
-infinite.</p>
+</section>
+</section>
+<section id="submitting-local-async-requests">
+<h3>Submitting local async requests<a class="headerlink" href="#submitting-local-async-requests" title="Link to this heading"></a></h3>
+<p>Call <code class="docutils literal notranslate"><span class="pre">UA_Server_read_async</span></code>, <code class="docutils literal notranslate"><span class="pre">UA_Server_write_async</span></code> or
+<code class="docutils literal notranslate"><span class="pre">UA_Server_call_async</span></code> with a non-NULL result callback. The server must be
+STARTED; otherwise the API returns BADSHUTDOWN.</p>
+<p>GOOD means the request was accepted and the result callback will run exactly
+once, including on cancellation. An error return means it will not be called.
+The return code reports acceptance, not the operation’s result.</p>
+<p>Drive the EventLoop while requests are pending. For synchronous completion,
+the result callback may run before the API returns; otherwise it runs on the
+EventLoop.</p>
+<p>Result data is borrowed for the result callback’s duration; copy it to keep it.
+Keep <code class="docutils literal notranslate"><span class="pre">asyncOpContext</span></code> valid until the result callback finishes, or longer if
+still used by the application.</p>
+<p>The timeout is in milliseconds; zero disables it. It is independent of
+<code class="docutils literal notranslate"><span class="pre">asyncOperationTimeout</span></code>, which applies to service requests. Timeouts are
+checked periodically, not at an exact deadline.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerAsyncReadResultCallback</span><span class="p">)</span>
 <span class="w">    </span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="p">(</span><span class="o">*</span><span class="n">UA_ServerAsyncWriteResultCallback</span><span class="p">)</span>
@@ -1760,30 +1781,7 @@ infinite.</p>
 <span class="w">                     </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span><span class="w"> </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Local async operations can be manually cancelled (besides an internal cancel
-due to a timeout or server shutdown). The local async operations to be
-cancelled are selected by matching their asyncOpContext pointer. This can
-cancel multiple operations that use the same context pointer.</p>
-<p>For operations where the async result was not yet set, the
-asyncOperationCancelCallback from the server-config gets called and the
-cancel-status is set in the operation result.</p>
-<p>For async operations where the result has already been set, but not yet
-notified with the result-callback (to be done in the next EventLoop
-iteration), the asyncOperationCancelCallback is not called and no cancel
-status is set in the result.</p>
-<p>Each operation’s result-callback gets called exactly once. When the operation
-is cancelled, the result-callback can be called synchronously using the
-synchronousResultCallback flag. Otherwise the result gets returned “normally”
-in the next EventLoop iteration. The synchronous option ensures that all
-(matching) async operations are fully cancelled right away. This can be
-important in a cleanup situation where the asyncOpContext is no longer valid
-in the future.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
-<span class="nf">UA_Server_cancelAsync</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">asyncOpContext</span><span class="p">,</span>
-<span class="w">                      </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">status</span><span class="p">,</span>
-<span class="w">                      </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">synchronousResultCallback</span><span class="p">);</span>
-</pre></div>
-</div>
+</section>
 </section>
 <section id="events">
 <span id="id4"></span><h2>Events<a class="headerlink" href="#events" title="Link to this heading"></a></h2>
@@ -1907,10 +1905,9 @@ changes made through OPC UA Services and the corresponding local
 populated are suppressed. Both EventTypes are emitted by the Server object.</p>
 <p>A structural change is reported only if the affected Node has a
 scalar <code class="docutils literal notranslate"><span class="pre">NodeVersion</span></code> Property with the String DataType. The server updates
-that Property with the decimal representation of a server-wide, increasing
-Int64. Nodes without a suitable <code class="docutils literal notranslate"><span class="pre">NodeVersion</span></code> Property are not
-included in a ModelChangeEvent. The following successful operations are
-reported:</p>
+that Property when reporting structural changes. Nodes without a suitable
+<code class="docutils literal notranslate"><span class="pre">NodeVersion</span></code> Property are not included in a ModelChangeEvent. The following
+successful operations are reported:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Operation</p></th>
@@ -1940,19 +1937,17 @@ reported:</p>
 Variable whose AccessLevel contains <code class="docutils literal notranslate"><span class="pre">UA_ACCESSLEVELMASK_SEMANTICCHANGE</span></code>.
 The Variable must be a Property connected to its owner by <code class="docutils literal notranslate"><span class="pre">HasProperty</span></code> or
 a subtype. The owner is reported as the affected Node. Same-value writes are
-suppressed when the previous value is directly available. For callback-based
-value sources the previous value may not be available for comparison, so a
-successful write is treated as a SemanticChange.</p>
+suppressed when the previous value is available. For callback-based value
+sources, every successful write is treated as a SemanticChange.</p>
 <p>A SemanticChange also marks Value MonitoredItems on the affected Variable.
 Their next DataChange notification contains the <code class="docutils literal notranslate"><span class="pre">SemanticsChanged</span></code>
 StatusCode bit. MonitoredItems with a zero SamplingInterval are sampled
 immediately. For cyclic sampling the bit remains pending until the next
 notification.</p>
-<p>Changes are accumulated until the outermost local operation or decoded
-Service request completes. Entries for the same affected Node are coalesced
-by combining their ModelChange verbs. Model and Semantic changes collected
-together are emitted as separate standard Events. Failed operations are not
-reported.</p>
+<p>Changes are reported when the outermost local API call or Service request
+completes. For each affected Node, its ModelChange verbs are combined into
+one entry. Model and Semantic changes are emitted as separate standard
+Events. Failed operations are not reported.</p>
 <p>See <code class="docutils literal notranslate"><span class="pre">examples/events/server_modelchange.c</span></code> for a complete local example.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
@@ -1961,19 +1956,13 @@ reported.</p>
 </section>
 <section id="remote-discovery-server-registration">
 <h2>Remote Discovery Server Registration<a class="headerlink" href="#remote-discovery-server-registration" title="Link to this heading"></a></h2>
-<p>The current server can register itself at a discovery. For that it requires
-to open a client connection.</p>
+<p>Register this server with a remote discovery server.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Register the given server instance at a discovery server. This should be</span>
 <span class="cm"> * called periodically, for example every 10 minutes, depending on the</span>
 <span class="cm"> * configuration of the discovery server.</span>
 <span class="cm"> *</span>
-<span class="cm"> * The supplied client configuration is used to create a new client to connect</span>
-<span class="cm"> * to the discovery server. The client configuration is moved over to the server</span>
-<span class="cm"> * and eventually cleaned up internally. The structure pointed at by `cc` is</span>
-<span class="cm"> * zeroed to avoid accessing outdated information.</span>
-<span class="cm"> *</span>
-<span class="cm"> * The eventloop and logging plugins in the client configuration are replaced by</span>
-<span class="cm"> * those configured in the server. */</span>
+<span class="cm"> * Takes ownership of the supplied client configuration and clears *cc. The</span>
+<span class="cm"> * server's EventLoop and logging plugins are used instead of those in cc. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_registerDiscovery</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_ClientConfig</span><span class="w"> </span><span class="o">*</span><span class="n">cc</span><span class="p">,</span>
 <span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">discoveryServerUrl</span><span class="p">,</span>
@@ -2018,8 +2007,8 @@ DiscoveryUrl.</p>
 <span class="w">                           </span><span class="k">const</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="o">*</span><span class="n">discoveryUrls</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>The server internally manages the ServersOnNetwork list. Multicast discovery
-is implemented on top in a driver outside of the core library.</p>
+<p>Query and maintain ServerOnNetwork records. Multicast discovery requires an
+mDNS driver.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Server_findServersOnNetwork</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_String</span><span class="w"> </span><span class="n">endpointUrl</span><span class="p">,</span>
 <span class="w">                               </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">startingRecordId</span><span class="p">,</span>
@@ -2069,8 +2058,6 @@ server shuts down, the drivers are also stopped.</p>
 <p>Drivers can use the server’s public API to the full extent. For example
 add/remove nodes, or register connections and timers in the server’s
 EventLoop.</p>
-<p>Some drivers define core functionality and are added internally in the server
-implementation.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* GENERIC permits multiple instances. Other driver types</span>
 <span class="cm"> * can be added only once to a server. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="p">{</span>
@@ -2081,8 +2068,7 @@ implementation.</p>
 <span class="k">struct</span><span class="w"> </span><span class="nc">UA_Driver</span><span class="p">;</span>
 <span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">UA_Driver</span><span class="w"> </span><span class="n">UA_Driver</span><span class="p">;</span>
 
-<span class="cm">/* Callback through which the server notifies the driver</span>
-<span class="cm"> * about runtime changes and internal events. */</span>
+<span class="cm">/* Receive application notifications selected by notificationFilter. */</span>
 <span class="k">typedef</span><span class="w"> </span><span class="kt">void</span>
 <span class="p">(</span><span class="o">*</span><span class="n">UA_DriverNotificationCallback</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">drv</span><span class="p">,</span>
 <span class="w">                                 </span><span class="n">UA_ApplicationNotificationType</span><span class="w"> </span><span class="n">type</span><span class="p">,</span>
@@ -2107,11 +2093,9 @@ implementation.</p>
 <span class="cm">     * not be switched out once the driver has been started. */</span>
 <span class="w">    </span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* The server forwards its internal notifications to all drivers. In order</span>
-<span class="cm">     * to avoid overload, the filter must be set. The top 32bit are ANDed with</span>
-<span class="cm">     * the notification type to see if the driver is interested in the</span>
-<span class="cm">     * notification. See the common.h for details on the notification types and</span>
-<span class="cm">     * their payload. */</span>
+<span class="w">    </span><span class="cm">/* Select notifications by setting notificationFilter. A notification is</span>
+<span class="cm">     * delivered when its type shares a bit with the filter in the upper 32 bits.</span>
+<span class="cm">     * See common.h for notification types and their payloads. */</span>
 <span class="w">    </span><span class="n">UA_DriverNotificationCallback</span><span class="w"> </span><span class="n">notificationCallback</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_ApplicationNotificationType</span><span class="w"> </span><span class="n">notificationFilter</span><span class="p">;</span>
 
@@ -2121,11 +2105,8 @@ implementation.</p>
 
 <span class="w">    </span><span class="n">UA_LifecycleState</span><span class="w"> </span><span class="n">state</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Start the Driver. It will typically register timers/connections in the</span>
-<span class="cm">     * EventLoop and may add nodes in the server's information model. Starting</span>
-<span class="cm">     * can fail if the server is not already started also.</span>
-<span class="cm">     *</span>
-<span class="cm">     * During startup, the server calls start on all registered drivers. */</span>
+<span class="w">    </span><span class="cm">/* Start the Driver. Can fail if the server has not started.</span>
+<span class="cm">     * The server calls start on all registered drivers during startup. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">sc</span><span class="p">);</span>
 
 <span class="w">    </span><span class="cm">/* Stopping is asynchronous and might need a few iterations of the eventloop</span>
@@ -2139,9 +2120,8 @@ implementation.</p>
 <span class="cm">     * successfully removed, the Driver must no longer be accessed from the</span>
 <span class="cm">     * server.</span>
 <span class="cm">     *</span>
-<span class="cm">     * Drivers are all free'd when the server is deleted. If a Driver is</span>
-<span class="cm">     * manually removed before, then it needs to be unlinked from the server's</span>
-<span class="cm">     * internal linked-list before. */</span>
+<span class="cm">     * The server frees its drivers when deleted. To free a driver manually,</span>
+<span class="cm">     * first detach it with UA_Server_removeDriver. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="n">UA_Driver</span><span class="w"> </span><span class="o">*</span><span class="n">sc</span><span class="p">);</span>
 <span class="p">};</span>
 
@@ -2363,18 +2343,13 @@ defining permissions per role on individual nodes or entire namespaces.</p>
 </section>
 <section id="server-configuration">
 <span id="id6"></span><h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Link to this heading"></a></h2>
-<p>The configuration structure is passed to the server during initialization.
-The server expects that the configuration is not modified during runtime.
-Currently, only one server can use a configuration at a time. During
-shutdown, the server will clean up the parts of the configuration that are
-modified at runtime through the provided API.</p>
-<p>Examples for configurations are provided in the <code class="docutils literal notranslate"><span class="pre">/plugins</span></code> folder.
-The usual usage is as follows:</p>
+<p>Do not modify the configuration while the server is running. A configuration
+belongs to one server at a time. The usual usage is:</p>
 <ol class="arabic simple">
-<li><p>Create a server configuration with default settings as a starting point</p></li>
-<li><p>Modify the configuration, e.g. by adding a server certificate</p></li>
-<li><p>Instantiate a server with it</p></li>
-<li><p>After shutdown of the server, clean up the configuration (free memory)</p></li>
+<li><p>Create a configuration with default settings.</p></li>
+<li><p>Adjust it, for example by adding a server certificate.</p></li>
+<li><p>Pass it to <code class="docutils literal notranslate"><span class="pre">UA_Server_newWithConfig</span></code>, which takes ownership of its contents.</p></li>
+<li><p>Shut down and delete the server; deletion also frees its configuration.</p></li>
 </ol>
 <p>The <a class="reference internal" href="tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a> provide a good starting point for this.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Encryption mode requirement for OPC UA Binary over WebSockets */</span>
@@ -2392,8 +2367,7 @@ The usual usage is as follows:</p>
 
 <span class="w">    </span><span class="cm">/* Server Description</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~</span>
-<span class="cm">     * The description must be internally consistent. The ApplicationUri set in</span>
-<span class="cm">     * the ApplicationDescription must match the URI set in the server</span>
+<span class="cm">     * The ApplicationUri in the ApplicationDescription must match the URI in the</span>
 <span class="cm">     * certificate.</span>
 <span class="cm">     * The applicationType is not just descriptive, it changes the actual</span>
 <span class="cm">     * functionality of the server. The RegisterServer service is available only</span>
@@ -2624,8 +2598,7 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">modellingRulesOnInstances</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Copy Method instance declarations into each Object instance instead of</span>
-<span class="cm">     * adding a reference to the Method on the ObjectType. The default is false</span>
-<span class="cm">     * for backwards compatibility. */</span>
+<span class="cm">     * adding a reference to the Method on the ObjectType. Default is false. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">copyMethodsOnInstances</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Limits</span>
@@ -2658,12 +2631,14 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="cm">/* Async Operations</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~</span>
 <span class="cm">     * See the section for :ref:`async operations&lt;async-operations&gt;`. */</span>
-<span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">asyncOperationTimeout</span><span class="p">;</span><span class="w">   </span><span class="cm">/* in ms, 0 =&gt; unlimited */</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* 0 =&gt; unlimited */</span>
+<span class="w">    </span><span class="n">UA_Double</span><span class="w"> </span><span class="n">asyncOperationTimeout</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Service requests only, in ms; 0 disables.</span>
+<span class="cm">                                     * Local requests use their timeout argument. */</span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxAsyncOperationQueueSize</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Admission limit; 0 =&gt; unlimited.</span>
+<span class="cm">                                       * Canceled operations count until their setter call.</span>
+<span class="cm">                                       * Not a hard limit on retained memory. */</span>
 
-<span class="w">    </span><span class="cm">/* Notifies the userland that an async operation has been canceled. The</span>
-<span class="cm">     * memory for setting the output value is then freed internally and should</span>
-<span class="cm">     * not be touched afterwards. */</span>
+<span class="w">    </span><span class="cm">/* Optional cancellation notification. See Async Operations for the out</span>
+<span class="cm">     * pointer, notification timing and completion rules. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">asyncOperationCancelCallback</span><span class="p">)(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">);</span>
 
 <span class="cp">#ifdef UA_ENABLE_ENCRYPTION</span>
@@ -2679,28 +2654,20 @@ The usual usage is as follows:</p>
 <span class="cm">     * ApplicationType (Part 12, 7.10.14). */</span>
 <span class="w">    </span><span class="n">UA_UInt64</span><span class="w"> </span><span class="n">serverCapabilities</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* Enable the internal management of RegisteredServers (besides the local</span>
-<span class="cm">     * server itself) via the RegisterServer and FindServer services. */</span>
+<span class="w">    </span><span class="cm">/* Enable registration and discovery of other servers through the</span>
+<span class="cm">     * RegisterServer and FindServers services. */</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">registeredServersEnabled</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Timeout in seconds when to automatically remove a registered server from</span>
 <span class="cm">     * the list, if it doesn't re-register within the given time frame. A value</span>
 <span class="cm">     * of 0 disables automatic removal. Default is 60 Minutes (60*60). Must be</span>
-<span class="cm">     * bigger than 10 seconds, because cleanup is only triggered approximately</span>
-<span class="cm">     * every 10 seconds. The server will still be removed depending on the</span>
-<span class="cm">     * state of the semaphore file. */</span>
+<span class="cm">     * greater than 10 seconds; expiration is not an exact deadline. Removal</span>
+<span class="cm">     * based on the semaphore file is independent of this timeout. */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">registeredServerCleanupTimeout</span><span class="p">;</span>
 
-<span class="w">    </span><span class="cm">/* mDNS based Announcement and Discovery is implemented in a driver that</span>
-<span class="cm">     * attach to a server outside the main configuration. The</span>
-<span class="cm">     * FindServersOnNetwork Server is however implemented by the server itself.</span>
-<span class="cm">     * The drivers interact with the server via the Discovery API. For example</span>
-<span class="cm">     * to add/update/remove a ServerOnNetwork structure. */</span>
-
-<span class="w">    </span><span class="cm">/* Enable the internal management of ServerOnNetwork entries and the</span>
-<span class="cm">     * FindServersOnNetwork Service. This is used in conjunction with mDNS to</span>
-<span class="cm">     * implement a Discovery Server that detects other servers on the</span>
-<span class="cm">     * network. If registeredServersEnabled is also set, every registered</span>
+<span class="w">    </span><span class="cm">/* Enable ServerOnNetwork records and the FindServersOnNetwork service.</span>
+<span class="cm">     * Use an mDNS driver to discover other servers on the network.</span>
+<span class="cm">     * If registeredServersEnabled is also set, every registered</span>
 <span class="cm">     * server gets a ServerOnNetwork entry under its mDNS name (the</span>
 <span class="cm">     * mdnsServerName from RegisterServer2 or else the first ServerName). See</span>
 <span class="cm">     * announceRegisteredServers for the announcement of these entries. */</span>
@@ -2766,7 +2733,7 @@ The usual usage is as follows:</p>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditingEnabled</span><span class="p">;</span>
 <span class="cp">#ifdef UA_ENABLE_AUDITING</span>
 <span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditWriteUpdateEnabled</span><span class="p">;</span><span class="w">  </span><span class="cm">/* Mind the runtime overhead */</span>
-<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditMethodUpdateEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Mind the runtime overhead */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">auditMethodUpdateEnabled</span><span class="p">;</span><span class="w"> </span><span class="cm">/* Synchronous calls only; mind the overhead */</span>
 <span class="cp">#endif</span>
 
 <span class="w">    </span><span class="cm">/* Historical Access</span>
@@ -2815,29 +2782,19 @@ The usual usage is as follows:</p>
 <span class="cm">     * UA_RolePermission mappings that define which roles get which</span>
 <span class="cm">     * permissions on nodes that reference this preset.</span>
 <span class="cm">     *</span>
-<span class="cm">     * During server startup, these presets are copied into the server's</span>
-<span class="cm">     * internal role-permissions array. The preset entries form the initial</span>
-<span class="cm">     * configuration with the following guarantees:</span>
+<span class="cm">     * Presets cannot be deleted during runtime and their indices remain stable</span>
+<span class="cm">     * throughout the server's lifetime. Custom nodestores can rely on these</span>
+<span class="cm">     * indices when assigning permissions to nodes.</span>
 <span class="cm">     *</span>
-<span class="cm">     * - Preset entries are **never deleted** during server runtime.</span>
-<span class="cm">     * - Their position (index) in the internal array is **kept stable**,</span>
-<span class="cm">     *   ensuring that nodes assigned to a preset continue to reference</span>
-<span class="cm">     *   the same configuration throughout the server's lifetime.</span>
-<span class="cm">     * - Custom nodestore implementations should be aware of these</span>
-<span class="cm">     *   index-stability guarantees when managing node permission storage.</span>
-<span class="cm">     *</span>
-<span class="cm">     * Additional role-permission sets can be added at runtime through</span>
-<span class="cm">     * the server API (UA_Server_setNodeRolePermissions). Runtime entries</span>
-<span class="cm">     * may be garbage-collected when no longer referenced by any node. */</span>
+<span class="cm">     * Additional role-permission sets can be assigned at runtime through</span>
+<span class="cm">     * UA_Server_setNodeRolePermissions. */</span>
 <span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rolePermissionPresetsSize</span><span class="p">;</span>
 <span class="w">    </span><span class="n">UA_RolePermissionSet</span><span class="w"> </span><span class="o">*</span><span class="n">rolePermissionPresets</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Initial Role Definitions</span>
 <span class="cm">     * ~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="cm">     * Array of initial role definitions. During server startup, these roles</span>
-<span class="cm">     * are copied into the server's internal role registry. Config roles are</span>
-<span class="cm">     * treated as **protected**: they cannot be removed at runtime via</span>
-<span class="cm">     * UA_Server_removeRole.</span>
+<span class="cm">     * Configured roles are **protected**: they cannot be removed at runtime</span>
+<span class="cm">     * via UA_Server_removeRole.</span>
 <span class="cm">     *</span>
 <span class="cm">     * Additional roles can be added at runtime through UA_Server_addRole.</span>
 <span class="cm">     * Runtime-added roles can be removed via UA_Server_removeRole. */</span>
@@ -2914,9 +2871,6 @@ The usual usage is as follows:</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cm">/* Set role permissions for a node.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Assigns the given set of role-permission mappings to the specified node.</span>
-<span class="cm"> * If an identical permission configuration already exists internally, the</span>
-<span class="cm"> * node will reference the existing configuration (deduplication). Otherwise,</span>
-<span class="cm"> * a new internal entry is created.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server instance</span>
 <span class="cm"> * @param nodeId The NodeId of the node</span>
@@ -2958,8 +2912,7 @@ The usual usage is as follows:</p>
 <span class="cm">/* Remove role permissions from a node.</span>
 <span class="cm"> *</span>
 <span class="cm"> * Resets the node to have no specific role permissions. Default access</span>
-<span class="cm"> * control behavior then applies. The internal reference count for the</span>
-<span class="cm"> * previously assigned permission configuration is decremented.</span>
+<span class="cm"> * control behavior then applies.</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param server The server instance</span>
 <span class="cm"> * @param nodeId The NodeId of the node</span>
