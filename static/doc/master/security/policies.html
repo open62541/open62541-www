@@ -54,7 +54,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../pubsub.html">PubSub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Security</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Supported Security Policies</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Supported Security Policies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#status-and-required-policies">Status and required policies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security-level">Security level</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#securechannel-securitypolicies">SecureChannel SecurityPolicies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#not-implemented">Not implemented</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pubsub-securitypolicies">PubSub SecurityPolicies</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="backends.html">Crypto Backends</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authentication.html">Authentication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="certificates.html">Certificates and Trust</a></li>
@@ -98,88 +105,347 @@
 <span id="security-policies"></span><h1>Supported Security Policies<a class="headerlink" href="#supported-security-policies" title="Link to this heading"></a></h1>
 <p>A <em>SecurityPolicy</em> is a named bundle of algorithms for asymmetric signing,
 asymmetric encryption, symmetric encryption, key derivation, and message
-signing – defined in Part 7 of the OPC UA standard.  A server advertises its
-supported policies through its <em>Endpoints</em> (returned by <code class="docutils literal notranslate"><span class="pre">GetEndpoints</span></code>).
-The client picks one when opening a SecureChannel.</p>
-<p>The table below lists every standard profile implemented in open62541.
-Adding a policy to a server is the same call regardless of backend –
-<code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addSecurityPolicy*()</span></code> (see <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a> for the
-full call list).</p>
+signing.  OPC UA Part 7 defines the standard SecurityPolicies as <em>Profiles</em>
+in the online Profile database at <a class="reference external" href="https://profiles.opcfoundation.org">https://profiles.opcfoundation.org</a>.  A
+server advertises its supported policies through its <em>Endpoints</em> (returned
+by <code class="docutils literal notranslate"><span class="pre">GetEndpoints</span></code>).  The client picks one when opening a SecureChannel.</p>
+<p>The tables below list every SecurityPolicy of the <code class="docutils literal notranslate"><span class="pre">UACore</span> <span class="pre">1.05</span></code> Profile group
+and show which crypto backend implements it. Adding a policy to a server is the
+same call regardless of backend – <code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addSecurityPolicy*()</span></code>
+(see <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a> for the full call list).</p>
+<section id="status-and-required-policies">
+<h2>Status and required policies<a class="headerlink" href="#status-and-required-policies" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Current</strong>: the Profile is released and not deprecated.</p></li>
+<li><p><strong>Deprecated</strong>: the Profile database marks the Profile as deprecated.  Do
+not use it for new systems.</p></li>
+</ul>
+<p>The conformance unit <em>Security Policy Required</em> asks every application that
+supports security for at least SecurityPolicy [A] (<code class="docutils literal notranslate"><span class="pre">Aes128_Sha256_RsaOaep</span></code>)
+and SecurityPolicy [B] (<code class="docutils literal notranslate"><span class="pre">Basic256Sha256</span></code>).  The conformance unit <em>Security
+ECC Policy</em> asks for one of SecurityPolicy [ECC A] or [ECC B].  The Profile
+database gives the label [ECC A] to <code class="docutils literal notranslate"><span class="pre">ECC_nistP256_AesGcm</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1_AesGcm</span></code>, and the label [ECC B] to
+<code class="docutils literal notranslate"><span class="pre">ECC_curve25519_ChaChaPoly</span></code>.  Both conformance units also say that obsolete
+SecurityPolicies shall not be enabled or usable without administrative
+intervention.</p>
+</section>
+<section id="security-level">
+<h2>Security level<a class="headerlink" href="#security-level" title="Link to this heading"></a></h2>
+<p>Each <code class="docutils literal notranslate"><span class="pre">UA_SecurityPolicy</span></code> has a <code class="docutils literal notranslate"><span class="pre">securityLevel</span></code> that gives an estimate of
+the strength of the security policy in relation to other security policies. The
+default server configuration populates the security level of the endpoint
+descriptions from the security level of the underlying security policy. Clients
+usually prefer endpoints with the highest security level.</p>
+<p>A security level of 0 is for <code class="docutils literal notranslate"><span class="pre">None</span></code> and for all deprecated policies.
+<code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addAllSecureEndpoints</span></code> creates no Endpoints for policies
+with level 0.  PubSub SecurityPolicies have no security level.</p>
+</section>
+<section id="securechannel-securitypolicies">
+<h2>SecureChannel SecurityPolicies<a class="headerlink" href="#securechannel-securitypolicies" title="Link to this heading"></a></h2>
+<p>The table lists the SecurityPolicies that open62541 implements. A check mark in
+the <em>Default</em> column means that <code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addAllSecurityPolicies</span></code>,
+<code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_setDefaultWithSecurityPolicies</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UA_ClientConfig_setDefaultEncryption</span></code> add the policy if the certificate and
+the private key match it.  The <code class="docutils literal notranslate"><span class="pre">*Secure*</span></code> variants of these server functions
+do not add <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 30.0%" />
-<col style="width: 14.0%" />
-<col style="width: 56.0%" />
+<col style="width: 24.0%" />
+<col style="width: 12.0%" />
+<col style="width: 6.0%" />
+<col style="width: 8.0%" />
+<col style="width: 8.0%" />
+<col style="width: 8.0%" />
+<col style="width: 8.0%" />
+<col style="width: 26.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Policy</p></th>
-<th class="head"><p>Type</p></th>
+<th class="head"><p>Status</p></th>
+<th class="head"><p>Level</p></th>
+<th class="head"><p>OpenSSL</p></th>
+<th class="head"><p>LibreSSL</p></th>
+<th class="head"><p>mbedTLS</p></th>
+<th class="head"><p>Default</p></th>
 <th class="head"><p>Notes</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>Universal</p></td>
-<td><p>No signing, no encryption.  Required for unencrypted discovery.</p></td>
+<td><p>Current</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>No signing, no encryption.  Also available without
+<code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Basic128Rsa15</span></code></p></td>
-<td><p>RSA</p></td>
-<td><p>Legacy.  RSA-1024 + AES-128.  Deprecated, do not use for new systems.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Aes128_Sha256_RsaOaep</span></code></p></td>
+<td><p>Current [A]</p></td>
+<td><p>10</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>Required by <em>Security Policy Required</em>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Basic256</span></code></p></td>
-<td><p>RSA</p></td>
-<td><p>RSA-2048 + AES-256.  Replaced by <code class="docutils literal notranslate"><span class="pre">Basic256Sha256</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Basic256Sha256</span></code></p></td>
-<td><p>RSA</p></td>
-<td><p>RSA-2048 + SHA-256 + AES-256.  The current RSA baseline.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Aes128_Sha256_RsaOaep</span></code></p></td>
-<td><p>RSA</p></td>
-<td><p>RSA-OAEP + AES-128 + SHA-256.  Modern RSA profile.</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Basic256Sha256</span></code></p></td>
+<td><p>Current [B]</p></td>
+<td><p>20</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>Required by <em>Security Policy Required</em>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Aes256_Sha256_RsaPss</span></code></p></td>
-<td><p>RSA</p></td>
-<td><p>RSA-PSS + AES-256 + SHA-256.  Strongest RSA profile.</p></td>
+<td><p>Current</p></td>
+<td><p>30</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>Strongest RSA policy.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_nistP256_AesGcm</span></code></p></td>
+<td><p>Current [ECC A]</p></td>
+<td><p>10</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>AES-128-GCM.  Satisfies <em>Security ECC Policy</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_nistP256_ChaChaPoly</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>10</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>ChaCha20-Poly1305.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Basic128Rsa15</span></code></p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>Known attacks.  The default functions add it only if the build
+defines <code class="docutils literal notranslate"><span class="pre">UA_INCLUDE_INSECURE_POLICIES</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Basic256</span></code></p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>Known attacks.  The default functions add it only if the build
+defines <code class="docutils literal notranslate"><span class="pre">UA_INCLUDE_INSECURE_POLICIES</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_nistP256</span></code></p></td>
-<td><p>ECC</p></td>
-<td><p>NIST P-256 (prime256v1).  See <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>AES-128-CBC with HMAC-SHA256.  Replaced by <code class="docutils literal notranslate"><span class="pre">ECC_nistP256_AesGcm</span></code>
+and <code class="docutils literal notranslate"><span class="pre">ECC_nistP256_ChaChaPoly</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_nistP384</span></code></p></td>
-<td><p>ECC</p></td>
-<td><p>NIST P-384 (secp384r1).  See <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>AES-256-CBC with HMAC-SHA384.  Replaced by <code class="docutils literal notranslate"><span class="pre">ECC_nistP384_AesGcm</span></code>
+and <code class="docutils literal notranslate"><span class="pre">ECC_nistP384_ChaChaPoly</span></code> (not implemented).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1</span></code></p></td>
-<td><p>ECC</p></td>
-<td><p>Brainpool P-256r1.  See <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>AES-128-CBC with HMAC-SHA256.  Replaced by
+<code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1_AesGcm</span></code> and <code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1_ChaChaPoly</span></code>
+(not implemented).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1</span></code></p></td>
-<td><p>ECC</p></td>
-<td><p>Brainpool P-384r1.  See <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>AES-256-CBC with HMAC-SHA384.  Replaced by
+<code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1_AesGcm</span></code> and <code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1_ChaChaPoly</span></code>
+(not implemented).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve25519</span></code></p></td>
-<td><p>ECC (EdDSA)</p></td>
-<td><p>Curve25519 / Ed25519.  OpenSSL only.  See <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>ChaCha20-Poly1305.  The Profile says that no application shall
+support it.  The current Curve25519 policies are
+<code class="docutils literal notranslate"><span class="pre">ECC_curve25519_AesGcm</span></code> and <code class="docutils literal notranslate"><span class="pre">ECC_curve25519_ChaChaPoly</span></code> (not
+implemented).</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve448</span></code></p></td>
-<td><p>ECC (EdDSA)</p></td>
-<td><p>Curve448 / Ed448.  OpenSSL only.  See <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PubSub-Aes128-CTR</span></code></p></td>
-<td><p>PubSub</p></td>
-<td><p>Symmetric-only, AES-128-CTR.  Used with PubSub message security.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PubSub-Aes256-CTR</span></code></p></td>
-<td><p>PubSub</p></td>
-<td><p>Symmetric-only, AES-256-CTR.  Used with PubSub message security.</p></td>
+<td><p>Deprecated</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>ChaCha20-Poly1305.  The Profile says that no application shall
+support it.  The current Curve448 policies are
+<code class="docutils literal notranslate"><span class="pre">ECC_curve448_AesGcm</span></code> and <code class="docutils literal notranslate"><span class="pre">ECC_curve448_ChaChaPoly</span></code> (not
+implemented).</p></td>
 </tr>
 </tbody>
 </table>
+<p>To use a deprecated policy, add it explicitly with its
+<code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addSecurityPolicy*()</span></code> function and create its Endpoints
+with <code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addEndpoint</span></code> or <code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addAllEndpoints</span></code>.
+The constructors of the deprecated policies log a warning.</p>
+</section>
+<section id="not-implemented">
+<h2>Not implemented<a class="headerlink" href="#not-implemented" title="Link to this heading"></a></h2>
+<p>open62541 does not implement these SecurityPolicies of the <code class="docutils literal notranslate"><span class="pre">UACore</span> <span class="pre">1.05</span></code>
+Profile group.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 36.0%" />
+<col style="width: 20.0%" />
+<col style="width: 44.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Policy</p></th>
+<th class="head"><p>Status</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_nistP384_AesGcm</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>Replaces <code class="docutils literal notranslate"><span class="pre">ECC_nistP384</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_nistP384_ChaChaPoly</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>Replaces <code class="docutils literal notranslate"><span class="pre">ECC_nistP384</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1_AesGcm</span></code></p></td>
+<td><p>Current [ECC A]</p></td>
+<td><p>Replaces <code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1_ChaChaPoly</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>Replaces <code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP256r1</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1_AesGcm</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>Replaces <code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1_ChaChaPoly</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>Replaces <code class="docutils literal notranslate"><span class="pre">ECC_brainpoolP384r1</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve25519_AesGcm</span></code></p></td>
+<td><p>Current</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve25519_ChaChaPoly</span></code></p></td>
+<td><p>Current [ECC B]</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve448_AesGcm</span></code></p></td>
+<td><p>Current</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve448_ChaChaPoly</span></code></p></td>
+<td><p>Current</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RSA_DH_AesGcm</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>RSA certificates with Diffie-Hellman key agreement, AES-GCM.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RSA_DH_ChaChaPoly</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>RSA certificates with Diffie-Hellman key agreement,
+ChaCha20-Poly1305.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve25519_ChaCha20Poly1305</span></code></p></td>
+<td><p>Deprecated</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ECC_curve448_ChaCha20Poly1305</span></code></p></td>
+<td><p>Deprecated</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pubsub-securitypolicies">
+<h2>PubSub SecurityPolicies<a class="headerlink" href="#pubsub-securitypolicies" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24.0%" />
+<col style="width: 14.0%" />
+<col style="width: 8.0%" />
+<col style="width: 8.0%" />
+<col style="width: 8.0%" />
+<col style="width: 8.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Policy</p></th>
+<th class="head"><p>Status</p></th>
+<th class="head"><p>OpenSSL</p></th>
+<th class="head"><p>LibreSSL</p></th>
+<th class="head"><p>mbedTLS</p></th>
+<th class="head"><p>TPM2</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PubSub-Aes128-CTR</span></code></p></td>
+<td><p>Current [A]</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>Required for UADP message signing (<em>PubSub Publisher UADP Security
+Signing</em>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PubSub-Aes256-CTR</span></code></p></td>
+<td><p>Current</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The TPM2 column needs <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_ENCRYPTION_TPM2=ON</span></code>.  The keys then stay
+in the TPM and are used through PKCS#11.</p>
 <p>Which of these you can actually enable depends on the <a class="reference internal" href="backends.html#security-backends"><span class="std std-ref">crypto backend</span></a> and the certificate you load.  ECC-specifics – the
 curve support matrix, certificate requirements, and the
 <code class="docutils literal notranslate"><span class="pre">UA_ServerConfig_addSecurityPolicy*Ecc*()</span></code> helpers – are documented in
 <a class="reference internal" href="ecc.html#security-ecc"><span class="std std-ref">ECC Specifics</span></a>.</p>
+</section>
 </section>
 
 
