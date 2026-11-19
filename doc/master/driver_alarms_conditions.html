@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alarms &amp; Conditions Driver (Experimental) &mdash; open62541 (master) 1.5.9 documentation</title>
+  <title>Alarms &amp; Conditions Driver (Experimental) &mdash; open62541 (master) 1.5.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=674ce552"></script>
+      <script src="_static/documentation_options.js?v=6ea0bac2"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -116,6 +116,19 @@ update, trigger, and delete Conditions. Create the driver with
 UA_AlarmsConditionsDriver() and attach it to a server with
 UA_Server_addDriver(). Only one Alarms &amp; Conditions driver instance can be
 attached to a server.</p>
+<p>Locking: The driver has no lock of its own. Its method and write callbacks,
+and the application callbacks they call, run with the server lock held. The
+lock is recursive, so the callbacks can use the server API. The driver
+functions below are not thread-safe. With multithreading, call them from the
+server’s thread (for example from a timer or a callback), not concurrently
+from another thread.</p>
+<p>Enable and Retain: Disabling a condition sets Retain to false (Part 9,
+5.5.2). Enabling it does not set Retain again, because only the application
+can evaluate whether the condition still needs attention. Until Retain is
+true again, Acknowledge, Confirm and AddComment return Bad_ConditionDisabled
+and ConditionRefresh skips the condition. Set Retain in the
+UA_ENTERING_ENABLEDSTATE callback, which runs before the event of the
+transition is triggered.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#if defined(UA_ENABLE_SUBSCRIPTIONS_EVENTS) &amp;&amp; defined(UA_GENERATED_NAMESPACE_ZERO_FULL)</span>
 
 <span class="n">_UA_BEGIN_DECLS</span>
@@ -264,6 +277,13 @@ attached to a server.</p>
 <span class="cm">     *</span>
 <span class="cm">     * The callback is called before triggering events when EnabledState/Id,</span>
 <span class="cm">     * AckedState/Id, ConfirmedState/Id, or ActiveState/Id transitions to true.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The Acknowledge and Confirm methods call the callback before they</span>
+<span class="cm">     * change the condition. A Bad status refuses the method call: it is</span>
+<span class="cm">     * returned to the client, and AckedState or ConfirmedState stays</span>
+<span class="cm">     * unchanged. When the application writes AckedState/Id or</span>
+<span class="cm">     * ConfirmedState/Id itself, a Bad status cannot undo that write and</span>
+<span class="cm">     * only skips the rest of the transition, including the event.</span>
 <span class="cm">     *</span>
 <span class="cm">     * @param driver The Alarms &amp; Conditions driver</span>
 <span class="cm">     * @param condition The Condition instance node</span>

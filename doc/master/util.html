@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Utility Definitions &mdash; open62541 (master) 1.5.9 documentation</title>
+  <title>Utility Definitions &mdash; open62541 (master) 1.5.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=674ce552"></script>
+      <script src="_static/documentation_options.js?v=6ea0bac2"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -290,6 +290,34 @@ NULL for that argument and treat it as an empty map.</p>
 <span class="cm"> * left untouched. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_KeyValueMap_merge</span><span class="p">(</span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">lhs</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">rhs</span><span class="p">);</span>
+
+<span class="cm">/* Typing restriction for a key-value parameter. Plugins and EventLoop</span>
+<span class="cm"> * implementations list the parameters they understand in an array of</span>
+<span class="cm"> * restrictions and check a user-supplied map against it. */</span>
+<span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">UA_QualifiedName</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataType</span><span class="w"> </span><span class="o">*</span><span class="n">type</span><span class="p">;</span><span class="w"> </span><span class="cm">/* NULL accepts a Variant of any type */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">required</span><span class="p">;</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">scalar</span><span class="p">;</span><span class="w">       </span><span class="cm">/* A scalar value is allowed */</span>
+<span class="w">    </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">array</span><span class="p">;</span><span class="w">        </span><span class="cm">/* An array value is allowed */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">UA_KeyValueRestriction</span><span class="p">;</span>
+
+<span class="cm">/* Validate the map against the restrictions. Fails if a required key is</span>
+<span class="cm"> * missing or if a value does not have the type and shape (scalar or array) that</span>
+<span class="cm"> * the restriction allows. The reason is logged with the given category and a</span>
+<span class="cm"> * prefix identifying the component (can be NULL).</span>
+<span class="cm"> *</span>
+<span class="cm"> * The namespace zero is reserved for the keys defined by open62541. If</span>
+<span class="cm"> * rejectUnknown is set, a key of namespace zero without a restriction fails</span>
+<span class="cm"> * with BadInvalidArgument. Keys of other namespaces belong to the application</span>
+<span class="cm"> * and are never rejected. Without rejectUnknown, keys without a restriction</span>
+<span class="cm"> * are ignored. */</span>
+<span class="n">UA_StatusCode</span>
+<span class="nf">UA_KeyValueMap_validate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueMap</span><span class="w"> </span><span class="o">*</span><span class="n">map</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_KeyValueRestriction</span><span class="w"> </span><span class="o">*</span><span class="n">restrictions</span><span class="p">,</span>
+<span class="w">                        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">restrictionsSize</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">rejectUnknown</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">UA_Logger</span><span class="w"> </span><span class="o">*</span><span class="n">logger</span><span class="p">,</span><span class="w"> </span><span class="n">UA_LogCategory</span><span class="w"> </span><span class="n">category</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">logprefix</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>

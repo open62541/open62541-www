@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GDS Receiver Driver &mdash; open62541 (master) 1.5.9 documentation</title>
+  <title>GDS Receiver Driver &mdash; open62541 (master) 1.5.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -14,7 +14,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=674ce552"></script>
+      <script src="_static/documentation_options.js?v=6ea0bac2"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -103,8 +103,28 @@ method. The driver also tracks active sessions and SecureChannels so that
 abandoned transactions can be discarded and affected channels can be
 revalidated or closed after an update.</p>
 <p>Build open62541 with <code class="docutils literal notranslate"><span class="pre">UA_ENABLE_DRIVER_GDS_RECEIVER</span></code> enabled.
-PushManagement additionally requires encryption and the full Namespace
-Zero.</p>
+PushManagement additionally requires encryption, the Method service set
+and the full Namespace Zero.</p>
+<p>Two file transfer drivers, registered while the receiver is started, serve
+the TrustList Objects of the DefaultApplicationGroup and the
+DefaultUserTokenGroup with the FileType Methods and Properties. Like every
+file transfer driver, they also serve the FileType Methods of Namespace
+Zero. A file transfer driver of the application on a TrustList Object makes
+the start fail with Bad_NodeIdExists. A TrustList opened for reading returns
+the encoded TrustListDataType at the time of the Open. A TrustList opened
+for writing is applied with CloseAndUpdate and discarded with Close
+(Part 12, 7.8.2). A MaxTrustListSize above 1 MiB raises the
+MaxByteStringLength of the TrustLists, so that a TrustList fits into one
+Write.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">drv.params</span></code> before the start; all keys use namespace 0.</p>
+<dl class="simple">
+<dt>0:activity-timeout [Double]</dt><dd><p>Close a TrustList without a Method call for longer than this many
+milliseconds and discard its changes (default: 60000, Part 12, 7.8.2.1).
+Published as the ActivityTimeout Property of the TrustLists. 0 disables
+it and removes the Property the receiver added; otherwise at least
+0.0001. Another type fails the start with Bad_InvalidArgument.</p>
+</dd>
+</dl>
 <p>Create the driver with UA_GDSReceiver_new() and attach its <code class="docutils literal notranslate"><span class="pre">drv</span></code> member to
 the server with UA_Server_addDriver() before calling
 UA_Server_run_startup(). A server can have at most one GDS Receiver driver.
@@ -128,7 +148,10 @@ successfully.</p>
 <span class="cm"> * Receiver driver must be attached and started. If certificateGroupId is</span>
 <span class="cm"> * null, the DefaultApplicationGroup is used. Returns BadInvalidArgument for a</span>
 <span class="cm"> * null receiver or empty certificate and BadInvalidState if the receiver is</span>
-<span class="cm"> * not attached and started. This function is thread-safe. */</span>
+<span class="cm"> * not attached and started. Returns BadNotSupported if the privateKey does not</span>
+<span class="cm"> * decode, is encrypted or its components do not form a key pair, and</span>
+<span class="cm"> * BadCertificateInvalid if a valid privateKey does not match the certificate.</span>
+<span class="cm"> * This function is thread-safe. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_GDSReceiver_updateCertificate</span><span class="p">(</span><span class="n">UA_GDSReceiver</span><span class="w"> </span><span class="o">*</span><span class="n">receiver</span><span class="p">,</span>
 <span class="w">                                </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
@@ -139,8 +162,9 @@ successfully.</p>
 <span class="cm">/* Create a PKCS #10 DER-encoded certificate signing request. The GDS Receiver</span>
 <span class="cm"> * driver must be attached and started. If certificateGroupId is null,</span>
 <span class="cm"> * the DefaultApplicationGroup is used. Returns BadInvalidArgument for a null</span>
-<span class="cm"> * receiver or output pointer and BadInvalidState if the receiver is not</span>
-<span class="cm"> * attached and started. This function is thread-safe. */</span>
+<span class="cm"> * receiver or output pointer, BadInvalidState if the receiver is not</span>
+<span class="cm"> * attached and started and BadTransactionPending while a push management</span>
+<span class="cm"> * transaction is active. This function is thread-safe. */</span>
 <span class="n">UA_StatusCode</span>
 <span class="nf">UA_GDSReceiver_createSigningRequest</span><span class="p">(</span><span class="n">UA_GDSReceiver</span><span class="w"> </span><span class="o">*</span><span class="n">receiver</span><span class="p">,</span>
 <span class="w">                                   </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="n">certificateGroupId</span><span class="p">,</span>
