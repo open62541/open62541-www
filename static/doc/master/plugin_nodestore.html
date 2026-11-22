@@ -657,6 +657,31 @@ Nodestore backends.</p>
 <span class="w">    </span><span class="cm">/* Removes a node from the nodestore. */</span>
 <span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">removeNode</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">);</span>
 
+<span class="w">    </span><span class="cm">/* Optional single-reference mutation. If editReference is NULL, the server</span>
+<span class="cm">     * uses getEditNode to add or delete the reference. A nodestore may omit</span>
+<span class="cm">     * editReference from a designated initializer or leave it unset after</span>
+<span class="cm">     * zero-initializing UA_Nodestore. When filling uninitialized storage field</span>
+<span class="cm">     * by field, set editReference to NULL explicitly if unused.</span>
+<span class="cm">     *</span>
+<span class="cm">     * A callback can return BADNOTSUPPORTED to use the same fallback for an</span>
+<span class="cm">     * individual edit. Otherwise return the status codes of the fallback. The</span>
+<span class="cm">     * caller relies on them for the second direction of the reference:</span>
+<span class="cm">     *</span>
+<span class="cm">     * - BADNODEIDUNKNOWN if the node does not exist</span>
+<span class="cm">     * - BADDUPLICATEREFERENCENOTALLOWED if the added reference exists already</span>
+<span class="cm">     *   (see UA_Node_addReference)</span>
+<span class="cm">     * - UNCERTAINREFERENCENOTDELETED if the deleted reference does not exist</span>
+<span class="cm">     *   (see UA_Node_deleteReference)</span>
+<span class="cm">     *</span>
+<span class="cm">     * A failed operation must leave the node unchanged. The caller serializes</span>
+<span class="cm">     * access and performs validation/model-change events. If the second</span>
+<span class="cm">     * direction cannot be added, the caller removes the first one again with</span>
+<span class="cm">     * this callback. */</span>
+<span class="w">    </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">editReference</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_NodeId</span><span class="w"> </span><span class="o">*</span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">UA_Byte</span><span class="w"> </span><span class="n">referenceTypeIndex</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">isForward</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ExpandedNodeId</span><span class="w"> </span><span class="o">*</span><span class="n">target</span><span class="p">,</span>
+<span class="w">                                  </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">targetNameHash</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">add</span><span class="p">);</span>
+
 <span class="w">    </span><span class="cm">/* Maps the ReferenceTypeIndex used for the references to the NodeId of the</span>
 <span class="cm">     * ReferenceType. The returned pointer is stable until the Nodestore is</span>
 <span class="cm">     * deleted. */</span>
@@ -666,6 +691,35 @@ Nodestore backends.</p>
 <span class="w">    </span><span class="cm">/* Execute a callback for every node in the nodestore. */</span>
 <span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">iterate</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span><span class="w"> </span><span class="n">UA_NodestoreVisitor</span><span class="w"> </span><span class="n">visitor</span><span class="p">,</span>
 <span class="w">                    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">visitorCtx</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* Optional additional references for Browse and BrowseNext. Leave NULL</span>
+<span class="cm">     * to browse only the references stored on the node. The server returns</span>
+<span class="cm">     * those references first across all pages. Supply only additional ones.</span>
+<span class="cm">     *</span>
+<span class="cm">     * referenceTypes is the resolved set of requested types and subtypes.</span>
+<span class="cm">     * Apply the BrowseDescription's direction, nodeClassMask and resultMask,</span>
+<span class="cm">     * using the preferred locales in localeIds for display names.</span>
+<span class="cm">     *</span>
+<span class="cm">     * An empty continuationPoint starts enumeration. Return at most</span>
+<span class="cm">     * availableSlots references. If more remain, result-&gt;continuationPoint</span>
+<span class="cm">     * identifies the first unreturned match. Otherwise leave it empty.</span>
+<span class="cm">     * The server calls only with positive availableSlots. When node references</span>
+<span class="cm">     * exactly fill a page, the first call is deferred until BrowseNext.</span>
+<span class="cm">     *</span>
+<span class="cm">     * Each browse has its own token, including interleaved browses of the</span>
+<span class="cm">     * same node. Tokens must be self-contained so they can be discarded on</span>
+<span class="cm">     * release or session close. A stable table index can serve as a token.</span>
+<span class="cm">     * Return BADCONTINUATIONPOINTINVALID if a token can no longer be resumed.</span>
+<span class="cm">     *</span>
+<span class="cm">     * The server initializes result and takes ownership of its references</span>
+<span class="cm">     * and token. Report errors in result-&gt;statusCode. All inputs are borrowed</span>
+<span class="cm">     * for the duration of the call. */</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">browseReferences</span><span class="p">)(</span><span class="n">UA_Nodestore</span><span class="w"> </span><span class="o">*</span><span class="n">ns</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_BrowseDescription</span><span class="w"> </span><span class="o">*</span><span class="n">description</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ReferenceTypeSet</span><span class="w"> </span><span class="o">*</span><span class="n">referenceTypes</span><span class="p">,</span>
+<span class="w">                             </span><span class="kt">size_t</span><span class="w"> </span><span class="n">localeIdsSize</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_LocaleId</span><span class="w"> </span><span class="o">*</span><span class="n">localeIds</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">UA_ByteString</span><span class="w"> </span><span class="o">*</span><span class="n">continuationPoint</span><span class="p">,</span>
+<span class="w">                             </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">availableSlots</span><span class="p">,</span><span class="w"> </span><span class="n">UA_BrowseResult</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">);</span>
 <span class="p">};</span>
 
 <span class="cm">/* Attributes must be of a matching type (VariableAttributes, ObjectAttributes,</span>
