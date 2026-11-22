@@ -244,12 +244,15 @@ triggers the scheduled house-keeping tasks.</p>
 <span class="cm"> * call UA_Client_run_iterate repeatedly until the connection is fully</span>
 <span class="cm"> * established. You can set a callback to client-&gt;config.stateCallback to be</span>
 <span class="cm"> * notified when the connection status changes. Or use UA_Client_getState to get</span>
-<span class="cm"> * the state manually. */</span>
+<span class="cm"> * the state manually. If the connection is not fully established within the</span>
+<span class="cm"> * timeout from the client configuration, it is closed with the connectStatus</span>
+<span class="cm"> * UA_STATUSCODE_BADTIMEOUT. A timeout of zero disables this async connect</span>
+<span class="cm"> * deadline. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_connectAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
 <span class="cm">/* Connect async to the server with a SecureChannel, but without creating a</span>
-<span class="cm"> * Session */</span>
+<span class="cm"> * Session. The same timeout applies as for UA_Client_connectAsync. */</span>
 <span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
 <span class="n">UA_Client_connectSecureChannelAsync</span><span class="p">(</span><span class="n">UA_Client</span><span class="w"> </span><span class="o">*</span><span class="n">client</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endpointUrl</span><span class="p">);</span>
 
@@ -547,6 +550,8 @@ the AddressSpace or through a View which is a subset of the AddressSpace.</p>
 <span class="cm"> *   to the UA_DataTypeArray array.</span>
 <span class="cm"> * - If the dataTypesNodeSize is zero, then the type hierarchy in the server is</span>
 <span class="cm"> *   browsed to find any unknown DataTypes.</span>
+<span class="cm"> * - customTypes is set to NULL if the call fails or if no unknown DataTypes</span>
+<span class="cm"> *   are found.</span>
 <span class="cm"> * - The UA_DataTypeArray has cleanup = true and borrowed = false, so the</span>
 <span class="cm"> *   entry and its datatypes are cleaned up with the client configuration</span>
 <span class="cm"> *   if the entry is added there. */</span>
@@ -684,7 +689,9 @@ client settings.</p>
 <span class="w">    </span><span class="cm">/* Response timeout in ms (0 -&gt; no timeout). If the server does not answer a</span>
 <span class="cm">     * request within this time a StatusCode UA_STATUSCODE_BADTIMEOUT is</span>
 <span class="cm">     * returned. This timeout can be overridden for individual requests by</span>
-<span class="cm">     * setting a non-null "timeoutHint" in the request header. */</span>
+<span class="cm">     * setting a non-null "timeoutHint" in the request header. The timeout</span>
+<span class="cm">     * also limits connection establishment. At zero, an asynchronous connect</span>
+<span class="cm">     * has no deadline and a synchronous connect has no time to wait. */</span>
 <span class="w">    </span><span class="n">UA_UInt32</span><span class="w"> </span><span class="n">timeout</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/* Self-description of the client.</span>
