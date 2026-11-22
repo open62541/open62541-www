@@ -85,6 +85,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#result-setters">Result setters</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#cancelling-an-individual-operation">Cancelling an individual operation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#submitting-local-async-requests">Submitting local async requests</a></li>
 </ul>
 </li>
@@ -1739,6 +1740,28 @@ and operation type.</p>
 </pre></div>
 </div>
 </section>
+</section>
+<section id="cancelling-an-individual-operation">
+<h3>Cancelling an individual operation<a class="headerlink" href="#cancelling-an-individual-operation" title="Link to this heading"></a></h3>
+<p>Use the original pointer from the Read, Write or Call handler while its result
+setter is outstanding. Synchronize use of the pointer with the result handoff.
+Returns true if the operation was pending and reason is a Bad StatusCode. The
+requester receives reason as the operation status. After result delivery,
+asyncOperationCancelCallback receives the pointer if configured and the result
+setter is still outstanding. Call the matching result setter exactly once.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">UA_Boolean</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_cancelAsyncRead</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
+
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_cancelAsyncWrite</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">UA_DataValue</span><span class="w"> </span><span class="o">*</span><span class="n">value</span><span class="p">,</span>
+<span class="w">                           </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
+
+<span class="n">UA_Boolean</span><span class="w"> </span><span class="n">UA_THREADSAFE</span>
+<span class="n">UA_Server_cancelAsyncCall</span><span class="p">(</span><span class="n">UA_Server</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="p">,</span><span class="w"> </span><span class="n">UA_Variant</span><span class="w"> </span><span class="o">*</span><span class="n">output</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">UA_StatusCode</span><span class="w"> </span><span class="n">reason</span><span class="p">);</span>
+</pre></div>
+</div>
 </section>
 <section id="submitting-local-async-requests">
 <h3>Submitting local async requests<a class="headerlink" href="#submitting-local-async-requests" title="Link to this heading"></a></h3>
