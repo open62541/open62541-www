@@ -40,9 +40,6 @@ cmake_force:
 #=============================================================================
 # Set environment variables for the build.
 
-# Prefix for USES_TERMINAL recipes under output sync.
-CMAKE_USES_TERMINAL_PREFIX =
-
 # The shell in which to execute make rules.
 SHELL = /bin/sh
 
